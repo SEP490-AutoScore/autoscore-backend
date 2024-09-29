@@ -3,33 +3,28 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 import java.sql.Timestamp;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Email;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountEntity {
+public class Exam_Database {
 
     @Id
-    private long account_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long exam_database_id;
 
-    @NotNull
-    @Size(min = 2, max = 100) // Đảm bảo tên dài ít nhất 2 ký tự và tối đa 100 ký tự
-    private String name;
+    private String data_script;
 
-    @NotNull
-    @Email(message = "Email should be valid") // Kiểm tra định dạng email
-    private String email;
-
-    @NotNull
-    @Size(min = 1, max = 20) // Đảm bảo trạng thái có độ dài hợp lệ
-    private String status;
+    private boolean status;
 
     @NotNull
     @Past // Thời điểm tạo phải là trong quá khứ
@@ -45,6 +40,9 @@ public class AccountEntity {
 
     private long deletedBy;
 
-    @NotNull
-    private long campus_id; // Ràng buộc campus_id không được null
+    //Relationship
+    //1-1 account
+    @OneToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 }
