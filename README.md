@@ -7,7 +7,7 @@
 ## Project Information
 
 - **Project Name**: AutoScore  
-- **Topic**: A tool for automating the grading process for courses that use APIs at FPT University.  
+- **Topic**: Automatic grading tool for subjects using structured API at FPT University.
 - **Team Name**: CodeEval Crew
 
 ---
