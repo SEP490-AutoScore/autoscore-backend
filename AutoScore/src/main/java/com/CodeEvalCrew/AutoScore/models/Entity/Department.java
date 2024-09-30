@@ -7,23 +7,27 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Department {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long department_id;
+    private long departmentId;
 
-    private String department_name;
+    private String departmentName;
     
-    private String dev_language;
+    private String devLanguage;
 
     private boolean status;
 
