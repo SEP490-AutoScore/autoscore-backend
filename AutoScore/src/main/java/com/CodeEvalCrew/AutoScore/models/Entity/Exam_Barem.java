@@ -15,19 +15,25 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Exam_Barem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long exam_barem_id;
+    private long examBaremId;
 
-    private String barem_content;
+    private String baremContent;
 
-    private float barem_max_score;
+    private float baremMaxScore;
 
     private String detail;
 
@@ -51,20 +57,20 @@ public class Exam_Barem {
     //Relationship
     //1-1 account
     @OneToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
     //n-1 exam question
     @ManyToOne
-    @JoinColumn(name = "exam_question_id", nullable = false)
-    private Exam_Question exam_question;
+    @JoinColumn(name = "examQuestionId", nullable = false)
+    private Exam_Question examQuestion;
 
     //1-1 test case
     @OneToOne
-    @JoinColumn(name = "test_case_id", nullable = true)
-    private Test_Case test_case;
+    @JoinColumn(name = "testCaseId", nullable = true)
+    private Test_Case testCase;
 
     //1-n score detail
-    @OneToMany(mappedBy = "exam_barem", cascade= CascadeType.ALL)
-    private Set<Score_Detail> score_details;
+    @OneToMany(mappedBy = "examBarem", cascade= CascadeType.ALL)
+    private Set<Score_Detail> scoreDetails;
 }

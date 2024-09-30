@@ -8,20 +8,27 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Campus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long campus_id;
+    private long campusId;
 
-    private String campus_name;
+    private String campusName;
 
     private boolean status;
 
@@ -41,4 +48,8 @@ public class Campus {
     //1-n score
     @OneToMany(mappedBy = "campus", cascade= CascadeType.ALL)
     private Set<Score> scores;
+
+    //1-n account
+    @OneToMany(mappedBy = "campus", cascade = CascadeType.ALL)
+    private Set<Account> accounts;
 }

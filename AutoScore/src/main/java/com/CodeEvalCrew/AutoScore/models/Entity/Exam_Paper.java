@@ -15,18 +15,24 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Exam_Paper {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long exam_paper_id;
+    private long examPaperId;
 
-    private String exam_paper_code;
+    private String examPaperCode;
 
     private boolean status;
 
@@ -47,29 +53,29 @@ public class Exam_Paper {
     //Relationship
     //1-1 account
     @OneToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
     //1-n score
-    @OneToMany(mappedBy = "exam_paper", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
     private Set<Score> scores;
 
     //n-1 exam
     @ManyToOne
-    @JoinColumn(name = "exam_id", nullable = false)
+    @JoinColumn(name = "examId", nullable = false)
     private Exam exam;
 
     //1-n examquestion
-    @OneToMany(mappedBy = "exam_paper", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
     private Set<Exam_Question> exam_questions;
 
     //1-1 exam db
     @OneToOne
-    @JoinColumn(name = "exam_database_id", nullable = false)
+    @JoinColumn(name = "examDatabaseId", nullable = false)
     private Exam_Database exam_database;
 
     //1-1 source
     @OneToOne
-    @JoinColumn(name = "source_id", nullable = false)
+    @JoinColumn(name = "sourceId", nullable = false)
     private Source source;
 }
