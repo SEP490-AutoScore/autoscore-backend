@@ -11,18 +11,24 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Exam_Database {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long exam_database_id;
+    private long examDatabaseId;
 
-    private String data_script;
+    private String dataScript;
 
     private boolean status;
 
@@ -43,6 +49,6 @@ public class Exam_Database {
     //Relationship
     //1-1 account
     @OneToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 }

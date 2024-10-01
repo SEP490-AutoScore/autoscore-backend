@@ -15,19 +15,25 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Subject {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long subject_id;
+    private long subjectId;
 
-    private String subject_name;
+    private String subjectName;
 
-    private String subject_code;
+    private String subjectCode;
 
     private boolean status;
 
@@ -47,7 +53,7 @@ public class Subject {
     //Relationship
     //1-1 account
     @OneToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
     //1-n exam
@@ -56,6 +62,6 @@ public class Subject {
 
     //1-1 department
     @OneToOne
-    @JoinColumn(name = "department_id", nullable = false)
+    @JoinColumn(name = "departmentId", nullable = false)
     private Department department;
 }

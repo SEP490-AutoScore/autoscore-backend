@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ReponseEntity;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.IdRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.services.exam_service.IExamService;
 

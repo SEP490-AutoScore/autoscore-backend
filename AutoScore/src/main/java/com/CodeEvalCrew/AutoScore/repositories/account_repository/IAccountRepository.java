@@ -7,5 +7,5 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 
 @Repository
 public interface IAccountRepository extends JpaRepository<Account, Long>{
-    
+    Account findByEmail(String email);
 }

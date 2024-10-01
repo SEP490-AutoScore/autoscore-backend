@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.services.exam_service;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ReponseEntity;

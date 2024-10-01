@@ -15,26 +15,32 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Exam {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long exam_id;
+    private long examId;
 
-    private String exam_code;
+    private String examCode;
 
-    private Timestamp exam_at;
+    private Timestamp examAt;
 
-    private Timestamp grading_at;
+    private Timestamp gradingAt;
 
-    private Timestamp publish_at;
+    private Timestamp publishAt;
 
-    private String semester_name;
+    private String semesterName;
 
     private boolean status;
 
@@ -55,17 +61,17 @@ public class Exam {
     //Relationship
     //n-1 subject
     @ManyToOne
-    @JoinColumn(name = "subject_id", nullable = false)
+    @JoinColumn(name = "subjectId", nullable = false)
     private Subject subject;
 
     //1-1 account
     @OneToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
     //n-1 campus
     @ManyToOne
-    @JoinColumn(name = "campus_id", nullable = false)
+    @JoinColumn(name = "campusId", nullable = false)
     private Campus campus;
 
     //1-n - score
