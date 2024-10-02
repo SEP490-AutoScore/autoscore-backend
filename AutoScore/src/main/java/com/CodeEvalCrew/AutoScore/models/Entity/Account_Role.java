@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,12 +27,14 @@ public class Account_Role {
     private boolean status;
 
     // Many-to-One relationship with Account
-    @ManyToOne
-    @JoinColumn(name = "accountId", nullable = false)
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "account_id", nullable = false)
+    @ToString.Exclude
     private Account account;
 
-    // Many-to-One relationship with Role
-    @ManyToOne
-    @JoinColumn(name = "roleId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    @ToString.Exclude
     private Role role;
 }

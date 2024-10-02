@@ -75,6 +75,7 @@ INSERT INTO `account`
 (`status`, `account_id`, `name`, `email`, `campus_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
 VALUES
 (true, 1, 'Admin', 'tuyenvtse160607@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 5, 'Admin', 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 2, 'Examiner', 'thanhtuyen66202@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 3, 'Head of Department', 'thanhtuyen662002@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 4, 'Lecturer', 'oscarsjoyfuljourney@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null);
@@ -85,4 +86,67 @@ VALUES
 (true, 1, 1),
 (true, 2, 2),
 (true, 3, 3),
-(true, 4, 4);
+(true, 4, 4),
+(true, 5, 1);
+
+INSERT INTO `examiner`
+(`status`, `account_id`, `campus_id`)
+VALUES
+(true, 1, 1),
+(true, 2, 2),
+(true, 3, 3);
+
+INSERT INTO `department` 
+(`department_name`, `dev_language`, `status`) 
+VALUES 
+('java coding', 'Java', true),
+('java coding', 'Java', true),
+('c# coding', 'C#', true),
+('c# coding', 'C#', true);
+
+
+INSERT INTO `subject` 
+(`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`, `department_id`) 
+VALUES 
+('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 1, 1),
+('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 2, 2),
+('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 2, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 3, 3),
+('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 2, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 4, 4);
+
+
+INSERT INTO `exam` 
+(`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_name`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`, `account_id`, `campus_id`) 
+VALUES 
+('SU23', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 1, null, 1, null, 1, 1, 1, 1),
+('SU24', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 2, null, 2, null, 2, 2, 2, 2),
+('SU25', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 3, null, 3, null, 3, 3, 3, 3);
+
+INSERT INTO `source` 
+(`origin_source_path`, `import_time`) 
+VALUES 
+('https://example.com/source1', '2024-09-30 10:00:00'),
+('https://example.com/source2', '2024-09-30 11:00:00'),
+('https://example.com/source3', '2024-09-30 12:00:00'),
+('https://example.com/source4', '2024-09-30 13:00:00');
+
+INSERT INTO `exam_database` 
+(`data_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`) 
+VALUES 
+('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 1),
+('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 2),
+('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 3);
+
+INSERT INTO `exam_paper` 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`, `exam_id`, `exam_database_id`, `source_id`) 
+VALUES 
+('EP001', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 1, 1, 1, 1, 1),
+('EP002', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 2, 2, 2, 2, 2),
+('EP003', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 3, 3, 3, 3, 3);
+
+INSERT INTO `exam_question` 
+(`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 
+VALUES 
+('What is the capital of France?', 'Q1', 5.0, 'Multiple Choice', true, '2023-09-30 10:00:00', 1, '2023-09-30 10:00:00', 1, 1, 1, 1),
+('Explain Newton\'s first law of motion.', 'Q2', 10.0, 'Essay', true, '2023-09-30 10:00:00', 2, '2023-09-30 10:00:00', 1, 2, 2, 1),
+('Solve the equation: 2x + 3 = 7.', 'Q3', 5.0, 'Short Answer', true, '2023-09-30 10:00:00', 3, '2023-09-30 10:00:00', 1, 3, 3, 1);
+
