@@ -30,9 +30,7 @@ public class Permission {
 
     private String action;
 
-    // Relationship
-    //n-1 category
-    //n-1 campus
+    // Relationships
     @ManyToOne
     @JoinColumn(name = "permissionCategoryId", nullable = false)
     private Permission_Category permissionCategory;

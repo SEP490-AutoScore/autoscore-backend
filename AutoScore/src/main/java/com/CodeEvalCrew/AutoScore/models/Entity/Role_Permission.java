@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,17 +22,18 @@ import lombok.ToString;
 public class Role_Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long role_peemissionId;
+    private long rolePermissionId;
 
     private boolean status;
 
     // Many-to-One relationship with Account
-    @ManyToOne
-    @JoinColumn(name = "permissionId", nullable = false)
-    private Permission permission;
-
-    // Many-to-One relationship with Role
-    @ManyToOne
-    @JoinColumn(name = "roleId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    @ToString.Exclude
     private Role role;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "permission_id", nullable = false)
+    @ToString.Exclude
+    private Permission permission;
 }

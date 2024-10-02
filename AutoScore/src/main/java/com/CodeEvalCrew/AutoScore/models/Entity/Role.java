@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Set;
 
 import io.micrometer.common.lang.Nullable;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -57,6 +58,7 @@ public class Role {
     private Set<Account_Role> account_roles;
 
     //n-n permision
-    @OneToMany(mappedBy = "role")
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private Set<Role_Permission> role_permissions;
 }
