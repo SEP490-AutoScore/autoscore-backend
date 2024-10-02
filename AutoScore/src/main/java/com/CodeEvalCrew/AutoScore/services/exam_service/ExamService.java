@@ -1,5 +1,6 @@
 package com.CodeEvalCrew.AutoScore.services.exam_service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ReponseEntity;
@@ -15,15 +16,15 @@ public class ExamService implements IExamService{
     }
 
     @Override
-    public ReponseEntity<Exam> getExamById(long id) throws Exception{
-        ReponseEntity<Exam> result = new ReponseEntity<>();
+    public Exam getExamById(long id) throws Exception{
+        Exam result = new Exam();
         try {
             Exam exam = examRepository.findById(id).get();
             if (exam == null) {
                 result.setMessage("Not found exam with id: "+ id);
                 throw new Exception("Not found");
             }
-            result.ok(exam);
+            result = exam;
         } catch (Exception e) {
             throw new Exception("Not found");
             // return result;
