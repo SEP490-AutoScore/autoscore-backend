@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.CodeEvalCrew.AutoScore.models.DTO.ReponseEntity;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.services.exam_service.IExamService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
-@RequestMapping("api/exam")
+@RequestMapping("api/exam/")
 public class ExamController {
     private final IExamService examService;
 
@@ -31,4 +34,11 @@ public class ExamController {
             return result;
         }
     }
+
+    @PostMapping("")
+    public String creatNewExam(@RequestBody String entity) {
+        
+        return entity;
+    }
+    
 }
