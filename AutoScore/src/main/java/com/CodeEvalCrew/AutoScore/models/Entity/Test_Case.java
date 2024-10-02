@@ -11,20 +11,26 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Test_Case {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long test_case_id;
+    private long testCaseId;
 
-    private String test_case_content;
+    private String testCaseContent;
 
-    private boolean is_generated_by_ai;
+    private boolean isGeneratedByAi;
 
     private String type;
 
@@ -47,6 +53,6 @@ public class Test_Case {
     //Relationship
     //1-1 account
     @OneToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 }

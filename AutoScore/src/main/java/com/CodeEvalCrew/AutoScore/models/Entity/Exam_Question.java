@@ -15,24 +15,30 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Exam_Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long question_id;
+    private long examQuestionId;
 
-    private String question_content;
+    private String questionContent;
 
-    private String question_number;
+    private String questionNumber;
 
-    private float max_score;
+    private float maxScore;
 
     private String type;
-    
+
     private boolean status;
 
     @NotNull
@@ -49,25 +55,22 @@ public class Exam_Question {
 
     private long deletedBy;
 
-    //Relationship
-    //1-1 account
+    // Relationship
+    // 1-1 account
     @OneToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
-    //n-1 exam_paper
+    // n-1 exam_paper
     @ManyToOne
-    @JoinColumn(name = "exam_paper_id", nullable = false)
-    private Exam_Paper exam_paper;
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 
-    //1-n barem
-    @OneToMany(mappedBy = "exam_question", cascade= CascadeType.ALL)
-    private Set<Exam_Barem> exam_barems;
+    // 1-n barem
+    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
+    private Set<Exam_Barem> examBarems;
 
-    //1-n score detail
-    // @OneToMany
-    // @JoinColumn(name = "score_detail_id", nullable = false)
-    // private Set<Score_Detail> scores_details;
-    @OneToMany(mappedBy = "exam_question", cascade= CascadeType.ALL)
-    private Set<Score_Detail> score_details;
+    // 1-n score detail
+    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
+    private Set<Score_Detail> scoreDetails;
 }

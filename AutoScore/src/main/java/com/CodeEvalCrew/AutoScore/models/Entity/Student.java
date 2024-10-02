@@ -11,19 +11,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long student_id;
+    private long studentId;
 
-    private String student_code;
+    private String studentCode;
 
-    private String student_email;
+    private String studentEmail;
 
     private boolean status;
 
@@ -34,10 +40,10 @@ public class Student {
 
     //1-n source_detail
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private Set<Source_Detail> source_details;
+    private Set<Source_Detail> sourceDetails;
 
     //1-1 campus
     @OneToOne
-    @JoinColumn(name = "campus_id", nullable = false)
+    @JoinColumn(name = "campusId", nullable = false)
     private Campus campus;
 }

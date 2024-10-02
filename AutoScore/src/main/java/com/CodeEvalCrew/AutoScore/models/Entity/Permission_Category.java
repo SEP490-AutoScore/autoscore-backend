@@ -9,21 +9,27 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Permission_Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long permission_category_id;
+    private long permission_categoryId;
 
-    private String permission_category_name;
+    private String permissionCategoryName;
 
     private boolean status;
     //Relationship
     //1-n permistion
-    @OneToMany(mappedBy = "permission_category", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "permissionCategory", cascade= CascadeType.ALL)
     private Set<Permission> permisions;
 }

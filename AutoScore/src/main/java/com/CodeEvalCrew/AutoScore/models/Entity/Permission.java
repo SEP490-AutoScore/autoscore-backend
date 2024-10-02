@@ -10,28 +10,32 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long permission_id;
+    private long permissionId;
 
-    private String permission_name;
+    private String permissionName;
 
     private String action;
 
-    // Relationship
-    //n-1 category
-    //n-1 campus
+    // Relationships
     @ManyToOne
-    @JoinColumn(name = "permission_category_id", nullable = false)
-    private Permission_Category permission_category;
+    @JoinColumn(name = "permissionCategoryId", nullable = false)
+    private Permission_Category permissionCategory;
 
     //n-n role
     @OneToMany(mappedBy = "permission")
-    private Set<Role_Permission> role_permissions;
+    private Set<Role_Permission> rolePermissions;
 }
