@@ -29,7 +29,7 @@ import lombok.ToString;
 public class Exam_Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long questionId;
+    private long examQuestionId;
 
     private String questionContent;
 
@@ -38,7 +38,7 @@ public class Exam_Question {
     private float maxScore;
 
     private String type;
-    
+
     private boolean status;
 
     @NotNull
@@ -55,22 +55,22 @@ public class Exam_Question {
 
     private long deletedBy;
 
-    //Relationship
-    //1-1 account
+    // Relationship
+    // 1-1 account
     @OneToOne
     @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
-    //n-1 exam_paper
+    // n-1 exam_paper
     @ManyToOne
     @JoinColumn(name = "examPaperId", nullable = false)
     private Exam_Paper examPaper;
 
-    //1-n barem
-    @OneToMany(mappedBy = "examQuestion", cascade= CascadeType.ALL)
+    // 1-n barem
+    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
     private Set<Exam_Barem> examBarems;
 
-    //1-n score detail
-    @OneToMany(mappedBy = "examQuestion", cascade= CascadeType.ALL)
+    // 1-n score detail
+    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
     private Set<Score_Detail> scoreDetails;
 }
