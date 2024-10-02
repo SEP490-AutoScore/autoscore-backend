@@ -25,23 +25,23 @@ public interface AccountMapper {
     SignInWithGoogleResponseDTO accountToSignInWithGoogleResponseDTO(Account account);
 
     default String getRoleName(Account account) {
-        return account.getAccount_roles().stream()
+        return account.getAccountRoles() != null ? account.getAccountRoles().stream()
             .filter(Account_Role::isStatus)
             .map(role -> role.getRole().getRoleName())
             .findFirst()
-            .orElse("Unknown");
+            .orElse("Unknown") : "Unknown";
     }
 
     default Set<String> getPermissions(Account account) {
-        return account.getAccount_roles().stream()
+        return account.getAccountRoles() != null ? account.getAccountRoles().stream()
             .filter(Account_Role::isStatus)
             .flatMap(accountRole -> accountRole.getRole().getRole_permissions().stream())
             .filter(Role_Permission::isStatus)
             .map(rolePermission -> rolePermission.getPermission().getAction())
-            .collect(Collectors.toSet());
+            .collect(Collectors.toSet()) : Set.of();
     }
 
     default String getCampusName(Account account) {
-        return account.getCampus().getCampusName();
+        return account.getCampus() != null ? account.getCampus().getCampusName() : "Unknown";
     }
 }
