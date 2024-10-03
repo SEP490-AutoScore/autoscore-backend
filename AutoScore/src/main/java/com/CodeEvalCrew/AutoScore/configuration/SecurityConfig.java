@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .requestMatchers("/").permitAll()
                 // Cho phép các yêu cầu OAuth2 và đăng nhập Google
                 .requestMatchers("/oauth2/**", "/o/oauth2/**", "/login/**").permitAll()
+                .requestMatchers("/api/exam/**").permitAll()
                 // Cho phép các endpoint Swagger
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
                 // Cho phép các yêu cầu tới endpoint auth khác

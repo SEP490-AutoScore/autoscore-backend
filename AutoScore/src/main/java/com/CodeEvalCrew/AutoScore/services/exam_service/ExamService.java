@@ -74,11 +74,8 @@ public class ExamService implements IExamService {
             //check subject
 
             //check exist exam
-
             Specification<Exam> spec = createSpecificationForExistedExamByCode(entity.getExamCode());
-
             boolean isExisted = examRepository.exists(spec);
-
             if(isExisted){
                 throw new Exception("Exam code existed");
             }
