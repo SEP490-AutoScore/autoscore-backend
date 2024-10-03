@@ -55,7 +55,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated() // Mọi request khác yêu cầu xác thực
                 )
-                // .oauth2Login(withDefaults())  // Đăng nhập OAuth2
                 .oauth2Login(oauth2 -> oauth2
                 .loginPage("/oauth2/authorization/google") // Chỉ định trang login OAuth2
                 .successHandler(successHandler()) // Chỉ định custom success handler
