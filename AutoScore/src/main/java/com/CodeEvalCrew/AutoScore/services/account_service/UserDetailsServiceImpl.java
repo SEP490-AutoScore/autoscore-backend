@@ -7,9 +7,9 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
-import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+
+import jakarta.transaction.Transactional;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,22 +21,31 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private IAccountRepository accountRepository;
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         Set<GrantedAuthority> authorities = account.getAccountRoles().stream()
-            .filter(Account_Role::isStatus) // Chỉ lấy các role đang hoạt động
-            .flatMap(accountRole -> accountRole.getRole().getRole_permissions().stream())
-            .filter(Role_Permission::isStatus) // Chỉ lấy các permission đang hoạt động
-            .map(rolePermission -> new SimpleGrantedAuthority(rolePermission.getPermission().getAction()))
-            .collect(Collectors.toSet());
+                .filter(accountRole -> accountRole.isStatus() && accountRole.getRole() != null) // Filter active roles with non-null Role
+                // Add roles with "ROLE_" prefix
+                .map(accountRole -> new SimpleGrantedAuthority("ROLE_" + accountRole.getRole().getRoleName()))
+                .collect(Collectors.toSet());  // Collect roles first
 
-        // Tạo đối tượng UserDetails
+        // Now, add permissions
+        authorities.addAll(
+                account.getAccountRoles().stream()
+                        .flatMap(accountRole -> accountRole.getRole().getRole_permissions().stream()) // Get permissions from roles
+                        .filter(rolePermission -> rolePermission.isStatus() && rolePermission.getPermission() != null) // Filter active permissions
+                        .map(rolePermission -> new SimpleGrantedAuthority(rolePermission.getPermission().getAction()))
+                        .collect(Collectors.toSet()) // Collect permissions
+        );
+
+        // Create UserDetails object with an empty string as the password (Google Sign-In)
         return new org.springframework.security.core.userdetails.User(
-            account.getEmail(),
-            "N/A",
-            authorities 
+                account.getEmail(),
+                "", // Use an empty string as password for Google Sign-In
+                authorities
         );
     }
 }
