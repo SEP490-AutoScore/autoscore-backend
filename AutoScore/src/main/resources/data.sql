@@ -75,6 +75,8 @@ INSERT INTO `account`
 (`status`, `account_id`, `name`, `email`, `campus_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
 VALUES
 (true, 1, 'Admin', 'tuyenvtse160607@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 5, 'Admin', 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 6, 'Admin', 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 2, 'Examiner', 'thanhtuyen66202@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 3, 'Head of Department', 'thanhtuyen662002@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 4, 'Lecturer', 'oscarsjoyfuljourney@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null);
@@ -85,7 +87,8 @@ VALUES
 (true, 1, 1),
 (true, 2, 2),
 (true, 3, 3),
-(true, 4, 4);
+(true, 4, 4),
+(true, 5, 1);
 
 INSERT INTO `examiner`
 (`status`, `account_id`, `campus_id`)
