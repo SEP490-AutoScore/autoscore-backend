@@ -76,6 +76,7 @@ INSERT INTO `account`
 VALUES
 (true, 1, 'Admin', 'tuyenvtse160607@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 5, 'Admin', 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 6, 'Admin', 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 2, 'Examiner', 'thanhtuyen66202@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 3, 'Head of Department', 'thanhtuyen662002@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 4, 'Lecturer', 'oscarsjoyfuljourney@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null);

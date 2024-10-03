@@ -21,7 +21,6 @@ import org.springframework.web.filter.CorsFilter;
 
 import com.CodeEvalCrew.AutoScore.security.JwtAuthenticationFilter;
 
-import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,9 +53,9 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
                 // Cho phép các yêu cầu tới endpoint auth khác
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/exam/**").permitAll()
                 .anyRequest().authenticated() // Mọi request khác yêu cầu xác thực
                 )
-                // .oauth2Login(withDefaults())  // Đăng nhập OAuth2
                 .oauth2Login(oauth2 -> oauth2
                 .loginPage("/oauth2/authorization/google") // Chỉ định trang login OAuth2
                 .successHandler(successHandler()) // Chỉ định custom success handler

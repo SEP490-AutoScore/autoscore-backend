@@ -11,11 +11,14 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Set;
+
+import org.slf4j.Logger;
 
 @Component
 public class JwtTokenProvider {
@@ -27,6 +30,8 @@ public class JwtTokenProvider {
     private long jwtExpiration;
 
     private Key key;
+    
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @PostConstruct
     public void init() {
@@ -58,18 +63,20 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            logger.info("JWT token is valid");
             return true;
         } catch (SecurityException | MalformedJwtException e) {
-            // Log lỗi nếu cần
+            logger.error("Invalid JWT token: " + e.getMessage());
         } catch (ExpiredJwtException e) {
-            // Token đã hết hạn
+            logger.error("Expired JWT token: " + e.getMessage());
         } catch (UnsupportedJwtException e) {
-            // Token không được hỗ trợ
+            logger.error("Unsupported JWT token: " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            // Token rỗng hoặc chỉ chứa khoảng trắng
+            logger.error("JWT claims string is empty: " + e.getMessage());
         }
         return false;
     }
+    
 
     // Lấy email từ JWT token
     public String getEmailFromJWT(String token) {

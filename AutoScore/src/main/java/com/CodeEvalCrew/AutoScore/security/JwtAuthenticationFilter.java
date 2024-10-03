@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Component
@@ -56,6 +57,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                System.out.println(auth.getAuthorities());
+
             }
         } catch (UsernameNotFoundException ex) {
             logger.error("User not found with provided token", ex);
