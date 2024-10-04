@@ -23,11 +23,12 @@ import lombok.ToString;
 public class Permission_Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long permission_categoryId;
+    private Long permissionCategoryId;
 
     private String permissionCategoryName;
 
     private boolean status;
+    
     //Relationship
     //1-n permistion
     @OneToMany(mappedBy = "permissionCategory", cascade= CascadeType.ALL)
