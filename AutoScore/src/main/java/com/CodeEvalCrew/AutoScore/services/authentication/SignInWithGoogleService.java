@@ -1,5 +1,6 @@
 package com.CodeEvalCrew.AutoScore.services.authentication;
 
+import org.hibernate.mapping.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

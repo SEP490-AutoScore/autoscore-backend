@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
                 // Cho phép các yêu cầu tới endpoint auth khác
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/exam/**").permitAll()
+                // .requestMatchers("/api/exam/**").permitAll()
                 .anyRequest().authenticated() // Mọi request khác yêu cầu xác thực
                 )
                 .oauth2Login(oauth2 -> oauth2
