@@ -1,5 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.campus_service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,5 +21,10 @@ public class CampusService implements ICampusService {
         campus.setCampusName(request.getCampusName());
         campus.setStatus(true); // Automatically set status to true
         return campusRepository.save(campus);
+    }
+
+    @Override
+    public Page<Campus> getAllCampuses(Pageable pageable) {
+        return campusRepository.findAll(pageable); // Return paginated results
     }
 }
