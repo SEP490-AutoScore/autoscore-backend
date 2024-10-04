@@ -33,7 +33,7 @@ import lombok.ToString;
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long accountId;
+    private Long accountId;
 
     @NotNull
     @Size(min = 2, max = 100)

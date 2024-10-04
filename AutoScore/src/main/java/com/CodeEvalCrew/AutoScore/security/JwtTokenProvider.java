@@ -1,6 +1,10 @@
 package com.CodeEvalCrew.AutoScore.security;
 
 import java.security.Key;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Optional;
+import java.util.Set;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -12,13 +16,15 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
-import java.util.Set;
-
 import org.slf4j.Logger;
+
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.RevokedToken;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.RevokedTokenRepository;
 
 @Component
 public class JwtTokenProvider {
@@ -30,7 +36,13 @@ public class JwtTokenProvider {
     private long jwtExpiration;
 
     private Key key;
-    
+
+    @Autowired
+    private RevokedTokenRepository revokedTokenRepository; // Thêm Repository để tương tác với CSDL
+
+    @Autowired
+    private IAccountRepository accountRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @PostConstruct
@@ -59,9 +71,13 @@ public class JwtTokenProvider {
        }
     }
 
-    // Xác minh JWT token
+    // Xác minh JWT token và kiểm tra token có bị thu hồi không
     public boolean validateToken(String token) {
         try {
+            if (isTokenRevoked(token)) {
+                logger.warn("JWT token has been revoked");
+                return false;
+            }
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             logger.info("JWT token is valid");
             return true;
@@ -76,7 +92,6 @@ public class JwtTokenProvider {
         }
         return false;
     }
-    
 
     // Lấy email từ JWT token
     public String getEmailFromJWT(String token) {
@@ -87,4 +102,20 @@ public class JwtTokenProvider {
                             .getBody();
         return claims.getSubject();
     }
+
+    // Kiểm tra token có bị thu hồi hay không
+    private boolean isTokenRevoked(String token) {
+        Optional<RevokedToken> revokedToken = revokedTokenRepository.findByToken(token);
+        return revokedToken.isPresent();
+    }
+
+    // Thu hồi token
+    public void revokeToken(String token, Account account) {
+        RevokedToken revokedToken = new RevokedToken();
+        revokedToken.setAccount(account);
+        revokedToken.setToken(token);
+        revokedToken.setRevokedAt(new Timestamp(new Date().getTime()));
+        revokedTokenRepository.save(revokedToken);
+        logger.info("Token has been revoked: " + token);
+    }    
 }
