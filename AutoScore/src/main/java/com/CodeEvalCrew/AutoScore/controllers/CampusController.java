@@ -5,7 +5,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,5 +48,13 @@ public class CampusController {
             @RequestParam(defaultValue = "10") int size // default size is 10 items
     ) {
         return campusService.getAllCampuses(PageRequest.of(page, size));
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('UPDATE_CAMPUS')")
+    @PutMapping("/{id}")
+    public Campus updateCampusName(
+            @PathVariable long id,
+            @RequestBody CreateCampusRequest request) {
+        return campusService.updateCampusName(id, request);
     }
 }

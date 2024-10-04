@@ -9,4 +9,6 @@ public interface ICampusService {
     Campus createCampus(CreateCampusRequest request);
 
     Page<Campus> getAllCampuses(Pageable pageable);
+
+    Campus updateCampusName(long id, CreateCampusRequest request);
 }

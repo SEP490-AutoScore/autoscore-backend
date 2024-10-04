@@ -2,6 +2,9 @@ package com.CodeEvalCrew.AutoScore.services.campus_service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,5 +29,17 @@ public class CampusService implements ICampusService {
     @Override
     public Page<Campus> getAllCampuses(Pageable pageable) {
         return campusRepository.findAll(pageable); // Return paginated results
+    }
+
+    @Override
+    public Campus updateCampusName(long id, CreateCampusRequest request) {
+        Optional<Campus> optionalCampus = campusRepository.findById(id);
+        if (optionalCampus.isPresent()) {
+            Campus campus = optionalCampus.get();
+            campus.setCampusName(request.getCampusName()); // Update the name
+            return campusRepository.save(campus); // Save updated entity
+        } else {
+            throw new RuntimeException("Campus not found with ID: " + id);
+        }
     }
 }
