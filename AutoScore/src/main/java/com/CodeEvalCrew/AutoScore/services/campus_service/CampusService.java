@@ -17,7 +17,7 @@ public class CampusService implements ICampusService {
     public Campus createCampus(CreateCampusRequest request) {
         Campus campus = new Campus();
         campus.setCampusName(request.getCampusName());
-        campus.setStatus(request.isStatus());
+        campus.setStatus(true); // Automatically set status to true
         return campusRepository.save(campus);
     }
 }
