@@ -46,7 +46,7 @@ public class ExamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping("exams")
+    @PostMapping("")
     public ResponseEntity<List<ExamViewResponseDTO>> getExam(@RequestBody ExamViewRequestDTO request) {
         List<ExamViewResponseDTO> result;
         try {

@@ -95,9 +95,10 @@ public class ExamService implements IExamService {
 // <editor-fold desc="get exam func helper">
     private Specification<Exam> createSpecificationForGet(ExamViewRequestDTO request) {
         Specification<Exam> spec = Specification.where(null);
-        if (!request.getSearchString().isBlank() || !request.getSearchString().isEmpty()) {
-            spec.or(ExamSpecification.hasExamCode(request.getSearchString()));
-            spec.or(ExamSpecification.hasSemester(request.getSearchString()));
+        
+        if (!request.getSearchString().isBlank()) {
+            spec = spec.or(ExamSpecification.hasExamCode(request.getSearchString()))
+                       .or(ExamSpecification.hasSemester(request.getSearchString()));
         }
 
         if (request.getCampusId() != 0) {

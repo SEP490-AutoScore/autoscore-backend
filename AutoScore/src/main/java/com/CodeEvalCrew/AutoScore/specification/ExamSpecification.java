@@ -9,19 +9,21 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 public class ExamSpecification {
     public static Specification<Exam> hasExamCode(String searchString) {
         return (root, query, criteriaBuilder) -> {
-            if (searchString == null || searchString.isEmpty()) {
-                return criteriaBuilder.conjunction(); // No filtering if null or empty
+            if (searchString == null || searchString.isBlank()) {
+                return criteriaBuilder.conjunction(); // No filtering if null or blank
             }
-            return criteriaBuilder.equal(root.get("examCode"), searchString);
+            String pattern = "%" + searchString.toLowerCase() + "%";
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("examCode")), pattern);
         };
     }
 
     public static Specification<Exam> hasSemester(String searchString) {
         return (root, query, criteriaBuilder) -> {
-            if (searchString == null || searchString.isEmpty()) {
-                return criteriaBuilder.conjunction(); // No filtering if null or empty
+            if (searchString == null || searchString.isBlank()) {
+                return criteriaBuilder.conjunction(); // No filtering if null or blank
             }
-            return criteriaBuilder.equal(root.get("semesterName"), searchString);
+            String pattern = "%" + searchString.toLowerCase() + "%";
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("semesterName")), pattern);
         };
     }
 
