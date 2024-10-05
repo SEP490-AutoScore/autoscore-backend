@@ -108,12 +108,12 @@ VALUES
 
 
 INSERT INTO `subject` 
-(`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`, `department_id`) 
+(`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `department_id`) 
 VALUES 
-('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 1, 1),
-('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 2, 2),
-('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 2, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 3, 3),
-('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 2, '2023-09-30 09:00:00', 1, '2023-09-30 09:00:00', 1, 4, 4);
+('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 1),
+('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 2),
+('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 3),
+('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 4);
 
 
 INSERT INTO `exam` 

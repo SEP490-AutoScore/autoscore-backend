@@ -40,12 +40,11 @@ public class SubjectService implements ISubjectService {
         // Fetch the department and account based on their IDs
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
-        Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+       
 
         // Set the department and account objects in the subject
         subject.setDepartment(department);
-        subject.setAccount(account);
+        
 
         return subjectRepository.save(subject);
     }
@@ -69,7 +68,7 @@ public class SubjectService implements ISubjectService {
             Subject subject = optionalSubject.get();
             subject.setSubjectName(request.getSubjectName());
             subject.setSubjectCode(request.getSubjectCode());
-            subject.setStatus(request.isStatus());
+
             subject.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             return subjectRepository.save(subject);
         } else {
