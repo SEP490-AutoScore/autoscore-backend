@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.RevokedToken;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.RevokedTokenRepository;
 
 @Component
@@ -39,9 +38,6 @@ public class JwtTokenProvider {
 
     @Autowired
     private RevokedTokenRepository revokedTokenRepository; // Thêm Repository để tương tác với CSDL
-
-    @Autowired
-    private IAccountRepository accountRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
