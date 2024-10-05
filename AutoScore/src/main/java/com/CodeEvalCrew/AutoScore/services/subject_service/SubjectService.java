@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.DeleteSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.UpdateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Department;
@@ -44,12 +45,6 @@ public class SubjectService implements ISubjectService {
         return subjectRepository.findAll(pageable);
     }
 
-
-    @Override
-    public void deleteSubject(long id) {
-        Optional<Subject> subject = subjectRepository.findById(id);
-        subject.ifPresent(subjectRepository::delete);
-    }
     @Override
     public Subject createSubject(CreateSubjectRequest request) {
         // Kiểm tra xem Department có tồn tại không
@@ -122,9 +117,34 @@ public class SubjectService implements ISubjectService {
             throw new RuntimeException("Subject not found");
         }
     }
+   @Override
+public void deleteSubject(DeleteSubjectRequest request) {
+    Optional<Subject> subjectOpt = subjectRepository.findById(request.getSubjectId());
+    if (subjectOpt.isPresent()) {
+        Subject subject = subjectOpt.get();
+        
+        // Cập nhật trạng thái subject thành 0
+        subject.setStatus("0"); // Hoặc giá trị khác tùy theo cấu trúc của bạn
+        subject.setDeletedAt(new Timestamp(System.currentTimeMillis())); // Cập nhật thời gian sửa đổi
+        // Cập nhật thông tin người xóa
+        Optional<Account> accountOpt = accountRepository.findById(request.getDeletedBy());
+        if (accountOpt.isPresent()) {
+            subject.setDeletedBy(accountOpt.get());
+        } else {
+            throw new RuntimeException("Account not found with ID: " + request.getDeletedBy());
+        }
+        
+        subjectRepository.save(subject); // Lưu lại thay đổi
+    } else {
+        throw new RuntimeException("Subject not found with ID: " + request.getSubjectId());
+    }
+}
+
+}
+
     
 
     
     
     
-}
+

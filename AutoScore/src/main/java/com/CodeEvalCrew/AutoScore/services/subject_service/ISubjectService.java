@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.subject_service;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.DeleteSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.UpdateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import org.springframework.data.domain.Page;
@@ -17,5 +18,5 @@ public interface ISubjectService {
 
     Subject updateSubject(UpdateSubjectRequest request);
 
-    void deleteSubject(long id);
+     void deleteSubject(DeleteSubjectRequest request);
 }

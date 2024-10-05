@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.DeleteSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.UpdateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.services.subject_service.ISubjectService;
@@ -44,12 +45,6 @@ public class SubjectController {
         return subjectService.getAllSubjects(PageRequest.of(page, size));
     }
 
-
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('DELETE_SUBJECT')")
-    @DeleteMapping("{id}")
-    public void deleteSubject(@PathVariable long id) {
-        subjectService.deleteSubject(id);
-    }
       @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('CREATE_SUBJECT')")
     @PostMapping("")
     public ResponseEntity<Subject> createSubject(@Valid @RequestBody CreateSubjectRequest request) {
@@ -63,5 +58,13 @@ public class SubjectController {
         return new ResponseEntity<>(updatedSubject, HttpStatus.OK);
     }
     
+ @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('DELETE_SUBJECT')")
+@DeleteMapping("")
+public ResponseEntity<Void> deleteSubject(@Valid @RequestBody DeleteSubjectRequest request) {
+    subjectService.deleteSubject(request);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Trả về 204 No Content
+}
+
+
 
 }
