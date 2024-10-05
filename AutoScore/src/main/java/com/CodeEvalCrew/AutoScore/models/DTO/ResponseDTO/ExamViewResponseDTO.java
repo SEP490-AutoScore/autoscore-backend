@@ -2,11 +2,7 @@ package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 
 import java.sql.Timestamp;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.CodeEvalCrew.AutoScore.models.Entity.Campus;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
-import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -26,9 +22,9 @@ public class ExamViewResponseDTO {
 
     private String semesterName;
 
-    private Campus campus;
+    private CampusView campus;
 
-    private Subject subject;
+    private SubjectView subject;
 
     public ExamViewResponseDTO(Exam exam) {
         this.examId = exam.getExamId();

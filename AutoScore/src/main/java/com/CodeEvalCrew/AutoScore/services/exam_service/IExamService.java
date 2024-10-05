@@ -10,9 +10,11 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 
 public interface IExamService{
-    Exam getExamById(long id)throws Exception,NotFoundException;
+    ExamViewResponseDTO getExamById(long id)throws Exception,NotFoundException;
 
-    public List<ExamViewResponseDTO> GetExam(ExamViewRequestDTO request) throws Exception;
+    List<ExamViewResponseDTO> GetExam(ExamViewRequestDTO request) throws Exception;
 
     ExamViewResponseDTO CreateNewExam(ExamCreateRequestDTO entity) throws Exception;
+
+    ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity) throws Exception;
 }

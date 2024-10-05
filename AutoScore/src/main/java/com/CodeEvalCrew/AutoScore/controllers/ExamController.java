@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -34,8 +36,8 @@ public class ExamController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @GetMapping("{id}")
-    public ResponseEntity<Exam> getExamById(@PathVariable long id){
-        Exam result;
+    public ResponseEntity<ExamViewResponseDTO> getExamById(@PathVariable long id){
+        ExamViewResponseDTO result;
         try {
             result = examService.getExamById(id);
         } catch (NotFoundException e) {
@@ -46,6 +48,7 @@ public class ExamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @PostMapping("")
     public ResponseEntity<List<ExamViewResponseDTO>> getExam(@RequestBody ExamViewRequestDTO request) {
         List<ExamViewResponseDTO> result;
@@ -60,13 +63,29 @@ public class ExamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping("new-exam")
+    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PutMapping("")
     public ResponseEntity<ExamViewResponseDTO> creatNewExam(@RequestBody ExamCreateRequestDTO entity) {
         try{
             //call service for create new exam
             ExamViewResponseDTO result = examService.CreateNewExam(entity);
 
             
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ExamViewResponseDTO> putMethodName(@PathVariable String id, @RequestBody ExamCreateRequestDTO request) {
+        
+        try{
+            //call service for update exam
+            ExamViewResponseDTO result = examService.updateExam(request);
+
             return new ResponseEntity<>(result, HttpStatus.OK);
         }catch (Exception ex){
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
