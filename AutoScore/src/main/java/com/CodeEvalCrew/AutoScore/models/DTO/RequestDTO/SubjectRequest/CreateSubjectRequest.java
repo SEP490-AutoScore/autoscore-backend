@@ -10,5 +10,4 @@ public class CreateSubjectRequest {
     private String subjectCode;
     private long departmentId;
     private long accountId;
-
 }

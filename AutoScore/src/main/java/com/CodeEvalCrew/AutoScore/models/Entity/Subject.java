@@ -27,7 +27,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Subject {
-@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long subjectId;
 
@@ -50,17 +50,17 @@ public class Subject {
     private Timestamp deletedAt;
 
     private long deletedBy;
-    //Relationship
-    //1-1 account
+    // Relationship
+    // 1-1 account
     @OneToOne
     @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
-    //1-n exam
+    // 1-n exam
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
     private Set<Exam> exams;
 
-    //1-1 department
+    // 1-1 department
     @OneToOne
     @JoinColumn(name = "departmentId", nullable = false)
     private Department department;

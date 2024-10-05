@@ -69,7 +69,7 @@ public class SubjectService implements ISubjectService {
             Subject subject = optionalSubject.get();
             subject.setSubjectName(request.getSubjectName());
             subject.setSubjectCode(request.getSubjectCode());
-            // subject.setStatus(request.isStatus());
+            subject.setStatus(request.isStatus());
             subject.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             return subjectRepository.save(subject);
         } else {

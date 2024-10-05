@@ -88,7 +88,8 @@ VALUES
 (true, 2, 2),
 (true, 3, 3),
 (true, 4, 4),
-(true, 5, 1);
+(true, 5, 1),
+(true, 6, 1);
 
 INSERT INTO `examiner`
 (`status`, `account_id`, `campus_id`)
