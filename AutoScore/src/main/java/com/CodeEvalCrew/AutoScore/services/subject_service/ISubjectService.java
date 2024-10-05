@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.subject_service;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.UpdateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,7 @@ public interface ISubjectService {
 
     Page<Subject> getAllSubjects(Pageable pageable);
 
-    Subject updateSubject(long id, CreateSubjectRequest request);
+    Subject updateSubject(UpdateSubjectRequest request);
 
     void deleteSubject(long id);
 }

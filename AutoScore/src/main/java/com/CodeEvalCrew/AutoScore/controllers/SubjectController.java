@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.UpdateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.services.subject_service.ISubjectService;
 
@@ -55,4 +56,12 @@ public class SubjectController {
         Subject createdSubject = subjectService.createSubject(request);
         return new ResponseEntity<>(createdSubject, HttpStatus.CREATED);
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('UPDATE_SUBJECT')")
+    @PutMapping("")
+    public ResponseEntity<Subject> updateSubject(@Valid @RequestBody UpdateSubjectRequest request) {
+        Subject updatedSubject = subjectService.updateSubject(request);
+        return new ResponseEntity<>(updatedSubject, HttpStatus.OK);
+    }
+    
+
 }

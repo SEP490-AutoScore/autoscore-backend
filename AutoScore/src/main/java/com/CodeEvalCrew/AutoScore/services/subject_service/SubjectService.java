@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.UpdateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Department;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
@@ -43,21 +44,6 @@ public class SubjectService implements ISubjectService {
         return subjectRepository.findAll(pageable);
     }
 
-    @Override
-    public Subject updateSubject(long id, CreateSubjectRequest request) {
-        Optional<Subject> optionalSubject = subjectRepository.findById(id);
-        
-        if (optionalSubject.isPresent()) {
-            Subject subject = optionalSubject.get();
-            subject.setSubjectName(request.getSubjectName());
-            subject.setSubjectCode(request.getSubjectCode());
-
-            subject.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-            return subjectRepository.save(subject);
-        } else {
-            throw new RuntimeException("Subject not found");
-        }
-    }
 
     @Override
     public void deleteSubject(long id) {
@@ -96,6 +82,48 @@ public class SubjectService implements ISubjectService {
     
         return subjectRepository.save(subject);
     }
+    @Override
+    public Subject updateSubject(UpdateSubjectRequest request) {
+        Optional<Subject> optionalSubject = subjectRepository.findById(request.getSubjectId());
+        
+        if (optionalSubject.isPresent()) {
+            Subject subject = optionalSubject.get();
+    
+            // Kiểm tra status trước khi cập nhật
+            if (!subject.getStatus().equals("1")) {
+                throw new RuntimeException("Cannot update subject with ID: " + request.getSubjectId() + " because it is not active.");
+            }
+    
+            // Cập nhật thông tin subject
+            subject.setSubjectName(request.getSubjectName());
+            subject.setSubjectCode(request.getSubjectCode());
+    
+            // Kiểm tra Department ID
+            if (request.getDepartmentId() != null) {
+                Optional<Department> departmentOpt = departmentRepository.findById(request.getDepartmentId());
+                if (departmentOpt.isPresent()) {
+                    subject.setDepartment(departmentOpt.get());
+                } else {
+                    throw new RuntimeException("Department not found with ID: " + request.getDepartmentId());
+                }
+            }
+    
+            subject.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            // Cập nhật thông tin người cập nhật
+            Optional<Account> accountOpt = accountRepository.findById(request.getUpdateBy());
+            if (accountOpt.isPresent()) {
+                subject.setUpdatedBy(accountOpt.get());
+            } else {
+                throw new RuntimeException("Account not found with ID: " + request.getUpdateBy());
+            }
+    
+            return subjectRepository.save(subject);
+        } else {
+            throw new RuntimeException("Subject not found");
+        }
+    }
+    
+
     
     
     
