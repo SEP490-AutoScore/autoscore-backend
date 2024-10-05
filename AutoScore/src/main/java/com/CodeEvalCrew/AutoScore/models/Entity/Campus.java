@@ -24,7 +24,7 @@ public class Campus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long campusId;
+    private Long campusId;
 
     private String campusName;
 

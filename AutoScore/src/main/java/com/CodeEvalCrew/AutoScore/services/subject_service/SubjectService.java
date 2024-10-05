@@ -29,25 +29,7 @@ public class SubjectService implements ISubjectService {
     @Autowired
     private IAccountRepository accountRepository;
 
-    @Override
-    public Subject createSubject(CreateSubjectRequest request) {
-        Subject subject = new Subject();
-        subject.setSubjectName(request.getSubjectName());
-        subject.setSubjectCode(request.getSubjectCode());
-        subject.setStatus(true); // Automatically set status to true
-        subject.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-
-        // Fetch the department and account based on their IDs
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
-       
-
-        // Set the department and account objects in the subject
-        subject.setDepartment(department);
-        
-
-        return subjectRepository.save(subject);
-    }
+  
 
     @Override
     public Page<Subject> getSubjectByCode(String subjectCode, Pageable pageable) {
@@ -64,6 +46,7 @@ public class SubjectService implements ISubjectService {
     @Override
     public Subject updateSubject(long id, CreateSubjectRequest request) {
         Optional<Subject> optionalSubject = subjectRepository.findById(id);
+        
         if (optionalSubject.isPresent()) {
             Subject subject = optionalSubject.get();
             subject.setSubjectName(request.getSubjectName());
@@ -81,4 +64,39 @@ public class SubjectService implements ISubjectService {
         Optional<Subject> subject = subjectRepository.findById(id);
         subject.ifPresent(subjectRepository::delete);
     }
+    @Override
+    public Subject createSubject(CreateSubjectRequest request) {
+        // Kiểm tra xem Department có tồn tại không
+        Optional<Department> departmentOpt = departmentRepository.findById(request.getDepartmentId());
+        if (!departmentOpt.isPresent()) {
+            throw new RuntimeException("Department not found with ID: " + request.getDepartmentId());
+        }
+        Department department = departmentOpt.get();
+    
+        // Kiểm tra xem Account (createBy) có tồn tại không
+        Optional<Account> accountOpt = accountRepository.findById(request.getCreateBy());
+        if (!accountOpt.isPresent()) {
+            throw new RuntimeException("Account not found with ID: " + request.getCreateBy());
+        }
+        Account creator = accountOpt.get();
+    
+        // Tạo đối tượng Subject mới
+        Subject subject = new Subject();
+        subject.setSubjectName(request.getSubjectName());
+        subject.setSubjectCode(request.getSubjectCode());
+        subject.setDepartment(department);
+        
+        // Thiết lập status là "1"
+        subject.setStatus("1"); // Gán giá trị status là "1"
+        
+        subject.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        subject.setCreatedBy(creator);
+    
+        // Bạn có thể thiết lập các trường khác nếu cần
+    
+        return subjectRepository.save(subject);
+    }
+    
+    
+    
 }
