@@ -11,6 +11,7 @@ import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PermissionCategoryRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionCategoryDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission_Category;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionCategoryRepository;
 
@@ -19,6 +20,9 @@ public class PermissionCategoryService implements IPermisionCategoryService {
 
     @Autowired
     private IPermissionCategoryRepository permissionCategoryRepository;
+
+    @Autowired
+    private IPermissionService permissionService;
 
     @Override
     public List<PermissionCategoryDTO> getAllPermissionCategory() {
@@ -141,6 +145,14 @@ public class PermissionCategoryService implements IPermisionCategoryService {
             Permission_Category permissionCategory = permissionCategoryRepository.findById(id).get();
             if (permissionCategory == null) {
                 return OperationStatus.NOT_FOUND;
+            }
+            
+            //Kiểm tra trong permission có đang dùng permission category hay không
+            List<PermissionResponseDTO> permissions = permissionService.getAllPermissions();
+            for (PermissionResponseDTO permission : permissions) {
+                if (permission.getPermissionCategory().getPermissionCategoryId().equals(id)) {
+                    return OperationStatus.CANNOT_DELETE;
+                }
             }
 
             // Xóa permission trong cơ sở dữ liệu

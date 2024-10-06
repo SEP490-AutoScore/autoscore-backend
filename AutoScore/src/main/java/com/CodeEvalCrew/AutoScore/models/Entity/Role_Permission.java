@@ -1,5 +1,8 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import java.time.LocalDateTime;
+
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -7,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +29,25 @@ public class Role_Permission {
     private long rolePermissionId;
 
     private boolean status;
+
+    @Nullable
+    @Past // Thời điểm tạo phải là trong quá khứ
+    private LocalDateTime createdAt;
+
+    @Nullable
+    private Long createdBy;
+
+    @Nullable
+    private LocalDateTime updatedAt;
+
+    @Nullable
+    private Long updatedBy;
+
+    @Nullable
+    private LocalDateTime deletedAt;
+
+    @Nullable
+    private Long deletedBy;
 
     // Many-to-One relationship with Account
     @ManyToOne(fetch = FetchType.EAGER)
