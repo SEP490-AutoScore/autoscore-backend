@@ -104,6 +104,7 @@ VALUES
 ('java coding', 'Java', true),
 ('java coding', 'Java', true),
 ('c# coding', 'C#', true),
+('c# coding', 'C#', true),
 ('c# coding', 'C#', true);
 
 
