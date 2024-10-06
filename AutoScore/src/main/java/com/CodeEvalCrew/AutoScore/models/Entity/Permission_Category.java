@@ -2,6 +2,8 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,5 +34,6 @@ public class Permission_Category {
     //Relationship
     //1-n permistion
     @OneToMany(mappedBy = "permissionCategory", cascade= CascadeType.ALL)
+    @JsonBackReference
     private Set<Permission> permisions;
 }

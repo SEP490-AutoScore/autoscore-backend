@@ -19,7 +19,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionCategoryDTO;
 import com.CodeEvalCrew.AutoScore.services.permission_service.IPermisionCategoryService;
 
 @RestController
-@RequestMapping("/permission/category")
+@RequestMapping("/api/permission/category")
 public class PermissionCategoryController {
 
     @Autowired

@@ -69,7 +69,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
 
             // Kiểm tra permission có tốn tại trong cơ sở dữ liệu hay không
             Optional<PermissionCategoryDTO> permisionCategory = getPermissionCategoryByName(permissionCategoryDTO.getName());
-            if (permisionCategory.isPresent()) {
+            if (permisionCategory.isPresent() && permisionCategory.get().isStatus()) {
                 return OperationStatus.ALREADY_EXISTS;
             }
 
@@ -109,7 +109,9 @@ public class PermissionCategoryService implements IPermisionCategoryService {
             // Kiểm tra permission có tốn tại trong cơ sở dữ liệu hay không
             List<PermissionCategoryDTO> permisionCategories = getAllPermissionCategory();
                 for (PermissionCategoryDTO permissionCategory : permisionCategories) {
-                    if (permissionCategory.getName().equals(name) && !permissionCategory.getId().equals(id)) {
+                    if (permissionCategory.getName().equals(name) 
+                        && !permissionCategory.getId().equals(id)
+                        && permissionCategory.isStatus()) {
                         return OperationStatus.ALREADY_EXISTS;
                     }
                 }
