@@ -77,6 +77,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -92,32 +93,35 @@ import lombok.ToString;
 public class Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long subjectId;
+    private Long subjectId;
 
     private String subjectName;
 
     private String subjectCode;
 
-    private boolean status;
+    // private boolean status;
+      @NotNull
+    @Size(min = 1, max = 20)
+    private String status;
 
     @NotNull
     @Past // Thời điểm tạo phải là trong quá khứ
     private Timestamp createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "createdBy", referencedColumnName = "accountId")
+    @JoinColumn(name = "created_by", referencedColumnName = "accountId")
     private Account createdBy; // Nối với account_id
 
     private Timestamp updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "updatedBy", referencedColumnName = "accountId")
+    @JoinColumn(name = "updated_by", referencedColumnName = "accountId")
     private Account updatedBy; // Nối với account_id
 
     private Timestamp deletedAt;
 
     @ManyToOne
-    @JoinColumn(name = "deletedBy", referencedColumnName = "accountId")
+    @JoinColumn(name = "deleted_by", referencedColumnName = "accountId")
     private Account deletedBy; // Nối với account_id
 
     // 1-n exam
@@ -125,7 +129,7 @@ public class Subject {
     private Set<Exam> exams;
 
     // 1-1 department
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "departmentId", nullable = false)
     private Department department;
 }

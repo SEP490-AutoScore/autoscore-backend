@@ -10,8 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.DeleteSubjectRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.UpdateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.services.subject_service.ISubjectService;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -21,13 +25,6 @@ public class SubjectController {
 
     @Autowired
     private ISubjectService subjectService;
-
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('CREATE_SUBJECT')")
-    @PostMapping("")
-    public Subject createSubject(@RequestBody CreateSubjectRequest request) {
-        // Create the subject and return the created subject directly
-        return subjectService.createSubject(request);
-    }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('VIEW_SUBJECT')")
     @GetMapping("/{subjectCode}")
@@ -48,17 +45,26 @@ public class SubjectController {
         return subjectService.getAllSubjects(PageRequest.of(page, size));
     }
 
+      @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('CREATE_SUBJECT')")
+    @PostMapping("")
+    public ResponseEntity<Subject> createSubject(@Valid @RequestBody CreateSubjectRequest request) {
+        Subject createdSubject = subjectService.createSubject(request);
+        return new ResponseEntity<>(createdSubject, HttpStatus.CREATED);
+    }
     @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('UPDATE_SUBJECT')")
-    @PutMapping("/{id}")
-    public Subject updateSubject(
-            @PathVariable long id,
-            @RequestBody CreateSubjectRequest request) {
-        return subjectService.updateSubject(id, request);
+    @PutMapping("")
+    public ResponseEntity<Subject> updateSubject(@Valid @RequestBody UpdateSubjectRequest request) {
+        Subject updatedSubject = subjectService.updateSubject(request);
+        return new ResponseEntity<>(updatedSubject, HttpStatus.OK);
     }
+    
+ @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('DELETE_SUBJECT')")
+@DeleteMapping("")
+public ResponseEntity<Void> deleteSubject(@Valid @RequestBody DeleteSubjectRequest request) {
+    subjectService.deleteSubject(request);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Trả về 204 No Content
+}
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') and hasAuthority('DELETE_SUBJECT')")
-    @DeleteMapping("{id}")
-    public void deleteSubject(@PathVariable long id) {
-        subjectService.deleteSubject(id);
-    }
+
+
 }
