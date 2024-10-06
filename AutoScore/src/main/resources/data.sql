@@ -18,40 +18,40 @@ VALUES
 (true, 8, 'MANAGE_SCORE');
 
 INSERT INTO `permission`
-(`action`, `permission_id`, `permission_name`, `permission_category_id`)
+(`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
 VALUES
-('VIEW_ACCOUNT', 1, 'View account', 1),
-('VIEW_ROLE', 2, 'View role', 2),
-('VIEW_PERMISSION', 3, 'View permission', 3),
-('VIEW_CAMPUS', 4, 'View campus', 4),
-('VIEW_SUBJECT', 5, 'View subject', 5),
-('VIEW_DEPARTMENT', 6, 'View department', 6),
-('VIEW_EXAM', 7, 'View exam', 7),
-('VIEW_SCORE', 8, 'View score', 8),
+('VIEW_ACCOUNT', 1, 'View account', 1, 1),
+('VIEW_ROLE', 2, 'View role', 2, 1),
+('VIEW_PERMISSION', 3, 'View permission', 3, 1),
+('VIEW_CAMPUS', 4, 'View campus', 4, 1),
+('VIEW_SUBJECT', 5, 'View subject', 5, 1),
+('VIEW_DEPARTMENT', 6, 'View department', 6, 1),
+('VIEW_EXAM', 7, 'View exam', 7, 1),
+('VIEW_SCORE', 8, 'View score', 8, 1),
 
-('CREATE_ACCOUNT', 9, 'Create account', 1),
-('CREATE_ROLE', 10, 'Create role', 2),
-('CREATE_PERMISSION', 11, 'Create permission', 3),
-('CREATE_CAMPUS', 12, 'Create campus', 4),
-('CREATE_SUBJECT', 13, 'Create subject', 5),
-('CREATE_DEPARTMENT', 14, 'Create department', 6),
-('CREATE_EXAM', 15, 'Create exam', 7),
+('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
+('CREATE_ROLE', 10, 'Create role', 2, 1),
+('CREATE_PERMISSION', 11, 'Create permission', 3, 1),
+('CREATE_CAMPUS', 12, 'Create campus', 4, 1),
+('CREATE_SUBJECT', 13, 'Create subject', 5, 1),
+('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
+('CREATE_EXAM', 15, 'Create exam', 7, 1),
 
-('UPDATE_ACCOUNT', 16, 'Update account', 1),
-('UPDATE_ROLE', 17, 'Update role', 2),
-('UPDATE_PERMISSION', 18, 'Update permission', 3),
-('UPDATE_CAMPUS', 19, 'Update campus', 4),
-('UPDATE_SUBJECT', 20, 'Update subject', 5),
-('UPDATE_DEPARTMENT', 21, 'Update department', 6),
-('UPDATE_EXAM', 22, 'Update exam', 7),
+('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
+('UPDATE_ROLE', 17, 'Update role', 2, 1),
+('UPDATE_PERMISSION', 18, 'Update permission', 3, 1),
+('UPDATE_CAMPUS', 19, 'Update campus', 4, 1),
+('UPDATE_SUBJECT', 20, 'Update subject', 5, 1),
+('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
+('UPDATE_EXAM', 22, 'Update exam', 7, 1),
 
-('DELETE_ACCOUNT', 23, 'Delete account', 1),
-('DELETE_ROLE', 24, 'Delete role', 2),
-('DELETE_PERMISSION', 25, 'Delete permission', 3),
-('DELETE_CAMPUS', 26, 'Delete campus', 4),
-('DELETE_SUBJECT', 27, 'Delete subject', 5),
-('DELETE_DEPARTMENT', 28, 'Delete department', 6),
-('DELETE_EXAM', 29, 'Delete exam', 7);
+('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
+('DELETE_ROLE', 24, 'Delete role', 2, 1),
+('DELETE_PERMISSION', 25, 'Delete permission', 3, 1),
+('DELETE_CAMPUS', 26, 'Delete campus', 4, 1),
+('DELETE_SUBJECT', 27, 'Delete subject', 5, 1),
+('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
+('DELETE_EXAM', 29, 'Delete exam', 7, 1);
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)

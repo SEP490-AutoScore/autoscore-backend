@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import io.micrometer.common.lang.Nullable;
@@ -29,7 +30,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long roleId;
+    private Long roleId;
 
     private String roleName;
 
@@ -37,19 +38,19 @@ public class Role {
 
     @Nullable
     @Past // Thời điểm tạo phải là trong quá khứ
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @Nullable
     private Long createdBy;
 
     @Nullable
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 
     @Nullable
     private Long updatedBy;
 
     @Nullable
-    private Timestamp deletedAt;
+    private LocalDateTime deletedAt;
 
     @Nullable
     private Long deletedBy;

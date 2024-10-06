@@ -19,7 +19,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionCategoryDTO;
 import com.CodeEvalCrew.AutoScore.services.permission_service.IPermisionCategoryService;
 
 @RestController
-@RequestMapping("/permission/category")
+@RequestMapping("/api/permission/category")
 public class PermissionCategoryController {
 
     @Autowired
@@ -94,6 +94,7 @@ public class PermissionCategoryController {
             case SUCCESS -> ResponseEntity.ok("Permission Category deleted successfully");
             case FAILURE -> ResponseEntity.status(500).body("An error occurred while deleting Permission Category");
             case NOT_FOUND -> ResponseEntity.status(404).body("Permission Category not found");
+            case CANNOT_DELETE -> ResponseEntity.status(400).body("Permission Category is in use");
             default -> ResponseEntity.status(500).body("Unexpected error occurred");
         };
     }

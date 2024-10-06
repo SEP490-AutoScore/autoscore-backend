@@ -22,7 +22,7 @@ import lombok.ToString;
 public class Account_Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long accountRoleId;
+    private Long accountRoleId;
 
     private boolean status;
 
