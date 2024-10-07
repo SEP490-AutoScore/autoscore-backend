@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.RoleRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
@@ -23,12 +24,13 @@ import com.CodeEvalCrew.AutoScore.utils.Util;
 public class RoleService implements IRoleService {
 
     private final IRoleRepositoty roleRepositoty;
-    private final IAccountRepository accountRepository;
+    private final IRolePermissionService rolePermissionService;
     private final Util util;
 
-    public RoleService(IRoleRepositoty roleRepositoty, IAccountRepository accountRepository) {
+
+    public RoleService(IRoleRepositoty roleRepositoty, IAccountRepository accountRepository, IRolePermissionService rolePermissionService) {
         this.roleRepositoty = roleRepositoty;
-        this.accountRepository = accountRepository;
+        this.rolePermissionService = rolePermissionService;
         this.util = new Util(accountRepository);
     }
 
@@ -40,7 +42,7 @@ public class RoleService implements IRoleService {
                 .map(role -> RoleMapper.INSTANCE.roleToRoleResponseDTO(role, util))
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error while getting all roles");
         }
     }
 
@@ -49,12 +51,12 @@ public class RoleService implements IRoleService {
         try {
             Role role = roleRepositoty.findById(roleId).get();
             if (role == null) {
-                throw new Exception("Role not found with id: " + roleId);
+                return null;
             }
 
             return RoleMapper.INSTANCE.roleToRoleResponseDTO(role, util);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error while getting role with id: " + roleId);
         }
     }
 
@@ -84,7 +86,7 @@ public class RoleService implements IRoleService {
 
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
@@ -119,11 +121,12 @@ public class RoleService implements IRoleService {
 
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
     @Override
+    @Transactional
     public OperationStatus deleteRole(Long roleId) {
         try {
             Optional<Role> role = roleRepositoty.findById(roleId);
@@ -138,17 +141,16 @@ public class RoleService implements IRoleService {
                 }
             }
 
-            role.get().setStatus(false);
-            role.get().setUpdatedAt(Util.getCurrentDateTime());
-            role.get().setUpdatedBy(Util.getAuthenticatedAccountId());
-            Role savedRole = roleRepositoty.save(role.get());
-            if (savedRole == null || savedRole.getRoleId() == null) {
+            OperationStatus operationStatus = rolePermissionService.deleteRolePermission(roleId);
+            if (operationStatus != OperationStatus.SUCCESS) {
                 return OperationStatus.FAILURE;
             }
 
+            roleRepositoty.deleteById(roleId);
+
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
@@ -162,7 +164,7 @@ public class RoleService implements IRoleService {
 
             return RoleMapper.INSTANCE.roleToRoleResponseDTO(role.get(), util);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error while getting role with name: " + roleName);
         }
     }
 
