@@ -15,17 +15,21 @@ import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.mappers.PermissionMapper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission_Category;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionCategoryRepository;
+import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRolePermissionRepository;
 
 @Service
 public class PermissionService implements IPermissionService {
 
     private final IPermissionRepository permissionRepository;
     private final IPermissionCategoryRepository permissionCatergoryRepository;
+    private final IRolePermissionRepository rolePermissionRepository;
 
-    public PermissionService(IPermissionRepository permissionRepository, IPermissionCategoryRepository permissionCatergoryRepository) {
+    public PermissionService(IPermissionRepository permissionRepository, IPermissionCategoryRepository permissionCatergoryRepository, IRolePermissionRepository rolePermissionRepository) {
         this.permissionRepository = permissionRepository;
         this.permissionCatergoryRepository = permissionCatergoryRepository;
+        this.rolePermissionRepository = rolePermissionRepository;
     }
 
     @Override
@@ -34,7 +38,7 @@ public class PermissionService implements IPermissionService {
             List<Permission> permissions = permissionRepository.findAll();
             return permissions.stream().map(PermissionMapper.INSTANCE::permissionToPermissionResponseDTO).collect(Collectors.toList());
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error while getting all permissions");
         }
     }
 
@@ -43,11 +47,11 @@ public class PermissionService implements IPermissionService {
         try {
             Permission permission = permissionRepository.findById(permissionId).get();
             if (permission == null) {
-                throw new Exception("Permission not found with id: " + permissionId);
+                return null;
             }
             return PermissionMapper.INSTANCE.permissionToPermissionResponseDTO(permission);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error while getting permission with id: " + permissionId);
         }
     }
 
@@ -90,7 +94,7 @@ public class PermissionService implements IPermissionService {
 
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
@@ -139,7 +143,7 @@ public class PermissionService implements IPermissionService {
 
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
@@ -151,14 +155,36 @@ public class PermissionService implements IPermissionService {
                 return OperationStatus.NOT_FOUND;
             }
 
+            List<Role_Permission> rolePermissions = getRolePermissionById(permissionId);
+            if (!rolePermissions.isEmpty()) {
+                return OperationStatus.CANNOT_DELETE;
+            }
+
             permission.setStatus(false);
             Permission savedPermission = permissionRepository.save(permission);
             if (savedPermission == null || savedPermission.getPermissionId() == null) {
                 return OperationStatus.FAILURE;
             }
+            
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
+        }
+    }
+
+    private List<Role_Permission> getRolePermissionById(Long permissionId) {
+        try {
+            if (permissionId == null) {
+                return null;
+            }
+
+            List<Role_Permission> rolePermissions = rolePermissionRepository.findAllByPermission_PermissionId(permissionId);
+            if (rolePermissions == null || rolePermissions.isEmpty()) {
+                throw new Exception("Role Permission not found with id: " + permissionId);
+            }
+            return rolePermissions;
+        } catch (Exception e) {
+            throw new Exception("Error while getting permission category with id: " + permissionId);
         }
     }
 }
