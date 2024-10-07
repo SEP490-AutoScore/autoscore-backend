@@ -8,5 +8,6 @@ public enum OperationStatus {
     ALREADY_ACTION_EXISTS,
     NOT_FOUND,
     INVALID_INPUT,
-    CANNOT_DELETE;
+    CANNOT_DELETE,
+    ERROR;
 }
