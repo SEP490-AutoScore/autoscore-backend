@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,7 +46,7 @@ public class PermissionController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('CREATE_PERMISSION')")
-    @GetMapping("/create")
+    @PostMapping("/create")
     public ResponseEntity<?> createPermission(@RequestBody PermissionRequestDTO permissionRequestDTO) {
         OperationStatus status = permissionService.createPermission(permissionRequestDTO);
         return switch (status) {
@@ -61,7 +62,7 @@ public class PermissionController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('UPDATE_PERMISSION')")
-    @GetMapping("/update")
+    @PostMapping("/update")
     public ResponseEntity<?> updatePermission(@RequestBody PermissionRequestDTO permissionRequestDTO) {
         OperationStatus status = permissionService.updatePermission(permissionRequestDTO);
         return switch (status) {
@@ -77,7 +78,7 @@ public class PermissionController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('DELETE_PERMISSION')")
-    @GetMapping("/delete/{permissionId}")
+    @PostMapping("/delete/{permissionId}")
     public ResponseEntity<?> deletePermission(@PathVariable Long permissionId) {
         OperationStatus status = permissionService.deletePermission(permissionId);
         return switch (status) {

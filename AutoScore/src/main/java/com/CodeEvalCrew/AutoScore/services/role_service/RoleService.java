@@ -63,7 +63,7 @@ public class RoleService implements IRoleService {
     @Override
     public OperationStatus createRole(RoleRequestDTO roleRequestDTO) {
         try {
-            String roleName = roleRequestDTO.getRoleName();
+            String roleName = roleRequestDTO.getRoleName().toUpperCase().trim();
             if (roleName == null || roleName.isEmpty()) {
                 return OperationStatus.INVALID_INPUT;
             }
@@ -94,7 +94,7 @@ public class RoleService implements IRoleService {
     public OperationStatus updateRole(RoleRequestDTO roleRequestDTO) {
         try {
             Long roleId = roleRequestDTO.getRoleId();
-            String roleName = roleRequestDTO.getRoleName();
+            String roleName = roleRequestDTO.getRoleName().toUpperCase().trim();
             if (roleId == null || roleId <= 0 || roleName == null || roleName.isEmpty()) {
                 return OperationStatus.INVALID_INPUT;
             }
