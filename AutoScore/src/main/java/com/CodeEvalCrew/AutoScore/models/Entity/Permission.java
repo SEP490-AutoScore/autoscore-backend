@@ -2,6 +2,8 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,15 +26,18 @@ import lombok.ToString;
 public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long permissionId;
+    private Long permissionId;
 
     private String permissionName;
 
     private String action;
 
+    private boolean status;
+
     // Relationships
     @ManyToOne
     @JoinColumn(name = "permissionCategoryId", nullable = false)
+    @JsonManagedReference
     private Permission_Category permissionCategory;
 
     //n-n role

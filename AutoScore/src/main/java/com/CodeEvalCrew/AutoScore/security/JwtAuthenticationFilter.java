@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.CodeEvalCrew.AutoScore.services.account_service.UserDetailsImpl;
 import com.CodeEvalCrew.AutoScore.services.account_service.UserDetailsServiceImpl;
 
 import jakarta.servlet.FilterChain;
@@ -20,7 +21,6 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Component
@@ -50,17 +50,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String email = tokenProvider.getEmailFromJWT(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(email);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                System.out.println(auth.getAuthorities());
-
             }
         } catch (UsernameNotFoundException ex) {
             logger.error("User not found with provided token", ex);

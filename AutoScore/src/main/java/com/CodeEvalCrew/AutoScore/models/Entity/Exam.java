@@ -30,7 +30,7 @@ public class Exam {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long examId;
+    private Long examId;
 
     private String examCode;
 
@@ -48,15 +48,15 @@ public class Exam {
     @Past // Thời điểm tạo phải là trong quá khứ
     private Timestamp createdAt;
 
-    private long createdBy;
+    private Long createdBy;
 
     private Timestamp updatedAt;
 
-    private long updatedBy;
+    private Long updatedBy;
 
     private Timestamp deletedAt;
 
-    private long deletedBy;
+    private Long deletedBy;
 
     //Relationship
     //n-1 subject

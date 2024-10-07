@@ -41,11 +41,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         .collect(Collectors.toSet()) // Collect permissions
         );
 
-        // Create UserDetails object with an empty string as the password (Google Sign-In)
-        return new org.springframework.security.core.userdetails.User(
-                account.getEmail(),
-                "", // Use an empty string as password for Google Sign-In
-                authorities
-        );
+        return new UserDetailsImpl(account.getAccountId(), account.getEmail(), authorities);
     }
 }

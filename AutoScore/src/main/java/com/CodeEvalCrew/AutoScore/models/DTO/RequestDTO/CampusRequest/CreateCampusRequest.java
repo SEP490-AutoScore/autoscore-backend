@@ -7,5 +7,4 @@ import lombok.Setter;
 @Setter
 public class CreateCampusRequest {
     private String campusName;
-    private boolean status;
 }
