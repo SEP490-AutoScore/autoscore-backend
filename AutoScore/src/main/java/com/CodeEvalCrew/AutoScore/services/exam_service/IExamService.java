@@ -13,7 +13,7 @@ public interface IExamService{
 
     List<ExamViewResponseDTO> GetExam(ExamViewRequestDTO request) throws Exception;
 
-    ExamViewResponseDTO CreateNewExam(ExamCreateRequestDTO entity) throws Exception;
+    ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception;
 
     ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity) throws Exception;
 }

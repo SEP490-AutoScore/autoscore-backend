@@ -7,10 +7,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
@@ -24,6 +24,8 @@ import com.CodeEvalCrew.AutoScore.repositories.campus_repository.ICampusReposito
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ExamService implements IExamService {
@@ -39,10 +41,10 @@ public class ExamService implements IExamService {
     @Autowired
     private final IAccountRepository accountRepository;
 
-    public ExamService(IExamRepository examRepository
-                        ,ICampusRepository campusRepository
-                        ,ISubjectRepository subjectRepository
-                        ,IAccountRepository accountRepository) {
+    public ExamService(IExamRepository examRepository,
+            ICampusRepository campusRepository,
+            ISubjectRepository subjectRepository,
+            IAccountRepository accountRepository) {
         this.examRepository = examRepository;
         this.campusRepository = campusRepository;
         this.subjectRepository = subjectRepository;
@@ -50,20 +52,19 @@ public class ExamService implements IExamService {
     }
 
     @Override
-    public ExamViewResponseDTO getExamById(long id) throws Exception, NotFoundException {
+    public ExamViewResponseDTO getExamById(long id) throws Exception {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             Exam exam = examRepository.findById(id).get();
             if (exam == null) {
-                // result.setMessage("Not found exam with id: "+ id);
-                throw new NotFoundException();
+                throw new NotFoundException("Exam id:" + id + " not found");
             }
             result = new ExamViewResponseDTO(exam);
-        } catch (NotFoundException e) {
-            throw new NotFoundException();
-            // return result;
+        } catch (NotFoundException nfe) {
+            throw new NotFoundException(nfe.getMessage());
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
         }
-
         return result;
     }
 
@@ -79,7 +80,7 @@ public class ExamService implements IExamService {
             }
 
             if (result.isEmpty()) {
-                throw new NoSuchElementException("No records found for the given request.");
+                throw new NoSuchElementException("No records");
             }
         } catch (NoSuchElementException e) {
             throw e; // Re-throw custom exception for no records
@@ -91,87 +92,68 @@ public class ExamService implements IExamService {
     }
 
     @Override
-    public ExamViewResponseDTO CreateNewExam(ExamCreateRequestDTO entity) throws Exception{
+    @Transactional
+    public ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
-            //check campus
-            Optional<Campus> optionCampus = campusRepository.findById(entity.getCampusId());
-            if(!optionCampus.isPresent()){
-                throw new Exception("Campus has not existed");
-            }
-            
-            //check subject
-            Optional<Subject> optionSubject = subjectRepository.findById(entity.getSubjectId());
-            if(!optionSubject.isPresent()){
-                throw new Exception("Subject has not existed");
-            }
+            // Check campus
+            Campus campus = checkEntityExistence(campusRepository.findById(entity.getCampusId()), "Campus", entity.getCampusId());
 
-            //check aacount
-            Optional<Account> optionalAccount = accountRepository.findById(entity.getAccountId());
-            if(!optionalAccount.isPresent()){
-                throw new Exception("Account has not existed");
-            }
+            // Check subject
+            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
 
-            //check exist exam
-            // Specification<Exam> spec = createSpecificationForExistedExamByCode(entity.getExamCode());
-            // boolean isExisted = examRepository.exists(spec);
-            // if(isExisted){
-            //     throw new Exception("Exam code existed");
+            // Check account
+            Account account = checkEntityExistence(accountRepository.findById(entity.getAccountId()), "Account", entity.getAccountId());
+
+            // //check exist exam
+            // Optional<Exam> optionExam = examRepository.findById(entity.getExamId());
+            // if (optionExam.isPresent()) {
+            //     throw new NotFoundException("Exam id: " + entity.getExamId() + " not found");
             // }
-
-            Optional<Exam> optionExam = examRepository.findById(entity.getExamId());
-            if(optionExam.isPresent()){
-                throw new Exception("Exam existed");
-            }
 
             //mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
-            exam.setCampus(optionCampus.get());
+            exam.setCampus(campus);
+            exam.setSubject(subject);
             exam.setCreatedAt(LocalDateTime.now());
-            exam.setSubject(optionSubject.get());
             exam.setStatus(true);
-            exam.setCreatedBy(entity.getAccountId());
+            exam.setCreatedBy(account.getAccountId());
 
             //create new exam
             examRepository.save(exam);
 
+        } catch (NotFoundException ex) {
+            throw ex;
         } catch (Exception e) {
-            throw new Exception("Error");
+            System.out.println(e.getCause());
+            System.out.println(e.getMessage());
+            throw new Exception(e.getMessage());
         }
 
         return result;
     }
 
     @Override
+    @Transactional
     public ExamViewResponseDTO updateExam(ExamCreateRequestDTO entity) throws Exception {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
-            //check campus
-            Optional<Campus> optionCampus = campusRepository.findById(entity.getCampusId());
-            if(!optionCampus.isPresent()){
-                throw new Exception("Campus has not existed");
-            }
-            
-            //check subject
-            Optional<Subject> optionSubject = subjectRepository.findById(entity.getSubjectId());
-            if(!optionSubject.isPresent()){
-                throw new Exception("Subject has not existed");
-            }
+            // Check campus
+            Campus campus = checkEntityExistence(campusRepository.findById(entity.getCampusId()), "Campus", entity.getCampusId());
+
+            // Check subject
+            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
 
             //check exist exam
-            Optional<Exam> optionExam = examRepository.findById(entity.getExamId());
-            if(!optionExam.isPresent()){
-                throw new Exception("Subject has not existed");
-            }
-            
+            Exam exam = checkEntityExistence(examRepository.findById(entity.getExamId()), "Exam", entity.getExamId());
+
             //update exam 
-            Exam exam = optionExam.get();
             exam.setExamCode(entity.getExamCode());
             exam.setExamAt(entity.getExamAt());
             exam.setGradingAt(entity.getGradingAt());
             exam.setPublishAt(entity.getPublishAt());
-            exam.setCampus(optionCampus.get());
-            exam.setSubject(optionSubject.get());
+            exam.setCampus(campus);
+            exam.setSubject(subject);
 
             //create new exam
             examRepository.save(exam);
@@ -180,8 +162,9 @@ public class ExamService implements IExamService {
 
             //mapping exam
             // Exam exam = new Exam();
-
-        }
+        }catch(NotFoundException nfe){
+            throw nfe;
+        } 
         catch (Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -189,13 +172,17 @@ public class ExamService implements IExamService {
         return result;
     }
 
+    private <T> T checkEntityExistence(Optional<T> entity, String entityName, Long entityId) {
+        return entity.orElseThrow(() -> new NotFoundException(entityName + " id: " + entityId + " not found"));
+    }
+
 // <editor-fold desc="get exam func helper">
     private Specification<Exam> createSpecificationForGet(ExamViewRequestDTO request) {
         Specification<Exam> spec = Specification.where(null);
-        
+
         if (!request.getSearchString().isBlank()) {
             spec = spec.or(ExamSpecification.hasExamCode(request.getSearchString()))
-                       .or(ExamSpecification.hasSemester(request.getSearchString()));
+                    .or(ExamSpecification.hasSemester(request.getSearchString()));
         }
 
         if (request.getCampusId() != 0) {
@@ -211,18 +198,13 @@ public class ExamService implements IExamService {
 // </editor-fold>
 
 // <editor-fold desc="create exam func helper">
-    private Specification<Exam> createSpecificationForExistedExamByCode(String examCode){
+    private Specification<Exam> createSpecificationForExistedExamByCode(String examCode) {
         Specification<Exam> spec = Specification.where(null);
-        
+
         spec.and(ExamSpecification.hasExamCode(examCode));
 
         return spec;
     }
 
-
 // </editor-fold>
-
-    
-
-
 }
