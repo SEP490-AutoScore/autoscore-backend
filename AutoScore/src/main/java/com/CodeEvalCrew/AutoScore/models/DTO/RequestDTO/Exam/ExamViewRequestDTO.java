@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PaginateEntity;
 
@@ -16,11 +16,11 @@ public class ExamViewRequestDTO{
     
     private long subjectId= 0;
 
-    private Timestamp examAt;
+    private LocalDateTime examAt;
 
-    private Timestamp gradingAt;
+    private LocalDateTime gradingAt;
 
-    private Timestamp publishAt;
+    private LocalDateTime publishAt;
 
     private String semesterName;
 

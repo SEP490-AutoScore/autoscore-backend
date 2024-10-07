@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,23 +25,22 @@ import lombok.ToString;
 public class Lecturer_Department {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long lecturer_departmentId;
+    private Long lecturer_departmentId;
 
     private boolean isHeader;
 
-    @NotNull
-    @Past // Thời điểm tạo phải là trong quá khứ
-    private Timestamp createdAt;
+    @Past
+    private LocalDateTime createdAt;
 
-    private long createdBy;
+    private Long createdBy;
 
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 
-    private long updatedBy;
+    private Long updatedBy;
 
-    private Timestamp deletedAt;
+    private LocalDateTime deletedAt;
 
-    private long deletedBy;
+    private Long deletedBy;
 
     //Relationship
     //n-1 lectuer

@@ -20,7 +20,7 @@ import lombok.ToString;
 public class AI_Prompt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long aiPromptId;
+    private Long aiPromptId;
 
     private String content;
 
@@ -33,6 +33,6 @@ public class AI_Prompt {
     private boolean status;
 
     @Nullable
-    private long parent;
+    private Long parent;
 
 }

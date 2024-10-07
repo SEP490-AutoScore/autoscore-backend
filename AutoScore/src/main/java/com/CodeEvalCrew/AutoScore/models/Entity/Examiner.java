@@ -22,7 +22,7 @@ import lombok.ToString;
 public class Examiner {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long examinerId;
+    private Long examinerId;
 
     private boolean status;
 

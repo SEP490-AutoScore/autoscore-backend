@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -49,15 +49,15 @@ public class Account {
     private String status;
 
     @Past
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     private Long createdBy;
 
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 
     private Long updatedBy;
 
-    private Timestamp deletedAt;
+    private LocalDateTime deletedAt;
 
     private Long deletedBy;
     

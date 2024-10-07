@@ -8,9 +8,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class SubjectView {
-    private long subjectId;
-
+    private Long subjectId;
     private String subjectName;
-
     private String subjectCode;
 }
