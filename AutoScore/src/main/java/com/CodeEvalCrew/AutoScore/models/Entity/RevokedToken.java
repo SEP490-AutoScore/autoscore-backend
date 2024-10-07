@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ public class RevokedToken {
     private String token;
 
     @Column(name = "revoked_at", nullable = false)
-    private Timestamp revokedAt;
+    private LocalDateTime revokedAt;
 
     // Quan hệ với Account
     @ManyToOne(fetch = FetchType.LAZY)

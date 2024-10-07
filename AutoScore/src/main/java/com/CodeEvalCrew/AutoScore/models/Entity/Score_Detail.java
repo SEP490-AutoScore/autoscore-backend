@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +24,7 @@ import lombok.ToString;
 public class Score_Detail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long scoreDetailId;
+    private Long scoreDetailId;
 
     private float baremScore;
 
@@ -34,11 +34,11 @@ public class Score_Detail {
 
     private String reReviewFeedback;
 
-    private Timestamp gradedAt;
+    private LocalDateTime gradedAt;
 
-    private Timestamp reReviewAt;
+    private LocalDateTime reReviewAt;
 
-    private long reReviewBy;
+    private Long reReviewBy;
 
     private boolean isPass;
 

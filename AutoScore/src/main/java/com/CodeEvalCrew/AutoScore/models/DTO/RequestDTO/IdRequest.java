@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IdRequest {
-    private long id;
+    private Long id;
 }

@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.services.exam_service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,9 +127,8 @@ public class ExamService implements IExamService {
             //mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
             exam.setCampus(optionCampus.get());
-            exam.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+            exam.setCreatedAt(LocalDateTime.now());
             exam.setSubject(optionSubject.get());
-            exam.setAccount(optionalAccount.get());
             exam.setStatus(true);
             exam.setCreatedBy(entity.getAccountId());
 

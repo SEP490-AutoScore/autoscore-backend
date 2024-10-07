@@ -1,10 +1,8 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,23 +34,17 @@ public class Role {
 
     private boolean status;
 
-    @Nullable
-    @Past // Thời điểm tạo phải là trong quá khứ
+    @Past
     private LocalDateTime createdAt;
 
-    @Nullable
     private Long createdBy;
 
-    @Nullable
     private LocalDateTime updatedAt;
 
-    @Nullable
     private Long updatedBy;
 
-    @Nullable
     private LocalDateTime deletedAt;
 
-    @Nullable
     private Long deletedBy;
     
     @OneToMany(mappedBy = "role")

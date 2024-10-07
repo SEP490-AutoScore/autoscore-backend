@@ -24,7 +24,7 @@ import lombok.ToString;
 public class Source {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long sourceId;
+    private Long sourceId;
 
     private String originSourcePath;
 

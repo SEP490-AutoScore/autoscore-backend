@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,21 +8,21 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ExamCreateRequestDTO {
-    private long examId;
+    private Long examId;
 
     private String examCode;
     
-    private Timestamp examAt;
+    private LocalDateTime examAt;
 
-    private Timestamp gradingAt;
+    private LocalDateTime gradingAt;
 
-    private Timestamp publishAt;
+    private LocalDateTime publishAt;
 
     private String semesterName;
 
-    private long campusId;
+    private Long campusId;
 
-    private long accountId;
+    private Long accountId;
     
-    private long subjectId;
+    private Long subjectId;
 }

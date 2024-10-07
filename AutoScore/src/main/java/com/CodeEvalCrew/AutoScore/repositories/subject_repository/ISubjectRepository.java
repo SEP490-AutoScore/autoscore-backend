@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ISubjectRepository extends JpaRepository<Subject, Long> {
+    @Override
     Page<Subject> findAll(Pageable pageable);
 
     Page<Subject> findBySubjectCode(String subjectCode, Pageable pageable);

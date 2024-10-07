@@ -5,7 +5,6 @@ import java.util.List;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.RoleRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.RoleResponseDTO;
-import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 
 public interface IRoleService {
     List<RoleResponseDTO> getAllRoles();

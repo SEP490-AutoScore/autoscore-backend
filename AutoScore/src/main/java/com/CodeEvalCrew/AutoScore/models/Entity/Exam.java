@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -11,8 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,27 +32,26 @@ public class Exam {
 
     private String examCode;
 
-    private Timestamp examAt;
+    private LocalDateTime examAt;
 
-    private Timestamp gradingAt;
+    private LocalDateTime gradingAt;
 
-    private Timestamp publishAt;
+    private LocalDateTime publishAt;
 
     private String semesterName;
 
     private boolean status;
 
-    @NotNull
-    @Past // Thời điểm tạo phải là trong quá khứ
-    private Timestamp createdAt;
+    @Past
+    private LocalDateTime createdAt;
 
     private Long createdBy;
 
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 
     private Long updatedBy;
 
-    private Timestamp deletedAt;
+    private LocalDateTime deletedAt;
 
     private Long deletedBy;
 
@@ -63,11 +60,6 @@ public class Exam {
     @ManyToOne
     @JoinColumn(name = "subjectId", nullable = false)
     private Subject subject;
-
-    //1-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
 
     //n-1 campus
     @ManyToOne

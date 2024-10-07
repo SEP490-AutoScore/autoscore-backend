@@ -2,7 +2,6 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.time.LocalDateTime;
 
-import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -30,23 +29,17 @@ public class Role_Permission {
 
     private boolean status;
 
-    @Nullable
-    @Past // Thời điểm tạo phải là trong quá khứ
+    @Past
     private LocalDateTime createdAt;
 
-    @Nullable
     private Long createdBy;
 
-    @Nullable
     private LocalDateTime updatedAt;
 
-    @Nullable
     private Long updatedBy;
 
-    @Nullable
     private LocalDateTime deletedAt;
 
-    @Nullable
     private Long deletedBy;
 
     // Many-to-One relationship with Account
