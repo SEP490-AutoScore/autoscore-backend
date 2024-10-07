@@ -85,6 +85,7 @@ INSERT INTO `account_role`
 (`status`, `account_id`, `role_id`)
 VALUES
 (true, 1, 1),
+(true, 1, 2),
 (true, 2, 2),
 (true, 3, 3),
 (true, 4, 4),
@@ -92,11 +93,11 @@ VALUES
 (true, 6, 1);
 
 INSERT INTO `examiner`
-(`status`, `account_id`, `campus_id`)
+(`status`, `account_id`)
 VALUES
-(true, 1, 1),
-(true, 2, 2),
-(true, 3, 3);
+(true, 1),
+(true, 2),
+(true, 3);
 
 INSERT INTO `department` 
 (`department_name`, `dev_language`, `status`) 

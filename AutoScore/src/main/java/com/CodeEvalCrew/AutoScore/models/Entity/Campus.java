@@ -31,14 +31,6 @@ public class Campus {
     private boolean status;
 
     //Relationship
-    //1-n lecturer
-    @OneToMany(mappedBy = "campus", cascade= CascadeType.ALL)
-    private Set<Lecturer> lecturers;
-
-    //1-n examiner
-    @OneToMany(mappedBy = "campus", cascade= CascadeType.ALL)
-    private Set<Examiner> examiners;
-
     //1-n exam
     @OneToMany(mappedBy = "campus", cascade= CascadeType.ALL)
     private Set<Exam> exams;

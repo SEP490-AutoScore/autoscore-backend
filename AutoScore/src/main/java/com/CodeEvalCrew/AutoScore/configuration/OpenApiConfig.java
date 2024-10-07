@@ -1,4 +1,4 @@
-package com.CodeEvalCrew.AutoScore.controllers;
+package com.CodeEvalCrew.AutoScore.configuration;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
