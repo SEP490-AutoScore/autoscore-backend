@@ -52,7 +52,7 @@ public class ExamService implements IExamService {
     }
 
     @Override
-    public ExamViewResponseDTO getExamById(long id) throws Exception {
+    public ExamViewResponseDTO getExamById(long id) throws Exception, NotFoundException {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             Exam exam = examRepository.findById(id).get();
@@ -61,7 +61,7 @@ public class ExamService implements IExamService {
             }
             result = new ExamViewResponseDTO(exam);
         } catch (NotFoundException nfe) {
-            throw new NotFoundException(nfe.getMessage());
+            throw nfe;
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }
@@ -93,7 +93,7 @@ public class ExamService implements IExamService {
 
     @Override
     @Transactional
-    public ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception {
+    public ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception, NotFoundException {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             // Check campus
@@ -125,8 +125,6 @@ public class ExamService implements IExamService {
         } catch (NotFoundException ex) {
             throw ex;
         } catch (Exception e) {
-            System.out.println(e.getCause());
-            System.out.println(e.getMessage());
             throw new Exception(e.getMessage());
         }
 
@@ -135,7 +133,7 @@ public class ExamService implements IExamService {
 
     @Override
     @Transactional
-    public ExamViewResponseDTO updateExam(ExamCreateRequestDTO entity) throws Exception {
+    public ExamViewResponseDTO updateExam(ExamCreateRequestDTO entity) throws Exception, NotFoundException {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             // Check campus
@@ -172,7 +170,7 @@ public class ExamService implements IExamService {
         return result;
     }
 
-    private <T> T checkEntityExistence(Optional<T> entity, String entityName, Long entityId) {
+    private <T> T checkEntityExistence(Optional<T> entity, String entityName, Long entityId) throws NotFoundException {
         return entity.orElseThrow(() -> new NotFoundException(entityName + " id: " + entityId + " not found"));
     }
 
@@ -200,9 +198,7 @@ public class ExamService implements IExamService {
 // <editor-fold desc="create exam func helper">
     private Specification<Exam> createSpecificationForExistedExamByCode(String examCode) {
         Specification<Exam> spec = Specification.where(null);
-
         spec.and(ExamSpecification.hasExamCode(examCode));
-
         return spec;
     }
 

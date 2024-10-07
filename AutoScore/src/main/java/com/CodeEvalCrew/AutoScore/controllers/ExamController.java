@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class ExamController {
             result = examService.getExamById(id);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -54,9 +55,11 @@ public class ExamController {
         try {
             // call service to get result
             result = examService.GetExam(request);
+        } catch(NoSuchElementException nsee){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             // return notfound
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

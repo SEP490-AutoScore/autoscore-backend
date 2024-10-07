@@ -2,8 +2,7 @@ package com.CodeEvalCrew.AutoScore.services.exam_service;
 
 import java.util.List;
 
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
-
+import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
@@ -13,7 +12,7 @@ public interface IExamService{
 
     List<ExamViewResponseDTO> GetExam(ExamViewRequestDTO request) throws Exception;
 
-    ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception;
+    ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception,NotFoundException;
 
-    ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity) throws Exception;
+    ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity) throws Exception,NotFoundException;
 }
