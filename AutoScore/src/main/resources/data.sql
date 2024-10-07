@@ -79,7 +79,8 @@ VALUES
 (true, 6, 'Admin', 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 2, 'Examiner', 'thanhtuyen66202@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
 (true, 3, 'Head of Department', 'thanhtuyen662002@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 4, 'Lecturer', 'oscarsjoyfuljourney@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null);
+(true, 4, 'Lecturer', 'oscarsjoyfuljourney@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 7, 'Examiner', 'minhtpvse160611@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null);
 
 INSERT INTO `account_role`
 (`status`, `account_id`, `role_id`)
@@ -89,7 +90,8 @@ VALUES
 (true, 3, 3),
 (true, 4, 4),
 (true, 5, 1),
-(true, 6, 1);
+(true, 6, 1),
+(true, 7, 2);
 
 INSERT INTO `examiner`
 (`status`, `account_id`, `campus_id`)
