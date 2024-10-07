@@ -1,7 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

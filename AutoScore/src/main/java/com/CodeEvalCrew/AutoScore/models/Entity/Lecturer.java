@@ -22,7 +22,7 @@ import lombok.ToString;
 public class Lecturer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long lecturerId;
+    private Long lecturerId;
 
     private String lecturer_code;
 

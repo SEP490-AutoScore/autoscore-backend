@@ -25,7 +25,7 @@ import lombok.ToString;
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long studentId;
+    private Long studentId;
 
     private String studentCode;
 

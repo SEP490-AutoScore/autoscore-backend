@@ -1,7 +1,7 @@
 package com.CodeEvalCrew.AutoScore.security;
 
 import java.security.Key;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
@@ -110,7 +110,7 @@ public class JwtTokenProvider {
         RevokedToken revokedToken = new RevokedToken();
         revokedToken.setAccount(account);
         revokedToken.setToken(token);
-        revokedToken.setRevokedAt(new Timestamp(new Date().getTime()));
+        revokedToken.setRevokedAt(LocalDateTime.now());
         revokedTokenRepository.save(revokedToken);
         logger.info("Token has been revoked: " + token);
     }    

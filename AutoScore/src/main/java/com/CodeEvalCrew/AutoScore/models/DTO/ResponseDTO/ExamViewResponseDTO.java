@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 
@@ -10,20 +10,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ExamViewResponseDTO {
-    private long examId;
-
+    private Long examId;
     private String examCode;
-
-    private Timestamp examAt;
-
-    private Timestamp gradingAt;
-
-    private Timestamp publishAt;
-
+    private LocalDateTime examAt;
+    private LocalDateTime gradingAt;
+    private LocalDateTime publishAt;
     private String semesterName;
-
     private CampusView campus;
-
     private SubjectView subject;
 
     public ExamViewResponseDTO(Exam exam) {

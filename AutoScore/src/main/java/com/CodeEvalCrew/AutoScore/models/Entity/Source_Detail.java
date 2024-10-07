@@ -21,7 +21,7 @@ import lombok.ToString;
 public class Source_Detail {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long sourceDetailId;
+    private Long sourceDetailId;
 
     private String studentSourceCodePath;
     //Relationship

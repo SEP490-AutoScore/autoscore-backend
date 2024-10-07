@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @Builder
 public class CampusView {
-    private long campusId;
-
+    private Long campusId;
     private String campusName;
 }
