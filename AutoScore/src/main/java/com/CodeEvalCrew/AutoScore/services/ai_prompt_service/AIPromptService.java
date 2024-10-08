@@ -1,13 +1,11 @@
 package com.CodeEvalCrew.AutoScore.services.ai_prompt_service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.mapping.KPropertyPathExtensionsKt;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.mappers.AIPromptMapper;
@@ -23,17 +21,18 @@ import com.CodeEvalCrew.AutoScore.utils.Util;
 public class AIPromptService implements IAIPromptService {
     @Autowired
     private final IAIPromptRepository promptRepository;
-    @Autowired
-    private final IAccountRepository accountRepository;
-    @Autowired
-    private final Util util;
+    // @Autowired
+    // private final IAccountRepository accountRepository;
+    // @Autowired
+    // private final Util util;
 
     public AIPromptService(IAIPromptRepository promptRepository
-                                ,IAccountRepository accountRepository
-                                ,Util util) {
+                                // ,IAccountRepository accountRepository
+                                // ,Util util
+                                ) {
         this.promptRepository = promptRepository;
-        this.accountRepository = accountRepository;
-        KPropertyPathExtensionsKt.util = util;
+        // this.accountRepository = accountRepository;
+        // this.util = new Util(accountRepository);
     }
 
     @Override
