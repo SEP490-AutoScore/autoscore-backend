@@ -46,7 +46,7 @@ public class Account {
 
     @NotNull
     @Size(min = 1, max = 20)
-    private String status;
+    private boolean status;
 
     @Past
     private LocalDateTime createdAt;

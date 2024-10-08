@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAccountRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AccountResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
