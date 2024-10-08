@@ -29,7 +29,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ExamService implements IExamService {
-
+    @Autowired
     private final IExamRepository examRepository;
 
     @Autowired

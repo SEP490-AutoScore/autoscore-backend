@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.specification;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -27,7 +28,7 @@ public class ExamSpecification {
         };
     }
 
-    public static Specification<Exam> hasExamAt(Timestamp timestamp) {
+    public static Specification<Exam> hasExamAt(LocalDateTime timestamp) {
         return (root, query, criteriaBuilder) -> {
             if (timestamp == null) {
                 return criteriaBuilder.conjunction(); // No filtering if null or empty
@@ -35,7 +36,7 @@ public class ExamSpecification {
             return criteriaBuilder.equal(root.get("examAt"), timestamp);
         };
     }
-    public static Specification<Exam> hasGradingAt(Timestamp timestamp) {
+    public static Specification<Exam> hasGradingAt(LocalDateTime timestamp) {
         return (root, query, criteriaBuilder) -> {
             if (timestamp == null) {
                 return criteriaBuilder.conjunction(); // No filtering if null or empty
@@ -43,7 +44,7 @@ public class ExamSpecification {
             return criteriaBuilder.equal(root.get("gradingAt"), timestamp);
         };
     }
-    public static Specification<Exam> hasPublishAt(Timestamp timestamp) {
+    public static Specification<Exam> hasPublishAt(LocalDateTime timestamp) {
         return (root, query, criteriaBuilder) -> {
             if (timestamp == null) {
                 return criteriaBuilder.conjunction(); // No filtering if null or empty

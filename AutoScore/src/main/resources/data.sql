@@ -153,3 +153,16 @@ VALUES
 ('Explain Newton\'s first law of motion.', 'Q2', 10.0, 'Essay', true, '2023-09-30 10:00:00', 2, '2023-09-30 10:00:00', 1, 2, 2, 1),
 ('Solve the equation: 2x + 3 = 7.', 'Q3', 5.0, 'Short Answer', true, '2023-09-30 10:00:00', 3, '2023-09-30 10:00:00', 1, 3, 3, 1);
 
+INSERT INTO ai_prompt (content, language_code, for_ai, type, status, parent)
+VALUES 
+    ('Defaut.', 'en', 'GPT-3', 'text', true, NULL),
+    ('Explain the laws of thermodynamics in simple terms.', 'en', 'GPT-3', 'text', true, 1),
+    ('Generate an image of a futuristic city.', 'es', 'DALL·E', 'image', true, 1),
+    ('Translate this text into Spanish.', 'en', 'GPT-3', 'text', true, 1),
+    ('Create a voiceover for this podcast script.', 'en', 'VoiceAI', 'voice', false, 1),
+    ('What is quantum computing?', 'fr', 'GPT-4', 'text', true, 1),
+    ('Generate a painting in the style of Van Gogh.', 'en', 'DALL·E', 'image', false, 1),
+    ('What is the current weather in Tokyo?', 'ja', 'GPT-3', 'text', true, 2),
+    ('Generate an image of a medieval castle.', 'en', 'DALL·E', 'image', true, 2),
+    ('Write a short story about a time-traveling detective.', 'en', 'GPT-3', 'text', true, 2);
+
