@@ -26,7 +26,7 @@ public class PermissionCategoryController {
     private IPermisionCategoryService permisionCategoryService;
 
     @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
-    @GetMapping("/getall")
+    @GetMapping
     public ResponseEntity<List<PermissionCategoryDTO>> getPermissionCategories() {
         List<PermissionCategoryDTO> permissionCategories = permisionCategoryService.getAllPermissionCategory();
         if (permissionCategories.isEmpty()) {
@@ -36,8 +36,8 @@ public class PermissionCategoryController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
-    @GetMapping("/getbyid/{id}")
-    public ResponseEntity<PermissionCategoryDTO> getPermissionCategoryById(@PathVariable long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<PermissionCategoryDTO> getPermissionCategoryById(@PathVariable Long id) {
         Optional<PermissionCategoryDTO> permissionCategory = permisionCategoryService.getPermissionCategoryById(id);
         if (permissionCategory.isEmpty()) {
             return ResponseEntity.notFound().build();

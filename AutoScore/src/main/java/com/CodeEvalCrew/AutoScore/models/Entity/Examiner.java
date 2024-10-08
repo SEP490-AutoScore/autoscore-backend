@@ -5,7 +5,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,10 +30,4 @@ public class Examiner {
     @OneToOne
     @JoinColumn(name = "accountId", nullable = false)
     private Account account;
-
-    //n-1 campus
-    @ManyToOne
-    @JoinColumn(name = "campusId", nullable = false)
-    private Campus campus;
-
 }

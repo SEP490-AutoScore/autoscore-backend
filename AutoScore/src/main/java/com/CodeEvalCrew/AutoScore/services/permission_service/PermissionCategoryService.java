@@ -40,7 +40,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
             return permissionCategoryDTOs;
 
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("An error occurred while fetching permission categories: " + e.getMessage());
         }
     }
 
@@ -50,7 +50,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
             // Lấy permission từ cơ sở dữ liệu
             Permission_Category permissionCategory = permissionCategoryRepository.findById(id).get();
             if (permissionCategory == null) {
-                throw new Exception("Not found permission category with id: " + id);
+                return null;
             }
 
             // Chuyển đổi(permission) Entity sang DTO
@@ -59,7 +59,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
                     permissionCategory.isStatus());
             return Optional.of(permissionCategoryDTO);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("An error occurred while fetching permission category: " + e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
             return OperationStatus.SUCCESS;
 
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
@@ -100,7 +100,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
         try {
             Long id = permissionCategoryDTO.getId();
             String name = permissionCategoryDTO.getName();
-            if (id == null || name == null || name.isEmpty()) {
+            if (id == 0 || id == null || name == null || name.isEmpty()) {
                 return OperationStatus.INVALID_INPUT;
             }
 
@@ -135,7 +135,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
             return OperationStatus.SUCCESS;
 
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
@@ -165,7 +165,7 @@ public class PermissionCategoryService implements IPermisionCategoryService {
             return OperationStatus.SUCCESS;
 
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            return OperationStatus.ERROR;
         }
     }
 
