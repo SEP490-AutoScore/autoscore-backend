@@ -15,5 +15,7 @@ public interface IAIPromptService {
     List<AIPromptView> getPromptByUser(long id) throws Exception;
 
     AIPromptView createNewPrompt(CreatePromptDTO request) throws Exception;
+
+    AIPromptView updatePrompt(CreatePromptDTO request) throws Exception;
     
 }

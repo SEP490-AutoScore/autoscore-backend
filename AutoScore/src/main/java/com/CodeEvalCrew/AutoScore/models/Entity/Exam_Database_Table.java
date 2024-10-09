@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,14 +23,17 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Lecturer_Department {
-@Id
+public class Exam_Database_Table {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lecturer_departmentId;
+    private Long examDatabaseTableId;
 
-    private boolean isHeader;
+    private String tableName;
 
-    @Past
+    private String tableScript;
+
+    private boolean status;
+
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -41,25 +45,13 @@ public class Lecturer_Department {
     private LocalDateTime deletedAt;
 
     private Long deletedBy;
-
-    //Relationship
-    //n-1 lectuer
+    //rlsp
+    //1-n table field
+    @OneToMany
+    @JoinColumn(name = "examDatabaseTableFieldId", nullable = true)
+    private Set<Exam_Database_Table_Field> examDatabaseTableFields;
+    //n-1 db
     @ManyToOne
-    @JoinColumn(name = "lecturerId", nullable = false)
-    private Lecturer lecturer;
-
-    //n-1 department
-    @ManyToOne
-    @JoinColumn(name = "departmentId", nullable = false)
-    private Department department;
-
-    //1-1 aipromt
-    @OneToOne
-    @JoinColumn(name = "ai_promptId", nullable = false)
-    private AI_Prompt aiPrompt;
-
-    //1-1 acocunt
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
+    @JoinColumn(name = "examDatabaseId", nullable = false)
+    private Exam_Database examDatabase;
 }

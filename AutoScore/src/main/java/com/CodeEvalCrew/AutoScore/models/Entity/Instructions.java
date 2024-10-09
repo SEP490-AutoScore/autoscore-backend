@@ -1,5 +1,7 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,16 +20,26 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Examiner {
-@Id
+public class Instructions {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long examinerId;
+    private Long instructionId;
+    private String introduction;
+    private String important;
+    private LocalDateTime createdAt;
 
-    private boolean status;
+    private Long createdBy;
 
-    //Relationship
-    //n-1 account
+    private LocalDateTime updatedAt;
+
+    private Long updatedBy;
+
+    private LocalDateTime deletedAt;
+
+    private Long deletedBy;
+
+     //1-1 exam pp
     @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 }

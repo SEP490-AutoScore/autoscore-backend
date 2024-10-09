@@ -41,8 +41,6 @@ public class Exam {
     private String semesterName;
 
     private boolean status;
-
-    @Past
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -60,11 +58,6 @@ public class Exam {
     @ManyToOne
     @JoinColumn(name = "subjectId", nullable = false)
     private Subject subject;
-
-    //n-1 campus
-    @ManyToOne
-    @JoinColumn(name = "campusId", nullable = false)
-    private Campus campus;
 
     //1-n - score
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)

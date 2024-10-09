@@ -63,17 +63,17 @@ public class AIPromptController {
         
     }
 
-    // @PutMapping("update-prompt")
-    // public ResponseEntity<?> updateNewPrompt(@RequestBody CreatePromptDTO request) {
-    //     try{
-    //         AIPromptView result;
-    //         //call service
-            
-    //         return new ResponseEntity<>(HttpStatus.OK);
-    //     }catch(Exception e){
-    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
+    @PutMapping("update-prompt")
+    public ResponseEntity<?> updateNewPrompt(@RequestBody CreatePromptDTO request) {
+        try{
+            AIPromptView result;
+            //call service
+            result = aIPromptService.updatePrompt(request);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         
-    // }
+    }
 
 }

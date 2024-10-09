@@ -39,8 +39,6 @@ public class Exam_Question {
     private String type;
 
     private boolean status;
-
-    @Past
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -54,15 +52,11 @@ public class Exam_Question {
     private Long deletedBy;
 
     // Relationship
-    // 1-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
 
     // n-1 exam_paper
     @ManyToOne
-    @JoinColumn(name = "examPaperId", nullable = false)
-    private Exam_Paper examPaper;
+    @JoinColumn(name = "examPartId", nullable = false)
+    private Exam_Part examPart;
 
     // 1-n barem
     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)

@@ -1,13 +1,11 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.util.Set;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,20 +18,17 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Department {
-@Id
+public class Account_Organization {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long departmentId;
-
-    private String departmentName;
-    
-    private String devLanguage;
-
+    private Long accountOrganizationId;
     private boolean status;
+    //rlsp
+    @ManyToOne
+    @JoinColumn(name = "accountId", nullable = false)
+    private Account account;
 
-    //Relationship
-    //1-n lectuerdepartment
-    @OneToMany(mappedBy = "department", cascade= CascadeType.ALL)
-    private Set<Lecturer_Department> lecturerDepartments;
-
+    @ManyToOne
+    @JoinColumn(name = "organizationId", nullable = false)
+    private Organization organization;
 }

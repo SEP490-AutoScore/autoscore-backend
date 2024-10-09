@@ -3,7 +3,6 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,20 +22,13 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Exam_Barem {
+public class Exam_Part {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long examBaremId;
-
-    private String baremContent;
-
-    private float baremMaxScore;
-
-    private String baremURL;
-
+    private Long examPartId;
+    private String partName;
     private boolean status;
-
-    private LocalDateTime createdAt;
+      private LocalDateTime createdAt;
 
     private Long createdBy;
 
@@ -47,19 +39,14 @@ public class Exam_Barem {
     private LocalDateTime deletedAt;
 
     private Long deletedBy;
-
-    //Relationship
-    //n-1 exam question
+    //rlsp
+    //exampp
     @ManyToOne
-    @JoinColumn(name = "examQuestionId", nullable = false)
-    private Exam_Question examQuestion;
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 
-    //1-1 test case
     @OneToMany
-    @JoinColumn(name = "testCaseId", nullable = true)
-    private Set<Test_Case> testCases;
-
-    //1-n score detail
-    @OneToMany(mappedBy = "examBarem", cascade= CascadeType.ALL)
-    private Set<Score_Detail> scoreDetails;
+    @JoinColumn(name = "examQuestionId", nullable = true)
+    private Set<Exam_Question> examQuestions;
+    
 }

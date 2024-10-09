@@ -1,15 +1,11 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.util.Set;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,25 +18,20 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Student {
+public class Organization_Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long studentId;
-
-    private String studentCode;
-
-    private String studentEmail;
+    private Long organizationSubjectId;
 
     private boolean status;
+    //rlsp
+    //n-1sub
+    @ManyToOne
+    @JoinColumn(name = "subjectId", nullable = false)
+    private Subject subject;
 
-    //Relationship
-    //1-n score
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private Set<Score> scores;
-
-    //1-n source_detail
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private Set<Source_Detail> sourceDetails;
-
-    //1-1 campus
+    //n-1org
+    @ManyToOne
+    @JoinColumn(name = "organizationId", nullable = false)
+    private Organization organization;
 }

@@ -1,12 +1,14 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
@@ -26,11 +28,18 @@ public class Exam_Database {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examDatabaseId;
 
-    private String dataScript;
+    private String databaseScript;
+
+    private String databaseDescription;
+
+    private String databaseName;
+
+    private String databaseImage;
+
+    private String databaseNote;
 
     private boolean status;
 
-    @Past
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -44,8 +53,7 @@ public class Exam_Database {
     private Long deletedBy;
 
     //Relationship
-    //1-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
+    @OneToMany
+    @JoinColumn(name = "examDatabaseTableId", nullable = true)
+    private Set<Exam_Database_Table> examDatabaseTables;
 }

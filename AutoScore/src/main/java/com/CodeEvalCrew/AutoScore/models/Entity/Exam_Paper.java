@@ -12,7 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,10 +31,7 @@ public class Exam_Paper {
     private Long examPaperId;
 
     private String examPaperCode;
-
     private boolean status;
-
-    @Past
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -49,11 +45,6 @@ public class Exam_Paper {
     private Long deletedBy;
 
     //Relationship
-    //1-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
-
     //1-n score
     @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
     private Set<Score> scores;
@@ -65,15 +56,19 @@ public class Exam_Paper {
 
     //1-n examquestion
     @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
-    private Set<Exam_Question> exam_questions;
+    private Set<Exam_Part> examParts;
 
     //1-1 exam db
     @OneToOne
     @JoinColumn(name = "examDatabaseId", nullable = false)
-    private Exam_Database exam_database;
+    private Exam_Database examDatabase;
 
     //1-1 source
     @OneToOne
     @JoinColumn(name = "sourceId", nullable = false)
     private Source source;
+
+    @OneToOne
+    @JoinColumn(name = "instructionsId", nullable = false)
+    private Instructions instruction;
 }

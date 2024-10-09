@@ -35,32 +35,7 @@ public class Subject {
 
     private String subjectCode;
 
-    // private boolean status;
-      @NotNull
-    @Size(min = 1, max = 20)
-    private String status;
-
-    // @NotNull
-    // @Past // Thời điểm tạo phải là trong quá khứ
-    // private Timestamp createdAt;
-
-    // @ManyToOne
-    // @JoinColumn(name = "created_by", referencedColumnName = "accountId")
-    // private Account createdBy; // Nối với account_id
-
-    // private Timestamp updatedAt;
-
-    // @ManyToOne
-    // @JoinColumn(name = "updated_by", referencedColumnName = "accountId")
-    // private Account updatedBy; // Nối với account_id
-
-    // private Timestamp deletedAt;
-
-    // @ManyToOne
-    // @JoinColumn(name = "deleted_by", referencedColumnName = "accountId")
-    // private Account deletedBy; // Nối với account_id
-
-    @Past
+    private boolean status;
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -77,8 +52,5 @@ public class Subject {
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
     private Set<Exam> exams;
 
-    // 1-1 department
-    @ManyToOne
-    @JoinColumn(name = "departmentId", nullable = false)
-    private Department department;
+
 }
