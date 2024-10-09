@@ -42,11 +42,6 @@ public class Score {
     private boolean flag;
 
     //Relationship
-    //1-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
-
     //n-1 exam
     @ManyToOne
     @JoinColumn(name = "examId", nullable = false)
@@ -57,15 +52,14 @@ public class Score {
     @JoinColumn(name = "examPaperId", nullable = false)
     private Exam_Paper examPaper;
 
-    //n-1 campus
-    @ManyToOne
-    @JoinColumn(name = "campusId", nullable = false)
-    private Campus campus;
-
     //n-1 student
     @ManyToOne
     @JoinColumn(name = "studentId", nullable = false)
     private Student student;
+
+    @ManyToOne
+    @JoinColumn(name = "organizationId", nullable = false)
+    private Organization organization;
 
     //1-n score detail
     // @OneToMany

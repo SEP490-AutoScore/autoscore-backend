@@ -16,11 +16,9 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDT
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-import com.CodeEvalCrew.AutoScore.models.Entity.Campus;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
-import com.CodeEvalCrew.AutoScore.repositories.campus_repository.ICampusRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
@@ -34,9 +32,6 @@ public class ExamService implements IExamService {
     private final IExamRepository examRepository;
 
     @Autowired
-    private final ICampusRepository campusRepository;
-
-    @Autowired
     private final ISubjectRepository subjectRepository;
 
     @Autowired
@@ -44,11 +39,10 @@ public class ExamService implements IExamService {
     private final Util util;
 
     public ExamService(IExamRepository examRepository,
-            ICampusRepository campusRepository,
+            // ICampusRepository campusRepository,
             ISubjectRepository subjectRepository,
             IAccountRepository accountRepository) {
         this.examRepository = examRepository;
-        this.campusRepository = campusRepository;
         this.subjectRepository = subjectRepository;
         this.accountRepository = accountRepository;
         this.util = new Util(accountRepository);
@@ -100,7 +94,6 @@ public class ExamService implements IExamService {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             // Check campus
-            Campus campus = checkEntityExistence(campusRepository.findById(entity.getCampusId()), "Campus", entity.getCampusId());
 
             // Check subject
             Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
@@ -116,7 +109,6 @@ public class ExamService implements IExamService {
 
             //mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
-            exam.setCampus(campus);
             exam.setSubject(subject);
             exam.setCreatedAt(LocalDateTime.now());
             exam.setStatus(true);
@@ -139,8 +131,6 @@ public class ExamService implements IExamService {
     public ExamViewResponseDTO updateExam(ExamCreateRequestDTO entity) throws Exception, NotFoundException {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
-            // Check campus
-            Campus campus = checkEntityExistence(campusRepository.findById(entity.getCampusId()), "Campus", entity.getCampusId());
 
             // Check subject
             Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
@@ -153,7 +143,6 @@ public class ExamService implements IExamService {
             exam.setExamAt(entity.getExamAt());
             exam.setGradingAt(entity.getGradingAt());
             exam.setPublishAt(entity.getPublishAt());
-            exam.setCampus(campus);
             exam.setSubject(subject);
 
             //create new exam

@@ -34,12 +34,12 @@ public class Util {
 
     // Get account name for mapping
     public String getAccountName(Long accountId) {
-        if (accountId != null) {
-            Account account = accountRepository.findById(accountId).orElse(null);
-            if (account != null) {
-                return account.getName();
-            }
-        }
+        // if (accountId != null) {
+        //     Account account = accountRepository.findById(accountId).orElse(null);
+        //     if (account != null) {
+        //         return account.getName();
+        //     }
+        // }
         return null;
     }
 }

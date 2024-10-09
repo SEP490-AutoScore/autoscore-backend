@@ -20,9 +20,9 @@ public interface AccountMapper {
     AccountMapper INSTANCE = Mappers.getMapper(AccountMapper.class);
 
     @Mapping(source = "accountId", target = "accountId")
-    @Mapping(source = "name", target = "name")
+    // @Mapping(source = "name", target = "name")
     @Mapping(source = "email", target = "email")
-    @Mapping(expression = "java(getCampusName(account))", target = "campusName")
+    // @Mapping(expression = "java(getCampusName(account))", target = "campusName")
     @Mapping(expression = "java(getRoleName(account))", target = "roleName")
     @Mapping(expression = "java(getPermissions(account))", target = "permissions")
     SignInWithGoogleResponseDTO accountToSignInWithGoogleResponseDTO(Account account);
@@ -49,7 +49,7 @@ public interface AccountMapper {
             .collect(Collectors.toSet()) : Set.of();
     }
 
-    default String getCampusName(Account account) {
-        return account.getCampus() != null ? account.getCampus().getCampusName() : "Unknown";
-    }
+    // default String getCampusName(Account account) {
+    //     return account.getCampus() != null ? account.getCampus().getCampusName() : "Unknown";
+    // }
 }

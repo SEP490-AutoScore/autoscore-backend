@@ -1,11 +1,13 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,18 +20,18 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Lecturer {
+public class Position {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lecturerId;
+    private Long positionId;
 
-    private String lecturer_code;
+    private String name;
 
     private boolean status;
 
-    //Relationship
-    //n-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
+    //realationship
+    // 1-n-Employee
+    @OneToMany
+    @JoinColumn(name = "employeeId", nullable = true)
+    private Set<Employee> employees;
 }
