@@ -1,16 +1,13 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,19 +20,22 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Exam_Barem {
+public class Exam_Database_Table_Field {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long examBaremId;
+    private Long examDatabaseTableFieldId;
 
-    private String baremContent;
+    private String fieldName;
 
-    private float baremMaxScore;
+    private String fieldType;
 
-    private String baremURL;
-
+    private boolean isNotNull;
+    private boolean isUnique;
     private boolean status;
-
+    private boolean isPrimaryKey;
+    private boolean isForeignKey;
+    private String referencedTable;
+    private String referencedField;
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -48,18 +48,7 @@ public class Exam_Barem {
 
     private Long deletedBy;
 
-    //Relationship
-    //n-1 exam question
     @ManyToOne
-    @JoinColumn(name = "examQuestionId", nullable = false)
-    private Exam_Question examQuestion;
-
-    //1-1 test case
-    @OneToMany
-    @JoinColumn(name = "testCaseId", nullable = true)
-    private Set<Test_Case> testCases;
-
-    //1-n score detail
-    @OneToMany(mappedBy = "examBarem", cascade= CascadeType.ALL)
-    private Set<Score_Detail> scoreDetails;
+    @JoinColumn(name = "examDatabaseTableId", nullable = false)
+    private Exam_Database_Table examDatabaseTable;
 }

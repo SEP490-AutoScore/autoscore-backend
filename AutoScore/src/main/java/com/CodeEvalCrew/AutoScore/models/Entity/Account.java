@@ -9,8 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -34,11 +32,6 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountId;
-
-    @NotNull
-    @Size(min = 2, max = 100)
-    private String name;
-
     @NotNull
     @Email(message = "Email should be valid")
     @Column(unique = true)
@@ -48,7 +41,6 @@ public class Account {
     @Size(min = 1, max = 20)
     private String status;
 
-    @Past
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -66,11 +58,10 @@ public class Account {
     @ToString.Exclude
     private Set<Account_Role> accountRoles;
 
-    @ManyToOne
-    @JoinColumn(name = "campusId", nullable = false)
-    private Campus campus;
-
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<OAuthRefreshToken> refreshTokens;
+
+    @OneToMany(mappedBy = "account", cascade= CascadeType.ALL)
+    private Set<Account_Organization> accountOrganizations;
 }

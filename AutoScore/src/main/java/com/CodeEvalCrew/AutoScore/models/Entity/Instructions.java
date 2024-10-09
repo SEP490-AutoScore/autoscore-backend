@@ -1,11 +1,12 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,22 +20,26 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Examiner {
-@Id
+public class Instructions {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long examinerId;
+    private Long instructionId;
+    private String introduction;
+    private String important;
+    private LocalDateTime createdAt;
 
-    private boolean status;
+    private Long createdBy;
 
-    //Relationship
-    //n-1 account
+    private LocalDateTime updatedAt;
+
+    private Long updatedBy;
+
+    private LocalDateTime deletedAt;
+
+    private Long deletedBy;
+
+     //1-1 exam pp
     @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
-
-    //n-1 campus
-    @ManyToOne
-    @JoinColumn(name = "campusId", nullable = false)
-    private Campus campus;
-
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 }

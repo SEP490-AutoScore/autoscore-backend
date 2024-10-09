@@ -89,7 +89,7 @@ public class ExamController {
         } catch (NotFoundException nfe) {
             return new ResponseEntity<>(nfe.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }

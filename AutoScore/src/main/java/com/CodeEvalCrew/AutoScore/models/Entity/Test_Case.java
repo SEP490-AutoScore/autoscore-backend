@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
@@ -34,8 +35,6 @@ public class Test_Case {
     private String type;
 
     private boolean status;
-
-    @Past
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -49,8 +48,7 @@ public class Test_Case {
     private Long deletedBy;
 
     //Relationship
-    //1-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
+    @ManyToOne
+    @JoinColumn(name = "examBaremId", nullable = false)
+    private Exam_Barem examBarem;
 }
