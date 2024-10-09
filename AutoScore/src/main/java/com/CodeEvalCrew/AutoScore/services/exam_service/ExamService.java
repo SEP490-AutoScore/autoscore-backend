@@ -24,6 +24,7 @@ import com.CodeEvalCrew.AutoScore.repositories.campus_repository.ICampusReposito
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import jakarta.transaction.Transactional;
 
@@ -40,6 +41,7 @@ public class ExamService implements IExamService {
 
     @Autowired
     private final IAccountRepository accountRepository;
+    private final Util util;
 
     public ExamService(IExamRepository examRepository,
             ICampusRepository campusRepository,
@@ -49,6 +51,7 @@ public class ExamService implements IExamService {
         this.campusRepository = campusRepository;
         this.subjectRepository = subjectRepository;
         this.accountRepository = accountRepository;
+        this.util = new Util(accountRepository);
     }
 
     @Override
@@ -103,7 +106,7 @@ public class ExamService implements IExamService {
             Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
 
             // Check account
-            Account account = checkEntityExistence(accountRepository.findById(entity.getAccountId()), "Account", entity.getAccountId());
+            Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()), "Account", Util.getAuthenticatedAccountId());
 
             // //check exist exam
             // Optional<Exam> optionExam = examRepository.findById(entity.getExamId());

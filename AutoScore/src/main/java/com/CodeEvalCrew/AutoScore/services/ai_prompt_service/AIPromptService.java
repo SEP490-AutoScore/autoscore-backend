@@ -13,9 +13,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.AIPrompt.CreatePromptDTO
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIPromptView;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Prompt;
 import com.CodeEvalCrew.AutoScore.repositories.AI_prompt_reposotiry.IAIPromptRepository;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.specification.AIPromptSpecifacation;
-import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
 public class AIPromptService implements IAIPromptService {
@@ -101,6 +99,11 @@ public class AIPromptService implements IAIPromptService {
         return listEntity.stream()
                          .map(AIPromptMapper.INSTANCE::entityToPromptView)
                          .collect(Collectors.toList());
+    }
+
+    @Override
+    public AIPromptView updatePrompt(CreatePromptDTO request) throws Exception {
+        throw new UnsupportedOperationException("Unimplemented method 'updatePrompt'");
     }
     
 
