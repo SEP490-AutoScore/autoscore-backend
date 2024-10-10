@@ -11,7 +11,6 @@ import lombok.Setter;
 public class AccountResponseDTO {
     private Long accountId;
     private String email;
-    private String name;
     private String status;
     private String createdBy;
     private String updatedBy;
@@ -19,6 +18,5 @@ public class AccountResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
-    private CampusResponseDTO campus;
     private Set<RoleResponseDTO> roles;
 }

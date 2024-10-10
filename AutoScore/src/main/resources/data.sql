@@ -1,10 +1,3 @@
-INSERT INTO `campus`
-(`status`, `campus_id`, `campus_name`)
-VALUES
-(true, 1, 'Ho Chi Minh'),
-(true, 2, 'Ha Noi'),
-(true, 3, 'Can Tho');
-
 INSERT INTO `permission_category`
 (`status`, `permission_category_id`, `permission_category_name`)
 VALUES
@@ -72,98 +65,128 @@ VALUES
 (true, 3, 1),(true, 3, 4),(true, 3, 5),(true, 3, 6),(true, 3, 7),(true, 3, 8),(true, 3, 9),(true, 3, 12);
 
 INSERT INTO `account`
-(`status`, `account_id`, `name`, `email`, `campus_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
+(`account_id`, `email`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
 VALUES
-(true, 1, 'Admin', 'tuyenvtse160607@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 5, 'Admin', 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 6, 'Admin', 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 2, 'Examiner', 'thanhtuyen66202@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 3, 'Head of Department', 'thanhtuyen662002@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 4, 'Lecturer', 'oscarsjoyfuljourney@gmail.com', 1, '2024-09-30 00:00:00', 1, null, null, null, null);
+(1, 'tuyenvtse160607@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(2, 'truonghnse160585@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(3, 'vuongvtse160599@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(4, 'minhtpvse160611@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(5, 'thanhtuyen66202@gmail.com', '2024-09-30 00:00:00', 1, null, null, null, null, true);
 
 INSERT INTO `account_role`
 (`status`, `account_id`, `role_id`)
 VALUES
 (true, 1, 1),
-(true, 1, 2),
-(true, 2, 2),
-(true, 3, 3),
-(true, 4, 4),
-(true, 5, 1),
-(true, 6, 1);
+(true, 2, 1),
+(true, 3, 1),
+(true, 4, 1),
+(true, 5, 2);
 
-INSERT INTO `examiner`
-(`status`, `account_id`)
+INSERT INTO `organization`
+(`organization_id`, `name`, `type`, `parent_id`, `status`)
 VALUES
-(true, 1),
-(true, 2),
-(true, 3);
+(1, 'FPT University', 'UNIVERSITY', null, true),
+(2, 'Ho Chi Minh', 'CAMPUS', 1, true),
+(3, 'Ha Noi', 'CAMPUS', 1, true),
+(4, 'Da Nang', 'CAMPUS', 1, true),
+(5, 'Can Tho', 'CAMPUS', 1, true),
+(6, 'SE', 'MAJOR', 2, true),
+(7, 'SE', 'MAJOR', 3, true),
+(8, 'SE', 'MAJOR', 4, true),
+(9, 'SE', 'MAJOR', 5, true),
+(10, 'JAVA', 'DEPARTMENT', 6, true),
+(11, '.NET', 'DEPARTMENT', 6, true),
+(12, 'JAVA', 'DEPARTMENT', 7, true),
+(13, '.NET', 'DEPARTMENT', 7, true),
+(14, 'JAVA', 'DEPARTMENT', 8, true),
+(15, '.NET', 'DEPARTMENT', 8, true),
+(16, 'JAVA', 'DEPARTMENT', 9, true),
+(17, '.NET', 'DEPARTMENT', 9, true);
 
-INSERT INTO `department` 
-(`department_name`, `dev_language`, `status`) 
-VALUES 
-('java coding', 'Java', true),
-('java coding', 'Java', true),
-('c# coding', 'C#', true),
-('c# coding', 'C#', true),
-('c# coding', 'C#', true);
+INSERT INTO `account_organization`
+(`status`, `account_id`, `organization_id`)
+VALUES
+(true, 1, 1),
+(true, 2, 1),
+(true, 3, 1),
+(true, 4, 1),
+(true, 5, 2),
+(true, 5, 11);
+
+INSERT INTO `position`
+(`position_id`, `name`, `status`)
+VALUES
+(1, 'Head of Department', true),
+(2, 'Examiner', true),
+(3, 'Lecturer', true),
+(4, 'Admin', true);
+
+INSERT INTO `employee`
+(`employee_id`, `full_name`, `employee_code`, `account_id`, `position_id`, `organization_id`, `ai_prompt_id`, `status`)
+VALUES
+(1, 'Võ Thanh Tuyền', 'AD0001', 1, 4, 1, null, true),
+(2, 'Hà Nhật Trường', 'AD0002', 2, 4, 1, null, true),
+(3, 'Võ Trọng Vương', 'AD0003', 3, 4, 1, null, true),
+(4, 'Thiều Phan Văn Minh', 'AD0004', 4, 4, 1, null, true),
+(5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 1, null, true);
 
 
-INSERT INTO `subject` 
-(`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `department_id`) 
-VALUES 
-('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 1),
-('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 2),
-('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 3),
-('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 4);
+
+-- INSERT INTO `subject` 
+-- (`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `department_id`) 
+-- VALUES 
+-- ('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 1),
+-- ('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 2),
+-- ('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 3),
+-- ('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 4);
 
 
-INSERT INTO `exam` 
-(`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_name`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`, `campus_id`) 
-VALUES 
-('SU23', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 1, null, 1, null, 1, 1, 1),
-('SU24', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 2, null, 2, null, 2, 2, 2),
-('SU25', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 3, null, 3, null, 3, 3, 3);
+-- INSERT INTO `exam` 
+-- (`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_name`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`, `campus_id`) 
+-- VALUES 
+-- ('SU23', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 1, null, 1, null, 1, 1, 1),
+-- ('SU24', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 2, null, 2, null, 2, 2, 2),
+-- ('SU25', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 3, null, 3, null, 3, 3, 3);
 
-INSERT INTO `source` 
-(`origin_source_path`, `import_time`) 
-VALUES 
-('https://example.com/source1', '2024-09-30 10:00:00'),
-('https://example.com/source2', '2024-09-30 11:00:00'),
-('https://example.com/source3', '2024-09-30 12:00:00'),
-('https://example.com/source4', '2024-09-30 13:00:00');
+-- INSERT INTO `source` 
+-- (`origin_source_path`, `import_time`) 
+-- VALUES 
+-- ('https://example.com/source1', '2024-09-30 10:00:00'),
+-- ('https://example.com/source2', '2024-09-30 11:00:00'),
+-- ('https://example.com/source3', '2024-09-30 12:00:00'),
+-- ('https://example.com/source4', '2024-09-30 13:00:00');
 
-INSERT INTO `exam_database` 
-(`data_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`) 
-VALUES 
-('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 1),
-('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 2),
-('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 3);
+-- INSERT INTO `exam_database` 
+-- (`data_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`) 
+-- VALUES 
+-- ('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 1),
+-- ('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 2),
+-- ('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 3);
 
-INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`, `exam_id`, `exam_database_id`, `source_id`) 
-VALUES 
-('EP001', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 1, 1, 1, 1, 1),
-('EP002', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 2, 2, 2, 2, 2),
-('EP003', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 3, 3, 3, 3, 3);
+-- INSERT INTO `exam_paper` 
+-- (`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`, `exam_id`, `exam_database_id`, `source_id`) 
+-- VALUES 
+-- ('EP001', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 1, 1, 1, 1, 1),
+-- ('EP002', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 2, 2, 2, 2, 2),
+-- ('EP003', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 3, 3, 3, 3, 3);
 
-INSERT INTO `exam_question` 
-(`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 
-VALUES 
-('What is the capital of France?', 'Q1', 5.0, 'Multiple Choice', true, '2023-09-30 10:00:00', 1, '2023-09-30 10:00:00', 1, 1, 1, 1),
-('Explain Newton\'s first law of motion.', 'Q2', 10.0, 'Essay', true, '2023-09-30 10:00:00', 2, '2023-09-30 10:00:00', 1, 2, 2, 1),
-('Solve the equation: 2x + 3 = 7.', 'Q3', 5.0, 'Short Answer', true, '2023-09-30 10:00:00', 3, '2023-09-30 10:00:00', 1, 3, 3, 1);
+-- INSERT INTO `exam_question` 
+-- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 
+-- VALUES 
+-- ('What is the capital of France?', 'Q1', 5.0, 'Multiple Choice', true, '2023-09-30 10:00:00', 1, '2023-09-30 10:00:00', 1, 1, 1, 1),
+-- ('Explain Newton\'s first law of motion.', 'Q2', 10.0, 'Essay', true, '2023-09-30 10:00:00', 2, '2023-09-30 10:00:00', 1, 2, 2, 1),
+-- ('Solve the equation: 2x + 3 = 7.', 'Q3', 5.0, 'Short Answer', true, '2023-09-30 10:00:00', 3, '2023-09-30 10:00:00', 1, 3, 3, 1);
 
-INSERT INTO ai_prompt (content, language_code, for_ai, type, status, parent)
-VALUES 
-    ('Defaut.', 'en', 'GPT-3', 'text', true, NULL),
-    ('Explain the laws of thermodynamics in simple terms.', 'en', 'GPT-3', 'text', true, 1),
-    ('Generate an image of a futuristic city.', 'es', 'DALL·E', 'image', true, 1),
-    ('Translate this text into Spanish.', 'en', 'GPT-3', 'text', true, 1),
-    ('Create a voiceover for this podcast script.', 'en', 'VoiceAI', 'voice', false, 1),
-    ('What is quantum computing?', 'fr', 'GPT-4', 'text', true, 1),
-    ('Generate a painting in the style of Van Gogh.', 'en', 'DALL·E', 'image', false, 1),
-    ('What is the current weather in Tokyo?', 'ja', 'GPT-3', 'text', true, 2),
-    ('Generate an image of a medieval castle.', 'en', 'DALL·E', 'image', true, 2),
-    ('Write a short story about a time-traveling detective.', 'en', 'GPT-3', 'text', true, 2);
+-- INSERT INTO ai_prompt (content, language_code, for_ai, type, status, parent)
+-- VALUES 
+--     ('Defaut.', 'en', 'GPT-3', 'text', true, NULL),
+--     ('Explain the laws of thermodynamics in simple terms.', 'en', 'GPT-3', 'text', true, 1),
+--     ('Generate an image of a futuristic city.', 'es', 'DALL·E', 'image', true, 1),
+--     ('Translate this text into Spanish.', 'en', 'GPT-3', 'text', true, 1),
+--     ('Create a voiceover for this podcast script.', 'en', 'VoiceAI', 'voice', false, 1),
+--     ('What is quantum computing?', 'fr', 'GPT-4', 'text', true, 1),
+--     ('Generate a painting in the style of Van Gogh.', 'en', 'DALL·E', 'image', false, 1),
+--     ('What is the current weather in Tokyo?', 'ja', 'GPT-3', 'text', true, 2),
+--     ('Generate an image of a medieval castle.', 'en', 'DALL·E', 'image', true, 2),
+--     ('Write a short story about a time-traveling detective.', 'en', 'GPT-3', 'text', true, 2);
 

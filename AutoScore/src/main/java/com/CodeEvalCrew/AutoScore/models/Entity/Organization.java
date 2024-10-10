@@ -6,6 +6,8 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +34,8 @@ public class Organization {
 
     private String name;
 
-    private Organization_Enum stype;
+    @Enumerated(EnumType.STRING)
+    private Organization_Enum type;
 
     private boolean status;
     //rels

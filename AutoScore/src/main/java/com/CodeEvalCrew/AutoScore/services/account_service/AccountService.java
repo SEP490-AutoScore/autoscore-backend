@@ -73,43 +73,6 @@ public class AccountService implements IAccountService {
         throw new UnsupportedOperationException("Unimplemented method 'getAccountById'");
     }
 
-    @Override
-    @Transactional
-    public OperationStatus createAccount(CreateAccountRequestDTO accountRequestDTO) {
-        try {
-            String email = accountRequestDTO.getEmail();
-            String name = accountRequestDTO.getName();
-            Long campusId = accountRequestDTO.getCampusId();
-            Long roleId = accountRequestDTO.getRoleId();
-            Long departmentId = accountRequestDTO.getDepartmentId();
-            boolean isHeader = accountRequestDTO.isHeader();
-            if (email == null || name == null || campusId == null || roleId == null) {
-                return OperationStatus.INVALID_INPUT;
-            }
-
-            // Check if account already exists
-            if (accountRepository.findByEmail(email) != null) {
-                return OperationStatus.ALREADY_EXISTS;
-            }
-            // Save account
-            Account account = new Account();
-            account.setName(name);
-            account.setEmail(email);
-            account.setStatus(true);
-            account.setCreatedAt(Util.getCurrentDateTime());
-            account.setCreatedBy(Util.getAuthenticatedAccountId());
-            Account savedAccount = accountRepository.save(account);
-            if (savedAccount == null) {
-                return OperationStatus.FAILURE;
-            }
-
-            
-        } catch (Exception e) {
-            return OperationStatus.ERROR;
-        }
-        return OperationStatus.SUCCESS;
-    }
-
     private List<Role> getRolesByAccountId(Long accountId) {
         if (accountId == null) {
             throw new IllegalArgumentException("Id cannot be null");

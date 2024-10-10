@@ -11,15 +11,9 @@ import lombok.Setter;
 @Setter
 public class SignInWithGoogleResponseDTO {
     private long accountId;
-    
-    @NotNull
-    private String name;
-    
     @NotNull
     @Email
     private String email;
-    
-    private String campusName;
     private String roleName;
     private Set<String> permissions;
     private String jwtToken;

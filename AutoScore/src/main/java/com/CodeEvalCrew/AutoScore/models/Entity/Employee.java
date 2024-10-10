@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,7 +41,7 @@ public class Employee {
 
     //1-1 prompt
     @OneToOne
-    @JoinColumn(name = "aiPromptId", nullable = false)
+    @JoinColumn(name = "aiPromptId", nullable = true)
     private AI_Prompt aiPrompt;
 
     //1-1 acc

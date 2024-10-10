@@ -9,5 +9,4 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 public interface IAccountService {
     List<AccountResponseDTO> getAllAccount();
     AccountResponseDTO getAccountById(Long accountId);
-    OperationStatus createAccount(CreateAccountRequestDTO accountRequestDTO);
 }

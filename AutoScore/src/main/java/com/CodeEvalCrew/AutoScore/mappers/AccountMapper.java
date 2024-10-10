@@ -21,9 +21,7 @@ public interface AccountMapper {
     AccountMapper INSTANCE = Mappers.getMapper(AccountMapper.class);
 
     @Mapping(source = "accountId", target = "accountId")
-    // @Mapping(source = "name", target = "name")
     @Mapping(source = "email", target = "email")
-    // @Mapping(expression = "java(getCampusName(account))", target = "campusName")
     @Mapping(expression = "java(getRoleName(account))", target = "roleName")
     @Mapping(expression = "java(getPermissions(account))", target = "permissions")
     SignInWithGoogleResponseDTO accountToSignInWithGoogleResponseDTO(Account account);
