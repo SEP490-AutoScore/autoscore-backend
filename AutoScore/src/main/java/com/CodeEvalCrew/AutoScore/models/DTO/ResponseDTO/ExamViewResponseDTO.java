@@ -16,7 +16,6 @@ public class ExamViewResponseDTO {
     private LocalDateTime gradingAt;
     private LocalDateTime publishAt;
     private String semesterName;
-    private CampusView campus;
     private SubjectView subject;
 
     public ExamViewResponseDTO(Exam exam) {
