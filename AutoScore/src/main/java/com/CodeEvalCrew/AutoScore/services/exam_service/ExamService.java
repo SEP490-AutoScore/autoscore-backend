@@ -19,6 +19,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
@@ -41,11 +42,12 @@ public class ExamService implements IExamService {
     public ExamService(IExamRepository examRepository,
             // ICampusRepository campusRepository,
             ISubjectRepository subjectRepository,
-            IAccountRepository accountRepository) {
+            IAccountRepository accountRepository,
+            IEmployeeRepository employeeRepository) {
         this.examRepository = examRepository;
         this.subjectRepository = subjectRepository;
         this.accountRepository = accountRepository;
-        this.util = new Util(accountRepository);
+        this.util = new Util(employeeRepository);
     }
 
     @Override

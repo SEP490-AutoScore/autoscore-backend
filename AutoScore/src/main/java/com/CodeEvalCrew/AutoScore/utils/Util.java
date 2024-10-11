@@ -5,15 +5,15 @@ import java.time.LocalDateTime;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.services.account_service.UserDetailsImpl;
 
 public class Util {
-    private final IAccountRepository accountRepository;
+    private final IEmployeeRepository employeeRepository;
 
-    public Util(IAccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+    public Util(IEmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
     }
 
     // Get the account id of the authenticated user
@@ -32,13 +32,13 @@ public class Util {
     }
 
     // Get account name for mapping
-    public String getAccountName(Long accountId) {
-        // if (accountId != null) {
-        //     Account account = accountRepository.findById(accountId).orElse(null);
-        //     if (account != null) {
-        //         return account.getName();
-        //     }
-        // }
+    public String getEmployeeFullName(Long accountId) {
+        if (accountId != null) {
+            Employee employee = employeeRepository.findByAccount_AccountId(accountId);
+            if (employee != null) {
+                return employee.getFullName();
+            }
+        }
         return null;
     }
 }

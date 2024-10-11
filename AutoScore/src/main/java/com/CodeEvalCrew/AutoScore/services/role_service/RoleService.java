@@ -18,6 +18,7 @@ import com.CodeEvalCrew.AutoScore.mappers.RoleMapper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
@@ -28,10 +29,10 @@ public class RoleService implements IRoleService {
     private final Util util;
 
 
-    public RoleService(IRoleRepositoty roleRepositoty, IAccountRepository accountRepository, IRolePermissionService rolePermissionService) {
+    public RoleService(IRoleRepositoty roleRepositoty, IEmployeeRepository employeeRepository, IRolePermissionService rolePermissionService) {
         this.roleRepositoty = roleRepositoty;
         this.rolePermissionService = rolePermissionService;
-        this.util = new Util(accountRepository);
+        this.util = new Util(employeeRepository);
     }
 
     @Override

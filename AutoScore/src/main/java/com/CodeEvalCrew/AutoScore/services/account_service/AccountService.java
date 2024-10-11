@@ -19,6 +19,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAccountRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRoleRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
@@ -31,10 +32,11 @@ public class AccountService implements IAccountService {
     private final IAccountRoleRepository accountRoleRepository;
     private final Util util;
 
-    public AccountService(IAccountRepository accountRepository, IAccountRoleRepository accountRoleRepository, IRoleRepositoty roleRepositoty) {
+    public AccountService(IAccountRepository accountRepository, IAccountRoleRepository accountRoleRepository, 
+                          IRoleRepositoty roleRepositoty, IEmployeeRepository employeeRepository) {
         this.accountRepository = accountRepository;
         this.accountRoleRepository = accountRoleRepository;
-        this.util = new Util(accountRepository);
+        this.util = new Util(employeeRepository);
     }
 
     @Override
