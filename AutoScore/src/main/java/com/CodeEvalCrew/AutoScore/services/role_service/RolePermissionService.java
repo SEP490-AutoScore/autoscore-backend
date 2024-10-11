@@ -22,6 +22,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRoleRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
 import com.CodeEvalCrew.AutoScore.utils.Util;
@@ -37,12 +38,12 @@ public class RolePermissionService implements IRolePermissionService {
 
     public RolePermissionService(IRolePermissionRepository rolePermissionRepository, IRoleRepositoty roleRepositoty,
             IPermissionRepository permissionRepository, IAccountRoleRepository accountRoleRepository,
-            IAccountRepository accountRepository) {
+            IAccountRepository accountRepository, IEmployeeRepository employeeRepository) {
         this.rolePermissionRepository = rolePermissionRepository;
         this.roleRepositoty = roleRepositoty;
         this.permissionRepository = permissionRepository;
         this.accountRoleRepository = accountRoleRepository;
-        this.util = new Util(accountRepository);
+        this.util = new Util(employeeRepository);
     }
 
     @Override
