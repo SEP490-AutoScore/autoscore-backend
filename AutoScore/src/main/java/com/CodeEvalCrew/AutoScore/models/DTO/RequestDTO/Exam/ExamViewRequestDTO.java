@@ -11,18 +11,14 @@ import lombok.Setter;
 @Setter
 public class ExamViewRequestDTO{
     private String searchString;
-
-    private long campusId = 0;
     
-    private long subjectId= 0;
+    private Long subjectId = null;
 
     private LocalDateTime examAt;
 
     private LocalDateTime gradingAt;
 
     private LocalDateTime publishAt;
-
-    private String semesterName;
 
     //paging
     PaginateEntity paginateEntity;

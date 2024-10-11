@@ -1,6 +1,4 @@
 package com.CodeEvalCrew.AutoScore.specification;
-
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -50,14 +48,6 @@ public class ExamSpecification {
                 return criteriaBuilder.conjunction(); // No filtering if null or empty
             }
             return criteriaBuilder.equal(root.get("publishAt"), timestamp);
-        };
-    }
-    
-    // Filter by Campus id (foreign key condition)
-    public static Specification<Exam> hasCampusId(long id) {
-        return (root, query, criteriaBuilder) -> {
-            // Join with the campus entity
-            return criteriaBuilder.equal(root.join("campus").get("campusId"), id);
         };
     }
 

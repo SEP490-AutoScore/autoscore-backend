@@ -143,6 +143,28 @@
             <version>1.5.2.Final</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Aspose -->
+        <!-- https://mvnrepository.com/artifact/com.aspose/aspose-words -->
+        <dependency>
+			<groupId>com.aspose</groupId>
+			<artifactId>aspose-words</artifactId>
+			<version>22.11</version>
+			<classifier>jdk17</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.aspose</groupId>
+			<artifactId>aspose-words</artifactId>
+			<version>22.11</version>
+			<classifier>javadoc</classifier>
+		</dependency>
+        <!-- https://mvnrepository.com/artifact/com.aspose/aspose-cells -->
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-cells</artifactId>
+            <version>24.9</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -173,6 +195,16 @@
                     <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
                 </configuration>
             </plugin>
+            <!-- Maven complier plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>23</source>
+                    <target>23</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     
@@ -185,6 +217,12 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <!-- Aspose Repository -->
+        <repository>
+			<id>AsposeJavaAPI</id>
+			<name>Aspose Java API</name>
+			<url>https://releases.aspose.com/java/repo/</url>
+		</repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>

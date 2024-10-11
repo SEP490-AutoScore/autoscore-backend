@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.exam_service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
@@ -15,4 +16,7 @@ public interface IExamService{
     ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception,NotFoundException;
 
     ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity) throws Exception,NotFoundException;
+
+    public byte[] mergeDataIntoTemplate(String templatePath, Map<String, Object> data) throws Exception;
+
 }
