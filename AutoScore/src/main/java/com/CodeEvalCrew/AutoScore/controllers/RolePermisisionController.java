@@ -64,17 +64,17 @@ public class RolePermisisionController {
         };
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') and hasAuthority('DELETE_ROLE_PERMISSION')")
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteRolePermission(@PathVariable Long id) {
-        OperationStatus operationStatus = rolePermissionService.deleteRolePermission(id);
-        return switch (operationStatus) {
-            case SUCCESS -> ResponseEntity.ok("Role Permission deleted successfully");
-            case FAILURE -> ResponseEntity.status(500).body("Can't delete Role Permission");
-            case CANNOT_DELETE -> ResponseEntity.status(409).body("Role Permission is in use");
-            case NOT_FOUND -> ResponseEntity.status(404).body("Role Permission not found");
-            case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Role Permission");
-            default -> ResponseEntity.status(500).body("Unexpected error occurred");
-        };
-    }
+    // @PreAuthorize("hasAnyAuthority('ADMIN') and hasAuthority('DELETE_ROLE_PERMISSION')")
+    // @DeleteMapping("/delete/{id}")
+    // public ResponseEntity<?> deleteRolePermission(@PathVariable Long id) {
+    //     OperationStatus operationStatus = rolePermissionService.deleteRolePermission(id);
+    //     return switch (operationStatus) {
+    //         case SUCCESS -> ResponseEntity.ok("Role Permission deleted successfully");
+    //         case FAILURE -> ResponseEntity.status(500).body("Can't delete Role Permission");
+    //         case CANNOT_DELETE -> ResponseEntity.status(409).body("Role Permission is in use");
+    //         case NOT_FOUND -> ResponseEntity.status(404).body("Role Permission not found");
+    //         case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Role Permission");
+    //         default -> ResponseEntity.status(500).body("Unexpected error occurred");
+    //     };
+    // }
 }

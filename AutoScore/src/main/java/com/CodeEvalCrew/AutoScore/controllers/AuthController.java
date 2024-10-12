@@ -12,9 +12,11 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleRespons
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 
 import java.sql.Timestamp;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -71,19 +73,23 @@ public class AuthController {
                     if (oldAccessToken != null) {
                         jwtTokenProvider.revokeToken(oldAccessToken, account);
                     }
+                    
+                    Role role = account.getRole();
+                    if (role == null || role.getRoleName() == null) {
+                        throw new IllegalStateException("Account does not have a valid active role");
+                    }
+
+                    String roleName = role.getRoleName();
+                    Set<String> permissions = role.getRole_permissions().stream()
+                            .filter(Role_Permission::isStatus)
+                            .map(rolePermission -> rolePermission.getPermission().getAction())
+                            .collect(Collectors.toSet()); 
 
                     // Tạo access token mới
                     String newAccessToken = jwtTokenProvider.generateToken(
                             account.getEmail(),
-                            account.getAccountRoles().stream()
-                                    .filter(Account_Role::isStatus)
-                                    .map(role -> role.getRole().getRoleName())
-                                    .collect(Collectors.toSet()),
-                            account.getAccountRoles().stream()
-                                    .filter(Account_Role::isStatus)
-                                    .flatMap(role -> role.getRole().getRole_permissions().stream())
-                                    .map(rolePermission -> rolePermission.getPermission().getAction())
-                                    .collect(Collectors.toSet())
+                            roleName,
+                            permissions
                     );
 
                     return ResponseEntity.ok(newAccessToken);

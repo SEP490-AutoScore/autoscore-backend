@@ -48,7 +48,7 @@ public class Role {
     private Long deletedBy;
     
     @OneToMany(mappedBy = "role")
-    private Set<Account_Role> account_roles;
+    private Set<Account> accounts;
 
     //n-n permision
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)

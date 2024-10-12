@@ -25,6 +25,8 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.RevokedToken;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.RevokedTokenRepository;
 
+import io.jsonwebtoken.security.InvalidKeyException;
+
 @Component
 public class JwtTokenProvider {
 
@@ -47,10 +49,10 @@ public class JwtTokenProvider {
     }
 
     // Tạo JWT token
-    public String generateToken(String email, Set<String> roles, Set<String> permissions) {
+    public String generateToken(String email, String role, Set<String> permissions) {
        try {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
+        claims.put("role", "ROLE_" + role);
         claims.put("permissions", permissions);
 
         Date now = new Date();
@@ -62,7 +64,7 @@ public class JwtTokenProvider {
                 .setExpiration(expiryDate)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
-       } catch (Exception e) {
+       } catch (InvalidKeyException e) {
             throw new IllegalStateException("Cannot create token: " + e.getMessage());
        }
     }
