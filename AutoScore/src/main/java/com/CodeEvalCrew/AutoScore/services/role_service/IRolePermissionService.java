@@ -10,5 +10,5 @@ public interface IRolePermissionService {
     RolePermissionResponseDTO getRolePermissionById(Long id);
     OperationStatus createRolePermission(RolePermissionRequestDTO rolePermissionRequestDTO);
     OperationStatus updateRolePermission(RolePermissionRequestDTO rolePermissionRequestDTO);
-    OperationStatus deleteRolePermission(Long id);
+    // OperationStatus deleteRolePermission(Long id);
 }

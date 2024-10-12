@@ -16,12 +16,10 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.RolePermissionResponseD
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRolePermissionRepository;
 import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.mappers.RolePermissionMapper;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRoleRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
@@ -33,16 +31,13 @@ public class RolePermissionService implements IRolePermissionService {
     private final IRolePermissionRepository rolePermissionRepository;
     private final IRoleRepositoty roleRepositoty;
     private final IPermissionRepository permissionRepository;
-    private final IAccountRoleRepository accountRoleRepository;
     private final Util util;
 
     public RolePermissionService(IRolePermissionRepository rolePermissionRepository, IRoleRepositoty roleRepositoty,
-            IPermissionRepository permissionRepository, IAccountRoleRepository accountRoleRepository,
-            IAccountRepository accountRepository, IEmployeeRepository employeeRepository) {
+            IPermissionRepository permissionRepository, IAccountRepository accountRepository, IEmployeeRepository employeeRepository) {
         this.rolePermissionRepository = rolePermissionRepository;
         this.roleRepositoty = roleRepositoty;
         this.permissionRepository = permissionRepository;
-        this.accountRoleRepository = accountRoleRepository;
         this.util = new Util(employeeRepository);
     }
 
@@ -188,31 +183,31 @@ public class RolePermissionService implements IRolePermissionService {
         }
     }
 
-    @Override
-    @Transactional
-    public OperationStatus deleteRolePermission(Long id) {
-        try {
-            if (id == null) {
-                return OperationStatus.INVALID_INPUT;
-            }
-            List<Role_Permission> rolePermissions = rolePermissionRepository.findAllByRole_RoleId(id);
-            if (rolePermissions == null || rolePermissions.isEmpty()) {
-                return OperationStatus.NOT_FOUND;
-            }
+    // @Override
+    // @Transactional
+    // public OperationStatus deleteRolePermission(Long id) {
+    //     try {
+    //         if (id == null) {
+    //             return OperationStatus.INVALID_INPUT;
+    //         }
+    //         List<Role_Permission> rolePermissions = rolePermissionRepository.findAllByRole_RoleId(id);
+    //         if (rolePermissions == null || rolePermissions.isEmpty()) {
+    //             return OperationStatus.NOT_FOUND;
+    //         }
 
-            List<Account_Role> accountRoles = accountRoleRepository.findAllByRole_RoleId(id);
-            if (accountRoles != null && !accountRoles.isEmpty()) {
-                return OperationStatus.CANNOT_DELETE;
-            }
+    //         List<Account_Role> accountRoles = accountRoleRepository.findAllByRole_RoleId(id);
+    //         if (accountRoles != null && !accountRoles.isEmpty()) {
+    //             return OperationStatus.CANNOT_DELETE;
+    //         }
 
-            for (Role_Permission rolePermission : rolePermissions) {
-                rolePermissionRepository.delete(rolePermission);
-            }
-            return OperationStatus.SUCCESS;
-        } catch (Exception e) {
-            return OperationStatus.ERROR;
-        }
-    }
+    //         for (Role_Permission rolePermission : rolePermissions) {
+    //             rolePermissionRepository.delete(rolePermission);
+    //         }
+    //         return OperationStatus.SUCCESS;
+    //     } catch (Exception e) {
+    //         return OperationStatus.ERROR;
+    //     }
+    // }
 
     private Role getRoleById(Long roleId) {
         try {

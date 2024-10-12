@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AccountResponseDTO {
+public class AccountResponseDTOReview {
     private Long accountId;
     private String email;
     private String status;
@@ -17,5 +17,4 @@ public class AccountResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
-    private RoleResponseDTO role;
 }

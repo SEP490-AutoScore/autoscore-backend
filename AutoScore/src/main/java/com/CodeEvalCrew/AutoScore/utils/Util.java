@@ -1,11 +1,13 @@
 package com.CodeEvalCrew.AutoScore.utils;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.services.account_service.UserDetailsImpl;
 
@@ -38,6 +40,16 @@ public class Util {
             if (employee != null) {
                 return employee.getFullName();
             }
+        }
+        return null;
+    }
+
+    // Get organizations
+    public static Set<Organization> getOrganizations() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            return userDetails.getOrganizations();
         }
         return null;
     }
