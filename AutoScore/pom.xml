@@ -143,6 +143,13 @@
             <version>1.5.2.Final</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Apache POI for Excel reading -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version>
+        </dependency>
     </dependencies>
 
     <build>
