@@ -7,9 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +39,4 @@ public class Student {
     //1-n source_detail
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private Set<Source_Detail> sourceDetails;
-
-    //1-1 campus
 }

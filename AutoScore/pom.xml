@@ -143,6 +143,7 @@
             <version>1.5.2.Final</version>
             <scope>provided</scope>
         </dependency>
+      
         <!-- Aspose -->
         <!-- https://mvnrepository.com/artifact/com.aspose/aspose-words -->
         <dependency>
@@ -169,15 +170,13 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>4.1.2</version>
+            <version>5.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>4.1.2</version>
+            <version>5.2.3</version>
         </dependency>
-
-
     </dependencies>
 
     <build>
