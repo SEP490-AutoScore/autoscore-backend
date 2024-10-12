@@ -56,7 +56,7 @@ public class Exam_Paper {
 
     //1-n examquestion
     @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
-    private Set<Exam_Part> examParts;
+    private Set<Exam_Question> examQuestions;
 
     //1-1 exam db
     @OneToOne

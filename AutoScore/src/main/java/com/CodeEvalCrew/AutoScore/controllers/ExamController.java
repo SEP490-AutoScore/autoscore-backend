@@ -120,16 +120,4 @@ public class ExamController {
         }
     }
 
-     @GetMapping("/generate-word")
-    public ResponseEntity<InputStreamResource> generateWordDocument() throws IOException {
-        examService.mergeDataIntoWord("John Doe", 5);
-
-        // Return the document as a response
-        FileInputStream fis = new FileInputStream("output.docx");
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=output.docx")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(new InputStreamResource(fis));
-    }
-
 }
