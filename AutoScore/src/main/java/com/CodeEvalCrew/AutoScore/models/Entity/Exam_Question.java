@@ -55,8 +55,8 @@ public class Exam_Question {
 
     // n-1 exam_paper
     @ManyToOne
-    @JoinColumn(name = "examPartId", nullable = false)
-    private Exam_Part examPart;
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 
     // 1-n barem
     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
