@@ -1,5 +1,8 @@
 package com.CodeEvalCrew.AutoScore.services.exam_service;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +11,23 @@ import java.util.Optional;
 
 
 import java.util.Map;
+
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+
 import com.aspose.words.Document;
 import com.aspose.words.MailMerge;
 
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+// import org.apache.poi.xwpf.usermodel.XWPFDocument;
+// import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+// import org.apache.poi.xwpf.usermodel.XWPFRun;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamMapper;

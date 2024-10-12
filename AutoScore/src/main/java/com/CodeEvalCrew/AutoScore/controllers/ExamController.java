@@ -1,10 +1,12 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
-import java.util.Map;
-
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -116,6 +118,18 @@ public class ExamController {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+     @GetMapping("/generate-word")
+    public ResponseEntity<InputStreamResource> generateWordDocument() throws IOException {
+        examService.mergeDataIntoWord("John Doe", 5);
+
+        // Return the document as a response
+        FileInputStream fis = new FileInputStream("output.docx");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=output.docx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(new InputStreamResource(fis));
     }
 
 }

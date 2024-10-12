@@ -146,22 +146,35 @@
         <!-- Aspose -->
         <!-- https://mvnrepository.com/artifact/com.aspose/aspose-words -->
         <dependency>
-			<groupId>com.aspose</groupId>
-			<artifactId>aspose-words</artifactId>
-			<version>22.11</version>
-			<classifier>jdk17</classifier>
-		</dependency>
-		<dependency>
-			<groupId>com.aspose</groupId>
-			<artifactId>aspose-words</artifactId>
-			<version>22.11</version>
-			<classifier>javadoc</classifier>
-		</dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-words</artifactId>
+            <version>22.11</version>
+            <classifier>jdk17</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-words</artifactId>
+            <version>22.11</version>
+            <classifier>javadoc</classifier>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.aspose/aspose-cells -->
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>aspose-cells</artifactId>
             <version>24.9</version>
+        </dependency>
+
+        <!-- Apache POI Dependency -->
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.1.2</version>
         </dependency>
 
 
@@ -219,10 +232,10 @@
         </repository>
         <!-- Aspose Repository -->
         <repository>
-			<id>AsposeJavaAPI</id>
-			<name>Aspose Java API</name>
-			<url>https://releases.aspose.com/java/repo/</url>
-		</repository>
+            <id>AsposeJavaAPI</id>
+            <name>Aspose Java API</name>
+            <url>https://releases.aspose.com/java/repo/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
