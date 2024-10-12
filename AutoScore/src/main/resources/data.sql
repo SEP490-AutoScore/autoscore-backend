@@ -65,22 +65,13 @@ VALUES
 (true, 3, 1),(true, 3, 4),(true, 3, 5),(true, 3, 6),(true, 3, 7),(true, 3, 8),(true, 3, 9),(true, 3, 12);
 
 INSERT INTO `account`
-(`account_id`, `email`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
+(`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
 VALUES
-(1, 'tuyenvtse160607@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(2, 'truonghnse160585@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(3, 'vuongvtse160599@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(4, 'minhtpvse160611@fpt.edu.vn', '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(5, 'thanhtuyen66202@gmail.com', '2024-09-30 00:00:00', 1, null, null, null, null, true);
-
-INSERT INTO `account_role`
-(`status`, `account_id`, `role_id`)
-VALUES
-(true, 1, 1),
-(true, 2, 1),
-(true, 3, 1),
-(true, 4, 1),
-(true, 5, 2);
+(1, 'tuyenvtse160607@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(2, 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(3, 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(4, 'minhtpvse160611@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(5, 'thanhtuyen66202@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true);
 
 INSERT INTO `organization`
 (`organization_id`, `name`, `type`, `parent_id`, `status`)
@@ -128,7 +119,7 @@ VALUES
 (2, 'Hà Nhật Trường', 'AD0002', 2, 4, 1, null, true),
 (3, 'Võ Trọng Vương', 'AD0003', 3, 4, 1, null, true),
 (4, 'Thiều Phan Văn Minh', 'AD0004', 4, 4, 1, null, true),
-(5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 1, null, true);
+(5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 2, null, true);
 
 
 

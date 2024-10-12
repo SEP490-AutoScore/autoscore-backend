@@ -8,12 +8,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAccountRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AccountResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
-import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Mapper
@@ -32,23 +29,13 @@ public interface AccountMapper {
     AccountResponseDTO accountToAccountResponseDTO(Account account, @Context Util util);
 
     default String getRoleName(Account account) {
-        return account.getAccountRoles() != null ? account.getAccountRoles().stream()
-            .filter(Account_Role::isStatus)
-            .map(role -> role.getRole().getRoleName())
-            .findFirst()
-            .orElse("Unknown") : "Unknown";
+        return account.getRole() != null ? account.getRole().getRoleName() : "Unknown";
     }
 
     default Set<String> getPermissions(Account account) {
-        return account.getAccountRoles() != null ? account.getAccountRoles().stream()
-            .filter(Account_Role::isStatus)
-            .flatMap(accountRole -> accountRole.getRole().getRole_permissions().stream())
-            .filter(Role_Permission::isStatus)
-            .map(rolePermission -> rolePermission.getPermission().getAction())
-            .collect(Collectors.toSet()) : Set.of();
+        return account.getRole() != null ? account.getRole().getRole_permissions().stream()
+                .filter(rolePermission -> rolePermission.isStatus() && rolePermission.getPermission() != null)
+                .map(rolePermission -> rolePermission.getPermission().getAction())
+                .collect(Collectors.toSet()) : Set.of();
     }
-
-    // default String getCampusName(Account account) {
-    //     return account.getCampus() != null ? account.getCampus().getCampusName() : "Unknown";
-    // }
 }
