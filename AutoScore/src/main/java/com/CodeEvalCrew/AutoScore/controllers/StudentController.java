@@ -9,14 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ImportListStudentDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.services.student_service.ExcelService;
 import com.CodeEvalCrew.AutoScore.services.student_service.IStudentService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("/api/students")
@@ -31,19 +30,24 @@ public class StudentController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXAMINER')")
-    @PostMapping("/import")
+    @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     @Operation(
-            summary = "Tải lên file Excel chứa thông tin sinh viên",
-            requestBody = @RequestBody(
-                    content = @Content(mediaType = "multipart/form-data",
-                            schema = @Schema(type = "object", format = "binary", requiredProperties = {"file"})))
+        summary = "Tải lên file Excel chứa thông tin sinh viên",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = {
+                @Content(mediaType = "multipart/form-data")
+            }
+        )
     )
-    public ResponseEntity<?> importExcelFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> importExcelFile(
+            @RequestParam("file") MultipartFile file, 
+            @RequestParam("examId") Long examId,
+            @RequestParam("organizationId") Long organizationId) {
         try {
             if (file.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is empty");
             }
-            List<Student> students = excelService.importExcelFile(file);
+            List<Student> students = excelService.importExcelFile(file, examId, organizationId);
             studentService.saveStudents(students);
             return ResponseEntity.status(HttpStatus.OK).body("File imported and students saved successfully!");
         } catch (IOException e) {

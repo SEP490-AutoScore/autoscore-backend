@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,4 +41,12 @@ public class Student {
     //1-n source_detail
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private Set<Source_Detail> sourceDetails;
+
+    @ManyToOne
+    @JoinColumn(name = "organizationId", nullable = false)
+    private Organization organization;
+
+    @ManyToOne
+    @JoinColumn(name = "examId", nullable = false)
+    private Exam exam;
 }
