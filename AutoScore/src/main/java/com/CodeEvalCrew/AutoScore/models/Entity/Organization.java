@@ -56,4 +56,7 @@ public class Organization {
 
     @OneToMany(mappedBy = "organization", cascade= CascadeType.ALL)
     private Set<Account_Organization> accountOrganizations;
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    private Set<Student> students;
 }

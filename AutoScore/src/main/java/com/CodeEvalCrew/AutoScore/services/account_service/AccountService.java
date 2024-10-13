@@ -3,8 +3,6 @@ package com.CodeEvalCrew.AutoScore.services.account_service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -63,7 +61,6 @@ public class AccountService implements IAccountService {
 
     @Override
     public AccountResponseDTO getAccountById(Long accountId) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAccountById'");
     }
 }

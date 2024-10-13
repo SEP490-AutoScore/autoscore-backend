@@ -121,23 +121,33 @@ VALUES
 (4, 'Thiều Phan Văn Minh', 'AD0004', 4, 4, 1, null, true),
 (5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 2, null, true);
 
+INSERT INTO `subject` 
+(`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) 
+VALUES 
+('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null),
+('java coding', 'JAVA231', true, '2023-09-30 09:00:00', 1, null, null, null, null);
 
+INSERT INTO `organization_subject`
+(`status`, `organization_id`, `subject_id`)
+VALUES
+(true, 2, 1),
+(true, 11, 1),
+(true, 2, 2),
+(true, 10, 2);
 
--- INSERT INTO `subject` 
--- (`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `department_id`) 
--- VALUES 
--- ('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 1),
--- ('c# coding', 'PRN231', true, '2023-09-30 09:00:00', 1, null, null, null, null, 2),
--- ('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 3),
--- ('java coding', 'JAVA241', true, '2023-09-30 09:00:00', 1, null, null, null, null, 4);
+INSERT INTO `semester`
+(`semester_code`, `semester_name`, `status`)
+VALUES
+('SP24', 'Spring 2024', true),
+('SU24', 'Summer 2024', true),
+('FA24', 'Fall 2024', true);
 
-
--- INSERT INTO `exam` 
--- (`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_name`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`, `campus_id`) 
--- VALUES 
--- ('SU23', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 1, null, 1, null, 1, 1, 1),
--- ('SU24', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 2, null, 2, null, 2, 2, 2),
--- ('SU25', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 'Fall 2024', true, '2024-09-30 09:00:00', 3, null, 3, null, 3, 3, 3);
+INSERT INTO `exam` 
+(`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_id`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
+VALUES 
+('PRN231_SP24_PE', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 2, true, '2024-09-30 09:00:00', 1, null, null, null, null, 1),
+('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
+('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
 
 -- INSERT INTO `source` 
 -- (`origin_source_path`, `import_time`) 

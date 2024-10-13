@@ -3,11 +3,9 @@ package com.CodeEvalCrew.AutoScore.services.role_service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.RoleRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;

@@ -24,7 +24,7 @@ public class ExamViewResponseDTO {
         this.examAt = exam.getExamAt();
         this.gradingAt = exam.getCreatedAt();
         this.publishAt = exam.getPublishAt();
-        this.semesterName = exam.getSemesterName();
+        // this.semesterName = exam.getSemesterName();
         // this.campus = exam.getCampus();
         // this.subject = exam.getSubject();
     }
