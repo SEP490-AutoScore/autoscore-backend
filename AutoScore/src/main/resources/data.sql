@@ -166,11 +166,11 @@ VALUES
 ('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, null, null, null, null, 'Sample Database', 'sample_database.png', 'Sample Database', 'This is a sample database.');
 
 INSERT INTO `instructions` 
-(`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) 
+(`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
 VALUES 
-('Introduction 1', 'Important 1', '2024-09-30 10:00:00', 1, null, null, null, null),
-('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null),
-('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null);
+('Introduction 1', 'Important 1', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
+('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
+('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
 INSERT INTO `exam_paper` 
 (`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `exam_database_id`, `instructions_id`) 
