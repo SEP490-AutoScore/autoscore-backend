@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.services.source_service;
 
-import java.io.File;
 import java.util.Optional;
 
 import org.slf4j.Logger;

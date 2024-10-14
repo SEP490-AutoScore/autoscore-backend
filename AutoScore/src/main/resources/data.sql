@@ -8,7 +8,8 @@ VALUES
 (true, 5, 'MANAGE_SUBJECT'),
 (true, 6, 'MANAGE_DEPARTMENT'),
 (true, 7, 'MANAGE_EXAM'),
-(true, 8, 'MANAGE_SCORE');
+(true, 8, 'MANAGE_SCORE'),
+(true, 9, 'MANAGE_EXAM_DATABASE');
 
 INSERT INTO `permission`
 (`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
@@ -21,6 +22,7 @@ VALUES
 ('VIEW_DEPARTMENT', 6, 'View department', 6, 1),
 ('VIEW_EXAM', 7, 'View exam', 7, 1),
 ('VIEW_SCORE', 8, 'View score', 8, 1),
+('VIEW_EXAM_DATABASE', 30, 'View exam database', 9, 1),
 
 ('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
 ('CREATE_ROLE', 10, 'Create role', 2, 1),
@@ -29,6 +31,7 @@ VALUES
 ('CREATE_SUBJECT', 13, 'Create subject', 5, 1),
 ('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
 ('CREATE_EXAM', 15, 'Create exam', 7, 1),
+('UPDATE_EXAM_DATABASE', 31, 'Update exam database', 9, 1),
 
 ('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
 ('UPDATE_ROLE', 17, 'Update role', 2, 1),
@@ -37,6 +40,7 @@ VALUES
 ('UPDATE_SUBJECT', 20, 'Update subject', 5, 1),
 ('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
 ('UPDATE_EXAM', 22, 'Update exam', 7, 1),
+('DELETE_EXAM_DATABASE', 32, 'Delete exam database', 9, 1),
 
 ('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
 ('DELETE_ROLE', 24, 'Delete role', 2, 1),
@@ -44,7 +48,8 @@ VALUES
 ('DELETE_CAMPUS', 26, 'Delete campus', 4, 1),
 ('DELETE_SUBJECT', 27, 'Delete subject', 5, 1),
 ('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
-('DELETE_EXAM', 29, 'Delete exam', 7, 1);
+('DELETE_EXAM', 29, 'Delete exam', 7, 1),
+('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1);
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
@@ -59,9 +64,9 @@ INSERT INTO `role_permission`
 VALUES
 (true, 1, 1),(true, 1, 2),(true, 1, 3),(true, 1, 4),(true, 1, 5),(true, 1, 6),(true, 1, 7),(true, 1, 8),(true, 1, 9),(true, 1, 10),(true, 1, 11),(true, 1, 12),(true, 1, 13),
 (true, 1, 14),(true, 1, 15),(true, 1, 16),(true, 1, 17),(true, 1, 18),(true, 1, 19),(true, 1, 20),(true, 1, 21),(true, 1, 22),(true, 1, 23),(true, 1, 24),(true, 1, 25),(true, 1, 26),
-(true, 1, 27),(true, 1, 28),(true, 1, 29),
+(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),
 (true, 2, 1),(true, 2, 4),(true, 2, 5),(true, 2, 6),(true, 2, 7),(true, 2, 8),(true, 2, 9),(true, 2, 12),(true, 2, 13),(true, 2, 14),(true, 2, 15),(true, 2, 16),(true, 2, 19),(true, 2, 20),
-(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),
+(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),
 (true, 3, 1),(true, 3, 4),(true, 3, 5),(true, 3, 6),(true, 3, 7),(true, 3, 8),(true, 3, 9),(true, 3, 12);
 
 INSERT INTO `account`
