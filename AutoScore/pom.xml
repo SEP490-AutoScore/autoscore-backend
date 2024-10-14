@@ -220,6 +220,12 @@
             <version>1.10</version>
         </dependency>
 
+        <!-- JDBC Driver of SQL Server -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+        </dependency>
+
     </dependencies>
     
     <build>
