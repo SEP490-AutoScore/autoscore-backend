@@ -63,11 +63,6 @@ public class Exam_Paper {
     @JoinColumn(name = "examDatabaseId", nullable = false)
     private Exam_Database examDatabase;
 
-    //1-1 source
-    @OneToOne
-    @JoinColumn(name = "sourceId", nullable = false)
-    private Source source;
-
     @OneToOne
     @JoinColumn(name = "instructionsId", nullable = false)
     private Instructions instruction;

@@ -37,9 +37,4 @@ public class Instructions {
     private LocalDateTime deletedAt;
 
     private Long deletedBy;
-
-     //1-1 exam pp
-    @OneToOne
-    @JoinColumn(name = "examPaperId", nullable = false)
-    private Exam_Paper examPaper;
 }

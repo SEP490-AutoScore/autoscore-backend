@@ -52,5 +52,5 @@ public class Util {
             return userDetails.getOrganizations();
         }
         return null;
-    }
+    }   
 }
