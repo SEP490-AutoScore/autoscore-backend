@@ -1,7 +1,6 @@
 package com.CodeEvalCrew.AutoScore.services.source_service;
 
 import com.CodeEvalCrew.AutoScore.mappers.SourceDetailMapper;
-import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source_Detail;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;

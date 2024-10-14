@@ -9,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ImportListStudentDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.services.student_service.ExcelService;
 import com.CodeEvalCrew.AutoScore.services.student_service.IStudentService;
