@@ -101,6 +101,10 @@ VALUES
 (true, 2, 1),
 (true, 3, 1),
 (true, 4, 1),
+(true, 1, 2),
+(true, 2, 2),
+(true, 3, 2),
+(true, 4, 2),
 (true, 5, 2),
 (true, 5, 11);
 
@@ -149,27 +153,26 @@ VALUES
 ('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
 ('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
 
--- INSERT INTO `source` 
--- (`origin_source_path`, `import_time`) 
--- VALUES 
--- ('https://example.com/source1', '2024-09-30 10:00:00'),
--- ('https://example.com/source2', '2024-09-30 11:00:00'),
--- ('https://example.com/source3', '2024-09-30 12:00:00'),
--- ('https://example.com/source4', '2024-09-30 13:00:00');
+INSERT INTO `exam_database` 
+(`database_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `database_description`, `database_image`, `database_name`, `database_note`) 
+VALUES 
+('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, null, null, null, null, 'Example Database', 'example_database.png', 'Example Database', 'This is an example database.'),
+('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, null, null, null, null, 'Another Database', 'another_database.png', 'Another Database', 'This is another database.'),
+('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, null, null, null, null, 'Sample Database', 'sample_database.png', 'Sample Database', 'This is a sample database.');
 
--- INSERT INTO `exam_database` 
--- (`data_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`) 
--- VALUES 
--- ('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 1),
--- ('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 2),
--- ('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, '2024-09-30 10:00:00', 1, NULL, 1, 3);
+INSERT INTO `instructions` 
+(`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) 
+VALUES 
+('Introduction 1', 'Important 1', '2024-09-30 10:00:00', 1, null, null, null, null),
+('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null),
+('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null);
 
--- INSERT INTO `exam_paper` 
--- (`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `account_id`, `exam_id`, `exam_database_id`, `source_id`) 
--- VALUES 
--- ('EP001', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 1, 1, 1, 1, 1),
--- ('EP002', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 2, 2, 2, 2, 2),
--- ('EP003', true, '2024-09-30 10:00:00', 1, NULL, 1, NULL, 3, 3, 3, 3, 3);
+INSERT INTO `exam_paper` 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `exam_database_id`, `instructions_id`) 
+VALUES 
+('009909', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 1, 1),
+('110100', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2, 2),
+('001001', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3, 3);
 
 -- INSERT INTO `exam_question` 
 -- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 

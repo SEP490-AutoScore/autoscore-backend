@@ -7,36 +7,98 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 
 @Service
 public class FileExtractionService {
+    private static final Logger logger = LoggerFactory.getLogger(FileExtractionService.class);
 
     // Giải nén file 7z bằng Apache Commons Compress
-    public void extract7zWithApacheCommons(File archive, File outputDir) throws IOException {
-        try (SevenZFile sevenZFile = new SevenZFile(archive)) {
-            SevenZArchiveEntry entry;
-            while ((entry = sevenZFile.getNextEntry()) != null) {
-                if (entry.isDirectory()) {
-                    continue;
-                }
-                File outFile = new File(outputDir, entry.getName());
-                Files.createDirectories(outFile.getParentFile().toPath());
-                try (FileOutputStream out = new FileOutputStream(outFile)) {
-                    byte[] buffer = new byte[8192];
-                    int len;
-                    while ((len = sevenZFile.read(buffer)) > 0) {
-                        out.write(buffer, 0, len);
-                    }
+    public String extract7zWithApacheCommons(MultipartFile file, String uploadDir) throws IOException {
+        File tempFile = new File(uploadDir, file.getOriginalFilename());
+        file.transferTo(tempFile);
+    
+        // Lấy thông tin campus
+        Set<Organization> organizations = Util.getOrganizations();
+        String campus = null;
+        if (organizations != null) {
+            for (Organization organization : organizations) {
+                if (organization.getType() == Organization_Enum.CAMPUS) {
+                    campus = organization.getName();
+                    break;
                 }
             }
         }
-    }
+
+        String rootFolder = null;
+        File outputDir = new File(uploadDir, campus);
+        outputDir.mkdir();
+    
+        long startTime = System.currentTimeMillis();  // Bắt đầu theo dõi thời gian
+    
+        try (SevenZFile sevenZFile = new SevenZFile(tempFile)) {
+            SevenZArchiveEntry entry;
+            byte[] buffer = new byte[10 * 1024 * 1024]; // Tăng kích thước bộ đệm lên 10MB
+            while ((entry = sevenZFile.getNextEntry()) != null) {
+                File outFile = new File(outputDir, entry.getName());
+    
+                if (entry.isDirectory()) {
+                    if (rootFolder == null) {
+                        rootFolder = outFile.getName();  // Lưu tên thư mục gốc
+                    }
+                    Files.createDirectories(outFile.toPath());
+                    logger.info("Directory created: {}", outFile.getPath());
+                } else {
+                    Files.createDirectories(outFile.getParentFile().toPath());
+                    
+                    // Ghi file
+                    try (FileOutputStream out = new FileOutputStream(outFile)) {
+                        int len;
+                        while ((len = sevenZFile.read(buffer)) > 0) {
+                            out.write(buffer, 0, len);
+                        }
+                    }
+                    logger.info("File extracted: {}", outFile.getPath());
+                }
+    
+                // Kiểm tra thời gian xử lý và log cảnh báo nếu cần
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                if (elapsedTime > 60000) {  // Quá 60 giây
+                    logger.warn("Extracting file took longer than expected: {}, elapsedTime: {} ms", entry.getName(), elapsedTime);
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Failed to extract 7z file: {}", e.getMessage());
+            throw new IOException("Error extracting file: " + e.getMessage());
+        } finally {
+            // Dọn dẹp file tạm
+            if (tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
+    
+        if (rootFolder == null) {
+            logger.error("Invalid folder structure in archive");
+            throw new IOException("Invalid folder structure in archive");
+        }
+    
+        return campus + "\\" + rootFolder;
+    }    
 
     // Giải nén file ZIP bằng Zip4j
     public void extractZipWithZip4j(File archive, File outputDir) throws IOException {
