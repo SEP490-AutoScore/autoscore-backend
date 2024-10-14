@@ -1,9 +1,12 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -92,6 +95,26 @@ public class ExamController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @PostMapping("/merge")
+    public ResponseEntity<byte[]> mergeData(@RequestBody Map<String, Object> data) {
+        try {
+            String templatePath = "AutoScore\\src\\main\\resources\\Template.docx"; // Path to your template
+
+            // Merge the data into the template
+            byte[] mergedDocument = examService.mergeDataIntoTemplate(templatePath, data);
+
+            // Prepare response headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "merged_document.docx");
+
+            // Return the document as a downloadable file
+            return new ResponseEntity<>(mergedDocument, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

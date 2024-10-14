@@ -6,9 +6,19 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+
+import java.util.Map;
+import com.aspose.words.Document;
+import com.aspose.words.MailMerge;
+
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+// import org.apache.poi.xwpf.usermodel.XWPFDocument;
+// import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+// import org.apache.poi.xwpf.usermodel.XWPFRun;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamMapper;
@@ -19,6 +29,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
@@ -39,13 +50,13 @@ public class ExamService implements IExamService {
     private final Util util;
 
     public ExamService(IExamRepository examRepository,
-            // ICampusRepository campusRepository,
             ISubjectRepository subjectRepository,
-            IAccountRepository accountRepository) {
+            IAccountRepository accountRepository,
+            IEmployeeRepository employeeRepository) {
         this.examRepository = examRepository;
         this.subjectRepository = subjectRepository;
         this.accountRepository = accountRepository;
-        this.util = new Util(accountRepository);
+        this.util = new Util(employeeRepository);
     }
 
     @Override
@@ -93,19 +104,13 @@ public class ExamService implements IExamService {
     public ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception, NotFoundException {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
-            // Check campus
-
             // Check subject
             Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
 
             // Check account
             Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()), "Account", Util.getAuthenticatedAccountId());
 
-            // //check exist exam
-            // Optional<Exam> optionExam = examRepository.findById(entity.getExamId());
-            // if (optionExam.isPresent()) {
-            //     throw new NotFoundException("Exam id: " + entity.getExamId() + " not found");
-            // }
+            //validation exam
 
             //mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
@@ -175,11 +180,7 @@ public class ExamService implements IExamService {
                     .or(ExamSpecification.hasSemester(request.getSearchString()));
         }
 
-        if (request.getCampusId() != 0) {
-            spec.and(ExamSpecification.hasCampusId(request.getCampusId()));
-        }
-
-        if (request.getSubjectId() != 0) {
+        if (request.getSubjectId() != null) {
             spec.and(ExamSpecification.hasSubjectId(request.getSubjectId()));
         }
 
@@ -187,12 +188,29 @@ public class ExamService implements IExamService {
     }
 // </editor-fold>
 
-// <editor-fold desc="create exam func helper">
-    private Specification<Exam> createSpecificationForExistedExamByCode(String examCode) {
-        Specification<Exam> spec = Specification.where(null);
-        spec.and(ExamSpecification.hasExamCode(examCode));
-        return spec;
+    @Override
+    public byte[] mergeDataIntoTemplate(String templatePath, Map<String, Object> data) throws Exception {
+        // Load the Word document template
+        Document doc = new Document(templatePath);
+
+        // Get the mail merge engine
+        MailMerge mailMerge = doc.getMailMerge();
+
+        // Prepare arrays of field names and values
+        String[] fieldNames = data.keySet().toArray(new String[0]);
+        Object[] fieldValues = data.values().toArray();
+
+        // Execute mail merge
+        mailMerge.execute(fieldNames, fieldValues);
+
+        // Save the document to a byte array (could save to a file or stream as well)
+        byte[] outputBytes;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            doc.save(outputStream, com.aspose.words.SaveFormat.DOCX);
+            outputBytes = outputStream.toByteArray();
+        }
+
+        return outputBytes;
     }
 
-// </editor-fold>
 }

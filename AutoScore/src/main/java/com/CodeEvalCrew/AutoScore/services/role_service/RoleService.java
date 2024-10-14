@@ -3,11 +3,9 @@ package com.CodeEvalCrew.AutoScore.services.role_service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.RoleRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
@@ -15,9 +13,8 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.RoleResponseDTO;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
 import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.mappers.RoleMapper;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
@@ -28,10 +25,10 @@ public class RoleService implements IRoleService {
     private final Util util;
 
 
-    public RoleService(IRoleRepositoty roleRepositoty, IAccountRepository accountRepository, IRolePermissionService rolePermissionService) {
+    public RoleService(IRoleRepositoty roleRepositoty, IEmployeeRepository employeeRepository, IRolePermissionService rolePermissionService) {
         this.roleRepositoty = roleRepositoty;
         this.rolePermissionService = rolePermissionService;
-        this.util = new Util(accountRepository);
+        this.util = new Util(employeeRepository);
     }
 
     @Override
@@ -125,34 +122,34 @@ public class RoleService implements IRoleService {
         }
     }
 
-    @Override
-    @Transactional
-    public OperationStatus deleteRole(Long roleId) {
-        try {
-            Optional<Role> role = roleRepositoty.findById(roleId);
-            if (role.isEmpty()) {
-                return OperationStatus.NOT_FOUND;
-            }
+    // @Override
+    // @Transactional
+    // public OperationStatus deleteRole(Long roleId) {
+    //     try {
+    //         Optional<Role> role = roleRepositoty.findById(roleId);
+    //         if (role.isEmpty()) {
+    //             return OperationStatus.NOT_FOUND;
+    //         }
 
-            Set<Account_Role> account_roles = role.get().getAccount_roles();
-            for (Account_Role account_role : account_roles) {
-                if (Objects.equals(account_role.getAccountRoleId(), roleId)) {
-                    return OperationStatus.CANNOT_DELETE;
-                }
-            }
+    //         Set<Account_Role> account_roles = role.get().getAccount_roles();
+    //         for (Account_Role account_role : account_roles) {
+    //             if (Objects.equals(account_role.getAccountRoleId(), roleId)) {
+    //                 return OperationStatus.CANNOT_DELETE;
+    //             }
+    //         }
 
-            OperationStatus operationStatus = rolePermissionService.deleteRolePermission(roleId);
-            if (operationStatus != OperationStatus.SUCCESS) {
-                return OperationStatus.FAILURE;
-            }
+    //         OperationStatus operationStatus = rolePermissionService.deleteRolePermission(roleId);
+    //         if (operationStatus != OperationStatus.SUCCESS) {
+    //             return OperationStatus.FAILURE;
+    //         }
 
-            roleRepositoty.deleteById(roleId);
+    //         roleRepositoty.deleteById(roleId);
 
-            return OperationStatus.SUCCESS;
-        } catch (Exception e) {
-            return OperationStatus.ERROR;
-        }
-    }
+    //         return OperationStatus.SUCCESS;
+    //     } catch (Exception e) {
+    //         return OperationStatus.ERROR;
+    //     }
+    // }
 
     @Override
     public RoleResponseDTO getRoleByName(String roleName) {

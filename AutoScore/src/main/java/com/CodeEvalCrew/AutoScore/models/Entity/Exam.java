@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,8 +37,6 @@ public class Exam {
 
     private LocalDateTime publishAt;
 
-    private String semesterName;
-
     private boolean status;
     private LocalDateTime createdAt;
 
@@ -65,4 +62,11 @@ public class Exam {
 
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
     private Set<Exam_Paper> exam_papers;    
+
+    @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
+    private Set<Student> students;    
+
+    @ManyToOne
+    @JoinColumn(name = "semesterId", nullable = false)
+    private Semester semester;
 }

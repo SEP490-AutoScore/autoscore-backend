@@ -17,7 +17,7 @@ public interface ExamMapper {
     @Mapping(source = "examAt", target = "examAt")
     @Mapping(source = "gradingAt", target = "gradingAt")
     @Mapping(source = "publishAt", target = "publishAt")
-    @Mapping(source = "semesterName", target = "semesterName")
+    // @Mapping(source = "semesterName", target = "semesterName")
 
     ExamViewResponseDTO examToViewResponse(Exam exam);
 

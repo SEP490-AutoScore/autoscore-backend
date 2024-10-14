@@ -7,12 +7,17 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 
 import jakarta.transaction.Transactional;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -23,24 +28,33 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // Tìm account theo email
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        Set<GrantedAuthority> authorities = account.getAccountRoles().stream()
-                .filter(accountRole -> accountRole.isStatus() && accountRole.getRole() != null) // Filter active roles with non-null Role
-                // Add roles with "ROLE_" prefix
-                .map(accountRole -> new SimpleGrantedAuthority("ROLE_" + accountRole.getRole().getRoleName()))
-                .collect(Collectors.toSet());  // Collect roles first
+        // Kiểm tra Role của Account
+        Role role = account.getRole();
+        if (role == null || !role.isStatus() || role.getRoleName() == null) {
+            throw new UsernameNotFoundException("Account has no valid role assigned.");
+        }
 
-        // Now, add permissions
-        authorities.addAll(
-                account.getAccountRoles().stream()
-                        .flatMap(accountRole -> accountRole.getRole().getRole_permissions().stream()) // Get permissions from roles
-                        .filter(rolePermission -> rolePermission.isStatus() && rolePermission.getPermission() != null) // Filter active permissions
-                        .map(rolePermission -> new SimpleGrantedAuthority(rolePermission.getPermission().getAction()))
-                        .collect(Collectors.toSet()) // Collect permissions
-        );
+        // Tạo danh sách GrantedAuthority (quyền) cho UserDetails
+        Set<GrantedAuthority> authorities = role.getRole_permissions().stream()
+                .filter(Role_Permission::isStatus)
+                .map(rolePermission -> new SimpleGrantedAuthority(rolePermission.getPermission().getAction()))
+                .collect(Collectors.toSet());
 
-        return new UserDetailsImpl(account.getAccountId(), account.getEmail(), authorities);
+        // Thêm quyền hạn của Role (ROLE_)
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
+
+        // Lấy danh sách các tổ chức mà tài khoản liên kết
+        Set<Organization> organizations = account.getAccountOrganizations().stream()
+                .filter(Account_Organization::isStatus) // Lọc các Account_Organization có status là true
+                .map(Account_Organization::getOrganization)
+                .collect(Collectors.toSet());
+
+        // Trả về đối tượng UserDetailsImpl với danh sách quyền hạn và tổ chức
+        return new UserDetailsImpl(account.getAccountId(), account.getEmail(), authorities, organizations);
     }
 }
+

@@ -1,7 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,5 +17,5 @@ public class AccountResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
-    private Set<RoleResponseDTO> roles;
+    private RoleResponseDTO role;
 }

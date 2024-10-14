@@ -2,8 +2,7 @@ package com.CodeEvalCrew.AutoScore.services.account_service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -15,26 +14,21 @@ import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountReposi
 import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.mappers.AccountMapper;
 import com.CodeEvalCrew.AutoScore.mappers.RoleMapper;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAccountRequestDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Role;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRoleRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
 import com.CodeEvalCrew.AutoScore.utils.Util;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class AccountService implements IAccountService {
 
     private final IAccountRepository accountRepository;
-    private final IAccountRoleRepository accountRoleRepository;
+    private final IRoleRepositoty roleRepositoty;
     private final Util util;
 
-    public AccountService(IAccountRepository accountRepository, IAccountRoleRepository accountRoleRepository, IRoleRepositoty roleRepositoty) {
+    public AccountService(IAccountRepository accountRepository, IRoleRepositoty roleRepositoty, IEmployeeRepository employeeRepository) {
         this.accountRepository = accountRepository;
-        this.accountRoleRepository = accountRoleRepository;
-        this.util = new Util(accountRepository);
+        this.roleRepositoty = roleRepositoty;
+        this.util = new Util(employeeRepository);
     }
 
     @Override
@@ -50,11 +44,9 @@ public class AccountService implements IAccountService {
                 AccountResponseDTO accountResponseDTO = AccountMapper.INSTANCE
                         .accountToAccountResponseDTO(account, util);
 
-                List<Role> roles = getRolesByAccountId(account.getAccountId());
-                Set<RoleResponseDTO> roleResponseDTOs = roles.stream()
-                        .map(role -> RoleMapper.INSTANCE.roleToRoleResponseDTO(role, util))
-                        .collect(Collectors.toSet());
-                accountResponseDTO.setRoles(roleResponseDTOs);
+                Optional<Role> role = roleRepositoty.findById(account.getRole().getRoleId());
+                RoleResponseDTO roleResponseDTO = RoleMapper.INSTANCE.roleToRoleResponseDTO(role.get(), util);
+                accountResponseDTO.setRole(roleResponseDTO);
 
                 accountResponseDTOs.add(accountResponseDTO);
             }
@@ -69,23 +61,6 @@ public class AccountService implements IAccountService {
 
     @Override
     public AccountResponseDTO getAccountById(Long accountId) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAccountById'");
-    }
-
-    private List<Role> getRolesByAccountId(Long accountId) {
-        if (accountId == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
-
-        List<Account_Role> accountRoles = accountRoleRepository.findAllByAccount_AccountId(accountId);
-
-        if (accountRoles == null || accountRoles.isEmpty()) {
-            throw new RuntimeException("Account Role not found with id: " + accountId);
-        }
-
-        return accountRoles.stream()
-                .map(Account_Role::getRole)
-                .collect(Collectors.toList());
     }
 }

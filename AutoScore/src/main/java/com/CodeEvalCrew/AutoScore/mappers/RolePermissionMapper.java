@@ -22,15 +22,15 @@ public interface RolePermissionMapper {
     // Ánh xạ Role_Permission -> RolePermissionResponseDTO
     @Mapping(source = "role.roleName", target = "roleName")
     @Mapping(source = "role.status", target = "status")
-    @Mapping(expression= "java(util.getAccountName(rolePermission.getCreatedBy()))", target = "createdBy")
-    @Mapping(expression= "java(util.getAccountName(rolePermission.getUpdatedBy()))", target = "updatedBy")
-    @Mapping(expression= "java(util.getAccountName(rolePermission.getDeletedBy()))", target = "deletedBy")
+    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getCreatedBy()))", target = "createdBy")
+    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getUpdatedBy()))", target = "updatedBy")
+    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getDeletedBy()))", target = "deletedBy")
     RolePermissionResponseDTO rolePermissionToRolePermissionResponseDTO(Role_Permission rolePermission, @Context Util util);
     
     // Ánh xạ List<Role_Permission> -> List<RolePermissionResponseDTO>
-    @Mapping(expression= "java(util.getAccountName(rolePermission.getCreatedBy()))", target = "createdBy")
-    @Mapping(expression= "java(util.getAccountName(rolePermission.getUpdatedBy()))", target = "updatedBy")
-    @Mapping(expression= "java(util.getAccountName(rolePermission.getDeletedBy()))", target = "deletedBy")
+    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getCreatedBy()))", target = "createdBy")
+    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getUpdatedBy()))", target = "updatedBy")
+    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getDeletedBy()))", target = "deletedBy")
     List<RolePermissionResponseDTO> rolePermissionsToRolePermissionResponseDTOs(List<Role_Permission> rolePermissions, @Context Util util);
 
     // Ánh xạ Permission -> PermissionResponseDTO

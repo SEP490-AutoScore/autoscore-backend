@@ -8,12 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +31,7 @@ public class Subject {
     private String subjectCode;
 
     private boolean status;
+    
     private LocalDateTime createdAt;
 
     private Long createdBy;
@@ -51,6 +47,4 @@ public class Subject {
     // 1-n exam
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
     private Set<Exam> exams;
-
-
 }

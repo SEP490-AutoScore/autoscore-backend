@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -104,21 +103,21 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('DELETE_ROLE')")
-    @DeleteMapping("/delete/{roleId}")
-    public ResponseEntity<?> deleteRole(@PathVariable Long roleId) {
-        try {
-            OperationStatus status = roleService.deleteRole(roleId);
-            return switch (status) {
-                case SUCCESS -> ResponseEntity.ok("Role deleted successfully");
-                case FAILURE -> ResponseEntity.status(500).body("Can't delete Role");
-                case NOT_FOUND -> ResponseEntity.status(404).body("Role not found");
-                case CANNOT_DELETE -> ResponseEntity.status(400).body("Role is in use");
-                case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Role");
-                default -> ResponseEntity.status(500).body("Unexpected error occurred");
-            };
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Unexpected error occurred");
-        }
-    }
+    // @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('DELETE_ROLE')")
+    // @DeleteMapping("/delete/{roleId}")
+    // public ResponseEntity<?> deleteRole(@PathVariable Long roleId) {
+    //     try {
+    //         OperationStatus status = roleService.deleteRole(roleId);
+    //         return switch (status) {
+    //             case SUCCESS -> ResponseEntity.ok("Role deleted successfully");
+    //             case FAILURE -> ResponseEntity.status(500).body("Can't delete Role");
+    //             case NOT_FOUND -> ResponseEntity.status(404).body("Role not found");
+    //             case CANNOT_DELETE -> ResponseEntity.status(400).body("Role is in use");
+    //             case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Role");
+    //             default -> ResponseEntity.status(500).body("Unexpected error occurred");
+    //         };
+    //     } catch (Exception e) {
+    //         return ResponseEntity.status(500).body("Unexpected error occurred");
+    //     }
+    // }
 }
