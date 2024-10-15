@@ -220,7 +220,12 @@
             <version>1.10</version>
         </dependency>
 
-        
+        <!-- JDBC Driver of SQL Server -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j -->
         <dependency>
             <groupId>org.docx4j</groupId>

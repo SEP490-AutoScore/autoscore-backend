@@ -8,8 +8,14 @@ import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceDetailRep
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceRepository;
 import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentRepository;
 
+import jakarta.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +25,8 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SourceDetailDTO;
 
 @Service
 public class SourceDetailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(SourceService.class);
 
     private final SourceDetailRepository sourceDetailRepository;
     private final SourceDetailMapper sourceDetailMapper;
@@ -67,5 +75,23 @@ public class SourceDetailService {
 
     public void deleteSourceDetail(Long id) {
         sourceDetailRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void saveStudentSubmission(File studentFolder, Student student, Source source) {
+        try {
+            // Lưu thông tin chi tiết về mã nguồn
+            Source_Detail sourceDetail = new Source_Detail();
+            sourceDetail.setStudentSourceCodePath(studentFolder.getPath());
+            sourceDetail.setStudent(student);
+            sourceDetail.setSource(source);
+            sourceDetailRepository.save(sourceDetail);
+
+            logger.info("Successfully saved submission for student: {}", student.getStudentCode());
+
+        } catch (DataAccessException e) {
+            logger.error("Database error: {}", e.getMessage());
+            throw new RuntimeException("Failed to save student submission: " + e.getMessage());
+        }
     }
 }

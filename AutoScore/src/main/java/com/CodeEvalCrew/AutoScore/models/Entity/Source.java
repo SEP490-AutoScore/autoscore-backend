@@ -4,7 +4,9 @@ import java.sql.Timestamp;
 import java.util.Set;
 
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,4 +36,8 @@ public class Source {
     //1-n source detail
     @OneToMany(mappedBy = "source", cascade = CascadeType.ALL)
     private Set<Source_Detail> sourceDetails;
+
+    @OneToOne
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 }

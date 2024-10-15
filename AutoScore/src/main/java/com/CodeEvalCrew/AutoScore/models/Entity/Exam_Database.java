@@ -1,14 +1,13 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,13 +25,17 @@ public class Exam_Database {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examDatabaseId;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String databaseScript;
 
     private String databaseDescription;
 
     private String databaseName;
 
-    private String databaseImage;
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] databaseImage;
 
     private String databaseNote;
 
@@ -50,8 +53,4 @@ public class Exam_Database {
 
     private Long deletedBy;
 
-    //Relationship
-    @OneToMany
-    @JoinColumn(name = "examDatabaseTableId", nullable = true)
-    private Set<Exam_Database_Table> examDatabaseTables;
 }
