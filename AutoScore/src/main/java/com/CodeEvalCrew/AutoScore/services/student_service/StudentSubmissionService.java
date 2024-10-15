@@ -42,22 +42,21 @@ public class StudentSubmissionService {
     @Autowired
     private SourceDetailService sourceDetailService;
 
+// Phương thức chính để xử lý file submission
     public List<String> processFileSubmission(MultipartFile file, Long examPaperId) throws IOException {
         List<String> unmatchedStudents = Collections.synchronizedList(new ArrayList<>());
 
-        // Bước 1: Giải nén file
+        // Step 1: Giải nén tệp đã upload
         String rootFolder = fileExtractionService.extract7zWithApacheCommons(file, uploadDir);
 
-        // Bước 2: Truy cập thư mục chứa bài nộp
+        // Step 2: Truy cập thư mục StudentSolution
         String mainSourcePath = uploadDir + "\\" + rootFolder;
         File studentSolutionFolder = new File(mainSourcePath + "\\StudentSolution");
 
         // Lưu main source path vào source
         Source source = sourceService.saveMainSource(mainSourcePath, examPaperId);
 
-        // Kiểm tra nếu thư mục StudentSolution tồn tại và là một thư mục
         if (studentSolutionFolder.exists() && studentSolutionFolder.isDirectory()) {
-            // Lấy danh sách tất cả các thư mục con bên trong StudentSolution (ví dụ: thư mục "1")
             File[] subFolders = studentSolutionFolder.listFiles(File::isDirectory);
 
             // Kiểm tra nếu có thư mục con nào bên trong
@@ -65,14 +64,12 @@ public class StudentSubmissionService {
                 // Lấy thư mục con đầu tiên (ví dụ: thư mục "1")
                 File actualStudentFolder = subFolders[0]; // Thư mục "1" có thể là subFolders[0]
 
-                // Kiểm tra nếu actualStudentFolder tồn tại và là một thư mục
                 if (actualStudentFolder.exists() && actualStudentFolder.isDirectory()) {
                     // Lấy danh sách các thư mục sinh viên bên trong actualStudentFolder
                     File[] studentFolders = actualStudentFolder.listFiles(File::isDirectory);
-
                     // Kiểm tra nếu có thư mục sinh viên nào bên trong
                     if (studentFolders != null && studentFolders.length > 0) {
-                        // Xử lý song song các thư mục sinh viên
+                        // Xử lý tất cả các thư mục sinh viên
                         Arrays.stream(studentFolders).parallel().forEach(studentFolder -> {
                             try {
                                 String studentCode = extractStudentCode(studentFolder.getName());
@@ -81,34 +78,55 @@ public class StudentSubmissionService {
                                 Optional<Student> student = studentRepository.findByStudentCode(studentCode);
 
                                 if (student.isPresent()) {
-                                    // Sinh viên tồn tại trong cơ sở dữ liệu
-                                    sourceDetailService.saveStudentSubmission(studentFolder, student.get(), source);
-                                    logger.info("Submission saved for student: {}", studentCode);
+                                    // Lấy danh sách các thử mục bên trong studentFolder
+                                    File[] studentSubFolders = studentFolder.listFiles(File::isDirectory);
+                                    if (studentSubFolders != null && studentSubFolders.length > 0) {
+                                        File studentSubFolder = studentSubFolders[0];
+                                        // Truy cập folder "0" và giải nén solution.zip
+                                        File solutionZip = new File(studentSubFolder, "solution.zip");
+                                        if (solutionZip.exists()) {
+                                            // Giải nén tệp zip và tất cả các tệp nén lồng nhau
+                                            File extractedFolder = extractArchive(solutionZip);
+                                            if (extractedFolder != null) {
+                                                // Tiếp tục giải nén các tệp trong thư mục được giải nén
+                                                File slnFile = processExtractedFolder(extractedFolder);
+
+                                                if (slnFile != null) {
+                                                    sourceDetailService.saveStudentSubmission(slnFile, student.get(), source);
+                                                    logger.info("Submission saved for student: {}", studentCode);
+                                                } else {
+                                                    logger.warn("No .sln file found for student: {}", studentCode);
+                                                    unmatchedStudents.add(studentCode);
+                                                }
+                                            }
+                                        } else {
+                                            logger.warn("solution.zip not found for student: {}", studentCode);
+                                            unmatchedStudents.add(studentCode);
+                                        }
+                                    } else {
+                                        logger.warn("No subfolders found inside StudentSolution");
+                                    }
                                 } else {
-                                    // Không tìm thấy sinh viên trong cơ sở dữ liệu
                                     unmatchedStudents.add(studentCode);
                                     logger.warn("Unmatched student: {}", studentCode);
                                 }
-                            } catch (Exception e) {
-                                logger.error("Error processing folder {}: {}", studentFolder.getName(), e.getMessage());
+                            } catch (IOException e) {
+                                logger.error("Error processing folder {}: {}", actualStudentFolder.getName(), e.getMessage());
                             }
                         });
                     } else {
-                        logger.error("No student folders found inside: {}", actualStudentFolder.getPath());
-                        throw new IOException("No student folders found inside the actual student folder");
+                        throw new IOException("No subfolders found inside StudentSolution");
                     }
                 } else {
-                    logger.error("Actual student folder does not exist or is not a directory: {}", actualStudentFolder.getPath());
-                    throw new IOException("Actual student folder is missing or invalid");
+                    throw new IOException("No subfolders found inside StudentSolution");
                 }
             } else {
-                logger.error("No subfolders found inside StudentSolution.");
                 throw new IOException("No subfolders found inside StudentSolution");
             }
         } else {
-            logger.error("StudentSolution folder does not exist or is not a directory: {}", studentSolutionFolder.getPath());
             throw new IOException("StudentSolution folder is missing or invalid");
         }
+
         return unmatchedStudents;
     }
 
@@ -121,5 +139,54 @@ public class StudentSubmissionService {
         logger.warn("Invalid folder name: {}", folderName);
         return "";
     }
-    
+
+    // Cập nhật phương thức extractArchive để giải nén tại vị trí hiện tại và xóa tệp nén sau khi giải nén
+    private File extractArchive(File archive) throws IOException {
+        File extractToDir = archive.getParentFile(); // Giải nén tại vị trí hiện tại của tệp nén
+
+        // Kiểm tra loại tệp nén và giải nén tương ứng
+        if (archive.getName().endsWith(".zip")) {
+            fileExtractionService.extractZipWithZip4j(archive, extractToDir); // Giải nén tại vị trí hiện tại
+        } else if (archive.getName().endsWith(".rar")) {
+            fileExtractionService.extractWithCommonsCompress(archive, extractToDir); // Giải nén tại vị trí hiện tại
+        } else if (archive.getName().endsWith(".7z")) {
+            fileExtractionService.extract7zFile(archive, extractToDir); // Giải nén tệp .7z tại vị trí hiện tại
+        } else {
+            throw new IOException("Unsupported archive format: " + archive.getName());
+        }
+
+        // Xóa tệp nén sau khi giải nén
+        if (archive.exists() && !archive.delete()) {
+            logger.warn("Failed to delete archive: {}", archive.getPath());
+        }
+
+        return extractToDir.exists() ? extractToDir : null;
+    }
+
+    // Xử lý thư mục đã giải nén: tiếp tục giải nén nếu có tệp nén bên trong, hoặc tìm tệp .sln.
+    private File processExtractedFolder(File folder) throws IOException {
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // Xử lý đệ quy nếu có thư mục con
+                    File slnFile = processExtractedFolder(file);
+                    if (slnFile != null) {
+                        return slnFile;  // Trả về tệp .sln nếu tìm thấy
+                    }
+                } else if (file.getName().endsWith(".sln")) {
+                    return file;  // Tìm thấy tệp .sln
+                } else if (file.getName().endsWith(".zip") || file.getName().endsWith(".rar") || file.getName().endsWith(".7z")) {
+                    // Nếu còn tệp nén, tiếp tục giải nén tại vị trí hiện tại của tệp nén
+                    File extractedFolder = extractArchive(file);
+                    if (extractedFolder != null) {
+                        return processExtractedFolder(extractedFolder);  // Tiếp tục xử lý thư mục vừa giải nén
+                    }
+                }
+            }
+        }
+
+        return null;  // Không tìm thấy tệp .sln
+    }
 }

@@ -1,28 +1,32 @@
 package com.CodeEvalCrew.AutoScore.services.file_service;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.util.Set;
+
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
-import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 
 @Service
 public class FileExtractionService {
@@ -134,6 +138,35 @@ public class FileExtractionService {
         } catch (ArchiveException e) {
             // Xử lý ngoại lệ
             throw new IOException("Error extracting archive: " + e.getMessage(), e);
+        }
+    }
+
+    // Giải nên file 7z
+    public void extract7zFile(File archive, File outputDir) throws IOException {
+        if (!outputDir.exists()) {
+            outputDir.mkdirs(); // Create the output directory if it doesn't exist
+        }
+    
+        try (SevenZFile sevenZFile = new SevenZFile(archive)) {
+            SevenZArchiveEntry entry;
+            byte[] buffer = new byte[8192]; // Adjust the buffer size if needed
+    
+            while ((entry = sevenZFile.getNextEntry()) != null) {
+                File outFile = new File(outputDir, entry.getName());
+    
+                if (entry.isDirectory()) {
+                    outFile.mkdirs(); // Create directories for the extracted entries
+                } else {
+                    try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                        int bytesRead;
+                        while ((bytesRead = sevenZFile.read(buffer)) > 0) {
+                            fos.write(buffer, 0, bytesRead);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new IOException("Failed to extract 7z file: " + e.getMessage(), e);
         }
     }
 }
