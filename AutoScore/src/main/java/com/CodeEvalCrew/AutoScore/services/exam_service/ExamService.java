@@ -488,7 +488,7 @@ public class ExamService implements IExamService {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (InvalidFormatException e) {
             message = "An error occurred while processing the document.";
             e.printStackTrace();
         }
