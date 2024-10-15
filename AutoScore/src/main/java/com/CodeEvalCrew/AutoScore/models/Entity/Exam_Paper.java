@@ -29,19 +29,13 @@ public class Exam_Paper {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examPaperId;
-
     private String examPaperCode;
     private boolean status;
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
 
     //Relationship

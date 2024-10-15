@@ -141,7 +141,9 @@ public class ExamService implements IExamService {
 
             //create new exam
             examRepository.save(exam);
-
+            
+            //mapping exam
+            result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException ex) {
             throw ex;
         } catch (Exception e) {
@@ -173,10 +175,8 @@ public class ExamService implements IExamService {
             //create new exam
             examRepository.save(exam);
 
-            result = ExamMapper.INSTANCE.examToViewResponse(exam);
-
             //mapping exam
-            // Exam exam = new Exam();
+            result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
