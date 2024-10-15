@@ -31,7 +31,7 @@ VALUES
 ('CREATE_SUBJECT', 13, 'Create subject', 5, 1),
 ('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
 ('CREATE_EXAM', 15, 'Create exam', 7, 1),
-('UPDATE_EXAM_DATABASE', 31, 'Update exam database', 9, 1),
+('CREATE_EXAM_DATABASE', 31, 'Create exam database', 9, 1),
 
 ('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
 ('UPDATE_ROLE', 17, 'Update role', 2, 1),
@@ -40,7 +40,7 @@ VALUES
 ('UPDATE_SUBJECT', 20, 'Update subject', 5, 1),
 ('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
 ('UPDATE_EXAM', 22, 'Update exam', 7, 1),
-('DELETE_EXAM_DATABASE', 32, 'Delete exam database', 9, 1),
+('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 9, 1),
 
 ('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
 ('DELETE_ROLE', 24, 'Delete role', 2, 1),
