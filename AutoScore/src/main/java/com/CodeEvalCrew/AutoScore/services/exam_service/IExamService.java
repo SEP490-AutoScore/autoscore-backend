@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.docx4j.model.fields.merge.DataFieldName;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
@@ -25,5 +26,5 @@ public interface IExamService{
 
     void mergeDataIntoWord(String templatePath, String outputPath, Map<DataFieldName, String> data) throws Exception;
 
-    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException;
+    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException;
 }

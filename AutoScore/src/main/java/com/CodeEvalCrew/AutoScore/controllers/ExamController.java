@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.docx4j.model.fields.merge.DataFieldName;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -139,7 +140,7 @@ public class ExamController {
     }
 
     @GetMapping("/generate-word")
-    public ResponseEntity<byte[]> generateWord() throws IOException {
+    public ResponseEntity<byte[]> generateWord() throws IOException, InvalidFormatException {
 
         try {
             // Define the path of the template and output file
