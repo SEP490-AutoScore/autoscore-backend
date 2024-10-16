@@ -1,11 +1,14 @@
 package com.CodeEvalCrew.AutoScore.services.exam_service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFAbstractNum;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFNumbering;
@@ -135,7 +141,9 @@ public class ExamService implements IExamService {
 
             //create new exam
             examRepository.save(exam);
-
+            
+            //mapping exam
+            result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException ex) {
             throw ex;
         } catch (Exception e) {
@@ -167,10 +175,8 @@ public class ExamService implements IExamService {
             //create new exam
             examRepository.save(exam);
 
-            result = ExamMapper.INSTANCE.examToViewResponse(exam);
-
             //mapping exam
-            // Exam exam = new Exam();
+            result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -247,7 +253,7 @@ public class ExamService implements IExamService {
     }
 
     @Override
-    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException {
+    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException {
 
         // Step 1: Get the Exam data
         ExamExport exam = getExamToExamExport();
@@ -261,15 +267,18 @@ public class ExamService implements IExamService {
         data.put("instructions", exam.getInstructions());
         data.put("important", exam.getImportant());
         data.put("semester", exam.getSemester());
-        // data.put("databaseDescription", exam.getDatabaseDescpription());
-        // data.put("databaseName", exam.getDatabaseName());
-        // data.put("databaseNote", exam.getDatabaseNote());
+        data.put("databaseDescription", exam.getDatabaseDescpription());
+        data.put("databaseName", exam.getDatabaseName());
+        data.put("databaseNote", exam.getDatabaseNote());
 
         // Step 3: Load the Word template and replace placeholders
         try (FileInputStream fis = new FileInputStream(templatePath); XWPFDocument document = new XWPFDocument(fis)) {
 
             // Replace placeholders in paragraphs
             replacePlaceholdersInDocument(document, data);
+
+            // Add image in to the exam paper
+            addDatabaseImage(document, exam);
 
             // Add exam questions and their corresponding barems
             addExamQuestions(document, exam);
@@ -303,17 +312,29 @@ public class ExamService implements IExamService {
 
     private void replacePlaceholdersInDocument(XWPFDocument document, Map<String, String> data) {
         for (XWPFParagraph paragraph : document.getParagraphs()) {
+            // combine run replace
+            StringBuilder paragraphText = new StringBuilder();
             for (XWPFRun run : paragraph.getRuns()) {
-                String text = run.getText(0);
-                if (text != null) {
-                    for (Map.Entry<String, String> entry : data.entrySet()) {
-                        String placeholder = "${" + entry.getKey() + "}";
-                        if (text.contains(placeholder)) {
-                            text = text.replace(placeholder, entry.getValue());
-                            run.setText(text, 0);
-                        }
-                    }
+                paragraphText.append(run.getText(0));
+            }
+
+            String combinedText = paragraphText.toString();
+            for (Map.Entry<String, String> entry : data.entrySet()) {
+                String placeholder = "${" + entry.getKey() + "}";
+                if (combinedText.contains(placeholder)) {
+                    combinedText = combinedText.replace(placeholder, entry.getValue());
                 }
+            }
+
+            // update run
+            int runIndex = 0;
+            for (XWPFRun run : paragraph.getRuns()) {
+                if (runIndex == 0) {
+                    run.setText(combinedText, 0); // update run
+                } else {
+                    run.setText("", 0); // remove value of run
+                }
+                runIndex++;
             }
         }
     }
@@ -349,11 +370,11 @@ public class ExamService implements IExamService {
                     "Semester",
                     "Subject Code",
                     90,
-                    "instruction",
-                    "important",
-                    "databaseDEscroption",
-                    "Daabasename",
-                    "Daabase note",
+                    "This is instruction student need to follow it to do the exam",
+                    "This is a inpotant information in the exam /n student need to follow it",
+                    "This is a database description for the exam",
+                    "Database name",
+                    "This is the database not use for the exam, this wiil be the one student need to notice",
                     questions
             );
 
@@ -414,6 +435,69 @@ public class ExamService implements IExamService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String addDatabaseImage(XWPFDocument document, ExamExport exportExam) throws IOException {
+        String message = "Image added successfully.";
+        String placeholder = "${imagePlaceholder}";
+        String imgPath = "C:\\Project\\SEP490\\database-img-test.png";
+        byte[] imageBytes = getImageAsByteArray(imgPath);
+
+        try {
+            // Iterate through all paragraphs and find the placeholder
+            List<XWPFParagraph> paragraphs = document.getParagraphs();
+            for (XWPFParagraph paragraph : paragraphs) {
+                for (XWPFRun run : paragraph.getRuns()) {
+                    String text = run.getText(0);
+                    if (text != null && text.contains(placeholder)) {
+                        // Replace the placeholder text with the image
+                        text = text.replace(placeholder, "");  // Remove the placeholder text
+                        run.setText(text, 0);  // Update the run with the modified text
+
+                        // Create a new centered paragraph for the image
+                        XWPFParagraph imageParagraph = document.createParagraph();
+                        imageParagraph.setAlignment(ParagraphAlignment.CENTER); // Center align the paragraph
+                        XWPFRun imageRun = imageParagraph.createRun();
+
+                        // Insert the image at the same location
+                        // try (InputStream imageStream = new FileInputStream(imgPath)) {
+                        try (ByteArrayInputStream imageInputStream = new ByteArrayInputStream(imageBytes)) {
+                            // imageRun.addBreak();  // Optional: Add a break before the image
+                            // imageRun.addPicture(
+                            //         imageStream,
+                            //         XWPFDocument.PICTURE_TYPE_PNG, // Use appropriate image type
+                            //         imgPath,
+                            //         Units.toEMU(200), // Width in EMUs
+                            //         Units.toEMU(150) // Height in EMUs
+                            // );
+                            imageRun.addBreak();  // Optional: Add a break before the image
+                            imageRun.addPicture(
+                                    imageInputStream,
+                                    XWPFDocument.PICTURE_TYPE_PNG, // Specify the correct image type (PNG in this example)
+                                    "image.png", // Image name (for internal Word reference, not the file system)
+                                    Units.toEMU(200), // Width in EMUs
+                                    Units.toEMU(150) // Height in EMUs
+                            );
+                        } catch (FileNotFoundException fnfe) {
+                            message = "Error: Image file not found.";
+                            fnfe.printStackTrace();
+                        } catch (IOException e) {
+                            message = "Error adding image to document.";
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        } catch (InvalidFormatException e) {
+            message = "An error occurred while processing the document.";
+            e.printStackTrace();
+        }
+
+        return message;
+    }
+
+    public static byte[] getImageAsByteArray(String pathToImage) throws IOException {
+        return Files.readAllBytes(Paths.get(pathToImage));
     }
 
 }

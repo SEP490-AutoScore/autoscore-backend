@@ -27,26 +27,16 @@ public class Exam_Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examQuestionId;
-
     private String questionContent;
-
     private String questionNumber;
-
     private float maxScore;
-
     private String type;
-
     private boolean status;
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
 
     // Relationship
