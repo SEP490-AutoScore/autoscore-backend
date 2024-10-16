@@ -15,13 +15,13 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamBarem.ExamBaremCreat
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamBarem.ExamBaremViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamBaremView;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Barem;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamBaremRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamBaremSpecification;
 import com.CodeEvalCrew.AutoScore.utils.Util;
-
-import antlr.Utils;
 
 @Service
 public class ExamBaremService implements IExamBaremService {
@@ -29,15 +29,17 @@ public class ExamBaremService implements IExamBaremService {
     @Autowired
     private final IExamBaremRepository examBaremRepository;
     @Autowired
-    private final IAccountRepository accountRepository;
-    private final Util util;
+    private final IExamQuestionRepository examQuestionRepository;
+    // @Autowired
+    // private final Util util;
 
     public ExamBaremService(IExamBaremRepository examBaremRepository,
             IAccountRepository accountRepository,
+            IExamQuestionRepository examQuestionRepository,
             IEmployeeRepository employeeRepository) {
         this.examBaremRepository = examBaremRepository;
-        this.accountRepository = accountRepository;
-        this.util = new Util(employeeRepository);
+        this.examQuestionRepository = examQuestionRepository;
+        // this.util = new Util(employeeRepository);
     }
 
     @Override
@@ -88,10 +90,12 @@ public class ExamBaremService implements IExamBaremService {
         ExamBaremView result;
         try {
             //check exam question
-            // Exam_Question = checkEntityExistence(examQuestionRepository.findById(request.getExamQuestionId())., "Exam question", request.getExamQuestionId());
+            Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(request.getExamQuestionId()), "Exam question", request.getExamQuestionId());
 
             //create new exam
             Exam_Barem examBarem = ExamBaremMapper.INSTANCE.examBaremCreateRequestToEntity(request);
+
+            examBarem.setExamQuestion(examQuestion);
 
             //update creater craetedate
             examBarem.setCreatedAt(Util.getCurrentDateTime());
@@ -102,6 +106,8 @@ public class ExamBaremService implements IExamBaremService {
 
             //mapping 
             return result = ExamBaremMapper.INSTANCE.examBaremToView(examBarem);
+        } catch (NotFoundException nfe) {
+            throw nfe;
         } catch (Exception e) {
             System.out.println(e.getCause());
             throw e;
@@ -116,9 +122,10 @@ public class ExamBaremService implements IExamBaremService {
             Exam_Barem examBarem = checkEntityExistence(examBaremRepository.findById(id), "Exam Barem", id);
 
             //check exam question
-            // Exam_Question = checkEntityExistence(examQuestionRepository.findById(request.getExamQuestionId())., "Exam question", request.getExamQuestionId());
+            Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(request.getExamQuestionId()), "Exam question", request.getExamQuestionId());
 
             //update
+            examBarem.setExamQuestion(examQuestion);
             examBarem.setBaremContent(request.getBaremContent());
             examBarem.setBaremMaxScore(request.getBaremMaxScore());
             examBarem.setBaremURL(request.getBaremURL());

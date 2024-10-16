@@ -4,9 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 
 @Repository
-public interface IExamPaperRepository extends JpaRepository<Exam_Paper, Long>, JpaSpecificationExecutor<Exam_Paper> {
-    
+public interface IExamQuestionRepository extends JpaRepository<Exam_Question,Long>, JpaSpecificationExecutor<Exam_Question> {
+
 }
