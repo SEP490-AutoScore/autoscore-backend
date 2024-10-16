@@ -29,19 +29,13 @@ public class Exam_Paper {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examPaperId;
-
     private String examPaperCode;
     private boolean status;
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
 
     //Relationship
@@ -62,11 +56,6 @@ public class Exam_Paper {
     @OneToOne
     @JoinColumn(name = "examDatabaseId", nullable = false)
     private Exam_Database examDatabase;
-
-    //1-1 source
-    @OneToOne
-    @JoinColumn(name = "sourceId", nullable = false)
-    private Source source;
 
     @OneToOne
     @JoinColumn(name = "instructionsId", nullable = false)
