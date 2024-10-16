@@ -9,9 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExamPaperCreateRequest {
-    private String examPaperCode;
+public class ExamPaperViewRequest {
     private Long examId;
-    private Long examInstructionId = null;
-    private Long examDatabaseId = null;
 }
