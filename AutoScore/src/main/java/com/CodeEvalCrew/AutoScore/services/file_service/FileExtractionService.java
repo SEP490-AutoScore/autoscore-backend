@@ -28,6 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
+import com.CodeEvalCrew.AutoScore.models.Entity.Source;
+import com.CodeEvalCrew.AutoScore.models.Entity.Student;
+import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import net.lingala.zip4j.ZipFile;
@@ -37,6 +40,11 @@ import net.lingala.zip4j.exception.ZipException;
 public class FileExtractionService {
 
     private static final Logger logger = LoggerFactory.getLogger(FileExtractionService.class);
+    private final StudentErrorService studentErrorService;
+
+    public FileExtractionService(StudentErrorService studentErrorService) {
+        this.studentErrorService = studentErrorService;
+    }
 
     @Value("${7z.path}")
     private String sevenZPath;
@@ -114,18 +122,19 @@ public class FileExtractionService {
     }
 
     // Giải nén file ZIP bằng Zip4j
-    public void extractZipWithZip4j(File archive, File outputDir) throws IOException {
+    public void extractZipWithZip4j(File archive, File outputDir, Source source, Student student) throws IOException {
         try {
             try (ZipFile zipFile = new ZipFile(archive)) {
                 zipFile.extractAll(outputDir.getAbsolutePath());
             }
         } catch (ZipException e) {
+            studentErrorService.saveStudentError(source, student, "Failed to extract ZIP for student code: " + student.getStudentCode());
             throw new IOException("Failed to extract ZIP file: " + archive.getAbsolutePath(), e);
         }
     }
 
     // Giải nén các định dạng khác như tar, tgz, gz
-    public void extractWithCommonsCompress(File archive, File outputDir) throws IOException {
+    public void extractWithCommonsCompress(File archive, File outputDir, Source source, Student student) throws IOException {
         try (InputStream fi = new FileInputStream(archive); BufferedInputStream bi = new BufferedInputStream(fi); ArchiveInputStream<ArchiveEntry> i = new ArchiveStreamFactory().createArchiveInputStream(bi)) {
             ArchiveEntry entry;
             while ((entry = i.getNextEntry()) != null) {
@@ -145,12 +154,13 @@ public class FileExtractionService {
             }
         } catch (ArchiveException e) {
             // Xử lý ngoại lệ
+            studentErrorService.saveStudentError(source, student, "Error extracting archive for student code: " + student.getStudentCode());
             throw new IOException("Error extracting archive: " + e.getMessage(), e);
         }
     }
 
     // Giải nên file 7z
-    public void extract7zFile(File archive, File outputDir) throws IOException {
+    public void extract7zFile(File archive, File outputDir, Source source, Student student) throws IOException {
         if (!outputDir.exists()) {
             outputDir.mkdirs(); // Create the output directory if it doesn't exist
         }
@@ -174,12 +184,13 @@ public class FileExtractionService {
                 }
             }
         } catch (IOException e) {
+            studentErrorService.saveStudentError(source, student, "Failed to extract 7z file for student code: " + student.getStudentCode());
             throw new IOException("Failed to extract 7z file: " + e.getMessage(), e);
         }
     }
 
     // Giải nén file RAR bằng 7z
-    public void extractRarWith7ZipCommand(File archive, File outputDir) throws IOException {
+    public void extractRarWith7ZipCommand(File archive, File outputDir, Source source, Student student) throws IOException {
         // logger.info("Start extracting RAR file: {}", archive.getAbsolutePath());
 
         if (!outputDir.exists()) {
@@ -230,6 +241,7 @@ public class FileExtractionService {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            studentErrorService.saveStudentError(source, student, "Error while processing RAR file for student code: " + student.getStudentCode());
             throw new IOException("The decompression process was interrupted.", e);
         }
 
@@ -239,6 +251,7 @@ public class FileExtractionService {
             errorThread.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            studentErrorService.saveStudentError(source, student, "Error while processing RAR file for student code: " + student.getStudentCode());
             throw new IOException("Stream processing was interrupted.", e);
         }
 

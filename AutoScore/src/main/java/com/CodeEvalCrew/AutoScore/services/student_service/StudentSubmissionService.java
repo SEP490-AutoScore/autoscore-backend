@@ -28,6 +28,7 @@ import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentReposit
 import com.CodeEvalCrew.AutoScore.services.file_service.FileExtractionService;
 import com.CodeEvalCrew.AutoScore.services.source_service.SourceDetailService;
 import com.CodeEvalCrew.AutoScore.services.source_service.SourceService;
+import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
 
 @Service
 public class StudentSubmissionService {
@@ -48,6 +49,9 @@ public class StudentSubmissionService {
 
     @Autowired
     private SourceDetailService sourceDetailService;
+
+    @Autowired
+    private StudentErrorService studentErrorService;
 
     // Số lượng luồng tối đa để xử lý submissions
     private static final int MAX_THREADS = 2;
@@ -178,28 +182,28 @@ public class StudentSubmissionService {
                         File solutionZip = new File(studentSubFolder, "solution.zip");
                         if (solutionZip.exists()) {
                             // Giải nén tệp zip và tất cả các tệp nén lồng nhau
-                            File extractedFolder = extractArchive(solutionZip);
+                            File extractedFolder = extractArchive(solutionZip, source, student);
                             if (extractedFolder != null) {
                                 // Tiếp tục giải nén các tệp trong thư mục được giải nén
-                                File slnFile = processExtractedFolder(extractedFolder);
+                                File slnFile = processExtractedFolder(extractedFolder, source, student);
 
                                 if (slnFile != null) {
-                                    sourceDetailService.saveStudentSubmission(slnFile, student, source);
+                                    sourceDetailService.saveStudentSubmission(slnFile.getParentFile(), student, source);
                                     // logger.info("Submission saved for student: {}", studentCode);
                                 } else {
                                     logger.warn("No .sln file found for student: {}", studentCode);
-                                    unmatchedStudents.add(studentCode);
+                                    studentErrorService.saveStudentError(source, student, "No .sln file found");
                                 }
                             }
                         } else {
                             logger.warn("solution.zip not found for student: {}", studentCode);
-                            unmatchedStudents.add(studentCode);
+                            studentErrorService.saveStudentError(source, student, "solution.zip not found");
                         }
                     } else {
                         logger.warn("No subfolders found inside student folder: {}", studentCode);
                     }
                 } else {
-                    unmatchedStudents.add(studentCode);
+                    studentErrorService.saveStudentError(source, null, "Student not found with student code: " + studentCode);
                     logger.warn("Unmatched student: {}", studentCode);
                 }
             } catch (IOException e) {
@@ -220,18 +224,18 @@ public class StudentSubmissionService {
     }
 
     // Cập nhật phương thức extractArchive để giải nén tại vị trí hiện tại và xóa tệp nén sau khi giải nén
-    private File extractArchive(File archive) throws IOException {
+    private File extractArchive(File archive, Source source, Student student) throws IOException {
         File extractToDir = archive.getParentFile(); // Giải nén tại vị trí hiện tại của tệp nén
 
         // Kiểm tra loại tệp nén và giải nén tương ứng
         if (archive.getName().endsWith(".zip")) {
-            fileExtractionService.extractZipWithZip4j(archive, extractToDir); // Giải nén tại .zip vị trí hiện tại
+            fileExtractionService.extractZipWithZip4j(archive, extractToDir, source, student); // Giải nén tại .zip vị trí hiện tại
         } else if (archive.getName().endsWith(".rar")) {
-            fileExtractionService.extractRarWith7ZipCommand(archive, extractToDir); // Giải nén tại .rar vị trí hiện tại
+            fileExtractionService.extractRarWith7ZipCommand(archive, extractToDir, source, student); // Giải nén tại .rar vị trí hiện tại
         } else if (archive.getName().endsWith(".7z")) {
-            fileExtractionService.extract7zFile(archive, extractToDir); // Giải nén tệp .7z tại vị trí hiện tại
+            fileExtractionService.extract7zFile(archive, extractToDir, source, student); // Giải nén tệp .7z tại vị trí hiện tại
         } else {
-            fileExtractionService.extractWithCommonsCompress(archive, extractToDir); // Giải nén khác tại vị trí hiện tại
+            fileExtractionService.extractWithCommonsCompress(archive, extractToDir, source, student); // Giải nén khác tại vị trí hiện tại
         }
 
         // Xóa tệp nén sau khi giải nén
@@ -243,14 +247,14 @@ public class StudentSubmissionService {
     }
 
     // Xử lý thư mục đã giải nén: tiếp tục giải nén nếu có tệp nén bên trong, hoặc tìm tệp .sln.
-    private File processExtractedFolder(File folder) throws IOException {
+    private File processExtractedFolder(File folder, Source source, Student student) throws IOException {
         File[] files = folder.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
                     // Xử lý đệ quy nếu có thư mục con
-                    File slnFile = processExtractedFolder(file);
+                    File slnFile = processExtractedFolder(file, source, student);
                     if (slnFile != null) {
                         return slnFile;  // Trả về tệp .sln nếu tìm thấy
                     }
@@ -258,9 +262,9 @@ public class StudentSubmissionService {
                     return file;  // Tìm thấy tệp .sln
                 } else if (file.getName().endsWith(".zip") || file.getName().endsWith(".rar") || file.getName().endsWith(".7z")) {
                     // Nếu còn tệp nén, tiếp tục giải nén tại vị trí hiện tại của tệp nén
-                    File extractedFolder = extractArchive(file);
+                    File extractedFolder = extractArchive(file, source, student);
                     if (extractedFolder != null) {
-                        return processExtractedFolder(extractedFolder);  // Tiếp tục xử lý thư mục vừa giải nén
+                        return processExtractedFolder(extractedFolder, source, student);  // Tiếp tục xử lý thư mục vừa giải nén
                     }
                 }
             }
