@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamPaperMapper;
-import com.CodeEvalCrew.AutoScore.mappers.ExamQuestionMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;

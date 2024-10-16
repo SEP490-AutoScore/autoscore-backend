@@ -22,7 +22,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.services.exam_paper_service.IExamPaperService;
 
 @RestController
-@RequestMapping("api/exam-paper/")
+@RequestMapping("api/exam-paper")
 public class ExamPaperController {
 
     @Autowired
@@ -47,7 +47,7 @@ public class ExamPaperController {
         }
     }
 
-    @PostMapping("path")
+    @PostMapping("")
     public ResponseEntity<?> createNewExamPaper(@RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;
         try {
@@ -77,7 +77,7 @@ public class ExamPaperController {
         }
     }
 
-    @PostMapping("path")
+    @PostMapping("list")
     public ResponseEntity<?> getList(@RequestBody ExamPaperViewRequest request) {
         List<ExamPaperView> result;
         try {
