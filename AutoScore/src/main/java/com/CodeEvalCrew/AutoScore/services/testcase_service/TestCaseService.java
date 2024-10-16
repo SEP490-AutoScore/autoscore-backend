@@ -1,5 +1,9 @@
 package com.CodeEvalCrew.AutoScore.services.testcase_service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,10 +18,6 @@ import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamData
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @Service
 public class TestCaseService implements ITestCaseService {
@@ -47,12 +47,12 @@ public class TestCaseService implements ITestCaseService {
 
         // Construct AI prompt
         String prompt = String.format(
-            "- viết ít nhất %d testcase cho hàm %s, %s\n- xuất file collection postman cho tôi\n- dữ liệu file collection postman cần có \"info\": \"_postman_id\": \"name\": \"schema\": \"_postman_workspace_id\": \"description\": \"_postman_exported_at\": \"_postman_export_type\": \"item\": \n- \"item\" cần có \"event\", \"listen\": \"test\", các \"script\": \"exec\": \"type\": \"text/javascript\"\nDưới đây là file .sql:\n%s",
+            "-create file json collection postman \n- create %d testcase for function %s, 2 testcase for funtion get FootballPlayer, %s \n- function login return token, save token into variable environment with name jwtToken. \n- file collection postman need have 2 part info and item; item needs data fields: name, event, listen:test, script:exec, type: javascript. \n \n- file .sql is below: \n%s",
             minimumNumberOfTestcases, baremContent, baremURL, databaseScript
         );
 
         // Set up the request to the AI service
-        String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc";
+        String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
 
