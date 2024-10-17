@@ -37,7 +37,7 @@ public class Exam_Barem {
     private float baremMaxScore;
 
     private String baremURL;
-
+    private String method;
     private boolean status;
 
     private LocalDateTime createdAt;

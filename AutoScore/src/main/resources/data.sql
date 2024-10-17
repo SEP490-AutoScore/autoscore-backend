@@ -180,42 +180,27 @@ VALUES
 INSERT INTO `exam_paper` 
 (`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `instructions_id`) 
 VALUES 
-('009909', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 1),
-('110100', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2),
-('001001', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3);
+('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2, 1),
+('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2),
+('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3);
 
 INSERT INTO `exam_question`
 (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('What is the output of the following code snippet?', 'Q1', 10, 'MULTIPLE_CHOICE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Explain the concept of OOP.', 'Q2', 15, 'OPEN_ENDED', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Write a function to reverse a string.', 'Q3', 20, 'PROGRAMMING', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+('Create api to crud the FootballPlayer entity', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('Create api to crud the FootballTeam entity.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('Create api to login to the system.', 'Q3', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
 
 INSERT INTO `exam_barem`
-(`barem_content`, `barem_max_score`, `baremurl`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_question_id`)
+(`barem_content`, `barem_max_score`, `baremurl`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_question_id`, `method`)
 VALUES
-('create FootballPlayer', 10, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Barem for Question 2: Expected key points.', 15, 'http://example.com/barem/q2', true, NOW(), 1, NULL, NULL, NULL, NULL, 2),
-('Barem for Question 3: Function should handle empty strings.', 20, 'http://example.com/barem/q3', true, NOW(), 1, NULL, NULL, NULL, NULL, 3);
+('Create FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'POST'),
+('Get FootballPlayer by ID', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
+('Get list FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
+('Update FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'PUT'),
+('Delete FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'DELETE'),
+('Get FootballTeam by ID', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
+('Get list FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
+('Create FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'POST');
 
-
--- INSERT INTO `exam_question` 
--- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 
--- VALUES 
--- ('What is the capital of France?', 'Q1', 5.0, 'Multiple Choice', true, '2023-09-30 10:00:00', 1, '2023-09-30 10:00:00', 1, 1, 1, 1),
--- ('Explain Newton\'s first law of motion.', 'Q2', 10.0, 'Essay', true, '2023-09-30 10:00:00', 2, '2023-09-30 10:00:00', 1, 2, 2, 1),
--- ('Solve the equation: 2x + 3 = 7.', 'Q3', 5.0, 'Short Answer', true, '2023-09-30 10:00:00', 3, '2023-09-30 10:00:00', 1, 3, 3, 1);
-
--- INSERT INTO ai_prompt (content, language_code, for_ai, type, status, parent)
--- VALUES 
---     ('Defaut.', 'en', 'GPT-3', 'text', true, NULL),
---     ('Explain the laws of thermodynamics in simple terms.', 'en', 'GPT-3', 'text', true, 1),
---     ('Generate an image of a futuristic city.', 'es', 'DALL·E', 'image', true, 1),
---     ('Translate this text into Spanish.', 'en', 'GPT-3', 'text', true, 1),
---     ('Create a voiceover for this podcast script.', 'en', 'VoiceAI', 'voice', false, 1),
---     ('What is quantum computing?', 'fr', 'GPT-4', 'text', true, 1),
---     ('Generate a painting in the style of Van Gogh.', 'en', 'DALL·E', 'image', false, 1),
---     ('What is the current weather in Tokyo?', 'ja', 'GPT-3', 'text', true, 2),
---     ('Generate an image of a medieval castle.', 'en', 'DALL·E', 'image', true, 2),
---     ('Write a short story about a time-traveling detective.', 'en', 'GPT-3', 'text', true, 2);
 
