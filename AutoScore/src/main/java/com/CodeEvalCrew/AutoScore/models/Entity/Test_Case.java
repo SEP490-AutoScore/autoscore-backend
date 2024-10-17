@@ -27,6 +27,9 @@ public class Test_Case {
     private Long testCaseId;
 
     private String testCaseContent;
+    private String testCaseBody;
+    private String testCasePredict;
+    private String testCaseScore;
 
     private boolean isGeneratedByAi;
 

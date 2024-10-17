@@ -9,7 +9,8 @@ VALUES
 (true, 6, 'MANAGE_DEPARTMENT'),
 (true, 7, 'MANAGE_EXAM'),
 (true, 8, 'MANAGE_SCORE'),
-(true, 9, 'MANAGE_EXAM_DATABASE');
+(true, 9, 'MANAGE_EXAM_DATABASE'),
+(true, 10, 'MANAGE_TESTCASE');
 
 INSERT INTO `permission`
 (`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
@@ -23,6 +24,7 @@ VALUES
 ('VIEW_EXAM', 7, 'View exam', 7, 1),
 ('VIEW_SCORE', 8, 'View score', 8, 1),
 ('VIEW_EXAM_DATABASE', 30, 'View exam database', 9, 1),
+('VIEW_TESTCASE', 34, 'View testcase', 10, 1),
 
 ('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
 ('CREATE_ROLE', 10, 'Create role', 2, 1),
@@ -32,6 +34,7 @@ VALUES
 ('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
 ('CREATE_EXAM', 15, 'Create exam', 7, 1),
 ('CREATE_EXAM_DATABASE', 31, 'Create exam database', 9, 1),
+('CREATE_TESTCASE', 35, 'Create testcase', 10, 1),
 
 ('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
 ('UPDATE_ROLE', 17, 'Update role', 2, 1),
@@ -41,6 +44,7 @@ VALUES
 ('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
 ('UPDATE_EXAM', 22, 'Update exam', 7, 1),
 ('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 9, 1),
+('UPDATE_TESTCASE', 36, 'Update testcase', 10, 1),
 
 ('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
 ('DELETE_ROLE', 24, 'Delete role', 2, 1),
@@ -49,7 +53,8 @@ VALUES
 ('DELETE_SUBJECT', 27, 'Delete subject', 5, 1),
 ('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
 ('DELETE_EXAM', 29, 'Delete exam', 7, 1),
-('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1);
+('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1),
+('DELETE_TESTCASE', 37, 'Delete testcase', 10, 1);
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
@@ -64,9 +69,9 @@ INSERT INTO `role_permission`
 VALUES
 (true, 1, 1),(true, 1, 2),(true, 1, 3),(true, 1, 4),(true, 1, 5),(true, 1, 6),(true, 1, 7),(true, 1, 8),(true, 1, 9),(true, 1, 10),(true, 1, 11),(true, 1, 12),(true, 1, 13),
 (true, 1, 14),(true, 1, 15),(true, 1, 16),(true, 1, 17),(true, 1, 18),(true, 1, 19),(true, 1, 20),(true, 1, 21),(true, 1, 22),(true, 1, 23),(true, 1, 24),(true, 1, 25),(true, 1, 26),
-(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),
+(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),(true, 1, 34),(true, 1, 35),(true, 1, 36),(true, 1, 37),
 (true, 2, 1),(true, 2, 4),(true, 2, 5),(true, 2, 6),(true, 2, 7),(true, 2, 8),(true, 2, 9),(true, 2, 12),(true, 2, 13),(true, 2, 14),(true, 2, 15),(true, 2, 16),(true, 2, 19),(true, 2, 20),
-(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),
+(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),(true, 2, 34),(true, 2, 35),(true, 2, 36),(true, 2, 37),
 (true, 3, 1),(true, 3, 4),(true, 3, 5),(true, 3, 6),(true, 3, 7),(true, 3, 8),(true, 3, 9),(true, 3, 12);
 
 INSERT INTO `account`
@@ -178,6 +183,21 @@ VALUES
 ('009909', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 1, 1),
 ('110100', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2, 2),
 ('001001', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3, 3);
+
+INSERT INTO `exam_question`
+(`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+VALUES
+('What is the output of the following code snippet?', 'Q1', 10, 'MULTIPLE_CHOICE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('Explain the concept of OOP.', 'Q2', 15, 'OPEN_ENDED', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('Write a function to reverse a string.', 'Q3', 20, 'PROGRAMMING', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+
+INSERT INTO `exam_barem`
+(`barem_content`, `barem_max_score`, `baremurl`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_question_id`)
+VALUES
+('create FootballPlayer', 10, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('Barem for Question 2: Expected key points.', 15, 'http://example.com/barem/q2', true, NOW(), 1, NULL, NULL, NULL, NULL, 2),
+('Barem for Question 3: Function should handle empty strings.', 20, 'http://example.com/barem/q3', true, NOW(), 1, NULL, NULL, NULL, NULL, 3);
+
 
 -- INSERT INTO `exam_question` 
 -- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 

@@ -24,20 +24,15 @@ public class Instructions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long instructionId;
+    private String instructionName;
     private String introduction;
     private String important;
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
-
     @ManyToOne
     @JoinColumn(name = "subjectId", nullable = false)
     private Subject subject;

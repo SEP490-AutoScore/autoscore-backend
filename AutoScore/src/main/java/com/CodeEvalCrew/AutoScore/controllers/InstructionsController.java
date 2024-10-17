@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,58 +15,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
-import com.CodeEvalCrew.AutoScore.services.exam_paper_service.IExamPaperService;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Instructions.InstructionCreateRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Instructions.InstructionViewRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.InstructionView;
+import com.CodeEvalCrew.AutoScore.services.instruction_service.IIntructionService;
 
 @RestController
-@RequestMapping("api/exam-paper")
-public class ExamPaperController {
-
+@RequestMapping("/api/instructions")
+public class InstructionsController {
     @Autowired
-    private final IExamPaperService examPaperService;
+    private final IIntructionService instructionService;
 
-    public ExamPaperController(IExamPaperService examPaperService) {
-        this.examPaperService = examPaperService;
+    public InstructionsController(IIntructionService intructionService) {
+        this.instructionService = intructionService;
     }
 
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@RequestParam Long id) {
-        ExamPaperView result;
+        InstructionView result;
         try {
 
-            result = examPaperService.getById(id);
-
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PostMapping("")
-    public ResponseEntity<?> createNewExamPaper(@RequestBody ExamPaperCreateRequest request) {
-        ExamPaperView result;
-        try {
-
-            result = examPaperService.createNewExamPaper(request);
-
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PutMapping("{id}")
-    public ResponseEntity<?> updateExamPaper(@PathVariable Long id, @RequestBody ExamPaperCreateRequest request) {
-        ExamPaperView result;
-        try {
-
-            result = examPaperService.updateExamPaper(id, request);
+            result = instructionService.getById(id);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException ex) {
@@ -78,12 +46,24 @@ public class ExamPaperController {
     }
 
     @PostMapping("list")
-    public ResponseEntity<?> getList(@RequestBody ExamPaperViewRequest request) {
-        List<ExamPaperView> result;
+    public ResponseEntity<?> getList(@RequestBody InstructionViewRequest request) {
+        List<InstructionView> result;
         try {
+            result = instructionService.getList(request);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-            result = examPaperService.getList(request);
+    }
 
+    @PostMapping("")
+    public ResponseEntity<?> createNewInstruction(@RequestBody InstructionCreateRequest request) {
+        InstructionView result;
+        try {
+            result = instructionService.createNewInstruoction(request);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -92,13 +72,11 @@ public class ExamPaperController {
         }
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> deleteExamPaper(@PathVariable Long id) {
-        ExamPaperView result;
+    @PutMapping("{id}")
+    public ResponseEntity<?> updateInstruction(@PathVariable Long id, @RequestBody InstructionCreateRequest request) {
+        InstructionView result;
         try {
-
-            result = examPaperService.deleteExamPaper(id);
-
+            result = instructionService.updateInstruction(id, request);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -106,4 +84,5 @@ public class ExamPaperController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
