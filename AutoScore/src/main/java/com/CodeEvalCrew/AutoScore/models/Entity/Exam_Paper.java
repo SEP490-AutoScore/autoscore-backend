@@ -52,11 +52,6 @@ public class Exam_Paper {
     @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
     private Set<Exam_Question> examQuestions;
 
-    //1-1 exam db
-    @OneToOne
-    @JoinColumn(name = "examDatabaseId", nullable = false)
-    private Exam_Database examDatabase;
-
     @OneToOne
     @JoinColumn(name = "instructionsId", nullable = false)
     private Instructions instruction;
