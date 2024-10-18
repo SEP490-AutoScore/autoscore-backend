@@ -64,20 +64,23 @@ public class ExamBaremService implements IExamBaremService {
     }
 
     @Override
-    public List<ExamBaremView> getList(ExamBaremViewRequest request) {
+    public List<ExamBaremView> getList(ExamBaremViewRequest request) throws NotFoundException, NoSuchElementException {
         List<ExamBaremView> result = new ArrayList<>();
         try {
+            //check examQuestion
+            Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(request.getExamQuestionId()), "Exam question", request.getExamQuestionId());
 
-            Specification<Exam_Barem> spec = ExamBaremSpecification.hasForeignKey(request.getExamQuestionId(), "exam_question", "examQuestionId");
+            Specification<Exam_Barem> spec = ExamBaremSpecification.hasForeignKey(request.getExamQuestionId(), "examQuestion", "examQuestionId");
+
             List<Exam_Barem> listExamBarems = examBaremRepository.findAll(spec);
-            if (result.isEmpty()) {
+            if (listExamBarems.isEmpty()) {
                 throw new NoSuchElementException("No exam barem found");
             }
             for (Exam_Barem examBarem : listExamBarems) {
                 result.add(ExamBaremMapper.INSTANCE.examBaremToView(examBarem));
             }
             return result;
-        } catch (NoSuchElementException nse) {
+        } catch (NoSuchElementException | NotFoundException nse) {
             throw nse;
         } catch (Exception e) {
             System.out.println(e.getCause());

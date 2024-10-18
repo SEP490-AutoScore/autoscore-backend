@@ -83,11 +83,10 @@ public class ExamBaremController {
         try {
 
             result = examBaremService.getList(request);
-            if (!result.isEmpty()) {
-                throw new NoSuchElementException("No exam barem match!");
-            }
-
-            return new ResponseEntity<>(HttpStatus.OK);
+            
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        } catch (NotFoundException nse) {
+            return new ResponseEntity<>(nse.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (NoSuchElementException nse) {
             return new ResponseEntity<>(nse.getMessage(), HttpStatus.OK);
         } catch (Exception e) {

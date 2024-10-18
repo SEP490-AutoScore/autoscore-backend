@@ -29,27 +29,18 @@ public class Exam_Barem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examBaremId;
-
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String baremContent;
-
     private float baremMaxScore;
-
     private String baremURL;
     private String method;
     private boolean status;
-
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
 
     //Relationship
