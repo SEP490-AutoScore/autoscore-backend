@@ -15,21 +15,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
-public class ExamDatabaseService {
+public class ExamDatabaseService implements IExamDatabaseService {
 
      @Autowired
     private IExamDatabaseRepository examDatabaseRepository;
-
+@Autowired
+    private IExamPaperRepository examPaperRepository;
     // Cấu hình kết nối với SQL Server
     private final String url = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
     private final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
     // Import file SQL và thực hiện các bước xử lý
-    public String importSqlFile(MultipartFile file, MultipartFile imageFile) throws Exception {
+    public String importSqlFile(MultipartFile file, MultipartFile imageFile,  Long examPaperId) throws Exception {
         // Nạp driver JDBC của SQL Server
         try {
             Class.forName(driver);
@@ -80,11 +83,24 @@ public class ExamDatabaseService {
 
 // Lấy dữ liệu từ file ảnh (nếu có)
 byte[] imageData = null;
-if (imageFile != null && !imageFile.isEmpty()) {
-    imageData = imageFile.getBytes();
-    System.out.println("Image file size: " + imageData.length + " bytes");  // Log the image size
+if (imageFile == null || imageFile.isEmpty()) {
+    throw new Exception("File ảnh không hợp lệ hoặc không được cung cấp."); // Throw an exception if image file is invalid
+} 
+
+// Kiểm tra định dạng file (chỉ chấp nhận PNG và JPEG)
+String contentType = imageFile.getContentType();
+if (!"image/png".equals(contentType) && !"image/jpeg".equals(contentType) && !"image/jpg".equals(contentType)) {
+    throw new Exception("Chỉ chấp nhận file ảnh PNG, JPEG, JPG");
 }
 
+// Đọc dữ liệu của file ảnh
+imageData = imageFile.getBytes();
+System.out.println("Image file size: " + imageData.length + " bytes");  // Log the image size
+
+
+// Fetch the exam paper entity using examPaperId
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+            .orElseThrow(() -> new Exception("Exam paper not found with id: " + examPaperId));
 
 // Lưu thông tin vào bảng Exam_Database
 Long authenticatedUserId = Util.getAuthenticatedAccountId(); // Lấy ID người dùng hiện tại
@@ -97,8 +113,9 @@ examDatabase.setDatabaseImage(imageData); // Lưu hình ảnh dưới dạng byt
 examDatabase.setStatus(true); // Đặt status là true
 examDatabase.setCreatedAt(now); // Thời gian hiện tại
 examDatabase.setCreatedBy(authenticatedUserId); // ID người dùng
+examDatabase.setExamPaper(examPaper);
 
-// Lưu đối tượng vào database
+ // Save the entity in the database
 examDatabaseRepository.save(examDatabase);
                 
                 return "Database " + dbName + " đã được tạo và dữ liệu đã được import.";

@@ -18,11 +18,7 @@ public class TestCaseController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') or hasAuthority('CREATE_TESTCASE')")
     @GetMapping("/prompt")
-    public String getResponse(
-        @RequestParam("examDatabaseId") Long examDatabaseId,
-        @RequestParam("examBaremId") Long examBaremId,
-        @RequestParam("MinimumNumberOfTestcases") int minimumNumberOfTestcases) {
-        
-        return testCaseService.getAIResponse(examDatabaseId, examBaremId, minimumNumberOfTestcases);
+    public String getResponse(@RequestParam Long examDatabaseId) {
+        return testCaseService.getAIResponse(examDatabaseId);
     }
 }
