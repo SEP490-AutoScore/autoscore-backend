@@ -58,7 +58,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
-            Specification<Exam_Question> spec = ExamQuestionSpecification.hasForeignKey(request.getExamPaperId(), "exam_paper", "examPaperId");
+            Specification<Exam_Question> spec = ExamQuestionSpecification.hasForeignKey(request.getExamPaperId(), "examPaper", "examPaperId");
             spec.and(ExamQuestionSpecification.hasTrueStatus());
 
             List<Exam_Question> listEntity = examQuestionRepository.findAll(spec);

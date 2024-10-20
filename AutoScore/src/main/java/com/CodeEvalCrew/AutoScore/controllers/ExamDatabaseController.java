@@ -9,21 +9,32 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.CodeEvalCrew.AutoScore.services.examdatabase_service.ExamDatabaseService;
+import com.CodeEvalCrew.AutoScore.services.examdatabase_service.IExamDatabaseService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 
 @RestController
 @RequestMapping("/api/database")
 public class ExamDatabaseController {
 
     @Autowired
-    private ExamDatabaseService examDatabaseService;
+    private IExamDatabaseService examDatabaseService;
 
     @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') or hasAuthority('CREATE_EXAM_DATABASE')")
-    @PostMapping("/import")
-    public ResponseEntity<String> importSqlFile(@RequestParam("file") MultipartFile sqlFile,
-                                                @RequestParam("image") MultipartFile imageFile) {
+    @PostMapping(value = "/import", consumes = {"multipart/form-data"})
+      @Operation(
+                    requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = {
+                        @Content(mediaType = "multipart/form-data")
+                    }
+            )
+    )
+    public ResponseEntity<String> importSqlFile(@RequestParam("file.sql") MultipartFile sqlFile,
+                                                @RequestParam("fileimage") MultipartFile imageFile,
+                                                @RequestParam("examPaperId") Long examPaperId) {
         try {
-            String result = examDatabaseService.importSqlFile(sqlFile, imageFile);
+            String result = examDatabaseService.importSqlFile(sqlFile, imageFile, examPaperId);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());

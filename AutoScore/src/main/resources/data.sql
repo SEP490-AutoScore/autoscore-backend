@@ -9,7 +9,8 @@ VALUES
 (true, 6, 'MANAGE_DEPARTMENT'),
 (true, 7, 'MANAGE_EXAM'),
 (true, 8, 'MANAGE_SCORE'),
-(true, 9, 'MANAGE_EXAM_DATABASE');
+(true, 9, 'MANAGE_EXAM_DATABASE'),
+(true, 10, 'MANAGE_TESTCASE');
 
 INSERT INTO `permission`
 (`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
@@ -23,6 +24,7 @@ VALUES
 ('VIEW_EXAM', 7, 'View exam', 7, 1),
 ('VIEW_SCORE', 8, 'View score', 8, 1),
 ('VIEW_EXAM_DATABASE', 30, 'View exam database', 9, 1),
+('VIEW_TESTCASE', 34, 'View testcase', 10, 1),
 
 ('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
 ('CREATE_ROLE', 10, 'Create role', 2, 1),
@@ -32,6 +34,7 @@ VALUES
 ('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
 ('CREATE_EXAM', 15, 'Create exam', 7, 1),
 ('CREATE_EXAM_DATABASE', 31, 'Create exam database', 9, 1),
+('CREATE_TESTCASE', 35, 'Create testcase', 10, 1),
 
 ('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
 ('UPDATE_ROLE', 17, 'Update role', 2, 1),
@@ -41,6 +44,7 @@ VALUES
 ('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
 ('UPDATE_EXAM', 22, 'Update exam', 7, 1),
 ('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 9, 1),
+('UPDATE_TESTCASE', 36, 'Update testcase', 10, 1),
 
 ('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
 ('DELETE_ROLE', 24, 'Delete role', 2, 1),
@@ -49,7 +53,8 @@ VALUES
 ('DELETE_SUBJECT', 27, 'Delete subject', 5, 1),
 ('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
 ('DELETE_EXAM', 29, 'Delete exam', 7, 1),
-('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1);
+('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1),
+('DELETE_TESTCASE', 37, 'Delete testcase', 10, 1);
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
@@ -64,9 +69,9 @@ INSERT INTO `role_permission`
 VALUES
 (true, 1, 1),(true, 1, 2),(true, 1, 3),(true, 1, 4),(true, 1, 5),(true, 1, 6),(true, 1, 7),(true, 1, 8),(true, 1, 9),(true, 1, 10),(true, 1, 11),(true, 1, 12),(true, 1, 13),
 (true, 1, 14),(true, 1, 15),(true, 1, 16),(true, 1, 17),(true, 1, 18),(true, 1, 19),(true, 1, 20),(true, 1, 21),(true, 1, 22),(true, 1, 23),(true, 1, 24),(true, 1, 25),(true, 1, 26),
-(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),
+(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),(true, 1, 34),(true, 1, 35),(true, 1, 36),(true, 1, 37),
 (true, 2, 1),(true, 2, 4),(true, 2, 5),(true, 2, 6),(true, 2, 7),(true, 2, 8),(true, 2, 9),(true, 2, 12),(true, 2, 13),(true, 2, 14),(true, 2, 15),(true, 2, 16),(true, 2, 19),(true, 2, 20),
-(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),
+(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),(true, 2, 34),(true, 2, 35),(true, 2, 36),(true, 2, 37),
 (true, 3, 1),(true, 3, 4),(true, 3, 5),(true, 3, 6),(true, 3, 7),(true, 3, 8),(true, 3, 9),(true, 3, 12);
 
 INSERT INTO `account`
@@ -158,12 +163,12 @@ VALUES
 ('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
 ('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
 
-INSERT INTO `exam_database` 
-(`database_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `database_description`, `database_image`, `database_name`, `database_note`) 
-VALUES 
-('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, null, null, null, null, 'Example Database', 'example_database.png', 'Example Database', 'This is an example database.'),
-('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, null, null, null, null, 'Another Database', 'another_database.png', 'Another Database', 'This is another database.'),
-('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, null, null, null, null, 'Sample Database', 'sample_database.png', 'Sample Database', 'This is a sample database.');
+-- INSERT INTO `exam_database` 
+-- (`database_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `database_description`, `database_image`, `database_name`, `database_note`) 
+-- VALUES 
+-- ('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, null, null, null, null, 'Example Database', 'example_database.png', 'Example Database', 'This is an example database.'),
+-- ('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, null, null, null, null, 'Another Database', 'another_database.png', 'Another Database', 'This is another database.'),
+-- ('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, null, null, null, null, 'Sample Database', 'sample_database.png', 'Sample Database', 'This is a sample database.');
 
 INSERT INTO `instructions` 
 (`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
@@ -173,29 +178,29 @@ VALUES
 ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
 INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `exam_database_id`, `instructions_id`) 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `instructions_id`) 
 VALUES 
-('009909', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 1, 1),
-('110100', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2, 2),
-('001001', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3, 3);
+('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2, 1),
+('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2),
+('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3);
 
--- INSERT INTO `exam_question` 
--- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 
--- VALUES 
--- ('What is the capital of France?', 'Q1', 5.0, 'Multiple Choice', true, '2023-09-30 10:00:00', 1, '2023-09-30 10:00:00', 1, 1, 1, 1),
--- ('Explain Newton\'s first law of motion.', 'Q2', 10.0, 'Essay', true, '2023-09-30 10:00:00', 2, '2023-09-30 10:00:00', 1, 2, 2, 1),
--- ('Solve the equation: 2x + 3 = 7.', 'Q3', 5.0, 'Short Answer', true, '2023-09-30 10:00:00', 3, '2023-09-30 10:00:00', 1, 3, 3, 1);
+INSERT INTO `exam_question`
+(`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+VALUES
+('Create api to crud the FootballPlayer entity', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('Create api to crud the FootballTeam entity.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('Create api to login to the system.', 'Q3', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
 
--- INSERT INTO ai_prompt (content, language_code, for_ai, type, status, parent)
--- VALUES 
---     ('Defaut.', 'en', 'GPT-3', 'text', true, NULL),
---     ('Explain the laws of thermodynamics in simple terms.', 'en', 'GPT-3', 'text', true, 1),
---     ('Generate an image of a futuristic city.', 'es', 'DALL·E', 'image', true, 1),
---     ('Translate this text into Spanish.', 'en', 'GPT-3', 'text', true, 1),
---     ('Create a voiceover for this podcast script.', 'en', 'VoiceAI', 'voice', false, 1),
---     ('What is quantum computing?', 'fr', 'GPT-4', 'text', true, 1),
---     ('Generate a painting in the style of Van Gogh.', 'en', 'DALL·E', 'image', false, 1),
---     ('What is the current weather in Tokyo?', 'ja', 'GPT-3', 'text', true, 2),
---     ('Generate an image of a medieval castle.', 'en', 'DALL·E', 'image', true, 2),
---     ('Write a short story about a time-traveling detective.', 'en', 'GPT-3', 'text', true, 2);
+INSERT INTO `exam_barem`
+(`barem_content`, `barem_max_score`, `baremurl`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_question_id`, `method`)
+VALUES
+('Create FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'POST'),
+('Get FootballPlayer by ID', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
+('Get list FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
+('Update FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'PUT'),
+('Delete FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'DELETE'),
+('Get FootballTeam by ID', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
+('Get list FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
+('Create FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'POST');
+
 

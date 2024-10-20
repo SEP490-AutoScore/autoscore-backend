@@ -9,10 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExamQuestionView {
-    private Long examQuestionId;
-    private String questionContent;
-    private String questionNumber;
-    private float maxScore;
-    private String type;
+public class InstructionView {
+    private String instructionName;
+    private String introduction;
+    private String important;
 }

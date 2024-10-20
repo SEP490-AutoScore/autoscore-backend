@@ -1,5 +1,6 @@
 package com.CodeEvalCrew.AutoScore.mappers;
 
+import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamBarem.ExamBaremCreate;
@@ -7,6 +8,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamBarem.ExamBaremViewR
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamBaremView;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Barem;
 
+@Mapper
 public interface ExamBaremMapper {
     ExamBaremMapper INSTANCE = Mappers.getMapper(ExamBaremMapper.class);
 

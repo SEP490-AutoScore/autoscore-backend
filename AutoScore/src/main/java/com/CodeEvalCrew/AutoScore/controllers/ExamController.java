@@ -30,6 +30,8 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_service.IExamService;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @RestController
 @RequestMapping("api/exam/")
 public class ExamController {
@@ -169,6 +171,23 @@ public class ExamController {
         }
 
     }
+
+    @GetMapping("test")
+    public String getMethodName(@RequestParam String param) {
+        Dotenv dotenv = Dotenv.load();
+
+        // Retrieve the environment variables
+        String dbHost = dotenv.get("DB_HOST");
+        String dbUser = dotenv.get("DB_USER");
+        String dbPassword = dotenv.get("DB_PASSWORD");
+
+        // Use the variables
+        System.out.println("Database Host: " + dbHost);
+        System.out.println("Database User: " + dbUser);
+        System.out.println("Database Password: " + dbPassword);
+        return dbHost + " " + dbUser;
+    }
+    
 
 
 }

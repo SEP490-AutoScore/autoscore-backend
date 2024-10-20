@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.exam_barem_service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamBarem.ExamBaremCreate;
@@ -11,7 +12,7 @@ public interface IExamBaremService {
 
     ExamBaremView getExamById(Long id) throws NotFoundException;
 
-    List<ExamBaremView> getList(ExamBaremViewRequest request);
+    List<ExamBaremView> getList(ExamBaremViewRequest request) throws NotFoundException, NoSuchElementException;
 
     ExamBaremView createNewExamBarem(ExamBaremCreate request) throws NotFoundException;
 
