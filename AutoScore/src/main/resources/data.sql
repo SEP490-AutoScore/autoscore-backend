@@ -163,17 +163,11 @@ VALUES
 ('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
 ('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
 
--- INSERT INTO `exam_database` 
--- (`database_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `database_description`, `database_image`, `database_name`, `database_note`) 
--- VALUES 
--- ('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, null, null, null, null, 'Example Database', 'example_database.png', 'Example Database', 'This is an example database.'),
--- ('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, null, null, null, null, 'Another Database', 'another_database.png', 'Another Database', 'This is another database.'),
--- ('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, null, null, null, null, 'Sample Database', 'sample_database.png', 'Sample Database', 'This is a sample database.');
-
 INSERT INTO `instructions` 
 (`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
 VALUES 
-('Introduction 1', 'Important 1', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
+('You are NOT allowed to use any device to share data with others.
+You must use Visual Studio 2019 or above, MSSQL Server 2012 or above for your development tools. ', '1.	Create Solution/Project in Visual Studio named PE_PRN231_FA24_TrialTest_StudentFullname_BE for API, and PE_PRN231_FA24_TrialTest_StudentCode_FE for Client Application. Set the default Client application for your project as Login page.', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
 ('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
 ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
@@ -187,20 +181,59 @@ VALUES
 INSERT INTO `exam_question`
 (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('Create api to crud the FootballPlayer entity', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Create api to crud the FootballTeam entity.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Create api to login to the system.', 'Q3', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
 
-INSERT INTO `exam_barem`
-(`barem_content`, `barem_max_score`, `baremurl`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_question_id`, `method`)
-VALUES
-('Create FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'POST'),
-('Get FootballPlayer by ID', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
-('Get list FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
-('Update FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'PUT'),
-('Delete FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'DELETE'),
-('Get FootballTeam by ID', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
-('Get list FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
-('Create FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'POST');
+INSERT INTO `autoscore`.`exam_barem` 
+(`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
+VALUES (
+  2, 
+  1, 
+  true, 
+  1, 
+  'Administrator, Patients, Doctor', 
+  'Authenticates the user using their email and password. On successful authentication, the API returns a token (JWT or session token) that can be used for further authenticated requests.', 
+  '/api/login', 
+  'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }', 
+  'POST', 
+  '{
+  "email": "user@example.com",
+  "password": "yourpassword"
+  }', 
+  'Request Body (JSON)', 
+  'Response Code: 200 OK\nResponse Body (JSON):\n{ "message": "Login successful", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", "user": { "id": 1, "email": "user@example.com", "role": "admin" }}', 
+  'Email: Must be a valid email address format. Password: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.', 
+  'Login function'
+),
+(2,
+ 1,
+ true,
+ 2,
+ 'Administrator, Patients, Doctor',
+ 'Adds a new person and, if applicable, the viruses they are infected with.',
+ '/api/person',
+ 'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }',
+ 'POST',
+ '{\n
+                  \"personID\": 1,\n
+                   \"fullName\": \"John Doe\",\n
+                    \"birthDay\": \"1990-05-15\",\n
+                    \"phone\": \"1234567890\",\n
+                    \"viruses\": [\n
+                        { \n" +
+                           \"virusName\": \"COVID-19\",\n
+                           \"resistanceRate\": 0.2 \n
+                        }, \n
+                       { \n
+                            \"virusName\": \"Influenza\",\n
+                            \"resistanceRate\": 0.0 \n
+                        } \n
+                   ]\n
+                }',
+ 'Request Body (JSON)',
+ 'Response: 201 Created\nResponse Body (JSON):\\n{ "personId": 1, "message": "Person and viruses added successfully" }',
+ 'Email: Must be a valid email address format.\\nPassword: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.',
+ 'Create (Add a person and the viruses they are infected with)'
+);
 
 

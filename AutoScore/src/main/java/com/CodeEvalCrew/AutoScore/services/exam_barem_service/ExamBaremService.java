@@ -100,10 +100,6 @@ public class ExamBaremService implements IExamBaremService {
 
             examBarem.setExamQuestion(examQuestion);
 
-            //update creater craetedate
-            examBarem.setCreatedAt(Util.getCurrentDateTime());
-            examBarem.setCreatedBy(Util.getAuthenticatedAccountId());
-
             //save exam
             examBaremRepository.save(examBarem);
 
@@ -131,9 +127,6 @@ public class ExamBaremService implements IExamBaremService {
             examBarem.setExamQuestion(examQuestion);
             examBarem.setBaremContent(request.getBaremContent());
             examBarem.setBaremMaxScore(request.getBaremMaxScore());
-            examBarem.setBaremURL(request.getBaremURL());
-            examBarem.setUpdatedAt(Util.getCurrentDateTime());
-            examBarem.setUpdatedBy(Util.getAuthenticatedAccountId());
 
             //save exam
             examBaremRepository.save(examBarem);

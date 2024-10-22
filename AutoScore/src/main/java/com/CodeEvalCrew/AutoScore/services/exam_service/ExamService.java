@@ -3,7 +3,6 @@ package com.CodeEvalCrew.AutoScore.services.exam_service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -18,6 +17,7 @@ import java.util.Optional;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.usermodel.BreakType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFAbstractNum;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -35,21 +35,31 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
+import com.CodeEvalCrew.AutoScore.mappers.ExamBaremMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ExamMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamBarem.ExamBaremExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionExport;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Testcase.TestCaseExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Barem;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamBaremRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
+import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.repositories.instruction_repository.IInstructionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
+import com.CodeEvalCrew.AutoScore.specification.ExamDatabaseSpecification;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.aspose.words.Document;
@@ -62,21 +72,39 @@ public class ExamService implements IExamService {
 
     @Autowired
     private final IExamRepository examRepository;
-
     @Autowired
     private final ISubjectRepository subjectRepository;
-
     @Autowired
     private final IAccountRepository accountRepository;
+    @Autowired
+    private final IExamPaperRepository examPaperRepository;
+    @Autowired
+    private final IExamDatabaseRepository examDatabaseRepository;
+    @Autowired
+    private final IExamQuestionRepository examQuestionRepository;
+    @Autowired
+    private final IExamBaremRepository examBaremRepository;
+    @Autowired
+    private final IInstructionRepository instructionRepository;
     private final Util util;
 
     public ExamService(IExamRepository examRepository,
             ISubjectRepository subjectRepository,
             IAccountRepository accountRepository,
+            IExamPaperRepository examPaperRepository,
+            IExamBaremRepository examBaremRepository,
+            IExamQuestionRepository examQuestionRepository,
+            IExamDatabaseRepository examDatabaseRepository,
+            IInstructionRepository instructionRepository,
             IEmployeeRepository employeeRepository) {
         this.examRepository = examRepository;
         this.subjectRepository = subjectRepository;
         this.accountRepository = accountRepository;
+        this.examPaperRepository = examPaperRepository;
+        this.instructionRepository = instructionRepository;
+        this.examDatabaseRepository = examDatabaseRepository;
+        this.examQuestionRepository = examQuestionRepository;
+        this.examBaremRepository = examBaremRepository;
         this.util = new Util(employeeRepository);
     }
 
@@ -141,7 +169,7 @@ public class ExamService implements IExamService {
 
             //create new exam
             examRepository.save(exam);
-            
+
             //mapping exam
             result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException ex) {
@@ -253,10 +281,14 @@ public class ExamService implements IExamService {
     }
 
     @Override
-    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException {
-
+    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws Exception {
+        ExamExport exam = new ExamExport();
         // Step 1: Get the Exam data
-        ExamExport exam = getExamToExamExport();
+        try {
+            exam = getExamToExamExport(1l);
+        } catch (NotFoundException ex) {
+
+        }
 
         // Step 2: Prepare the placeholder data
         String duration = Integer.toString(exam.getDuration());
@@ -297,16 +329,13 @@ public class ExamService implements IExamService {
             XWPFParagraph questionParagraph = document.createParagraph();
             XWPFRun questionRun = questionParagraph.createRun();
             questionRun.setBold(true);  // Highlight the question
-            questionRun.setText("Câu hỏi: " + question.getQuestionContent() + " (" + question.getQuestionScore() + " điểm)");
-            questionRun.addCarriageReturn();
-            questionRun.setText("Xem thêm tại: " + question.getQuestionURL());
-            questionRun.addCarriageReturn();
+            questionRun.setText("Question: " + question.getQuestionContent() + " (" + question.getQuestionScore() + " points)");
 
             // Create numbered list for the barems
             addNumberedBaremList(document, question.getBarems());
 
             // Add space between questions
-            document.createParagraph().createRun().addBreak();
+            document.createParagraph().createRun();
         }
     }
 
@@ -339,46 +368,37 @@ public class ExamService implements IExamService {
         }
     }
 
-    private ExamExport getExamToExamExport() {
+    private ExamExport getExamToExamExport(Long examPaperId) throws NotFoundException, Exception {
         ExamExport result = new ExamExport();
-        List<ExamQuestionExport> questions = new ArrayList<>();
-        List<ExamBaremExport> barems = new ArrayList<>();
-        List<TestCaseExport> testcases = new ArrayList<>();
-        TestCaseExport tc1 = new TestCaseExport(
-                "Test1", 0.1, "Body", "Response"
-        );
-        TestCaseExport tc2 = new TestCaseExport(
-                "Test2", 0.1, "Body", "Response"
-        );
-
-        testcases.add(tc1);
-        testcases.add(tc2);
-
-        ExamBaremExport barem = new ExamBaremExport("Barem content", 0.2, testcases);
-
-        barems.add(barem);
-        barems.add(barem);
-
-        ExamQuestionExport question = new ExamQuestionExport("Content", 0.4, "Question url", barems);
-
-        questions.add(question);
-        questions.add(question);
         try {
-            result = new ExamExport(
-                    "Code",
-                    "Paper code",
-                    "Semester",
-                    "Subject Code",
-                    90,
-                    "This is instruction student need to follow it to do the exam",
-                    "This is a inpotant information in the exam /n student need to follow it",
-                    "This is a database description for the exam",
-                    "Database name",
-                    "This is the database not use for the exam, this wiil be the one student need to notice",
-                    questions
-            );
+            List<ExamQuestionExport> questions = new ArrayList<>(getListExamQuestionExport(examPaperId));
 
+            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper", examPaperId);
+
+            Exam exam = checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()), "Exam", examPaper.getExam().getExamId());
+
+            Specification<Exam_Database> spec = ExamDatabaseSpecification.hasForeignKey(examPaperId, "exam_paper", "examPaperId");
+
+            //get error
+            Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
+
+            result.setExamCode(exam.getExamCode());
+            result.setExamPaperCode(examPaper.getExamPaperCode());
+            result.setSemester(exam.getSemester().getSemesterCode());
+            result.setSubjectCode(exam.getSubject().getSubjectCode());
+            result.setDuration(90);
+            result.setInstructions(examPaper.getInstruction().getIntroduction());
+            result.setImportant(examPaper.getInstruction().getImportant());
+            result.setDatabaseDescpription("databaseDescpription");
+            result.setDatabaseNote("databaseNote");
+            result.setQuestions(questions);
+            result.setDatabaseName("Database Name");
+            result.setDatabaseImage(getImageAsByteArray(""));
+
+        } catch (NotFoundException ex) {
+            throw ex;
         } catch (Exception e) {
+            System.out.println(e.getCause());
             throw e;
         }
 
@@ -401,95 +421,94 @@ public class ExamService implements IExamService {
             for (ExamBaremExport barem : barems) {
                 XWPFParagraph paragraph = document.createParagraph();
                 paragraph.setNumID(numID);  // Set numbering
+
                 XWPFRun run = paragraph.createRun();
-                run.setText(barem.getBaremContent() + " (" + barem.getBaremScore() + " điểm)");
-                addNumberedTestCaseList(document, barem.getTestCases());
+                run.setText(barem.getBaremContent() + " (" + barem.getBaremMaxScore() + " points)");
+                run.addBreak();
+
+                // Detailed information about the endpoint
+                run.setText("Endpoint: " + (barem.getEndpoint() != null ? barem.getEndpoint() : "N/A"));
+                run.addBreak();
+
+                run.setText("Method: " + (barem.getMethod() != null ? barem.getMethod() : "N/A"));
+                run.addBreak();
+
+                run.setText("Function: " + (barem.getBaremFunction() != null ? barem.getBaremFunction() : "N/A"));
+                run.addBreak();
+
+                run.setText("\t" + (barem.getPayloadType() != null ? barem.getPayloadType() : "N/A"));
+                run.addBreak();
+
+                run.setText((barem.getPayload() != null ? barem.getPayload() : "N/A"));
+                run.addBreak();
+
+                run.setText("Validations: ");
+                run.addBreak();
+
+                run.setText((barem.getValidation() != null ? barem.getValidation() : "N/A"));
+                run.addBreak();
+
+                run.setText("Success Response: ");
+                run.addBreak();
+
+                run.setText((barem.getSuccessResponse() != null ? barem.getSuccessResponse() : "N/A"));
+                run.addBreak();
+
+                run.setText("Error Response: ");
+                run.addBreak();
+
+                run.setText((barem.getErrorResponse() != null ? barem.getErrorResponse() : "N/A"));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace();  // Log the error for debugging purposes
         }
-    }
 
-    private void addNumberedTestCaseList(XWPFDocument document, List<TestCaseExport> testCaseExports) {
-        try {
-            // Create a numbering element for numbered list
-            CTAbstractNum abstractNum = CTAbstractNum.Factory.newInstance();
-            abstractNum.setAbstractNumId(BigInteger.valueOf(0));
-
-            // Create numbering
-            XWPFNumbering numbering = document.createNumbering();
-            BigInteger abstractNumID = numbering.addAbstractNum(new XWPFAbstractNum(abstractNum));
-            BigInteger numID = numbering.addNum(abstractNumID);
-
-            // Add each barem as a numbered item
-            for (TestCaseExport testCaseExport : testCaseExports) {
-                XWPFParagraph paragraph = document.createParagraph();
-                paragraph.setNumID(numID);  // Set numbering
-                XWPFRun run = paragraph.createRun();
-                run.setText(testCaseExport.getTestCaseName() + " (" + String.valueOf(testCaseExport.getMaxScore()) + " điểm)");
-                run.addCarriageReturn();
-                run.setText("Test case body: " + testCaseExport.getTestcaseBody());
-                run.addCarriageReturn();
-                run.setText("Test case response: " + testCaseExport.getTestcaseResponse());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private String addDatabaseImage(XWPFDocument document, ExamExport exportExam) throws IOException {
         String message = "Image added successfully.";
         String placeholder = "${imagePlaceholder}";
-        String imgPath = "C:\\Project\\SEP490\\database-img-test.png";
-        byte[] imageBytes = getImageAsByteArray(imgPath);
 
         try {
-            // Iterate through all paragraphs and find the placeholder
             List<XWPFParagraph> paragraphs = document.getParagraphs();
+
             for (XWPFParagraph paragraph : paragraphs) {
                 for (XWPFRun run : paragraph.getRuns()) {
                     String text = run.getText(0);
                     if (text != null && text.contains(placeholder)) {
-                        // Replace the placeholder text with the image
-                        text = text.replace(placeholder, "");  // Remove the placeholder text
-                        run.setText(text, 0);  // Update the run with the modified text
+                        // Replace the placeholder text with an empty string
+                        text = text.replace(placeholder, "");
+                        run.setText(text, 0); // Update the run with the modified text
 
                         // Create a new centered paragraph for the image
                         XWPFParagraph imageParagraph = document.createParagraph();
                         imageParagraph.setAlignment(ParagraphAlignment.CENTER); // Center align the paragraph
                         XWPFRun imageRun = imageParagraph.createRun();
 
-                        // Insert the image at the same location
-                        // try (InputStream imageStream = new FileInputStream(imgPath)) {
-                        try (ByteArrayInputStream imageInputStream = new ByteArrayInputStream(imageBytes)) {
-                            // imageRun.addBreak();  // Optional: Add a break before the image
-                            // imageRun.addPicture(
-                            //         imageStream,
-                            //         XWPFDocument.PICTURE_TYPE_PNG, // Use appropriate image type
-                            //         imgPath,
-                            //         Units.toEMU(200), // Width in EMUs
-                            //         Units.toEMU(150) // Height in EMUs
-                            // );
-                            imageRun.addBreak();  // Optional: Add a break before the image
+                        try (ByteArrayInputStream imageInputStream = new ByteArrayInputStream(exportExam.getDatabaseImage())) {
                             imageRun.addPicture(
                                     imageInputStream,
-                                    XWPFDocument.PICTURE_TYPE_PNG, // Specify the correct image type (PNG in this example)
-                                    "image.png", // Image name (for internal Word reference, not the file system)
+                                    XWPFDocument.PICTURE_TYPE_PNG, // Correct image type
+                                    "image.png", // Image name (for internal Word reference)
                                     Units.toEMU(200), // Width in EMUs
                                     Units.toEMU(150) // Height in EMUs
                             );
-                        } catch (FileNotFoundException fnfe) {
-                            message = "Error: Image file not found.";
-                            fnfe.printStackTrace();
-                        } catch (IOException e) {
+                        } catch (InvalidFormatException e) {
                             message = "Error adding image to document.";
                             e.printStackTrace();
                         }
+
+                        // Optional: Add a break after the image
+                        imageRun.addBreak(BreakType.PAGE);
+                        break; // Exit the loop after processing the first run with the placeholder
                     }
                 }
             }
-        } catch (InvalidFormatException e) {
-            message = "An error occurred while processing the document.";
+        } catch (IOException e) {
+            message = "Error reading the image file.";
+            e.printStackTrace();
+        } catch (Exception e) {
+            message = "An unexpected error occurred.";
             e.printStackTrace();
         }
 
@@ -497,7 +516,45 @@ public class ExamService implements IExamService {
     }
 
     public static byte[] getImageAsByteArray(String pathToImage) throws IOException {
-        return Files.readAllBytes(Paths.get(pathToImage));
+        String imgPath = "C:\\Project\\SEP490\\database-img-test.png";
+        return Files.readAllBytes(Paths.get(imgPath));
+    }
+
+    private List<ExamQuestionExport> getListExamQuestionExport(Long examPaperId) throws NoSuchElementException {
+        List<ExamQuestionExport> result = new ArrayList<>();
+
+        List<Exam_Question> listQuestions = examQuestionRepository.getByExamPaperExamPaperId(examPaperId);
+
+        if (listQuestions.isEmpty()) {
+            throw new NoSuchElementException("No question found");
+        }
+
+        for (Exam_Question examQuestion : listQuestions) {
+            ExamQuestionExport export = new ExamQuestionExport();
+            export.setQuestionContent(examQuestion.getQuestionContent());
+            export.setQuestionScore(examQuestion.getMaxScore());
+            List<ExamBaremExport> barems = getListBaremExports(examQuestion.getExamQuestionId());
+            export.setBarems(barems);
+            result.add(export);
+        }
+
+        return result;
+    }
+
+    private List<ExamBaremExport> getListBaremExports(Long examQuestionId) {
+        List<ExamBaremExport> result = new ArrayList<>();
+
+        List<Exam_Barem> listBarems = examBaremRepository.getByExamQuestionExamQuestionId(examQuestionId);
+
+        if (listBarems.isEmpty()) {
+            throw new NoSuchElementException("No barems found");
+        }
+
+        for (Exam_Barem examBarem : listBarems) {
+            ExamBaremExport export = ExamBaremMapper.INSTANCE.examBaremToExport(examBarem);
+            result.add(export);
+        }
+        return result;
     }
 
 }

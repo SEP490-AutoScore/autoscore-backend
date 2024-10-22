@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -33,15 +32,20 @@ public class Exam_Barem {
     @Column(columnDefinition = "LONGTEXT")
     private String baremContent;
     private float baremMaxScore;
-    private String baremURL;
+    private String endpoint;
+    private String allowRole;
     private String method;
+    private String baremFunction;
+    private String payloadType;
+    @Column(columnDefinition = "TEXT")
+    private String payload;
+    private String validation;
+    @Column(length = 65535)
+    private String successResponse;
+    @Column(columnDefinition = "TEXT")
+    private String errorResponse;
     private boolean status;
-    private LocalDateTime createdAt;
-    private Long createdBy;
-    private LocalDateTime updatedAt;
-    private Long updatedBy;
-    private LocalDateTime deletedAt;
-    private Long deletedBy;
+    private int orderBy;
 
     //Relationship
     //n-1 exam question
