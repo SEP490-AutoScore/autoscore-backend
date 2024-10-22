@@ -7,8 +7,11 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 
+import org.springframework.stereotype.Service;
+
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SonarQube.SonarQubeRunnerRequest;
 
+@Service
 public class ThirdPartyUtil {
 
     public int sonarQubeRunner(SonarQubeRunnerRequest request) throws Exception {
