@@ -1,7 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,39 +20,27 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Test_Case {
+public class Gherkin_Scenario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long testCaseId;
+    private Long gherkinScenarioId;
 
     @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private String testcaseScript;
+    @Column(columnDefinition = "LONGTEXT")
+    private String gherkinData;
 
-    private String testCaseContent;
-    private String testCaseBody;
-    private String testCasePredict;
-    private String testCaseScore;
+    private String postmanFunctionName;
 
-    private boolean isGeneratedByAi;
+    private float baremDetailScore;
 
-    private String type;
+    private Long gherkinScenarioParentId;
 
-    private boolean status;
-    private LocalDateTime createdAt;
+    private int gherkinScenarioPosition;
 
-    private Long createdBy;
+    private Boolean statusParentId;
 
-    private LocalDateTime updatedAt;
-
-    private Long updatedBy;
-
-    private LocalDateTime deletedAt;
-
-    private Long deletedBy;
-
-    //Relationship
+    // Quan hệ n-1 với Exam_Barem
     @ManyToOne
     @JoinColumn(name = "examBaremId", nullable = false)
     private Exam_Barem examBarem;

@@ -10,7 +10,7 @@ VALUES
 (true, 7, 'MANAGE_EXAM'),
 (true, 8, 'MANAGE_SCORE'),
 (true, 9, 'MANAGE_EXAM_DATABASE'),
-(true, 10, 'MANAGE_TESTCASE');
+(true, 10, 'MANAGE_GHERKIN_SCENARIO');
 
 INSERT INTO `permission`
 (`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
@@ -24,7 +24,7 @@ VALUES
 ('VIEW_EXAM', 7, 'View exam', 7, 1),
 ('VIEW_SCORE', 8, 'View score', 8, 1),
 ('VIEW_EXAM_DATABASE', 30, 'View exam database', 9, 1),
-('VIEW_TESTCASE', 34, 'View testcase', 10, 1),
+('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 10, 1),
 
 ('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
 ('CREATE_ROLE', 10, 'Create role', 2, 1),
@@ -34,7 +34,7 @@ VALUES
 ('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
 ('CREATE_EXAM', 15, 'Create exam', 7, 1),
 ('CREATE_EXAM_DATABASE', 31, 'Create exam database', 9, 1),
-('CREATE_TESTCASE', 35, 'Create testcase', 10, 1),
+('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 10, 1),
 
 ('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
 ('UPDATE_ROLE', 17, 'Update role', 2, 1),
@@ -44,7 +44,7 @@ VALUES
 ('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
 ('UPDATE_EXAM', 22, 'Update exam', 7, 1),
 ('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 9, 1),
-('UPDATE_TESTCASE', 36, 'Update testcase', 10, 1),
+('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 10, 1),
 
 ('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
 ('DELETE_ROLE', 24, 'Delete role', 2, 1),
@@ -54,7 +54,7 @@ VALUES
 ('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
 ('DELETE_EXAM', 29, 'Delete exam', 7, 1),
 ('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1),
-('DELETE_TESTCASE', 37, 'Delete testcase', 10, 1);
+('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 10, 1);
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)

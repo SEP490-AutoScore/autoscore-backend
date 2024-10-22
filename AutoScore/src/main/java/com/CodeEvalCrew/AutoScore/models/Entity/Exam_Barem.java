@@ -53,10 +53,9 @@ public class Exam_Barem {
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;
 
-    //1-1 test case
-    @OneToMany
-    @JoinColumn(name = "testCaseId", nullable = true)
-    private Set<Test_Case> testCases;
+    // 1-n Gherkin_Scenario
+    @OneToMany(mappedBy = "examBarem", cascade = CascadeType.ALL)
+    private Set<Gherkin_Scenario> gherkinScenarios;
 
     //1-n score detail
     @OneToMany(mappedBy = "examBarem", cascade= CascadeType.ALL)
