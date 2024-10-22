@@ -30,13 +30,7 @@ public class Score {
 
     private float totalScore;
 
-    private float reReviewTotalScore;
-
     private LocalDateTime gradedAt;
-
-    private LocalDateTime updatedAt;
-
-    private boolean status;
 
     private boolean flag;
 

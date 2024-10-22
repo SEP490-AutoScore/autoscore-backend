@@ -26,19 +26,11 @@ public class Score_Detail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scoreDetailId;
 
-    private float baremScore;
+    private float baremDetailScore;
 
     private String feedback;
 
-    private float reReviewScore;
-
-    private String reReviewFeedback;
-
     private LocalDateTime gradedAt;
-
-    private LocalDateTime reReviewAt;
-
-    private Long reReviewBy;
 
     private boolean isPass;
 
