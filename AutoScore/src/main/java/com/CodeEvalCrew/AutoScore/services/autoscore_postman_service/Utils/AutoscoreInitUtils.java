@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class PostmanUtils {
+public class AutoscoreInitUtils {
 
     public static int BASE_PORT = 10000;
 

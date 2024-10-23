@@ -294,6 +294,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- delete container docker -->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>3.2.13</version>  <!-- Phiên bản mới nhất tại thời điểm này -->
+        </dependency>
     </dependencies>
     
     <build>
