@@ -5,9 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,20 +18,21 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Gherkin_Scenario {
+public class Question_Ask_AI {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long gherkinScenarioId;
+    private Long questionAskAiId;
 
     @Lob
     @Column(columnDefinition = "LONGTEXT")
-    private String gherkinData;
+    private String content;
 
-    private Long orderBy;
+    private Long stepNo;
 
-    // Quan hệ n-1 với Exam_Barem (sau sẽ sửa thành Exam_Question)
-    @ManyToOne
-    @JoinColumn(name = "examBaremId", nullable = false)
-    private Exam_Barem examBarem;
+    private String aiName;
+
+    private String purpose;
+
+    private String aiKey;
 }

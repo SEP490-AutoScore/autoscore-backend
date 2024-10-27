@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -37,6 +39,12 @@ public class Exam_Paper {
     private Long updatedBy;
     private LocalDateTime deletedAt;
     private Long deletedBy;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String fileCollectionPostman;
+    private Boolean isComfirmFile;
+    private Boolean isUsed;
 
     //Relationship
     //1-n score

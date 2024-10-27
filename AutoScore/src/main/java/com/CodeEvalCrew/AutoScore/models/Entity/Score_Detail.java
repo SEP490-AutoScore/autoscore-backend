@@ -1,14 +1,11 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,20 +23,15 @@ public class Score_Detail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scoreDetailId;
 
-    private float baremDetailScore;
-
-    private String feedback;
-
-    private LocalDateTime gradedAt;
-
     private boolean isPass;
 
-    //Relationship
-    //1-1 account
-    @OneToOne
-    @JoinColumn(name = "accountId", nullable = false)
-    private Account account;
+    private String postmanFunctionName;
+    private Float scoreOfFunction;
+    private Long totalPmtest;
+    private Float scoreAchieve;
+    private Long noPmtestAchieve;
 
+    //Relationship
     //n-1 score
     @ManyToOne
     @JoinColumn(name = "scoreId", nullable = false)
@@ -50,9 +42,5 @@ public class Score_Detail {
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;
 
-    //n-1 exam barem
-    @ManyToOne
-    @JoinColumn(name = "examBaremId", nullable = false)
-    private Exam_Barem examBarem;
 
 }

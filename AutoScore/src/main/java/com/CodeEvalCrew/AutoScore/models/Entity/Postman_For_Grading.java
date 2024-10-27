@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,29 +19,25 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Source_Detail {
-@Id
+public class Postman_For_Grading {
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sourceDetailId;
+    private Long postmanForGradingId;
 
-    private String studentSourceCodePath;
+    @Column(nullable = false)
+    private String postmanFunctionName;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private String fileCollectionPostman;
+    private Float scoreOfFunction;
 
-    private Boolean is_pass_first_progress;
-    private Boolean is_pass_second_progress;
-    private Boolean is_pass_third_progress;
+    private Long totalPmTest;
 
-    //Relationship
-    //n-1 student
+    private Long orderBy;
+
+    private Long parentId;
+
+    // Many-to-One relationship with Exam_Question
     @ManyToOne
-    @JoinColumn(name = "studentId", nullable = false)
-    private Student student;
-
-    //n-1 source
-    @ManyToOne
-    @JoinColumn(name = "sourceId", nullable = false)
-    private Source source;
+    @JoinColumn(name = "examQuestionId", nullable = false)
+    private Exam_Question examQuestion;
 }
