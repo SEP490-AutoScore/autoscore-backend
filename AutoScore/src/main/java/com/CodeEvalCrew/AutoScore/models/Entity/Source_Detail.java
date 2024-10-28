@@ -29,7 +29,7 @@ public class Source_Detail {
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")
-    private String fileCollectionPostman;
+    private byte[] fileCollectionPostman;
 
     private Boolean is_pass_first_progress;
     private Boolean is_pass_second_progress;

@@ -2,7 +2,6 @@ package com.CodeEvalCrew.AutoScore.services.autoscore_postman_service.Utils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.AbstractMap;
@@ -14,10 +13,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 public class AutoscoreInitUtils {
+
+ 
 
     public static int BASE_PORT = 10000;
 
@@ -105,64 +103,6 @@ public class AutoscoreInitUtils {
         }
     }
 
-    public static void updateAppsettingsJson(Path filePath) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode rootNode = (ObjectNode) objectMapper.readTree(Files.newBufferedReader(filePath, StandardCharsets.UTF_8));
-
-        if (rootNode.has("ConnectionStrings")) {
-            ObjectNode connectionStringsNode = (ObjectNode) rootNode.get("ConnectionStrings");
-            connectionStringsNode.fieldNames().forEachRemaining(key -> {
-                connectionStringsNode.put(key, String.join(";",
-                        "Server=192.168.2.16\\SQLEXPRESS",
-                        "uid=sa",
-                        "pwd=1234567890",
-                        "database=EnglishPremierLeague2024DB",
-                        "TrustServerCertificate=True"
-                ));
-            });
-        }
-
-        if (rootNode.has("Kestrel")) {
-            ObjectNode kestrelNode = (ObjectNode) rootNode.get("Kestrel").get("Endpoints").get("Http");
-            String oldUrl = kestrelNode.get("Url").asText();
-            String newUrl = oldUrl.replace("{PORT}", "8080");
-            kestrelNode.put("Url", newUrl);
-        }
-
-        objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValue(Files.newBufferedWriter(filePath, StandardCharsets.UTF_8), rootNode);
-    }
-
-    public static void findAndUpdateAppsettings(Path dirPath) throws IOException {
-        try (Stream<Path> folders = Files.walk(dirPath, 1)) {
-            // Find directories that contain a Program.cs file
-            List<Path> targetDirs = folders
-                    .filter(Files::isDirectory)
-                    .filter(path -> {
-                        try (Stream<Path> files = Files.walk(path, 1)) {
-                            return files.anyMatch(file -> file.getFileName().toString().equalsIgnoreCase("Program.cs"));
-                        } catch (IOException e) {
-                            return false;
-                        }
-                    })
-                    .collect(Collectors.toList());
-
-            // Search for appsettings.json in the found directories
-            for (Path targetDir : targetDirs) {
-                try (Stream<Path> paths = Files.walk(targetDir)) {
-                    paths.filter(Files::isRegularFile)
-                            .filter(path -> path.toString().endsWith("appsettings.json"))
-                            .forEach(path -> {
-                                try {
-                                    updateAppsettingsJson(path);
-                                } catch (IOException e) {
-                                    System.err.println("Error updating: " + path + " - " + e.getMessage());
-                                }
-                            });
-                }
-            }
-        }
-    }
 
     public static void removeDockerFiles(Path dirPath) throws IOException {
         Files.deleteIfExists(dirPath.resolve("Dockerfile"));
