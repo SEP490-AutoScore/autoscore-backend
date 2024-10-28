@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
@@ -104,6 +105,19 @@ public class ExamPaperController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PostMapping("/import-postman-collections")
+    public ResponseEntity<?> importPostmanCollections(
+            @RequestParam("examPaperId") Long examPaperId,
+            @RequestParam("files") List<MultipartFile> files) throws Exception {
+        try {
+            examPaperService.importPostmanCollections(examPaperId, files);
+            return new ResponseEntity<>("Files imported and validated successfully.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Failed to import files: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -1,13 +1,16 @@
 package com.CodeEvalCrew.AutoScore.services.exam_paper_service;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ssl.SslProperties.Bundles.Watch.File;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamPaperMapper;
@@ -20,6 +23,13 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperReposit
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamPaperSpecification;
 import com.CodeEvalCrew.AutoScore.utils.Util;
+import io.jsonwebtoken.io.IOException;
+import java.nio.file.Files;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 @Service
 public class ExamPaperService implements IExamPaperService {
@@ -27,12 +37,18 @@ public class ExamPaperService implements IExamPaperService {
     private final IExamPaperRepository examPaperRepository;
     @Autowired
     private final IExamRepository examRepository;
+    @Autowired
+    private final ObjectMapper objectMapper;
+
 
     public ExamPaperService(IExamPaperRepository examPaperRepository,
-                            IExamRepository examRepository) {
+                            IExamRepository examRepository,
+                            ObjectMapper objectMapper) {
         this.examPaperRepository = examPaperRepository;
         this.examRepository = examRepository;
+        this.objectMapper = objectMapper;
     }
+  
 
     @Override
     public ExamPaperView getById(Long id) throws NotFoundException {
@@ -162,5 +178,92 @@ public class ExamPaperService implements IExamPaperService {
     private <T> T checkEntityExistence(Optional<T> entity, String entityName, Long entityId) throws NotFoundException {
         return entity.orElseThrow(() -> new NotFoundException(entityName + " id: " + entityId + " not found"));
     }
+
+
+    @Override
+    public void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception {
+        try {
+            Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                    .orElseThrow(() -> new NotFoundException("Exam Paper not found for ID: " + examPaperId));
     
+            for (MultipartFile file : files) {
+                byte[] fileData = file.getBytes();
+                java.io.File tempFile = convertBytesToFile(fileData, file.getOriginalFilename());
+    
+                // Check if the file contains valid JSON
+                if (!isValidJson(tempFile)) {
+                    throw new Exception("File " + file.getOriginalFilename() + " contains invalid JSON.");
+                }
+    
+                // Run Newman test
+                boolean isNewmanSuccess = runNewmanTest(tempFile);
+                
+                // Regardless of Newman test result, save the exam paper
+                examPaper.setFileCollectionPostman(fileData);
+                examPaper.setIsComfirmFile(true);
+                examPaperRepository.save(examPaper);
+                
+                // Handle Newman result
+                if (!isNewmanSuccess) {
+                    // Optionally, you can log the failure or take additional actions
+                    System.out.println("Newman test failed for file: " + file.getOriginalFilename());
+                }
+    
+                // Clean up the temporary file
+                Files.deleteIfExists(tempFile.toPath());
+            }
+        } catch (NotFoundException e) {
+            throw new Exception("Exam Paper with ID " + examPaperId + " not found.", e);
+        } catch (Exception e) {
+            // Handle other exceptions that may arise during processing
+            throw new Exception("Failed to import files: " + e.getMessage(), e);
+        }
+    }
+
+    
+
+    
+    private java.io.File convertBytesToFile(byte[] fileData, String fileName) throws Exception {
+        java.io.File tempFile = new java.io.File(System.getProperty("java.io.tmpdir") + "\\" + fileName);
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            fos.write(fileData);
+        }
+        return tempFile;
+    }
+
+    private boolean isValidJson(java.io.File file) {
+        try {
+            objectMapper.readTree(file); // Try to parse the JSON
+            return true; // JSON is valid
+        } catch (Exception e) {
+            return false; // JSON is invalid
+        }
+    }
+
+    private boolean runNewmanTest(java.io.File file) {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd", "run", "\"" + file.getAbsolutePath() + "\""
+            );
+            processBuilder.redirectErrorStream(true);
+
+            Process process = processBuilder.start();
+
+            // Capture output for debugging
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                StringBuilder output = new StringBuilder();
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                    System.out.println(line); // Log each line for debugging
+                }
+            }
+
+            int exitCode = process.waitFor();
+            return exitCode == 0; // Return true if successful
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // Return false on error
+        }
+    }
 }

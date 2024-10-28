@@ -41,7 +41,7 @@ public class Exam_Paper {
     private Long deletedBy;
     @Lob
     @Column(columnDefinition = "LONGBLOB")
-    private String fileCollectionPostman;
+    private byte[] fileCollectionPostman;
     private Boolean isComfirmFile;
     private Boolean isUsed;
 
