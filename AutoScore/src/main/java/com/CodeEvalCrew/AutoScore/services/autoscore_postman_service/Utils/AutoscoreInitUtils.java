@@ -23,16 +23,22 @@ public class AutoscoreInitUtils {
 
     public static Map.Entry<Path, String> findCsprojAndDotnetVersion(Path dirPath) throws IOException {
         Pattern pattern = Pattern.compile("<TargetFramework>(net\\d+\\.\\d+)</TargetFramework>");
-        Pattern beFolderPattern = Pattern.compile(".*_BE$");
 
         try (Stream<Path> folders = Files.walk(dirPath, 1)) {
-            Optional<Path> beFolder = folders
+            // Find directories that contain a Program.cs file
+            Optional<Path> targetDir = folders
                     .filter(Files::isDirectory)
-                    .filter(path -> beFolderPattern.matcher(path.getFileName().toString()).matches())
+                    .filter(path -> {
+                        try (Stream<Path> files = Files.walk(path, 1)) {
+                            return files.anyMatch(file -> file.getFileName().toString().equalsIgnoreCase("Program.cs"));
+                        } catch (IOException e) {
+                            return false;
+                        }
+                    })
                     .findFirst();
 
-            if (beFolder.isPresent()) {
-                try (Stream<Path> paths = Files.walk(beFolder.get())) {
+            if (targetDir.isPresent()) {
+                try (Stream<Path> paths = Files.walk(targetDir.get())) {
                     for (Path path : paths.filter(Files::isRegularFile).collect(Collectors.toList())) {
                         if (path.toString().endsWith(".csproj")) {
                             List<String> lines = Files.readAllLines(path);
@@ -50,7 +56,7 @@ public class AutoscoreInitUtils {
         }
         return null;
     }
-
+    
     public static void createDockerfile(Path dirPath, Path csprojPath, String dotnetVersion, int port) throws IOException {
         String csprojName = csprojPath.getFileName().toString();
         String folderName = csprojPath.getParent().getFileName().toString();
@@ -127,17 +133,34 @@ public class AutoscoreInitUtils {
                 .writeValue(Files.newBufferedWriter(filePath, StandardCharsets.UTF_8), rootNode);
     }
 
-    public static void findAndUpdateAppsettingsInBE(Path dirPath) throws IOException {
-        try (var paths = Files.walk(dirPath)) {
-            paths.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith("appsettings.json"))
-                    .forEach(path -> {
-                        try {
-                            updateAppsettingsJson(path);
+    public static void findAndUpdateAppsettings(Path dirPath) throws IOException {
+        try (Stream<Path> folders = Files.walk(dirPath, 1)) {
+            // Find directories that contain a Program.cs file
+            List<Path> targetDirs = folders
+                    .filter(Files::isDirectory)
+                    .filter(path -> {
+                        try (Stream<Path> files = Files.walk(path, 1)) {
+                            return files.anyMatch(file -> file.getFileName().toString().equalsIgnoreCase("Program.cs"));
                         } catch (IOException e) {
-                            System.err.println("Error updating: " + path + " - " + e.getMessage());
+                            return false;
                         }
-                    });
+                    })
+                    .collect(Collectors.toList());
+
+            // Search for appsettings.json in the found directories
+            for (Path targetDir : targetDirs) {
+                try (Stream<Path> paths = Files.walk(targetDir)) {
+                    paths.filter(Files::isRegularFile)
+                            .filter(path -> path.toString().endsWith("appsettings.json"))
+                            .forEach(path -> {
+                                try {
+                                    updateAppsettingsJson(path);
+                                } catch (IOException e) {
+                                    System.err.println("Error updating: " + path + " - " + e.getMessage());
+                                }
+                            });
+                }
+            }
         }
     }
 

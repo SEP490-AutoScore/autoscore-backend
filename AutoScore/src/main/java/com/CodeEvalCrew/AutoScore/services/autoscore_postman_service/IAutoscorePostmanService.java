@@ -5,6 +5,6 @@ import java.util.List;
 import com.CodeEvalCrew.AutoScore.models.DTO.StudentSourceInfoDTO;
 
 public interface IAutoscorePostmanService {
-    List<StudentSourceInfoDTO> getStudentSourceInfoByExamPaperId(Long examPaperId, int numberOfAssignmentsDeployedAtTheSameTime);
+    List<StudentSourceInfoDTO> gradingFunction(Long examPaperId, int numberDeploy);
 
 }

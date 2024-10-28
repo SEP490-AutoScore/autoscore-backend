@@ -3,36 +3,51 @@ package com.CodeEvalCrew.AutoScore.services.autoscore_postman_service;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.mappers.SourceDetailMapperforAutoscore;
 import com.CodeEvalCrew.AutoScore.models.DTO.StudentSourceInfoDTO;
+import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceRepository;
 import com.CodeEvalCrew.AutoScore.services.autoscore_postman_service.Utils.AutoscoreInitUtils;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
+
 
 
 @Service
 public class AutoscorePostmanService implements IAutoscorePostmanService {
 
+    private static final String DB_URL = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
+    private static final String DB_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+
     @Autowired
     private SourceRepository sourceRepository;
     @Autowired
     private SourceDetailMapperforAutoscore sourceDetailMapper;
+     @Autowired
+    private IExamDatabaseRepository examDatabaseRepository;
+
+
 
     @Override
-    public List<StudentSourceInfoDTO> getStudentSourceInfoByExamPaperId(Long examPaperId, int numberOfAssignmentsDeployedAtTheSameTime) {
+    public List<StudentSourceInfoDTO> gradingFunction(Long examPaperId, int numberDeploy) {
         List<StudentSourceInfoDTO> studentSources = sourceRepository.findByExamPaper_ExamPaperId(examPaperId)
             .map(source -> source.getSourceDetails()
                 .stream()
@@ -40,11 +55,55 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                 .collect(Collectors.toList()))
             .orElseThrow(() -> new IllegalArgumentException("Exam Paper not found for ID: " + examPaperId));
 
+            
+            //deleteDatabaseByExamPaperId(examPaperId);
+
+            // try {
+            //     deleteContainerAndImages();
+            // } catch (IOException e) {
+            //     e.printStackTrace();
+            //     throw new RuntimeException("Failed to delete containers and images: " + e.getMessage());
+            // }
+
         processStudentSolutions(studentSources);
-        // Gọi deployAndScoring với số lượng bài triển khai đồng thời từ tham số
-    deployAndScoring(studentSources, numberOfAssignmentsDeployedAtTheSameTime);
+      
+        //deployAndScoring(studentSources, numberDeploy);
 
         return studentSources;
+    }
+
+    private void deleteDatabaseByExamPaperId(Long examPaperId) {
+        try {
+            // Load SQL Server JDBC driver
+            Class.forName(DB_DRIVER);
+
+            // Establish connection to SQL Server
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 Statement statement = connection.createStatement()) {
+
+                // Fetch the database name associated with the examPaperId
+                String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
+                if (databaseName != null && !databaseName.isEmpty()) {
+                    // Drop the database if it exists
+                    String sql = "IF EXISTS (SELECT name FROM sys.databases WHERE name = '" + databaseName + "') " +
+                                 "BEGIN " +
+                                 "   ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
+                                 "   DROP DATABASE [" + databaseName + "]; " +
+                                 "END";
+                    statement.executeUpdate(sql);
+                    System.out.println("Database " + databaseName + " has been deleted.");
+                } else {
+                    System.out.println("No database found for examPaperId: " + examPaperId);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to delete database for examPaperId: " + examPaperId);
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException("SQL Server JDBC Driver not found.");
+        }
     }
 
     // Process each student solution and generate Docker files
@@ -65,7 +124,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                     if (csprojAndVersion != null) {
                         AutoscoreInitUtils.createDockerfile(dirPath, csprojAndVersion.getKey(), csprojAndVersion.getValue(), port);
                         AutoscoreInitUtils.createDockerCompose(dirPath, studentId, port);
-                        AutoscoreInitUtils.findAndUpdateAppsettingsInBE(dirPath);
+                        AutoscoreInitUtils.findAndUpdateAppsettings(dirPath);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -84,21 +143,21 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
 
 
 
-    public void deployAndScoring(List<StudentSourceInfoDTO> studentSources, int numberOfAssignmentsDeployedAtTheSameTime) {
+    public void deployAndScoring(List<StudentSourceInfoDTO> studentSources, int numberDeploy) {
         int totalAssignments = studentSources.size();
         int deployed = 0;
     
         // Step 1: Multi-threaded deployment
         while (deployed < totalAssignments) {
-            int end = Math.min(deployed + numberOfAssignmentsDeployedAtTheSameTime, totalAssignments);
+            int end = Math.min(deployed + numberDeploy, totalAssignments);
             List<StudentSourceInfoDTO> batch = studentSources.subList(deployed, end);
-            ExecutorService executor = Executors.newFixedThreadPool(numberOfAssignmentsDeployedAtTheSameTime);
+            ExecutorService executor = Executors.newFixedThreadPool(numberDeploy);
     
             for (StudentSourceInfoDTO studentSource : batch) {
                 executor.submit(() -> {
                     try {
                         // Deploy the student solution using multi-threading
-                        deployStudentSolution(studentSource, numberOfAssignmentsDeployedAtTheSameTime);
+                        deployStudentSolution(studentSource, numberDeploy);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -114,7 +173,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
             }
     
             // Update the number of assignments that have been deployed
-            deployed += numberOfAssignmentsDeployedAtTheSameTime;
+            deployed += numberDeploy;
         }
     
         // Step 2: Sequential scoring (single-threaded)
@@ -129,7 +188,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         // Step 3: Sequential container removal (single-threaded)
         for (StudentSourceInfoDTO studentSource : studentSources) {
             try {
-                deleteContainer(studentSource);  // Remove each container sequentially
+                deleteContainerAndImages();  // Remove each container sequentially
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -199,28 +258,33 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
     }
 
     
-    // Hàm xóa tất cả container  Docker sau khi chấm điểm
-
- private void deleteContainer(StudentSourceInfoDTO studentSource) throws IOException {
-    System.out.println("Deleting container for studentId: " + studentSource.getStudentId());
-
-    DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375").build();
-
-    try {
-        List<Container> containers = dockerClient.listContainersCmd().withShowAll(true).exec();
-
-        for (Container container : containers) {
-            System.out.println("Removing container " + container.getNames()[0] + " (" + container.getId().substring(0, 12) + ")");
-            dockerClient.removeContainerCmd(container.getId()).withForce(true).exec();
+    public void deleteContainerAndImages() throws IOException {
+        DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375")
+            .withDockerCmdExecFactory(new OkHttpDockerCmdExecFactory())
+            .build();
+    
+        try {
+            // Remove all containers
+            List<Container> containers = dockerClient.listContainersCmd().withShowAll(true).exec();
+            for (Container container : containers) {
+                System.out.println("Removing container " + container.getNames()[0] + " (" + container.getId().substring(0, 12) + ")");
+                dockerClient.removeContainerCmd(container.getId()).withForce(true).exec();
+            }
+            System.out.println("All containers have been removed.");
+    
+            // Remove all images
+            List<Image> images = dockerClient.listImagesCmd().withDanglingFilter(false).exec();
+            for (Image image : images) {
+                System.out.println("Removing image " + image.getId().substring(0, 12));
+                dockerClient.removeImageCmd(image.getId()).withForce(true).exec();
+            }
+            System.out.println("All images have been removed.");
+    
+        } catch (DockerException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Docker operation failed: " + e.getMessage());
+        } finally {
+            dockerClient.close(); // Close Docker client
         }
-
-        System.out.println("All containers have been removed");
-
-    } catch (DockerException e) {
-        e.printStackTrace();
-    } finally {
-        dockerClient.close(); // Make sure to close the client
     }
-}
-
 }
