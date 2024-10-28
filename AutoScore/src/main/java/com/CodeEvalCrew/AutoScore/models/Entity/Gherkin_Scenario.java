@@ -1,10 +1,12 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,25 +20,19 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Score_Detail {
+public class Gherkin_Scenario {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long scoreDetailId;
-    private String postmanFuntionName;
-    private int totalPostmantTest;
-    private String postmanFunctionName;
-    private Float scoreOfFunction;
-    private Long totalPmtest;
-    private Float scoreAchieve;
-    private Long noPmtestAchieve;
+    private Long gherkinScenarioId;
 
-    //Relationship
-    //n-1 score
-    @ManyToOne
-    @JoinColumn(name = "scoreId", nullable = false)
-    private Score score;
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String gherkinData;
 
-    //n-1 exam question
+    private Long orderBy;
+
+    // Quan hệ n-1 với Exam_Barem (sau sẽ sửa thành Exam_Question)
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;

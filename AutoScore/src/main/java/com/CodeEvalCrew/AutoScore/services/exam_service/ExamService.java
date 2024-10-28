@@ -5,10 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +17,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.BreakType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
-import org.apache.poi.xwpf.usermodel.XWPFAbstractNum;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFNumbering;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
@@ -29,7 +25,6 @@ import org.docx4j.model.fields.merge.DataFieldName;
 import org.docx4j.model.fields.merge.MailMerger;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTAbstractNum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -39,7 +34,6 @@ import com.CodeEvalCrew.AutoScore.mappers.ExamMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamBarem.ExamBaremExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
@@ -47,7 +41,6 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
-import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
@@ -56,7 +49,6 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamDatabaseSpecification;
-import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.aspose.words.Document;
 import com.aspose.words.MailMerge;
@@ -140,7 +132,7 @@ public class ExamService implements IExamService {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             // Check subject
-            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
+            // Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
 
             // Check account
             Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()), "Account", Util.getAuthenticatedAccountId());
@@ -148,10 +140,10 @@ public class ExamService implements IExamService {
             //validation exam
             //mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
-            exam.setSubject(subject);
-            exam.setCreatedAt(LocalDateTime.now());
-            exam.setStatus(true);
-            exam.setCreatedBy(account.getAccountId());
+            // exam.setSubject(subject);
+            // exam.setCreatedAt(LocalDateTime.now());
+            // exam.setStatus(true);
+            // exam.setCreatedBy(account.getAccountId());
 
             //create new exam
             examRepository.save(exam);
@@ -174,25 +166,25 @@ public class ExamService implements IExamService {
         try {
 
             // Check subject
-            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
+            // Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
 
             //check exist exam
-            Exam exam = checkEntityExistence(examRepository.findById(entity.getExamId()), "Exam", entity.getExamId());
+            // Exam exam = checkEntityExistence(examRepository.findById(entity.getExamId()), "Exam", entity.getExamId());
 
             //update exam 
-            exam.setExamCode(entity.getExamCode());
-            exam.setExamAt(entity.getExamAt());
-            exam.setGradingAt(entity.getGradingAt());
-            exam.setPublishAt(entity.getPublishAt());
-            exam.setSubject(subject);
+            // exam.setExamCode(entity.getExamCode());
+            // exam.setExamAt(entity.getExamAt());
+            // exam.setGradingAt(entity.getGradingAt());
+            // exam.setPublishAt(entity.getPublishAt());
+            // exam.setSubject(subject);
 
             //create new exam
-            examRepository.save(exam);
+            // examRepository.save(exam);
 
             //mapping exam
-            result = ExamMapper.INSTANCE.examToViewResponse(exam);
-        } catch (NotFoundException nfe) {
-            throw nfe;
+            // result = ExamMapper.INSTANCE.examToViewResponse(exam);
+        // } catch (NotFoundException nfe) {
+        //     throw nfe;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -208,14 +200,14 @@ public class ExamService implements IExamService {
     private Specification<Exam> createSpecificationForGet(ExamViewRequestDTO request) {
         Specification<Exam> spec = Specification.where(null);
 
-        if (!request.getSearchString().isBlank()) {
-            spec = spec.or(ExamSpecification.hasExamCode(request.getSearchString()))
-                    .or(ExamSpecification.hasSemester(request.getSearchString()));
-        }
+        // if (!request.getSearchString().isBlank()) {
+        //     spec = spec.or(ExamSpecification.hasExamCode(request.getSearchString()))
+        //             .or(ExamSpecification.hasSemester(request.getSearchString()));
+        // }
 
-        if (request.getSubjectId() != null) {
-            spec.and(ExamSpecification.hasSubjectId(request.getSubjectId()));
-        }
+        // if (request.getSubjectId() != null) {
+        //     spec.and(ExamSpecification.hasSubjectId(request.getSubjectId()));
+        // }
 
         return spec;
     }
@@ -315,10 +307,10 @@ public class ExamService implements IExamService {
             XWPFParagraph questionParagraph = document.createParagraph();
             XWPFRun questionRun = questionParagraph.createRun();
             questionRun.setBold(true);  // Highlight the question
-            questionRun.setText("Question: " + question.getQuestionContent() + " (" + question.getQuestionScore() + " points)");
+            // questionRun.setText("Question: " + question.getQuestionContent() + " (" + question.getQuestionScore() + " points)");
 
             // Create numbered list for the barems
-            addNumberedBaremList(document, question.getBarems());
+            // addNumberedBaremList(document, question.getBarems());
 
             // Add space between questions
             document.createParagraph().createRun();
@@ -361,17 +353,17 @@ public class ExamService implements IExamService {
 
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper", examPaperId);
 
-            Exam exam = checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()), "Exam", examPaper.getExam().getExamId());
+            // Exam exam = checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()), "Exam", examPaper.getExam().getExamId());
 
             Specification<Exam_Database> spec = ExamDatabaseSpecification.hasForeignKey(examPaperId, "exam_paper", "examPaperId");
 
             //get error
             Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
 
-            result.setExamCode(exam.getExamCode());
+            // result.setExamCode(exam.getExamCode());
             result.setExamPaperCode(examPaper.getExamPaperCode());
-            result.setSemester(exam.getSemester().getSemesterCode());
-            result.setSubjectCode(exam.getSubject().getSubjectCode());
+            // result.setSemester(exam.getSemester().getSemesterCode());
+            // result.setSubjectCode(exam.getSubject().getSubjectCode());
             result.setDuration(90);
             result.setDatabaseDescpription("Database Descpription");
             result.setDatabaseNote("databaseNote");
@@ -390,64 +382,64 @@ public class ExamService implements IExamService {
     }
 
 // Function to add a numbered list for barems
-    private void addNumberedBaremList(XWPFDocument document, List<ExamBaremExport> barems) {
-        try {
-            // Create a numbering element for numbered list
-            CTAbstractNum abstractNum = CTAbstractNum.Factory.newInstance();
-            abstractNum.setAbstractNumId(BigInteger.valueOf(0));
+    // private void addNumberedBaremList(XWPFDocument document, List<ExamBaremExport> barems) {
+    //     try {
+    //         // Create a numbering element for numbered list
+    //         CTAbstractNum abstractNum = CTAbstractNum.Factory.newInstance();
+    //         abstractNum.setAbstractNumId(BigInteger.valueOf(0));
 
-            // Create numbering
-            XWPFNumbering numbering = document.createNumbering();
-            BigInteger abstractNumID = numbering.addAbstractNum(new XWPFAbstractNum(abstractNum));
-            BigInteger numID = numbering.addNum(abstractNumID);
+    //         // Create numbering
+    //         XWPFNumbering numbering = document.createNumbering();
+    //         BigInteger abstractNumID = numbering.addAbstractNum(new XWPFAbstractNum(abstractNum));
+    //         BigInteger numID = numbering.addNum(abstractNumID);
 
-            // Add each barem as a numbered item
-            for (ExamBaremExport barem : barems) {
-                XWPFParagraph paragraph = document.createParagraph();
-                paragraph.setNumID(numID);  // Set numbering
+    //         // Add each barem as a numbered item
+    //         for (ExamBaremExport barem : barems) {
+    //             XWPFParagraph paragraph = document.createParagraph();
+    //             paragraph.setNumID(numID);  // Set numbering
 
-                XWPFRun run = paragraph.createRun();
-                run.setText(barem.getBaremContent() + " (" + barem.getBaremMaxScore() + " points)");
-                run.addBreak();
+    //             XWPFRun run = paragraph.createRun();
+    //             run.setText(barem.getBaremContent() + " (" + barem.getBaremMaxScore() + " points)");
+    //             run.addBreak();
 
-                // Detailed information about the endpoint
-                run.setText("Endpoint: " + (barem.getEndpoint() != null ? barem.getEndpoint() : "N/A"));
-                run.addBreak();
+    //             // Detailed information about the endpoint
+    //             run.setText("Endpoint: " + (barem.getEndpoint() != null ? barem.getEndpoint() : "N/A"));
+    //             run.addBreak();
 
-                run.setText("Method: " + (barem.getMethod() != null ? barem.getMethod() : "N/A"));
-                run.addBreak();
+    //             run.setText("Method: " + (barem.getMethod() != null ? barem.getMethod() : "N/A"));
+    //             run.addBreak();
 
-                run.setText("Function: " + (barem.getBaremFunction() != null ? barem.getBaremFunction() : "N/A"));
-                run.addBreak();
+    //             run.setText("Function: " + (barem.getBaremFunction() != null ? barem.getBaremFunction() : "N/A"));
+    //             run.addBreak();
 
-                run.setText("\t" + (barem.getPayloadType() != null ? barem.getPayloadType() : "N/A"));
-                run.addBreak();
+    //             run.setText("\t" + (barem.getPayloadType() != null ? barem.getPayloadType() : "N/A"));
+    //             run.addBreak();
 
-                run.setText((barem.getPayload() != null ? barem.getPayload() : "N/A"));
-                run.addBreak();
+    //             run.setText((barem.getPayload() != null ? barem.getPayload() : "N/A"));
+    //             run.addBreak();
 
-                run.setText("Validations: ");
-                run.addBreak();
+    //             run.setText("Validations: ");
+    //             run.addBreak();
 
-                run.setText((barem.getValidation() != null ? barem.getValidation() : "N/A"));
-                run.addBreak();
+    //             run.setText((barem.getValidation() != null ? barem.getValidation() : "N/A"));
+    //             run.addBreak();
 
-                run.setText("Success Response: ");
-                run.addBreak();
+    //             run.setText("Success Response: ");
+    //             run.addBreak();
 
-                run.setText((barem.getSuccessResponse() != null ? barem.getSuccessResponse() : "N/A"));
-                run.addBreak();
+    //             run.setText((barem.getSuccessResponse() != null ? barem.getSuccessResponse() : "N/A"));
+    //             run.addBreak();
 
-                run.setText("Error Response: ");
-                run.addBreak();
+    //             run.setText("Error Response: ");
+    //             run.addBreak();
 
-                run.setText((barem.getErrorResponse() != null ? barem.getErrorResponse() : "N/A"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();  // Log the error for debugging purposes
-        }
+    //             run.setText((barem.getErrorResponse() != null ? barem.getErrorResponse() : "N/A"));
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();  // Log the error for debugging purposes
+    //     }
 
-    }
+    // }
 
     private String addDatabaseImage(XWPFDocument document, ExamExport exportExam) throws IOException {
         String message = "Image added successfully.";
@@ -515,8 +507,8 @@ public class ExamService implements IExamService {
 
         for (Exam_Question examQuestion : listQuestions) {
             ExamQuestionExport export = new ExamQuestionExport();
-            export.setQuestionContent(examQuestion.getQuestionContent());
-            export.setQuestionScore(examQuestion.getMaxScore());
+            // export.setQuestionContent(examQuestion.getQuestionContent());
+            // export.setQuestionScore(examQuestion.getMaxScore());
             result.add(export);
         }
 

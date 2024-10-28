@@ -28,7 +28,7 @@ public class Exam_Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examQuestionId;
     private String questionContent;
-    private float maxScore;
+    private Float examQuestionScore;
     private String endPoint;
     private String roleAllow;
     private String httpMethod;
@@ -39,13 +39,15 @@ public class Exam_Question {
     private String sucessResponse;
     private String errorResponse;
     private boolean status;
-    private int orderBy;
+    private Long orderBy;
     private LocalDateTime createdAt;
     private Long createdBy;
     private LocalDateTime updatedAt;
     private Long updatedBy;
     private LocalDateTime deletedAt;
     private Long deletedBy;
+
+
 
     // Relationship
 
@@ -57,4 +59,8 @@ public class Exam_Question {
     // 1-n score detail
     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
     private Set<Score_Detail> scoreDetails;
+
+     // 1-n score detail
+     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
+     private Set<Gherkin_Scenario> gherkinScenarios;
 }

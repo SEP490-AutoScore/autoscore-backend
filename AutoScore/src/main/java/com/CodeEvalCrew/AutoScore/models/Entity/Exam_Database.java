@@ -27,6 +27,7 @@ public class Exam_Database {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examDatabaseId;
 
+    //sau sửa thành databaseFile;
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String databaseScript;
@@ -41,7 +42,7 @@ public class Exam_Database {
 
     private String databaseNote;
 
-    private boolean status;
+    private Boolean status;
 
     private LocalDateTime createdAt;
 

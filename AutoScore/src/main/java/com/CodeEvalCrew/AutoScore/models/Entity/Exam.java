@@ -46,10 +46,6 @@ public class Exam {
     @JoinColumn(name = "subjectId", nullable = false)
     private Subject subject;
 
-    //1-n - score
-    @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
-    private Set<Score> scores;
-
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
     private Set<Exam_Paper> exam_papers;    
 
