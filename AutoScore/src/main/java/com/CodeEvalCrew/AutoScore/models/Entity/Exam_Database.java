@@ -27,10 +27,9 @@ public class Exam_Database {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examDatabaseId;
 
-    //sau sửa thành databaseFile;
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String databaseScript;
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] databaseFile;
 
     private String databaseDescription;
 
