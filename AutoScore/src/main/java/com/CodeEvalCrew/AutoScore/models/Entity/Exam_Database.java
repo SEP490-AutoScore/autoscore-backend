@@ -56,7 +56,7 @@ public class Exam_Database {
 
     private Long deletedBy;
 
-    //1-1 exam db
+    //1-1 exam 
     @OneToOne
     @JoinColumn(name = "examPaperId", nullable = false)
     private Exam_Paper examPaper;
