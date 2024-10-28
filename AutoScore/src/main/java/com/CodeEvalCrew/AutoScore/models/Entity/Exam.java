@@ -28,28 +28,18 @@ public class Exam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examId;
-
     private String examCode;
-
     private LocalDateTime examAt;
-
     private LocalDateTime gradingAt;
-
     private LocalDateTime publishAt;
-
     private boolean status;
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
-
+    
     //Relationship
     //n-1 subject
     @ManyToOne

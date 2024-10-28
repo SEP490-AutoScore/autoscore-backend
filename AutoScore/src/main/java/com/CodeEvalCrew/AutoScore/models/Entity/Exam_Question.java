@@ -28,10 +28,18 @@ public class Exam_Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examQuestionId;
     private String questionContent;
-    private String questionNumber;
     private float maxScore;
-    private String type;
+    private String endPoint;
+    private String roleAllow;
+    private String httpMethod;
+    private String description;
+    private String payloadType;
+    private String payload;
+    private String validation;
+    private String sucessResponse;
+    private String errorResponse;
     private boolean status;
+    private int orderBy;
     private LocalDateTime createdAt;
     private Long createdBy;
     private LocalDateTime updatedAt;
@@ -45,10 +53,6 @@ public class Exam_Question {
     @ManyToOne
     @JoinColumn(name = "examPaperId", nullable = false)
     private Exam_Paper examPaper;
-
-    // 1-n barem
-    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
-    private Set<Exam_Barem> examBarems;
 
     // 1-n score detail
     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)

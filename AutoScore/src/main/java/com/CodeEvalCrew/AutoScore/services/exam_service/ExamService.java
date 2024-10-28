@@ -35,7 +35,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
-import com.CodeEvalCrew.AutoScore.mappers.ExamBaremMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ExamMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamExport;
@@ -45,19 +44,16 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestio
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
-import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Barem;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
-import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamBaremRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
-import com.CodeEvalCrew.AutoScore.repositories.instruction_repository.IInstructionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamDatabaseSpecification;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
@@ -82,30 +78,20 @@ public class ExamService implements IExamService {
     private final IExamDatabaseRepository examDatabaseRepository;
     @Autowired
     private final IExamQuestionRepository examQuestionRepository;
-    @Autowired
-    private final IExamBaremRepository examBaremRepository;
-    @Autowired
-    private final IInstructionRepository instructionRepository;
-    private final Util util;
 
     public ExamService(IExamRepository examRepository,
             ISubjectRepository subjectRepository,
             IAccountRepository accountRepository,
             IExamPaperRepository examPaperRepository,
-            IExamBaremRepository examBaremRepository,
             IExamQuestionRepository examQuestionRepository,
             IExamDatabaseRepository examDatabaseRepository,
-            IInstructionRepository instructionRepository,
             IEmployeeRepository employeeRepository) {
         this.examRepository = examRepository;
         this.subjectRepository = subjectRepository;
         this.accountRepository = accountRepository;
         this.examPaperRepository = examPaperRepository;
-        this.instructionRepository = instructionRepository;
         this.examDatabaseRepository = examDatabaseRepository;
         this.examQuestionRepository = examQuestionRepository;
-        this.examBaremRepository = examBaremRepository;
-        this.util = new Util(employeeRepository);
     }
 
     @Override
@@ -387,9 +373,7 @@ public class ExamService implements IExamService {
             result.setSemester(exam.getSemester().getSemesterCode());
             result.setSubjectCode(exam.getSubject().getSubjectCode());
             result.setDuration(90);
-            result.setInstructions(examPaper.getInstruction().getIntroduction());
-            result.setImportant(examPaper.getInstruction().getImportant());
-            result.setDatabaseDescpription("databaseDescpription");
+            result.setDatabaseDescpription("Database Descpription");
             result.setDatabaseNote("databaseNote");
             result.setQuestions(questions);
             result.setDatabaseName("Database Name");
@@ -533,27 +517,9 @@ public class ExamService implements IExamService {
             ExamQuestionExport export = new ExamQuestionExport();
             export.setQuestionContent(examQuestion.getQuestionContent());
             export.setQuestionScore(examQuestion.getMaxScore());
-            List<ExamBaremExport> barems = getListBaremExports(examQuestion.getExamQuestionId());
-            export.setBarems(barems);
             result.add(export);
         }
 
-        return result;
-    }
-
-    private List<ExamBaremExport> getListBaremExports(Long examQuestionId) {
-        List<ExamBaremExport> result = new ArrayList<>();
-
-        List<Exam_Barem> listBarems = examBaremRepository.getByExamQuestionExamQuestionId(examQuestionId);
-
-        if (listBarems.isEmpty()) {
-            throw new NoSuchElementException("No barems found");
-        }
-
-        for (Exam_Barem examBarem : listBarems) {
-            ExamBaremExport export = ExamBaremMapper.INSTANCE.examBaremToExport(examBarem);
-            result.add(export);
-        }
         return result;
     }
 

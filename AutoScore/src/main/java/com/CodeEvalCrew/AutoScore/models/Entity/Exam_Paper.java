@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +30,10 @@ public class Exam_Paper {
     private Long examPaperId;
     private String examPaperCode;
     private boolean status;
+    private String instruction;
+    private String fileCollectionPostman;
+    private boolean isComfirm;
+    private boolean isUsed;
     private LocalDateTime createdAt;
     private Long createdBy;
     private LocalDateTime updatedAt;
@@ -52,7 +55,6 @@ public class Exam_Paper {
     @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
     private Set<Exam_Question> examQuestions;
 
-    @OneToOne
-    @JoinColumn(name = "instructionsId", nullable = false)
-    private Instructions instruction;
+    @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
+    private Set<Important_Exam_Paper> importants;
 }

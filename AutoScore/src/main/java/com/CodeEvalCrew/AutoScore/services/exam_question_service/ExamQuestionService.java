@@ -118,9 +118,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             //update
             examQuestion.setQuestionContent(request.getQuestionContent());
-            examQuestion.setQuestionNumber(request.getQuestionNumber());
             examQuestion.setMaxScore(request.getMaxScore());
-            examQuestion.setType(request.getType());
             examQuestion.setExamPaper(examPaper);
             examQuestion.setUpdatedAt(Util.getCurrentDateTime());
             examQuestion.setUpdatedBy(Util.getAuthenticatedAccountId());
