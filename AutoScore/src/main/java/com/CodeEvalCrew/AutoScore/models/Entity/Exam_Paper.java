@@ -40,8 +40,8 @@ public class Exam_Paper {
     private LocalDateTime deletedAt;
     private Long deletedBy;
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String fileCollectionPostman;
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] fileCollectionPostman;
     private Boolean isComfirmFile;
     private Boolean isUsed;
 

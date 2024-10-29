@@ -171,18 +171,28 @@ VALUES
 -- ('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
 -- ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
--- INSERT INTO `exam_paper` 
--- (`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `instructions_id`) 
--- VALUES 
--- ('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2, 1),
--- ('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2),
--- ('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3);
+INSERT INTO `exam_paper` 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`) 
+VALUES 
+('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2),
+('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2),
+('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2);
 
--- INSERT INTO `exam_question`
--- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
--- VALUES
--- ('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
--- ('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `exam_question`
+(`question_content`, `order_by`, `exam_question_score`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+VALUES
+('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 1, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 2, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('3.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 3, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('4.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 4, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+
+INSERT INTO `postman_for_grading`
+(`score_of_function`, `exam_question_id`, `order_by`, `parent_id`, `total_pm_test`, `postman_function_name`)
+VALUES
+(2.5, 1, 1, 0, 2, 'login'),
+(2.5, 1, 2, 0, 4, 'get'),
+(2.5, 1, 3, 0, 2, 'post'),
+(2.5, 1, 4, 3, 2, 'delete');
 
 -- INSERT INTO `autoscore`.`exam_barem` 
 -- (`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 

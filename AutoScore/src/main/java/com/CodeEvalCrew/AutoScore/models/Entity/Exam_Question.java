@@ -47,10 +47,7 @@ public class Exam_Question {
     private LocalDateTime deletedAt;
     private Long deletedBy;
 
-
-
     // Relationship
-
     // n-1 exam_paper
     @ManyToOne
     @JoinColumn(name = "examPaperId", nullable = false)
@@ -60,7 +57,11 @@ public class Exam_Question {
     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
     private Set<Score_Detail> scoreDetails;
 
-     // 1-n score detail
+     // 1-n Gherkin_Scenario
      @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
      private Set<Gherkin_Scenario> gherkinScenarios;
+
+    // 1-n Postman_For_Grading
+    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
+    private Set<Postman_For_Grading> postmanForGradingEntries;
 }

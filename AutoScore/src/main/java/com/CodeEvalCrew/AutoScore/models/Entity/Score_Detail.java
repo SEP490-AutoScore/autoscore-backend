@@ -22,8 +22,6 @@ public class Score_Detail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scoreDetailId;
-    private String postmanFuntionName;
-    private int totalPostmantTest;
     private String postmanFunctionName;
     private Float scoreOfFunction;
     private Long totalPmtest;

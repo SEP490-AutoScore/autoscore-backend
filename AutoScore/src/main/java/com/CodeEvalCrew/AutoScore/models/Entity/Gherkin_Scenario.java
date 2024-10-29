@@ -32,7 +32,6 @@ public class Gherkin_Scenario {
 
     private Long orderBy;
 
-    // Quan hệ n-1 với Exam_Barem (sau sẽ sửa thành Exam_Question)
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;

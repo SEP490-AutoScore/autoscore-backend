@@ -21,10 +21,10 @@ public class AutoScorePostmanController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') or hasAuthority('VIEW_EXAM')")
     @GetMapping("")
-    public List<StudentSourceInfoDTO> getStudentSourceInfo(
+    public List<StudentSourceInfoDTO> gradingFunction(
         @RequestParam Long examPaperId,
-        @RequestParam(name = "numberOfAssignmentsDeployedAtTheSameTime", required = false, defaultValue = "3") int numberOfAssignmentsDeployedAtTheSameTime
+        @RequestParam(name = "numberDeploy", required = false, defaultValue = "3") int numberDeploy
     ) {
-        return autoscorePostmanService.getStudentSourceInfoByExamPaperId(examPaperId, numberOfAssignmentsDeployedAtTheSameTime);
+        return autoscorePostmanService.gradingFunction(examPaperId, numberDeploy);
     }
 }
