@@ -1,6 +1,8 @@
 package com.CodeEvalCrew.AutoScore.services.autoscore_postman_service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,14 +32,19 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentDeployResult;
 import com.CodeEvalCrew.AutoScore.models.DTO.StudentSourceInfoDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score;
+import com.CodeEvalCrew.AutoScore.models.Entity.Score_Detail;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source_Detail;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.repositories.score_detail_repository.ScoreDetailRepository;
 import com.CodeEvalCrew.AutoScore.repositories.score_repository.ScoreRepository;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceDetailRepository;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceRepository;
+import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentRepository;
 import com.CodeEvalCrew.AutoScore.services.autoscore_postman_service.Utils.AutoscoreInitUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -48,6 +55,7 @@ import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
+
 
 
 @Service
@@ -68,6 +76,10 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
     private IExamPaperRepository examPaperRepository;
     @Autowired
     private ScoreRepository scoreRepository;
+    @Autowired
+    private ScoreDetailRepository scoreDetailRepository;
+    @Autowired
+    private StudentRepository studentRepository;
 
     @Override
     public List<StudentSourceInfoDTO> gradingFunction(Long examPaperId, int numberDeploy) {
@@ -190,49 +202,153 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         }
          // Run Newman for each successful deployment
          if (!successfulDeployments.isEmpty()) {
-            System.out.println("Running Newman for the first successful deployment...");
             StudentSourceInfoDTO firstSuccessfulStudent = successfulDeployments.get(0);
-            storeAndRunPostmanCollection(firstSuccessfulStudent.getStudentId(), firstSuccessfulStudent.getSourceDetailId());
+
+            Map<String, Integer> passedFunctionNames = storeAndRunPostmanCollection(
+                firstSuccessfulStudent.getStudentId(), firstSuccessfulStudent.getSourceDetailId()
+            );
+        
+
+           // Convert List to Map to get count of each function's success
+        Map<String, Long> functionPassedCountMap = passedFunctionNames.entrySet().stream()
+        .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)));
+
+    System.out.println("Function passed count map: " + functionPassedCountMap);
+    
+
+        // Call saveScoreAndScoreDetail with the Map
+        saveScoreAndScoreDetail(firstSuccessfulStudent.getStudentId(), examPaperId, functionPassedCountMap);
+        
+      
         } else {
             System.out.println("No successful deployments found to run Newman.");
         }
 
     }
+   
 
-   private void storeAndRunPostmanCollection(Long studentId, Long sourceDetailId) {
-    try {
-        // Create student-specific directory for Postman collection
-        Path studentDir = Paths.get("D:/Desktop/all collection postman", String.valueOf(studentId));
-        Files.createDirectories(studentDir);
+    private Map<String, Integer> storeAndRunPostmanCollection(Long studentId, Long sourceDetailId) {
+        Map<String, Integer> functionResults = new HashMap<>();
+        String currentFunction = null;
+        int passCount = 0;
 
-        // Fetch and save the Postman collection
-        Source_Detail sourceDetail = sourceDetailRepository.findById(sourceDetailId)
-                .orElseThrow(() -> new RuntimeException("Source_Detail not found with ID: " + sourceDetailId));
-        Path postmanFilePath = studentDir.resolve("fileCollectionPostman.json");
-        Files.write(postmanFilePath, sourceDetail.getFileCollectionPostman());
+        try {
+            Path studentDir = Paths.get("D:/Desktop/all collection postman", String.valueOf(studentId));
+            Files.createDirectories(studentDir);
 
-        // Specify the full path to newman
-        String newmanPath = "C:/Users/Admin/AppData/Roaming/npm/newman.cmd";
-        
-        System.out.println("Running Newman for studentId: " + studentId);
+            // Đường dẫn đến file Postman collection
+            Path postmanFilePath = studentDir.resolve("fileCollectionPostman.json");
 
-        // Run Newman
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                newmanPath, "run", postmanFilePath.toString()
-        );
-        processBuilder.inheritIO(); // Print Newman output to the console
+            String newmanPath = "C:/Users/Admin/AppData/Roaming/npm/newman.cmd";
+            System.out.println("Running Newman for studentId: " + studentId);
 
-        Process process = processBuilder.start();
-        int exitCode = process.waitFor();
-        if (exitCode == 0) {
-            System.out.println("Newman executed successfully for studentId: " + studentId);
-        } else {
-            System.err.println("Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId);
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    newmanPath, "run", postmanFilePath.toString()
+            );
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "UTF-8"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("Raw Output: " + line);
+                    line = line.trim();
+
+                    // Kiểm tra xem dòng bắt đầu với biểu tượng '→' để tìm tên hàm
+                    if (line.startsWith("→")) {
+                        // Nếu đã có một hàm trước đó, lưu kết quả của nó
+                        if (currentFunction != null) {
+                            functionResults.put(currentFunction, passCount);
+                        }
+                        // Thiết lập hàm hiện tại và reset passCount
+                        currentFunction = line.split("\\s+")[1];
+                        passCount = 0;  // Reset đếm dấu tích cho hàm mới
+
+                    } else if (line.startsWith("√")) {
+                        // Đếm dấu tích (√) cho kiểm thử thành công
+                        passCount++;
+
+                    } else if (line.matches("^\\d+\\..*")) {
+                        // Kiểm tra thất bại không có dấu √ sẽ không tăng passCount
+                        if (!line.contains("√")) {
+                            passCount = 0; // Reset nếu có kiểm thử thất bại trong hàm
+                        }
+                    }
+                }
+
+                // Lưu kết quả của hàm cuối cùng nếu có
+                if (currentFunction != null) {
+                    functionResults.put(currentFunction, passCount);
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Newman executed successfully for studentId: " + studentId);
+            } else {
+                System.err.println("Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId);
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error running Newman or storing Postman collection for studentId " + studentId + ": " + e.getMessage());
         }
-    } catch (IOException | InterruptedException e) {
-        System.err.println("Error running Newman or storing Postman collection for studentId " + studentId + ": " + e.getMessage());
+
+        // In kết quả cuối cùng
+        functionResults.forEach((function, count) -> {
+            System.out.println("noPmtestAchieve for " + function + ": " + count);
+        });
+
+        return functionResults;
+    }
+    
+
+
+public void saveScoreAndScoreDetail(Long studentId, Long examPaperId, Map<String, Long> functionPassedCountMap) {
+    // Retrieve student and exam paper entities
+    Student student = studentRepository.findById(studentId).orElse(null);
+    Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElse(null);
+
+    if (student == null || examPaper == null) {
+        System.err.println("Student hoặc Exam Paper không tồn tại.");
+        return;
+    }
+
+    // Create a Score object and set its properties
+    Score score = new Score();
+    score.setStudent(student);
+    score.setExamPaper(examPaper);
+    score.setGradedAt(LocalDateTime.now());
+    score.setFlag(true);
+    score.setOrganization(student.getOrganization());
+
+    scoreRepository.save(score);
+
+    // Process each question and its Postman functions in the exam paper
+    for (Exam_Question question : examPaper.getExamQuestions()) {
+        for (Postman_For_Grading postmanFunction : question.getPostmanForGradingEntries()) {
+            Score_Detail scoreDetail = new Score_Detail();
+            scoreDetail.setScore(score);
+            scoreDetail.setExamQuestion(question);
+            scoreDetail.setPostmanFunctionName(postmanFunction.getPostmanFunctionName());
+            scoreDetail.setScoreOfFunction(postmanFunction.getScoreOfFunction());
+            scoreDetail.setTotalPmtest(postmanFunction.getTotalPmTest());
+
+            // Calculate noPmtestAchieve based on the passed test count from functionPassedCountMap
+            Long noPmtestAchieve = functionPassedCountMap.getOrDefault(postmanFunction.getPostmanFunctionName(), 0L);
+            scoreDetail.setNoPmtestAchieve(noPmtestAchieve);
+
+            // Calculate scoreAchieve using the formula: (noPmtestAchieve / totalPmtest) * scoreOfFunction
+            Float totalPmtest = postmanFunction.getTotalPmTest().floatValue();
+            Float scoreAchieve = (noPmtestAchieve / totalPmtest) * postmanFunction.getScoreOfFunction();
+            scoreDetail.setScoreAchieve(scoreAchieve);
+
+            // Save the score detail
+            scoreDetailRepository.save(scoreDetail);
+            System.out.println("noPmtestAchieve for " + postmanFunction.getPostmanFunctionName() + ": " + noPmtestAchieve);
+        }
+        
     }
 }
+
 
 
 

@@ -181,8 +181,18 @@ VALUES
 INSERT INTO `exam_question`
 (`question_content`, `order_by`, `exam_question_score`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 1, 2, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 2, 2, true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 1, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 2, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('3.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 3, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('4.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 4, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+
+INSERT INTO `postman_for_grading`
+(`score_of_function`, `exam_question_id`, `order_by`, `parent_id`, `total_pm_test`, `postman_function_name`)
+VALUES
+(2.5, 1, 1, 0, 2, 'login'),
+(2.5, 1, 2, 0, 4, 'get'),
+(2.5, 1, 3, 0, 2, 'post'),
+(2.5, 1, 4, 3, 2, 'delete');
 
 -- INSERT INTO `autoscore`.`exam_barem` 
 -- (`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
