@@ -36,7 +36,6 @@ public class Postman_For_Grading {
 
     private Long parentId;
 
-    // Many-to-One relationship with Exam_Question
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;
