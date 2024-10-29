@@ -156,84 +156,84 @@ VALUES
 ('SU24', 'Summer 2024', true),
 ('FA24', 'Fall 2024', true);
 
-INSERT INTO `exam` 
-(`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_id`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
-VALUES 
-('PRN231_SP24_PE', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 2, true, '2024-09-30 09:00:00', 1, null, null, null, null, 1),
-('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
-('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
+-- INSERT INTO `exam` 
+-- (`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_id`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
+-- VALUES 
+-- ('PRN231_SP24_PE', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 2, true, '2024-09-30 09:00:00', 1, null, null, null, null, 1),
+-- ('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
+-- ('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
 
-INSERT INTO `instructions` 
-(`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
-VALUES 
-('You are NOT allowed to use any device to share data with others.
-You must use Visual Studio 2019 or above, MSSQL Server 2012 or above for your development tools. ', '1.	Create Solution/Project in Visual Studio named PE_PRN231_FA24_TrialTest_StudentFullname_BE for API, and PE_PRN231_FA24_TrialTest_StudentCode_FE for Client Application. Set the default Client application for your project as Login page.', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
-('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
-('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
+-- INSERT INTO `instructions` 
+-- (`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
+-- VALUES 
+-- ('You are NOT allowed to use any device to share data with others.
+-- You must use Visual Studio 2019 or above, MSSQL Server 2012 or above for your development tools. ', '1.	Create Solution/Project in Visual Studio named PE_PRN231_FA24_TrialTest_StudentFullname_BE for API, and PE_PRN231_FA24_TrialTest_StudentCode_FE for Client Application. Set the default Client application for your project as Login page.', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
+-- ('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
+-- ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
-INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `instructions_id`) 
-VALUES 
-('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2, 1),
-('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2),
-('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3);
+-- INSERT INTO `exam_paper` 
+-- (`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `instructions_id`) 
+-- VALUES 
+-- ('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2, 1),
+-- ('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2),
+-- ('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3);
 
-INSERT INTO `exam_question`
-(`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
-VALUES
-('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+-- INSERT INTO `exam_question`
+-- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+-- VALUES
+-- ('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+-- ('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
 
-INSERT INTO `autoscore`.`exam_barem` 
-(`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
-VALUES (
-  2, 
-  1, 
-  true, 
-  1, 
-  'Administrator, Patients, Doctor', 
-  'Authenticates the user using their email and password. On successful authentication, the API returns a token (JWT or session token) that can be used for further authenticated requests.', 
-  '/api/login', 
-  'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }', 
-  'POST', 
-  '{
-  "email": "user@example.com",
-  "password": "yourpassword"
-  }', 
-  'Request Body (JSON)', 
-  'Response Code: 200 OK\nResponse Body (JSON):\n{ "message": "Login successful", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", "user": { "id": 1, "email": "user@example.com", "role": "admin" }}', 
-  'Email: Must be a valid email address format. Password: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.', 
-  'Login function'
-),
-(2,
- 1,
- true,
- 2,
- 'Administrator, Patients, Doctor',
- 'Adds a new person and, if applicable, the viruses they are infected with.',
- '/api/person',
- 'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }',
- 'POST',
- '{\n
-                  \"personID\": 1,\n
-                   \"fullName\": \"John Doe\",\n
-                    \"birthDay\": \"1990-05-15\",\n
-                    \"phone\": \"1234567890\",\n
-                    \"viruses\": [\n
-                        { \n" +
-                           \"virusName\": \"COVID-19\",\n
-                           \"resistanceRate\": 0.2 \n
-                        }, \n
-                       { \n
-                            \"virusName\": \"Influenza\",\n
-                            \"resistanceRate\": 0.0 \n
-                        } \n
-                   ]\n
-                }',
- 'Request Body (JSON)',
- 'Response: 201 Created\nResponse Body (JSON):\\n{ "personId": 1, "message": "Person and viruses added successfully" }',
- 'Email: Must be a valid email address format.\\nPassword: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.',
- 'Create (Add a person and the viruses they are infected with)'
-);
+-- INSERT INTO `autoscore`.`exam_barem` 
+-- (`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
+-- VALUES (
+--   2, 
+--   1, 
+--   true, 
+--   1, 
+--   'Administrator, Patients, Doctor', 
+--   'Authenticates the user using their email and password. On successful authentication, the API returns a token (JWT or session token) that can be used for further authenticated requests.', 
+--   '/api/login', 
+--   'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }', 
+--   'POST', 
+--   '{
+--   "email": "user@example.com",
+--   "password": "yourpassword"
+--   }', 
+--   'Request Body (JSON)', 
+--   'Response Code: 200 OK\nResponse Body (JSON):\n{ "message": "Login successful", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", "user": { "id": 1, "email": "user@example.com", "role": "admin" }}', 
+--   'Email: Must be a valid email address format. Password: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.', 
+--   'Login function'
+-- ),
+-- (2,
+--  1,
+--  true,
+--  2,
+--  'Administrator, Patients, Doctor',
+--  'Adds a new person and, if applicable, the viruses they are infected with.',
+--  '/api/person',
+--  'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }',
+--  'POST',
+--  '{\n
+--                   \"personID\": 1,\n
+--                    \"fullName\": \"John Doe\",\n
+--                     \"birthDay\": \"1990-05-15\",\n
+--                     \"phone\": \"1234567890\",\n
+--                     \"viruses\": [\n
+--                         { \n" +
+--                            \"virusName\": \"COVID-19\",\n
+--                            \"resistanceRate\": 0.2 \n
+--                         }, \n
+--                        { \n
+--                             \"virusName\": \"Influenza\",\n
+--                             \"resistanceRate\": 0.0 \n
+--                         } \n
+--                    ]\n
+--                 }',
+--  'Request Body (JSON)',
+--  'Response: 201 Created\nResponse Body (JSON):\\n{ "personId": 1, "message": "Person and viruses added successfully" }',
+--  'Email: Must be a valid email address format.\\nPassword: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.',
+--  'Create (Add a person and the viruses they are infected with)'
+-- );
 
 

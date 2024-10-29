@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Base64;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,7 +68,10 @@ public class ThirdPartyUtil {
             URL url = uri.toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("Authorization", "Basic " + request.getToken());  // Use Basic Auth if needed
+              // Set the Authorization header with correctly encoded Basic Auth
+        String token = request.getToken() + ":";
+        String encodedToken = Base64.getEncoder().encodeToString(token.getBytes());
+        connection.setRequestProperty("Authorization", "Basic " + encodedToken);
 
             StringBuilder response;
             try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {

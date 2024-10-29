@@ -40,7 +40,7 @@ public class SonarController {
         String result;
         SonarQubeRunnerRequest request = new SonarQubeRunnerRequest();
         request.setHostURL("http://localhost:9000");
-        request.setProjectKey("VuongVT");
+        request.setProjectKey("test");
         request.setToken("squ_8cc3080177d6bbb02dc68712db2299d08a1cda9b");
         try {
             result = util.sonarQubeResultFeatch(request);
