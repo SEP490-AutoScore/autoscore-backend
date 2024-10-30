@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,6 +58,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
 
@@ -102,14 +102,6 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         deleteAndCreateDatabaseByExamPaperId(examPaperId);
         AutoscoreInitUtils.deleteAllFilesAndFolders(directoryPath);
 
-        // try {
-        // deleteContainerAndImages();
-        // } catch (IOException e) {
-        // e.printStackTrace();
-        // throw new RuntimeException("Failed to delete containers and images: " +
-        // e.getMessage());
-        // }
-
         processStudentSolutions(studentSources, examPaperId);
 
         return studentSources;
@@ -135,7 +127,9 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                 int port = AutoscoreInitUtils.BASE_PORT + i;
                 Long studentId = studentSource.getStudentId();
 
-                // delete container docker
+                createFileCollectionPostman(examPaperId, studentSource.getSourceDetailId(), port);
+
+                // Xóa container docker
                 try {
                     deleteContainerAndImages();
                 } catch (IOException e) {
@@ -144,7 +138,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                 }
 
                 Future<StudentDeployResult> future = executor.submit(() -> {
-                    CountDownLatch latch = new CountDownLatch(1);
+
                     try {
                         AutoscoreInitUtils.removeDockerFiles(dirPath);
                         var csprojAndVersion = AutoscoreInitUtils.findCsprojAndDotnetVersion(dirPath);
@@ -155,16 +149,10 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                             AutoscoreInitUtils.createDockerCompose(dirPath, studentId, port);
                             findAndUpdateAppsettings(dirPath, examPaperId, port);
 
-                            // createFileCollectionPostman(examPaperId, studentSource.getSourceDetailId(),
-                            // port);
-                            createFileCollectionPostman(examPaperId, studentSource.getSourceDetailId(), port);
-                            latch.countDown();
-
                         }
-                        // return deployStudentSolution(studentSource);
-                        // Đợi createFileCollectionPostman hoàn thành
-                        latch.await(); // Chờ latch đếm về 0
+
                         return deployStudentSolution(studentSource);
+
                     } catch (IOException e) {
                         e.printStackTrace();
                         return new StudentDeployResult(studentId, false, "IOException: " + e.getMessage());
@@ -204,6 +192,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
             // Run Newman cho các triển khai thành công trong nhóm hiện tại
             if (!successfulDeployments.isEmpty()) {
                 for (StudentSourceInfoDTO successfulStudent : successfulDeployments) {
+
                     Map<String, Integer> passedFunctionNames = getAndRunPostmanCollection(
                             successfulStudent.getStudentId(), successfulStudent.getSourceDetailId());
 
@@ -226,105 +215,6 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         }
     }
 
-    // public void processStudentSolutions(List<StudentSourceInfoDTO>
-    // studentSources, Long examPaperId) {
-    // // Giới hạn chỉ lấy 3 phần tử đầu tiên
-    // List<StudentSourceInfoDTO> limitedStudentSources = studentSources.subList(0,
-    // Math.min(3, studentSources.size()));
-    // ExecutorService executor =
-    // Executors.newFixedThreadPool(limitedStudentSources.size());
-    // Map<Future<StudentDeployResult>, StudentSourceInfoDTO>
-    // futureToStudentSourceMap = new HashMap<>();
-    // List<StudentSourceInfoDTO> successfulDeployments = new ArrayList<>(); // List
-    // to track successful deployments
-
-    // for (int i = 0; i < limitedStudentSources.size(); i++) {
-    // StudentSourceInfoDTO studentSource = limitedStudentSources.get(i);
-    // Path dirPath = Paths.get(studentSource.getStudentSourceCodePath());
-    // int port = AutoscoreInitUtils.BASE_PORT + i;
-    // Long studentId = studentSource.getStudentId();
-
-    // Future<StudentDeployResult> future = executor.submit(() -> {
-    // try {
-    // AutoscoreInitUtils.removeDockerFiles(dirPath);
-    // var csprojAndVersion =
-    // AutoscoreInitUtils.findCsprojAndDotnetVersion(dirPath);
-
-    // if (csprojAndVersion != null) {
-    // AutoscoreInitUtils.createDockerfile(dirPath, csprojAndVersion.getKey(),
-    // csprojAndVersion.getValue(), port);
-    // AutoscoreInitUtils.createDockerCompose(dirPath, studentId, port);
-    // findAndUpdateAppsettings(dirPath, examPaperId, port);
-    // createFileCollectionPostman(examPaperId, studentSource.getSourceDetailId(),
-    // port);
-    // }
-    // return deployStudentSolution(studentSource);
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // return new StudentDeployResult(studentId, false, "IOException: " +
-    // e.getMessage());
-    // }
-    // });
-
-    // futureToStudentSourceMap.put(future, studentSource);
-
-    // }
-    // executor.shutdown();
-
-    // try {
-    // executor.awaitTermination(60, TimeUnit.MINUTES);
-    // } catch (InterruptedException e) {
-    // e.printStackTrace();
-    // }
-
-    // // Hiển thị kết quả triển khai cho mỗi sinh viên
-    // for (Map.Entry<Future<StudentDeployResult>, StudentSourceInfoDTO> entry :
-    // futureToStudentSourceMap.entrySet()) {
-    // Future<StudentDeployResult> future = entry.getKey();
-    // StudentSourceInfoDTO studentSource = entry.getValue();
-
-    // try {
-    // StudentDeployResult result = future.get();
-    // System.out.println(result.getMessage() + " for studentId: " +
-    // result.getStudentId());
-
-    // if (!result.isSuccessful()) {
-    // recordFailure(result.getStudentId(), examPaperId, "Cannot deploy Docker.");
-    // } else {
-    // successfulDeployments.add(studentSource);
-    // }
-    // } catch (InterruptedException | ExecutionException e) {
-    // e.printStackTrace();
-    // }
-    // }
-    // // Run Newman for each successful deployment
-    // if (!successfulDeployments.isEmpty()) {
-    // for (StudentSourceInfoDTO successfulStudent : successfulDeployments) {
-    // Map<String, Integer> passedFunctionNames = getAndRunPostmanCollection(
-    // successfulStudent.getStudentId(), successfulStudent.getSourceDetailId());
-
-    // // Convert List to Map to get count of each function's success
-    // Map<String, Long> functionPassedCountMap =
-    // passedFunctionNames.entrySet().stream()
-    // .collect(Collectors.groupingBy(Map.Entry::getKey,
-    // Collectors.summingLong(Map.Entry::getValue)));
-
-    // System.out.println("Function passed count map for studentId " +
-    // successfulStudent.getStudentId() + ": "
-    // + functionPassedCountMap);
-
-    // // Call saveScoreAndScoreDetail with the Map
-
-    // saveScoreAndScoreDetail(successfulStudent.getStudentId(), examPaperId,
-    // functionPassedCountMap);
-    // deleteAndCreateDatabaseByExamPaperId(examPaperId);
-    // }
-
-    // } else {
-    // System.out.println("No successful deployments found to run Newman.");
-    // }
-    // }
-
     private Map<String, Integer> getAndRunPostmanCollection(Long studentId, Long sourceDetailId) {
         Map<String, Integer> functionResults = new HashMap<>();
         String currentFunction = null;
@@ -341,10 +231,18 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                     .orElseThrow(() -> new RuntimeException("Source_Detail not found with ID: " + sourceDetailId));
 
             Path postmanFilePath = studentDir.resolve(studentId + ".json");
-            // Files.write(postmanFilePath, sourceDetail.getFileCollectionPostman());
+
             // Đảm bảo tải `fileCollectionPostman`
             Hibernate.initialize(sourceDetail.getFileCollectionPostman());
             byte[] postmanCollection = sourceDetail.getFileCollectionPostman();
+
+            try {
+                // Tạm dừng 3 giây (3000 milliseconds)
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             System.out.println("Debug: fileCollectionPostman for sourceDetailId " + sourceDetailId + " is "
                     + (postmanCollection == null ? "null" : "not null"));
             Objects.requireNonNull(postmanCollection,
@@ -416,8 +314,12 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
             if (exitCode == 0) {
                 System.out.println("Newman executed successfully for studentId: " + studentId);
             } else {
+                // System.err.println(
+                //         "Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId);
                 System.err.println(
-                        "Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId);
+                    "Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId +
+                    ". Please check " + outputFile.toString() + " for detailed error logs."
+                );
             }
         } catch (IOException | InterruptedException e) {
             System.err.println("Error running Newman or storing Postman collection for studentId " + studentId + ": "
@@ -431,191 +333,6 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
 
         return functionResults;
     }
-
-    // private Map<String, Integer> getAndRunPostmanCollection(Long studentId, Long
-    // sourceDetailId) {
-    // Map<String, Integer> functionResults = new HashMap<>();
-    // String currentFunction = null;
-    // int passCount = 0;
-    // boolean hasError = false; // Cờ để kiểm tra xem hàm hiện tại có lỗi hay không
-
-    // try {
-    // // Tạo thư mục sinh viên nếu chưa có
-    // Path studentDir = Paths.get("D:/Desktop/all collection postman",
-    // String.valueOf(studentId));
-    // Files.createDirectories(studentDir);
-
-    // // Lấy dữ liệu collection và tạo file Postman
-    // Source_Detail sourceDetail = sourceDetailRepository.findById(sourceDetailId)
-    // .orElseThrow(() -> new RuntimeException("Source_Detail not found with ID: " +
-    // sourceDetailId));
-
-    // Path postmanFilePath = studentDir.resolve(studentId + ".json");
-    // Files.write(postmanFilePath, sourceDetail.getFileCollectionPostman());
-
-    // thêm code đợi file tạo thành công xử lý tiếp code dưới
-
-    // // Đường dẫn tới newman
-    // String newmanPath = "C:/Users/Admin/AppData/Roaming/npm/newman.cmd";
-    // System.out.println("Running Newman for studentId: " + studentId);
-
-    // // Cấu hình ProcessBuilder
-    // ProcessBuilder processBuilder = new ProcessBuilder(newmanPath, "run",
-    // postmanFilePath.toString());
-    // processBuilder.redirectErrorStream(true);
-    // Process process = processBuilder.start();
-
-    // // Đặt tên file lưu output
-    // Path outputFile = studentDir.resolve(studentId + ".txt");
-
-    // try (
-    // BufferedReader reader = new BufferedReader(
-    // new InputStreamReader(process.getInputStream(), "UTF-8"));
-    // BufferedWriter writer = Files.newBufferedWriter(outputFile)) {
-
-    // String line;
-    // while ((line = reader.readLine()) != null) {
-    // writer.write(line); // Ghi dòng đầu ra vào file
-    // writer.newLine();
-
-    // line = line.trim();
-
-    // if (line.startsWith("→")) {
-    // // Nếu có hàm trước đó và không bị lỗi, lưu kết quả
-    // if (currentFunction != null && !hasError) {
-    // functionResults.put(currentFunction, passCount);
-    // }
-    // // Khởi tạo lại biến cho hàm mới
-    // currentFunction = line.split("\\s+")[1];
-    // passCount = 0;
-    // hasError = false; // Reset lỗi cho hàm mới
-    // } else if (line.matches(".*\\[(4\\d{2}|5\\d{2}) .+\\].*") ||
-    // line.contains("[errored]")) {
-    // // Đánh dấu hàm hiện tại là lỗi
-    // hasError = true;
-    // } else if (line.startsWith("√") && !hasError) {
-    // // Chỉ tăng passCount nếu không có lỗi
-    // passCount++;
-    // }
-    // }
-
-    // // Lưu kết quả của hàm cuối cùng nếu có và không bị lỗi
-    // if (currentFunction != null && !hasError) {
-    // functionResults.put(currentFunction, passCount);
-    // }
-    // }
-
-    // int exitCode = process.waitFor();
-    // if (exitCode == 0) {
-    // System.out.println("Newman executed successfully for studentId: " +
-    // studentId);
-    // } else {
-    // System.err.println(
-    // "Newman execution failed with exit code: " + exitCode + " for studentId: " +
-    // studentId);
-    // }
-    // } catch (IOException | InterruptedException e) {
-    // System.err.println("Error running Newman or storing Postman collection for
-    // studentId " + studentId + ": "
-    // + e.getMessage());
-    // }
-
-    // // In kết quả cuối cùng
-    // functionResults.forEach((function, count) -> {
-    // System.out.println("noPmtestAchieve for " + function + ": " + count);
-    // });
-
-    // return functionResults;
-    // }
-
-    // private Map<String, Integer> getAndRunPostmanCollection(Long studentId, Long
-    // sourceDetailId) {
-    // Map<String, Integer> functionResults = new HashMap<>();
-    // String currentFunction = null;
-    // int passCount = 0;
-
-    // try {
-    // // Tạo thư mục sinh viên nếu chưa có
-    // Path studentDir = Paths.get("D:/Desktop/all collection postman",
-    // String.valueOf(studentId));
-    // Files.createDirectories(studentDir);
-
-    // // Lấy dữ liệu collection và tạo file Postman
-    // Source_Detail sourceDetail = sourceDetailRepository.findById(sourceDetailId)
-    // .orElseThrow(() -> new RuntimeException("Source_Detail not found with ID: " +
-    // sourceDetailId));
-
-    // Path postmanFilePath = studentDir.resolve(studentId + ".json");
-    // Files.write(postmanFilePath, sourceDetail.getFileCollectionPostman());
-
-    // // Đường dẫn tới newman
-    // String newmanPath = "C:/Users/Admin/AppData/Roaming/npm/newman.cmd";
-    // System.out.println("Running Newman for studentId: " + studentId);
-
-    // // Cấu hình ProcessBuilder
-    // ProcessBuilder processBuilder = new ProcessBuilder(newmanPath, "run",
-    // postmanFilePath.toString());
-    // processBuilder.redirectErrorStream(true);
-    // Process process = processBuilder.start();
-
-    // // Đặt tên file lưu output
-    // Path outputFile = studentDir.resolve(studentId + ".txt");
-
-    // try (
-    // BufferedReader reader = new BufferedReader(
-    // new InputStreamReader(process.getInputStream(), "UTF-8"));
-    // BufferedWriter writer = Files.newBufferedWriter(outputFile)) {
-    // String line;
-    // while ((line = reader.readLine()) != null) {
-    // writer.write(line); // Ghi dòng đầu ra vào file
-    // writer.newLine();
-
-    // line = line.trim();
-
-    // if (line.startsWith("→")) {
-    // if (currentFunction != null) {
-    // functionResults.put(currentFunction, passCount);
-    // }
-    // currentFunction = line.split("\\s+")[1];
-    // passCount = 0;
-
-    // } else if (line.startsWith("√")) {
-    // passCount++;
-
-    // } else if (line.matches("^\\d+\\..*")) {
-    // if (!line.contains("√") && passCount == 0) {
-    // passCount = 0;
-    // }
-    // }
-    // }
-    // // Lưu kết quả của hàm cuối cùng nếu có
-    // if (currentFunction != null) {
-    // functionResults.put(currentFunction, passCount);
-    // }
-    // }
-
-    // int exitCode = process.waitFor();
-    // if (exitCode == 0) {
-    // System.out.println("Newman executed successfully for studentId: " +
-    // studentId);
-    // } else {
-    // System.err.println(
-    // "Newman execution failed with exit code: " + exitCode + " for studentId: " +
-    // studentId);
-    // }
-    // } catch (IOException | InterruptedException e) {
-    // System.err.println("Error running Newman or storing Postman collection for
-    // studentId " + studentId + ": "
-    // + e.getMessage());
-    // }
-
-    // // In kết quả cuối cùng
-    // functionResults.forEach((function, count) -> {
-    // System.out.println("noPmtestAchieve for " + function + ": " + count);
-    // });
-
-    // return functionResults;
-    // }
 
     private Float calculateScoreAchieve(Postman_For_Grading postmanFunction, Long noPmtestAchieve,
             Map<String, Long> functionPassedCountMap, Map<Long, Float> parentScoreMap) {
@@ -665,7 +382,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         score.setStudent(student);
         score.setExamPaper(examPaper);
         score.setGradedAt(LocalDateTime.now());
-        score.setFlag(true);
+        // score.setFlag(true);
 
         // Lưu tạm Score để có thể dùng làm khóa ngoại cho Score_Detail
         scoreRepository.save(score);
@@ -719,70 +436,6 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         scoreRepository.save(score); // Lưu lại Score với totalScore đã cập nhật
         System.out.println("Saved total score: " + totalScoreAchieve);
     }
-
-    // public void saveScoreAndScoreDetail(Long studentId, Long examPaperId,
-    // Map<String, Long> functionPassedCountMap) {
-    // Student student = studentRepository.findById(studentId).orElse(null);
-    // Exam_Paper examPaper =
-    // examPaperRepository.findById(examPaperId).orElse(null);
-
-    // if (student == null || examPaper == null) {
-    // System.err.println("Student hoặc Exam Paper không tồn tại.");
-    // return;
-    // }
-
-    // Score score = new Score();
-    // score.setStudent(student);
-    // score.setExamPaper(examPaper);
-    // score.setGradedAt(LocalDateTime.now());
-    // score.setFlag(true);
-
-    // scoreRepository.save(score);
-
-    // Map<Long, Float> parentScoreMap = new HashMap<>(); // Lưu điểm của chức năng
-    // cha
-
-    // for (Exam_Question question : examPaper.getExamQuestions()) {
-    // for (Postman_For_Grading postmanFunction :
-    // question.getPostmanForGradingEntries()) {
-    // Score_Detail scoreDetail = new Score_Detail();
-    // scoreDetail.setScore(score);
-    // scoreDetail.setExamQuestion(question);
-    // scoreDetail.setPostmanFunctionName(postmanFunction.getPostmanFunctionName());
-    // scoreDetail.setScoreOfFunction(postmanFunction.getScoreOfFunction());
-    // scoreDetail.setTotalPmtest(postmanFunction.getTotalPmTest());
-
-    // Long noPmtestAchieve =
-    // functionPassedCountMap.getOrDefault(postmanFunction.getPostmanFunctionName(),
-    // 0L);
-    // System.out.println("noPmtestAchieve for function " +
-    // postmanFunction.getPostmanFunctionName() + ": " +
-    // noPmtestAchieve);
-
-    // scoreDetail.setNoPmtestAchieve(noPmtestAchieve);
-
-    // // Tính scoreAchieve
-    // Float scoreAchieve = calculateScoreAchieve(postmanFunction, noPmtestAchieve,
-    // functionPassedCountMap, parentScoreMap);
-    // scoreDetail.setScoreAchieve(scoreAchieve);
-
-    // // Nếu là chức năng cha, cập nhật parentScoreMap với scoreAchieve
-    // if (postmanFunction.getPostmanForGradingParentId() == null ||
-    // postmanFunction.getPostmanForGradingParentId().equals(postmanFunction.getPostmanForGradingId()))
-    // {
-    // parentScoreMap.put(postmanFunction.getPostmanForGradingId(), scoreAchieve);
-    // System.out.println("Updated parentScoreMap for function " +
-    // postmanFunction.getPostmanFunctionName() +
-    // " with scoreAchieve: " + scoreAchieve);
-    // }
-
-    // scoreDetailRepository.save(scoreDetail);
-    // System.out.println("Saved score detail for function " +
-    // postmanFunction.getPostmanFunctionName() +
-    // ", scoreAchieve: " + scoreAchieve);
-    // }
-    // }
-    // }
 
     private StudentDeployResult deployStudentSolution(StudentSourceInfoDTO studentSource) {
         Path dirPath = Paths.get(studentSource.getStudentSourceCodePath());
@@ -932,21 +585,20 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         }
     }
 
-    public void deleteContainerAndImages() throws IOException {
+    public void deleteContainerAndImages() throws IOException { 
         DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375")
                 .withDockerCmdExecFactory(new OkHttpDockerCmdExecFactory())
                 .build();
-
+    
         try {
             // Remove all containers
             List<Container> containers = dockerClient.listContainersCmd().withShowAll(true).exec();
             for (Container container : containers) {
-                System.out.println("Removing container " + container.getNames()[0] + " ("
-                        + container.getId().substring(0, 12) + ")");
+                System.out.println("Removing container " + container.getNames()[0] + " (" + container.getId().substring(0, 12) + ")");
                 dockerClient.removeContainerCmd(container.getId()).withForce(true).exec();
             }
             System.out.println("All containers have been removed.");
-
+    
             // Remove all images
             List<Image> images = dockerClient.listImagesCmd().withDanglingFilter(false).exec();
             for (Image image : images) {
@@ -954,7 +606,18 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                 dockerClient.removeImageCmd(image.getId()).withForce(true).exec();
             }
             System.out.println("All images have been removed.");
-
+    
+            // Remove unused networks
+            List<Network> networks = dockerClient.listNetworksCmd().exec();
+            for (Network network : networks) {
+                // Ignore default Docker networks
+                if (!network.getName().equals("bridge") && !network.getName().equals("host") && !network.getName().equals("none")) {
+                    System.out.println("Removing network " + network.getName() + " (" + network.getId().substring(0, 12) + ")");
+                    dockerClient.removeNetworkCmd(network.getId()).exec();
+                }
+            }
+            System.out.println("All unused networks have been removed.");
+    
         } catch (DockerException e) {
             e.printStackTrace();
             throw new RuntimeException("Docker operation failed: " + e.getMessage());
@@ -963,7 +626,9 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         }
     }
 
+    // @Transactional
     public void createFileCollectionPostman(Long examPaperId, Long sourceDetailId, int port) {
+        // Fetch the exam paper's Postman file collection
         Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                 .orElseThrow(() -> new RuntimeException("Exam_Paper not found with ID: " + examPaperId));
 
@@ -971,10 +636,12 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         if (fileCollection == null) {
             throw new RuntimeException("No fileCollectionPostman found in Exam_Paper with ID: " + examPaperId);
         }
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode rootNode = (ObjectNode) objectMapper.readTree(fileCollection);
             ArrayNode items = (ArrayNode) rootNode.get("item");
+
             for (int i = 0; i < items.size(); i++) {
                 ObjectNode item = (ObjectNode) items.get(i);
                 if (item.has("request")) {
@@ -988,11 +655,33 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                     }
                 }
             }
+
+            // Convert updated JSON back to byte array and save it to sourceDetail
             byte[] updatedFileCollection = objectMapper.writeValueAsString(rootNode).getBytes(StandardCharsets.UTF_8);
             Source_Detail sourceDetail = sourceDetailRepository.findById(sourceDetailId)
                     .orElseThrow(() -> new RuntimeException("Source_Detail not found with ID: " + sourceDetailId));
             sourceDetail.setFileCollectionPostman(updatedFileCollection);
             sourceDetailRepository.save(sourceDetail);
+
+            // Wait until fileCollectionPostman is confirmed as saved
+            int maxRetries = 5;
+            int retries = 0;
+            while (retries < maxRetries) {
+                sourceDetail = sourceDetailRepository.findById(sourceDetailId)
+                        .orElseThrow(() -> new RuntimeException("Source_Detail not found with ID: " + sourceDetailId));
+
+                if (sourceDetail.getFileCollectionPostman() != null) {
+                    break; // Exit loop if the fileCollectionPostman is available
+                }
+                Thread.sleep(500); // Wait for a short time before retrying
+                retries++;
+            }
+
+            if (sourceDetail.getFileCollectionPostman() == null) {
+                throw new RuntimeException(
+                        "fileCollectionPostman not properly saved for sourceDetailId: " + sourceDetailId);
+            }
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to update fileCollectionPostman: " + e.getMessage(), e);
         }

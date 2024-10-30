@@ -189,7 +189,7 @@ VALUES
 INSERT INTO `postman_for_grading`
 (`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`)
 VALUES
-(2.5, 1, 1, 1, 2, 'login'),
+(2.5, 1, 1, null, 2, 'login'),
 (2.5, 1, 2, 1, 4, 'get'),
 (2.5, 1, 3, 1, 2, 'post'),
 (2.5, 1, 4, 3, 2, 'delete');
