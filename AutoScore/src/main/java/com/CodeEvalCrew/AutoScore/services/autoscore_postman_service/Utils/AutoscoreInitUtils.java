@@ -2,8 +2,12 @@ package com.CodeEvalCrew.AutoScore.services.autoscore_postman_service.Utils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +20,6 @@ import java.util.stream.Stream;
 public class AutoscoreInitUtils {
 
  
-
     public static int BASE_PORT = 10000;
 
     public static Map.Entry<Path, String> findCsprojAndDotnetVersion(Path dirPath) throws IOException {
@@ -108,4 +111,34 @@ public class AutoscoreInitUtils {
         Files.deleteIfExists(dirPath.resolve("Dockerfile"));
         Files.deleteIfExists(dirPath.resolve("docker-compose.yml"));
     }
+
+    public static void deleteAllFilesAndFolders(String directoryPath) {
+        Path directory = Paths.get(directoryPath);
+
+        try {
+            // Duyệt qua tất cả các tệp và thư mục con
+            Files.walkFileTree(directory, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    // Xóa từng tệp
+                    Files.delete(file);
+                    System.out.println("Deleted file: " + file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    // Xóa thư mục sau khi đã xóa hết các tệp bên trong
+                    Files.delete(dir);
+                    System.out.println("Deleted directory: " + dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+
+            System.out.println("All files and folders deleted successfully.");
+        } catch (IOException e) {
+            System.err.println("Error while deleting files and folders: " + e.getMessage());
+        }
+    }
+
 }

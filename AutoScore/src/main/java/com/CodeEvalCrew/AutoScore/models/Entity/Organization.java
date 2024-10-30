@@ -50,9 +50,9 @@ public class Organization {
     private Set<Organization_Subject> organizationSubjects;
 
     //1-n-score
-    @OneToMany
-    @JoinColumn(name = "scoreId", nullable = true)
-    private Set<Score> scores;
+    // @OneToMany
+    // @JoinColumn(name = "scoreId", nullable = true)
+    // private Set<Score> scores;
 
     @OneToMany(mappedBy = "organization", cascade= CascadeType.ALL)
     private Set<Account_Organization> accountOrganizations;

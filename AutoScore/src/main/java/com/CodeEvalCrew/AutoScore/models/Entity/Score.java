@@ -46,9 +46,9 @@ public class Score {
     @JoinColumn(name = "studentId", nullable = false)
     private Student student;
 
-    @ManyToOne
-    @JoinColumn(name = "organizationId", nullable = false)
-    private Organization organization;
+    // @ManyToOne
+    // @JoinColumn(name = "organizationId", nullable = false)
+    // private Organization organization;
 
     //1-n score detail
     @OneToMany(mappedBy = "score", cascade = CascadeType.ALL, orphanRemoval = true)
