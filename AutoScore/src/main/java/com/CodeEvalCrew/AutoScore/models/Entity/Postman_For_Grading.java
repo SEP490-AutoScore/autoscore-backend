@@ -34,7 +34,7 @@ public class Postman_For_Grading {
 
     private Long orderBy;
 
-    private Long parentId;
+    private Long postmanForGradingParentId;
 
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
