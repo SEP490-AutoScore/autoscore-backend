@@ -194,6 +194,26 @@ VALUES
 (2.5, 1, 3, 1, 2, 'post'),
 (2.5, 1, 4, 3, 2, 'delete');
 
+INSERT INTO `AI_Info`
+(`ai_api_key`, `ai_name`, `purpose`)
+VALUES
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini', 'Generate GherkinFormat'),
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Generate Postman');
+
+
+INSERT INTO `Content`
+(`question_content`, `order_priority`, `ai_info_id`)
+VALUES
+('Save to your memory, do not reply', 1, 1),
+('create gherkin format, respond to the prompt below, each gherkin format is enclosed in {{ }}
+
+{{
+Scenario:
+}}', 2, 1),
+('Postman', 1, 2),
+('Postman', 2, 2);
+
+
 -- INSERT INTO `autoscore`.`exam_barem` 
 -- (`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
 -- VALUES (
