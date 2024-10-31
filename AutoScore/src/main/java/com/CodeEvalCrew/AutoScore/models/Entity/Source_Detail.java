@@ -1,10 +1,12 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +26,15 @@ public class Source_Detail {
     private Long sourceDetailId;
 
     private String studentSourceCodePath;
+
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] fileCollectionPostman;
+
+    private Boolean is_pass_first_progress;
+    private Boolean is_pass_second_progress;
+    private Boolean is_pass_third_progress;
+
     //Relationship
     //n-1 student
     @ManyToOne

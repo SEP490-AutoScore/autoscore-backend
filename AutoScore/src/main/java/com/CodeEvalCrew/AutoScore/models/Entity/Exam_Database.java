@@ -28,8 +28,8 @@ public class Exam_Database {
     private Long examDatabaseId;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String databaseScript;
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] databaseFile;
 
     private String databaseDescription;
 
@@ -41,7 +41,7 @@ public class Exam_Database {
 
     private String databaseNote;
 
-    private boolean status;
+    private Boolean status;
 
     private LocalDateTime createdAt;
 
@@ -55,7 +55,7 @@ public class Exam_Database {
 
     private Long deletedBy;
 
-    //1-1 exam db
+    //1-1 exam 
     @OneToOne
     @JoinColumn(name = "examPaperId", nullable = false)
     private Exam_Paper examPaper;

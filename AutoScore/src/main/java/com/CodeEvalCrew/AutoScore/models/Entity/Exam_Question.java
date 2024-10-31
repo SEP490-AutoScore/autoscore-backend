@@ -28,10 +28,18 @@ public class Exam_Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examQuestionId;
     private String questionContent;
-    private String questionNumber;
-    private float maxScore;
-    private String type;
+    private Float examQuestionScore;
+    private String endPoint;
+    private String roleAllow;
+    private String httpMethod;
+    private String description;
+    private String payloadType;
+    private String payload;
+    private String validation;
+    private String sucessResponse;
+    private String errorResponse;
     private boolean status;
+    private Long orderBy;
     private LocalDateTime createdAt;
     private Long createdBy;
     private LocalDateTime updatedAt;
@@ -40,17 +48,20 @@ public class Exam_Question {
     private Long deletedBy;
 
     // Relationship
-
     // n-1 exam_paper
     @ManyToOne
     @JoinColumn(name = "examPaperId", nullable = false)
     private Exam_Paper examPaper;
 
-    // 1-n barem
-    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
-    private Set<Exam_Barem> examBarems;
-
     // 1-n score detail
     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
     private Set<Score_Detail> scoreDetails;
+
+     // 1-n Gherkin_Scenario
+     @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
+     private Set<Gherkin_Scenario> gherkinScenarios;
+
+    // 1-n Postman_For_Grading
+    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL)
+    private Set<Postman_For_Grading> postmanForGradingEntries;
 }

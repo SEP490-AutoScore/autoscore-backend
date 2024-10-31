@@ -10,7 +10,7 @@ VALUES
 (true, 7, 'MANAGE_EXAM'),
 (true, 8, 'MANAGE_SCORE'),
 (true, 9, 'MANAGE_EXAM_DATABASE'),
-(true, 10, 'MANAGE_TESTCASE');
+(true, 10, 'MANAGE_GHERKIN_SCENARIO');
 
 INSERT INTO `permission`
 (`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
@@ -24,7 +24,7 @@ VALUES
 ('VIEW_EXAM', 7, 'View exam', 7, 1),
 ('VIEW_SCORE', 8, 'View score', 8, 1),
 ('VIEW_EXAM_DATABASE', 30, 'View exam database', 9, 1),
-('VIEW_TESTCASE', 34, 'View testcase', 10, 1),
+('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 10, 1),
 
 ('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
 ('CREATE_ROLE', 10, 'Create role', 2, 1),
@@ -34,7 +34,7 @@ VALUES
 ('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
 ('CREATE_EXAM', 15, 'Create exam', 7, 1),
 ('CREATE_EXAM_DATABASE', 31, 'Create exam database', 9, 1),
-('CREATE_TESTCASE', 35, 'Create testcase', 10, 1),
+('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 10, 1),
 
 ('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
 ('UPDATE_ROLE', 17, 'Update role', 2, 1),
@@ -44,7 +44,7 @@ VALUES
 ('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
 ('UPDATE_EXAM', 22, 'Update exam', 7, 1),
 ('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 9, 1),
-('UPDATE_TESTCASE', 36, 'Update testcase', 10, 1),
+('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 10, 1),
 
 ('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
 ('DELETE_ROLE', 24, 'Delete role', 2, 1),
@@ -54,7 +54,7 @@ VALUES
 ('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
 ('DELETE_EXAM', 29, 'Delete exam', 7, 1),
 ('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1),
-('DELETE_TESTCASE', 37, 'Delete testcase', 10, 1);
+('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 10, 1);
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
@@ -163,44 +163,87 @@ VALUES
 ('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
 ('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
 
--- INSERT INTO `exam_database` 
--- (`database_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `database_description`, `database_image`, `database_name`, `database_note`) 
+-- INSERT INTO `instructions` 
+-- (`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
 -- VALUES 
--- ('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, null, null, null, null, 'Example Database', 'example_database.png', 'Example Database', 'This is an example database.'),
--- ('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, null, null, null, null, 'Another Database', 'another_database.png', 'Another Database', 'This is another database.'),
--- ('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, null, null, null, null, 'Sample Database', 'sample_database.png', 'Sample Database', 'This is a sample database.');
-
-INSERT INTO `instructions` 
-(`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
-VALUES 
-('Introduction 1', 'Important 1', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
-('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
-('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
+-- ('You are NOT allowed to use any device to share data with others.
+-- You must use Visual Studio 2019 or above, MSSQL Server 2012 or above for your development tools. ', '1.	Create Solution/Project in Visual Studio named PE_PRN231_FA24_TrialTest_StudentFullname_BE for API, and PE_PRN231_FA24_TrialTest_StudentCode_FE for Client Application. Set the default Client application for your project as Login page.', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
+-- ('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
+-- ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
 INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `instructions_id`) 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`) 
 VALUES 
-('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2, 1),
-('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2),
-('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3);
+('PRN234_PE_SU24', true, '2024-10-30 10:00:00', 1, null, null, null, null, 2),
+('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2),
+('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2);
 
 INSERT INTO `exam_question`
-(`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+(`question_content`, `order_by`, `exam_question_score`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('Create api to crud the FootballPlayer entity', 'Q1', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Create api to crud the FootballTeam entity.', 'Q2', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Create api to login to the system.', 'Q3', 2, 'BE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 1, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 2, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('3.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 3, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+('4.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 4, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
 
-INSERT INTO `exam_barem`
-(`barem_content`, `barem_max_score`, `baremurl`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_question_id`, `method`)
+INSERT INTO `postman_for_grading`
+(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`)
 VALUES
-('Create FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'POST'),
-('Get FootballPlayer by ID', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
-('Get list FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'GET'),
-('Update FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'PUT'),
-('Delete FootballPlayer', 1, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1, 'DELETE'),
-('Get FootballTeam by ID', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
-('Get list FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'GET'),
-('Create FootballTeam', 1, 'http://localhost:8080/api/footballteam', true, NOW(), 1, NULL, NULL, NULL, NULL, 2, 'POST');
+(2.5, 1, 1, null, 2, 'login'),
+(2.5, 1, 2, 1, 4, 'get'),
+(2.5, 1, 3, 1, 2, 'post'),
+(2.5, 1, 4, 3, 2, 'delete');
+
+-- INSERT INTO `autoscore`.`exam_barem` 
+-- (`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
+-- VALUES (
+--   2, 
+--   1, 
+--   true, 
+--   1, 
+--   'Administrator, Patients, Doctor', 
+--   'Authenticates the user using their email and password. On successful authentication, the API returns a token (JWT or session token) that can be used for further authenticated requests.', 
+--   '/api/login', 
+--   'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }', 
+--   'POST', 
+--   '{
+--   "email": "user@example.com",
+--   "password": "yourpassword"
+--   }', 
+--   'Request Body (JSON)', 
+--   'Response Code: 200 OK\nResponse Body (JSON):\n{ "message": "Login successful", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", "user": { "id": 1, "email": "user@example.com", "role": "admin" }}', 
+--   'Email: Must be a valid email address format. Password: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.', 
+--   'Login function'
+-- ),
+-- (2,
+--  1,
+--  true,
+--  2,
+--  'Administrator, Patients, Doctor',
+--  'Adds a new person and, if applicable, the viruses they are infected with.',
+--  '/api/person',
+--  'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }',
+--  'POST',
+--  '{\n
+--                   \"personID\": 1,\n
+--                    \"fullName\": \"John Doe\",\n
+--                     \"birthDay\": \"1990-05-15\",\n
+--                     \"phone\": \"1234567890\",\n
+--                     \"viruses\": [\n
+--                         { \n" +
+--                            \"virusName\": \"COVID-19\",\n
+--                            \"resistanceRate\": 0.2 \n
+--                         }, \n
+--                        { \n
+--                             \"virusName\": \"Influenza\",\n
+--                             \"resistanceRate\": 0.0 \n
+--                         } \n
+--                    ]\n
+--                 }',
+--  'Request Body (JSON)',
+--  'Response: 201 Created\nResponse Body (JSON):\\n{ "personId": 1, "message": "Person and viruses added successfully" }',
+--  'Email: Must be a valid email address format.\\nPassword: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.',
+--  'Create (Add a person and the viruses they are infected with)'
+-- );
 
 

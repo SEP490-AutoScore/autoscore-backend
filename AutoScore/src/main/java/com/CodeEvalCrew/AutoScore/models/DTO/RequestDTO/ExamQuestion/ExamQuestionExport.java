@@ -16,6 +16,5 @@ import lombok.Setter;
 public class ExamQuestionExport {
     private String questionContent;
     private double questionScore;
-    private String questionURL;
     private List<ExamBaremExport> barems;
 }

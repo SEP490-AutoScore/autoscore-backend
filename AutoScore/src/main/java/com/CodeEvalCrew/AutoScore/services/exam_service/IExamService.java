@@ -26,5 +26,5 @@ public interface IExamService{
 
     void mergeDataIntoWord(String templatePath, String outputPath, Map<DataFieldName, String> data) throws Exception;
 
-    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException;
+    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException, Exception;
 }

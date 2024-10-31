@@ -142,17 +142,16 @@ public class ExamController {
     }
 
     @GetMapping("/generate-word")
-    public ResponseEntity<byte[]> generateWord() throws IOException, InvalidFormatException {
-
+    public ResponseEntity<byte[]> generateWord() {
+        Dotenv dotenv = Dotenv.load();
+        String path = dotenv.get("PATH");
         try {
             // Define the path of the template and output file
-            String templatePath = "C:\\Project\\SEP490\\tp.docx";
+            String templatePath = "AutoScore\\src\\main\\resources\\Template.docx";
             String outputPath = "C:\\Project\\SEP490\\output.docx";
 
             // Create a map of data to be merged into the document
             Map<String, String> data = new HashMap<>();
-            // data.put("ExamCode", name);
-            // data.put("ExamPaperCode", date);
 
             // Merge data into the Word template
             examService.mergeDataToWord(templatePath, outputPath, data);
@@ -167,7 +166,10 @@ public class ExamController {
                     .body(documentContent);
         } catch (IOException e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-
+        } catch (InvalidFormatException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }

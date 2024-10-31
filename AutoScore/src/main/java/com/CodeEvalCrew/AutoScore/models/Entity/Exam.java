@@ -28,37 +28,23 @@ public class Exam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examId;
-
     private String examCode;
-
     private LocalDateTime examAt;
-
     private LocalDateTime gradingAt;
-
     private LocalDateTime publishAt;
-
     private boolean status;
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
-
+    
     //Relationship
     //n-1 subject
     @ManyToOne
     @JoinColumn(name = "subjectId", nullable = false)
     private Subject subject;
-
-    //1-n - score
-    @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
-    private Set<Score> scores;
 
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
     private Set<Exam_Paper> exam_papers;    

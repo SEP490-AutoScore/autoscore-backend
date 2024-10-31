@@ -11,7 +11,7 @@ public interface ExamDatabaseMapper {
     ExamDatabaseMapper INSTANCE = Mappers.getMapper(ExamDatabaseMapper.class);
 
     @Mapping(source = "examDatabaseId", target = "examDatabaseId")
-    @Mapping(source = "databaseScript", target = "databaseScript")
+    @Mapping(source = "databaseFile", target = "databaseFile")
     @Mapping(source = "databaseDescription", target = "databaseDescription")
     @Mapping(source = "databaseName", target = "databaseName")
     @Mapping(source = "databaseImage", target = "databaseImage")
