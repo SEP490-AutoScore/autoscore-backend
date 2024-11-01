@@ -205,7 +205,7 @@ INSERT INTO `AI_Info`
 (`ai_api_key`, `ai_name`, `purpose`)
 VALUES
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini', 'Generate GherkinFormat'),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Generate Postman');
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Create file collection Postman');
 
 
 INSERT INTO `Content`
@@ -222,8 +222,11 @@ Scenario:
 Scenario:
 .....
 }}', 2, 1),
-('Postman', 1, 2),
-('Postman', 2, 2);
+('Save to your memory, do not reply', 1, 2),
+('Save to your memory, do not reply', 2, 2),
+('- Write many pm test in the form of postman json file collection only for gherkin format below, should have "info" and "item",
+- "info" needs "_postman_id", "name", "schema", _exporter_id,
+- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test ', 3, 2);
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 

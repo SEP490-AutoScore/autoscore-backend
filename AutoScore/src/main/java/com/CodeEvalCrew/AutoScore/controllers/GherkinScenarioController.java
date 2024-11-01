@@ -13,13 +13,9 @@ import com.CodeEvalCrew.AutoScore.services.gherkin_scenario_service.IGherkinScen
 @RequestMapping("api/gherkin_scenario")
 public class GherkinScenarioController {
 
-    private final IGherkinScenarioService gherkinScenarioService;
-
     @Autowired
-    public GherkinScenarioController(IGherkinScenarioService gherkinScenarioService) {
-        this.gherkinScenarioService = gherkinScenarioService;
-    }
-
+    private IGherkinScenarioService gherkinScenarioService;
+ 
     @GetMapping("/generate_gherkin_format")
     public ResponseEntity<String> generateGherkinFormat(@RequestParam Long examQuestionId) {
         String result = gherkinScenarioService.generateGherkinFormat(examQuestionId);

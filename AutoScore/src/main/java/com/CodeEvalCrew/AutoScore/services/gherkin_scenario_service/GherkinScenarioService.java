@@ -112,6 +112,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             scenario.setGherkinData(data);
             scenario.setOrderPriority(priority++);
             scenario.setExamQuestion(examQuestion);
+            scenario.setIsUpdateCreate(true);
 
             gherkinScenarioRepository.save(scenario);
         }
