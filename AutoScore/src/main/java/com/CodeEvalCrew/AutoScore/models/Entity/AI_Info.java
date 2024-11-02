@@ -1,11 +1,14 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import jakarta.persistence.Column;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,21 +21,22 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Question_Ask_AI {
+public class AI_Info {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long questionAskAiId;
+    private Long aiInfoId;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String content;
+    @NotNull
+    private String aiApiKey;
 
-    private Long stepNo;
-
+    @NotNull
     private String aiName;
 
     private String purpose;
 
-    private String aiKey;
+    // Relationship
+    @OneToMany(mappedBy = "aiInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<Content> contents;
 }

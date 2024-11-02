@@ -31,6 +31,10 @@ public class Exam_Database {
     @Column(columnDefinition = "LONGBLOB")
     private byte[] databaseFile;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String databaseScript;
+    
     private String databaseDescription;
 
     private String databaseName;

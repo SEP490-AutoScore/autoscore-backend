@@ -1,15 +1,14 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,29 +21,21 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Gherkin_Scenario {
+public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long gherkinScenarioId;
+    private Long contentId;
 
+    @NotNull
     @Lob
     @Column(columnDefinition = "LONGTEXT")
-    private String gherkinData;
+    private String questionContent;
 
     private Long orderPriority;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    @Basic(fetch = FetchType.EAGER) // Buộc tải ngay lập tức
-    private byte[] fileCollectionPostman;
-
-    private Boolean isUpdateCreate;
-
-
-
-
+    // Relationship
     @ManyToOne
-    @JoinColumn(name = "examQuestionId", nullable = false)
-    private Exam_Question examQuestion;
+    @JoinColumn(name = "aiInfoId", nullable = false)  
+    private AI_Info aiInfo;
 }
