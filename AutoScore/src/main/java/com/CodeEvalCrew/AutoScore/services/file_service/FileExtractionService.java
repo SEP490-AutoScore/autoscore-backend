@@ -227,8 +227,8 @@ public class FileExtractionService {
         errorThread.start();
 
         try {
-            // Đợi tiến trình kết thúc với thời gian chờ tối đa (ví dụ: 5 phút)
-            boolean finished = process.waitFor(5, TimeUnit.MINUTES);
+            // Đợi tiến trình kết thúc với thời gian chờ tối đa
+            boolean finished = process.waitFor(10, TimeUnit.SECONDS);
             if (!finished) {
                 process.destroyForcibly();
                 throw new IOException("RAR decompression process timed out.");
