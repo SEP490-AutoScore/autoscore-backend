@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class ExamDatabaseResponseDTO {
     private Long examDatabaseId;
-    private byte[] databaseFile;  
+    private String databaseScript;
     private String databaseDescription;
     private String databaseName;
     private byte[] databaseImage;
