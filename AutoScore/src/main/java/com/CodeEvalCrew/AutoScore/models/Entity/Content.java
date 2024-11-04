@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,24 +21,21 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Gherkin_Scenario {
+public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long gherkinScenarioId;
+    private Long contentId;
 
+    @NotNull
     @Lob
     @Column(columnDefinition = "LONGTEXT")
-    private String gherkinData;
+    private String questionContent;
 
     private Long orderPriority;
 
-    private Boolean isUpdateCreate;
-
+    // Relationship
     @ManyToOne
-    @JoinColumn(name = "examQuestionId", nullable = false)
-    private Exam_Question examQuestion;
-
-    @OneToOne(mappedBy = "gherkinScenario")
-    private Postman_For_Grading postmanForGrading;
+    @JoinColumn(name = "aiInfoId", nullable = false)  
+    private AI_Info aiInfo;
 }

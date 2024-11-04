@@ -2,7 +2,6 @@ package com.CodeEvalCrew.AutoScore.services.examdatabase_service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,26 +33,27 @@ public class ExamDatabaseService implements IExamDatabaseService {
     private final String url = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
     private final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId) throws Exception {
+
+
+      public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId) throws Exception {
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
             throw new Exception("SQL Server driver not found: " + e.getMessage());
         }
 
-        // Convert .sql file to byte array
-        byte[] sqlFileBytes;
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+        // Chuyển đổi nội dung file .sql thành chuỗi và lưu vào `databaseScript`
+        String databaseScript;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder scriptBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                outputStream.write(line.getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+                scriptBuilder.append(line).append("\n");
             }
-            sqlFileBytes = outputStream.toByteArray();
+            databaseScript = scriptBuilder.toString();
         }
 
-        String dbName = extractDatabaseName(new String(sqlFileBytes, StandardCharsets.UTF_8));
+        String dbName = extractDatabaseName(databaseScript);
         if (dbName == null) {
             throw new Exception("Database name not found in .sql file");
         }
@@ -68,13 +68,12 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 stmt.execute("CREATE DATABASE " + dbName);
                 stmt.execute("USE " + dbName);
 
-                executeSqlStatements(stmt, new String(sqlFileBytes, StandardCharsets.UTF_8)
-                        .replaceFirst("(?i)CREATE DATABASE\\s+[a-zA-Z0-9_]+\\s*GO", "")
+                executeSqlStatements(stmt, databaseScript.replaceFirst("(?i)CREATE DATABASE\\s+[a-zA-Z0-9_]+\\s*GO", "")
                         .replaceFirst("(?i)USE\\s+[a-zA-Z0-9_]+\\s*GO", ""), dbName);
 
                 conn.commit();
 
-                byte[] imageData = null;
+                byte[] imageData;
                 if (imageFile == null || imageFile.isEmpty()) {
                     throw new Exception("Invalid or missing image file.");
                 }
@@ -93,7 +92,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 LocalDateTime now = Util.getCurrentDateTime();
 
                 Exam_Database examDatabase = new Exam_Database();
-                examDatabase.setDatabaseFile(sqlFileBytes); // Set databaseFile as byte array
+                examDatabase.setDatabaseScript(databaseScript); // Lưu chuỗi SQL vào `databaseScript`
                 examDatabase.setDatabaseName(dbName);
                 examDatabase.setDatabaseImage(imageData);
                 examDatabase.setStatus(true);
@@ -114,6 +113,88 @@ public class ExamDatabaseService implements IExamDatabaseService {
             throw new Exception("SQL connection or execution error: " + e.getMessage());
         }
     }
+
+    
+    // public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId) throws Exception {
+    //     try {
+    //         Class.forName(driver);
+    //     } catch (ClassNotFoundException e) {
+    //         throw new Exception("SQL Server driver not found: " + e.getMessage());
+    //     }
+
+    //     // Convert .sql file to byte array
+    //     byte[] sqlFileBytes;
+    //     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    //          BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+    //         String line;
+    //         while ((line = reader.readLine()) != null) {
+    //             outputStream.write(line.getBytes(StandardCharsets.UTF_8));
+    //             outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+    //         }
+    //         sqlFileBytes = outputStream.toByteArray();
+    //     }
+
+    //     String dbName = extractDatabaseName(new String(sqlFileBytes, StandardCharsets.UTF_8));
+    //     if (dbName == null) {
+    //         throw new Exception("Database name not found in .sql file");
+    //     }
+
+    //     try (Connection conn = DriverManager.getConnection(url)) {
+    //         conn.setAutoCommit(false);
+    //         Statement stmt = conn.createStatement();
+
+    //         try {
+    //             dropDatabaseIfExists(stmt, dbName);
+
+    //             stmt.execute("CREATE DATABASE " + dbName);
+    //             stmt.execute("USE " + dbName);
+
+    //             executeSqlStatements(stmt, new String(sqlFileBytes, StandardCharsets.UTF_8)
+    //                     .replaceFirst("(?i)CREATE DATABASE\\s+[a-zA-Z0-9_]+\\s*GO", "")
+    //                     .replaceFirst("(?i)USE\\s+[a-zA-Z0-9_]+\\s*GO", ""), dbName);
+
+    //             conn.commit();
+
+    //             byte[] imageData = null;
+    //             if (imageFile == null || imageFile.isEmpty()) {
+    //                 throw new Exception("Invalid or missing image file.");
+    //             }
+
+    //             String contentType = imageFile.getContentType();
+    //             if (!"image/png".equals(contentType) && !"image/jpeg".equals(contentType) && !"image/jpg".equals(contentType)) {
+    //                 throw new Exception("Only PNG, JPEG, JPG files are accepted");
+    //             }
+
+    //             imageData = imageFile.getBytes();
+
+    //             Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+    //                     .orElseThrow(() -> new Exception("Exam paper not found with id: " + examPaperId));
+
+    //             Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    //             LocalDateTime now = Util.getCurrentDateTime();
+
+    //             Exam_Database examDatabase = new Exam_Database();
+    //             examDatabase.setDatabaseFile(sqlFileBytes); // Set databaseFile as byte array
+    //             examDatabase.setDatabaseName(dbName);
+    //             examDatabase.setDatabaseImage(imageData);
+    //             examDatabase.setStatus(true);
+    //             examDatabase.setCreatedAt(now);
+    //             examDatabase.setCreatedBy(authenticatedUserId);
+    //             examDatabase.setExamPaper(examPaper);
+
+    //             examDatabaseRepository.save(examDatabase);
+
+    //             return "Database " + dbName + " has been created and data has been imported.";
+
+    //         } catch (SQLException e) {
+    //             conn.rollback();
+    //             throw new Exception("Transaction failed and rolled back: " + e.getMessage());
+    //         }
+
+    //     } catch (SQLException e) {
+    //         throw new Exception("SQL connection or execution error: " + e.getMessage());
+    //     }
+    // }
 
     private void dropDatabaseIfExists(Statement stmt, String dbName) throws SQLException {
         String checkDbQuery = "IF EXISTS (SELECT name FROM sys.databases WHERE name = '" + dbName + "') " +

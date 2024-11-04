@@ -178,13 +178,20 @@ VALUES
 ('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2),
 ('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2);
 
-INSERT INTO `exam_question`
-(`question_content`, `order_by`, `exam_question_score`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+-- INSERT INTO `exam_question`
+-- (`question_content`, `order_by`, `exam_question_score`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+-- VALUES
+-- ('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 1, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+-- ('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 2, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+-- ('3.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 3, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
+-- ('4.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 4, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+
+INSERT INTO `Exam_Question`
+(`question_content`, `exam_question_score`, `end_point`, `role_allow`, `http_method`, `description`, `payload_type`, `payload`, `validation`, `sucess_response`, `error_response`, `status`, `order_by`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('1.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 1, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('2.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 2, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('3.	Check authentication/authorization with the ASP.NET Core Web API with JSON Web Token (JWT)', 3, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('4.	You must use RESTful API to implement the ASP.NET Core Web API. CORS is using in this case.', 4, 2.5, true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+('Create FootballPlayer', 2, '/api/question', 'Admin, Manager', 'GET', 'Create FootballPlayer', 'JSON', '{\"sample\":\"data\"}', 'required', '{\"status\":\"success\"}', '{\"status\":\"error\"}', true, 1, '2023-10-01 10:00:00', 3, null, null, null, null, 1);
+
+
 
 INSERT INTO `postman_for_grading`
 (`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`)
@@ -193,6 +200,34 @@ VALUES
 (2.5, 1, 2, 1, 4, 'get'),
 (2.5, 1, 3, 1, 2, 'post'),
 (2.5, 1, 4, 3, 2, 'delete');
+
+INSERT INTO `AI_Info`
+(`ai_api_key`, `ai_name`, `purpose`)
+VALUES
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini', 'Generate GherkinFormat'),
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Create file collection Postman');
+
+
+INSERT INTO `Content`
+(`question_content`, `order_priority`, `ai_info_id`)
+VALUES
+('Save to your memory, do not reply', 1, 1),
+('Write many gherkin format for me to suit the assignment requirements, respond to the AI prompt below, Each Scenario and content are enclosed in {{ }}
+
+{{
+Scenario:
+.....
+}}
+{{
+Scenario:
+.....
+}}', 2, 1),
+('Save to your memory, do not reply', 1, 2),
+('Save to your memory, do not reply', 2, 2),
+('- Write many pm test in the form of postman json file collection only for gherkin format below, should have "info" and "item",
+- "info" needs "_postman_id", "name", "schema", _exporter_id,
+- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test ', 3, 2);
+
 
 -- INSERT INTO `autoscore`.`exam_barem` 
 -- (`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
