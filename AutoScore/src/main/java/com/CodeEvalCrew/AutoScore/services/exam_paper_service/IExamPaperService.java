@@ -12,16 +12,18 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 
 public interface IExamPaperService {
 
-    ExamPaperView getById(Long id) throws NotFoundException;
+  ExamPaperView getById(Long id) throws NotFoundException;
 
-    List<ExamPaperView> getList(ExamPaperViewRequest request) throws NotFoundException, NoSuchElementException;
+  List<ExamPaperView> getList(ExamPaperViewRequest request) throws NotFoundException, NoSuchElementException;
 
-    ExamPaperView createNewExamPaper(ExamPaperCreateRequest request)  throws NotFoundException;
+  ExamPaperView createNewExamPaper(ExamPaperCreateRequest request) throws NotFoundException;
 
-    ExamPaperView updateExamPaper(Long id, ExamPaperCreateRequest request)throws NotFoundException;
+  ExamPaperView updateExamPaper(Long id, ExamPaperCreateRequest request) throws NotFoundException;
 
-    ExamPaperView deleteExamPaper(Long id) throws NotFoundException;
-    
-      void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception;
-    
+  ExamPaperView deleteExamPaper(Long id) throws NotFoundException;
+
+  void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception;
+
+  List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException;
+
 }

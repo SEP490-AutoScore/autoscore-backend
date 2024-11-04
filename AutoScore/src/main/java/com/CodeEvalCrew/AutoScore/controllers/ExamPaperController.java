@@ -108,7 +108,6 @@ public class ExamPaperController {
         }
     }
 
-
     @PostMapping("/import-postman-collections")
     public ResponseEntity<?> importPostmanCollections(
             @RequestParam("examPaperId") Long examPaperId,
@@ -120,4 +119,17 @@ public class ExamPaperController {
             return new ResponseEntity<>("Failed to import files: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/{examPaperId}/questions")
+    public ResponseEntity<?> getExamQuestionIds(@PathVariable Long examPaperId) {
+        try {
+            List<Long> questionIds = examPaperService.getExamQuestionIdsByExamPaperId(examPaperId);
+            return new ResponseEntity<>(questionIds, HttpStatus.OK);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
