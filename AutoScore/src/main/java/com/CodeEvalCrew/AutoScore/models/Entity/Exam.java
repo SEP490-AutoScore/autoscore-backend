@@ -5,6 +5,7 @@ import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -42,8 +43,8 @@ public class Exam {
     
     //Relationship
     //n-1 subject
-    @ManyToOne
-    @JoinColumn(name = "subjectId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subjectId", nullable = true)
     private Subject subject;
 
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
@@ -52,7 +53,7 @@ public class Exam {
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
     private Set<Student> students;    
 
-    @ManyToOne
-    @JoinColumn(name = "semesterId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semesterId", nullable = true)
     private Semester semester;
 }

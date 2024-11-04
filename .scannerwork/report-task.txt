@@ -1,6 +1,0 @@
-projectKey=VuongVT
-serverUrl=http://localhost:9000
-serverVersion=10.7.0.96327
-dashboardUrl=http://localhost:9000/dashboard?id=VuongVT
-ceTaskId=b156e29a-8693-456c-b3fb-74547b401047
-ceTaskUrl=http://localhost:9000/api/ce/task?id=b156e29a-8693-456c-b3fb-74547b401047

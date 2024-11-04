@@ -1,13 +1,17 @@
 package com.CodeEvalCrew.AutoScore.services.exam_paper_service;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ssl.SslProperties.Bundles.Watch.File;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,16 +23,17 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewR
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Important;
+import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
+import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
+import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamPaperSpecification;
 import com.CodeEvalCrew.AutoScore.utils.Util;
-import io.jsonwebtoken.io.IOException;
-import java.nio.file.Files;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
 
 
 @Service
@@ -38,26 +43,33 @@ public class ExamPaperService implements IExamPaperService {
     @Autowired
     private final IExamRepository examRepository;
     @Autowired
+    private final ImportantRepository importantRepository;
+    @Autowired
+    private final ImportantExamPaperRepository importantExamPaperRepository;
+    @Autowired
     private final ObjectMapper objectMapper;
 
 
     public ExamPaperService(IExamPaperRepository examPaperRepository,
                             IExamRepository examRepository,
+                            ImportantRepository importantRepository,
+                            ImportantExamPaperRepository importantExamPaperRepository,
                             ObjectMapper objectMapper) {
         this.examPaperRepository = examPaperRepository;
         this.examRepository = examRepository;
         this.objectMapper = objectMapper;
+        this.importantRepository = importantRepository;
+        this.importantExamPaperRepository = importantExamPaperRepository;
     }
   
 
     @Override
     public ExamPaperView getById(Long id) throws NotFoundException {
-        ExamPaperView result;
         try {
 
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(id), "Exam Paper", id);
 
-            return result = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -71,7 +83,7 @@ public class ExamPaperService implements IExamPaperService {
         List<ExamPaperView> result = new ArrayList<>();
         try {
             //check exam
-            Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
+            checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
 
             //crete spec
             Specification<Exam_Paper> spec = ExamPaperSpecification.hasForeignKey(request.getExamId(), "exam", "examId");
@@ -92,27 +104,40 @@ public class ExamPaperService implements IExamPaperService {
             System.out.println(e.getCause());
             throw e;
         }
-
     }
 
     @Override
+    @Transactional
     public ExamPaperView createNewExamPaper(ExamPaperCreateRequest request) throws NotFoundException {
-        ExamPaperView result;
         try {
             //check Exam
             Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
 
+            //set to add
+            Set<Important_Exam_Paper> importants = new HashSet<>();
+            
             //mapping
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
+            
+            // check important to add to exam paper
+            for (Long importantId : request.getImportantIdList()) {
+                Important important = checkEntityExistence(importantRepository.findById(importantId), "Important", importantId);
+                
+                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, important, examPaper);
+
+                importants.add(importantExamPaper);
+            }
 
             //update side in4
             examPaper.setExam(exam);
+            examPaper.setImportants(importants);
+            examPaper.setStatus(true);
             examPaper.setCreatedAt(Util.getCurrentDateTime());
             examPaper.setCreatedBy(Util.getAuthenticatedAccountId());
 
             examPaperRepository.save(examPaper);
 
-            return result = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -122,8 +147,8 @@ public class ExamPaperService implements IExamPaperService {
     }
 
     @Override
+    @Transactional
     public ExamPaperView updateExamPaper(Long id, ExamPaperCreateRequest request) throws NotFoundException{
-        ExamPaperView result;
         try {
             //check ExamPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(id), "Exam Paper", id);
@@ -131,14 +156,8 @@ public class ExamPaperService implements IExamPaperService {
             //check Exam
             Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
 
-            //check exam instuc
-
-            //check exam db
-
             //update side in4
             examPaper.setExamPaperCode(request.getExamPaperCode());
-            //examPaper.setExamInstruc
-            //examPaper.serExamDB
             examPaper.setExam(exam);
             examPaper.setStatus(true);
             examPaper.setUpdatedAt(Util.getCurrentDateTime());
@@ -146,7 +165,7 @@ public class ExamPaperService implements IExamPaperService {
 
             examPaperRepository.save(examPaper);
 
-            return result = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -157,7 +176,6 @@ public class ExamPaperService implements IExamPaperService {
 
     @Override
     public ExamPaperView deleteExamPaper(Long id) throws NotFoundException {
-        ExamPaperView result;
         try {
 
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(id), "Exam Paper", id);
@@ -166,7 +184,7 @@ public class ExamPaperService implements IExamPaperService {
             examPaper.setDeletedAt(Util.getCurrentDateTime());
             examPaper.setDeletedBy(Util.getAuthenticatedAccountId());
 
-            return result = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {

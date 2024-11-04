@@ -12,7 +12,15 @@ import lombok.Setter;
 public class ExamQuestionView {
     private Long examQuestionId;
     private String questionContent;
-    private String questionNumber;
-    private float maxScore;
-    private String type;
+    private Float examQuestionScore;
+    private String endPoint;
+    private String roleAllow;
+    private String httpMethod;
+    private String description;
+    private String payloadType;
+    private String payload;
+    private String validation;
+    private String sucessResponse;
+    private String errorResponse;
+    private Long orderBy;
 }

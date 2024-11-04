@@ -12,4 +12,6 @@ import lombok.Setter;
 public class ExamPaperView {
     private Long examPaperId;
     private String examPaperCode;
+    private String instruction;
+    // private List<ImportantView> importants;
 }

@@ -8,17 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ExamCreateRequestDTO {
-    private Long examId = null;
-
     private String examCode;
-    
     private LocalDateTime examAt;
-
     private LocalDateTime gradingAt;
-
     private LocalDateTime publishAt;
-
-    private String semesterName;
-    
     private Long subjectId;
+    private Long semesterId;
 }

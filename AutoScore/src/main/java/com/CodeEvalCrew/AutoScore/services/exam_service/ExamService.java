@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +42,18 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.Semester;
+import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.repositories.semester_repository.SemesterRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamDatabaseSpecification;
+import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.aspose.words.Document;
 import com.aspose.words.MailMerge;
@@ -62,6 +67,8 @@ public class ExamService implements IExamService {
     private final IExamRepository examRepository;
     @Autowired
     private final ISubjectRepository subjectRepository;
+    @Autowired
+    private final SemesterRepository semesterRepository;
     @Autowired
     private final IAccountRepository accountRepository;
     @Autowired
@@ -77,6 +84,7 @@ public class ExamService implements IExamService {
             IExamPaperRepository examPaperRepository,
             IExamQuestionRepository examQuestionRepository,
             IExamDatabaseRepository examDatabaseRepository,
+            SemesterRepository semesterRepository,
             IEmployeeRepository employeeRepository) {
         this.examRepository = examRepository;
         this.subjectRepository = subjectRepository;
@@ -84,6 +92,7 @@ public class ExamService implements IExamService {
         this.examPaperRepository = examPaperRepository;
         this.examDatabaseRepository = examDatabaseRepository;
         this.examQuestionRepository = examQuestionRepository;
+        this.semesterRepository = semesterRepository;
     }
 
     @Override
@@ -94,7 +103,7 @@ public class ExamService implements IExamService {
             if (exam == null) {
                 throw new NotFoundException("Exam id:" + id + " not found");
             }
-            result = new ExamViewResponseDTO(exam);
+            result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception ex) {
@@ -132,59 +141,66 @@ public class ExamService implements IExamService {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             // Check subject
-            // Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
+            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
 
             // Check account
             Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()), "Account", Util.getAuthenticatedAccountId());
 
+            //Check semester
+            Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()),"Semester", entity.getSemesterId());
+
             //validation exam
             //mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
-            // exam.setSubject(subject);
-            // exam.setCreatedAt(LocalDateTime.now());
-            // exam.setStatus(true);
-            // exam.setCreatedBy(account.getAccountId());
+            exam.setSubject(subject);
+            exam.setCreatedAt(LocalDateTime.now());
+            exam.setStatus(true);
+            exam.setCreatedBy(account.getAccountId());
+            exam.setSemester(semester);
 
             //create new exam
-            examRepository.save(exam);
+            exam = examRepository.save(exam);
 
             //mapping exam
             result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException ex) {
             throw ex;
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new Exception(e.getMessage());
         }
-
         return result;
     }
 
     @Override
     @Transactional
-    public ExamViewResponseDTO updateExam(ExamCreateRequestDTO entity) throws Exception, NotFoundException {
+    public ExamViewResponseDTO updateExam(ExamCreateRequestDTO entity,Long id) throws Exception, NotFoundException {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
-
-            // Check subject
-            // Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
-
             //check exist exam
-            // Exam exam = checkEntityExistence(examRepository.findById(entity.getExamId()), "Exam", entity.getExamId());
+            Exam exam = checkEntityExistence(examRepository.findById(id), "Exam", id);
+            
+            // Check subject
+            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
+
+            //Check semester
+            Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()),"Semester", entity.getSemesterId());
 
             //update exam 
-            // exam.setExamCode(entity.getExamCode());
-            // exam.setExamAt(entity.getExamAt());
-            // exam.setGradingAt(entity.getGradingAt());
-            // exam.setPublishAt(entity.getPublishAt());
-            // exam.setSubject(subject);
+            exam.setExamCode(entity.getExamCode());
+            exam.setExamAt(entity.getExamAt());
+            exam.setGradingAt(entity.getGradingAt());
+            exam.setPublishAt(entity.getPublishAt());
+            exam.setSubject(subject);
+            exam.setSemester(semester);
 
-            //create new exam
-            // examRepository.save(exam);
+            //save exam
+            examRepository.save(exam);
 
-            //mapping exam
-            // result = ExamMapper.INSTANCE.examToViewResponse(exam);
-        // } catch (NotFoundException nfe) {
-        //     throw nfe;
+            // mapping exam to return
+            result = ExamMapper.INSTANCE.examToViewResponse(exam);
+        } catch (NotFoundException nfe) {
+            throw nfe;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -200,14 +216,14 @@ public class ExamService implements IExamService {
     private Specification<Exam> createSpecificationForGet(ExamViewRequestDTO request) {
         Specification<Exam> spec = Specification.where(null);
 
-        // if (!request.getSearchString().isBlank()) {
-        //     spec = spec.or(ExamSpecification.hasExamCode(request.getSearchString()))
-        //             .or(ExamSpecification.hasSemester(request.getSearchString()));
-        // }
+        if (!request.getSearchString().isBlank()) {
+            spec = spec.or(ExamSpecification.hasExamCode(request.getSearchString()))
+                    .or(ExamSpecification.hasSemester(request.getSearchString()));
+        }
 
-        // if (request.getSubjectId() != null) {
-        //     spec.and(ExamSpecification.hasSubjectId(request.getSubjectId()));
-        // }
+        if (request.getSubjectId() != null) {
+            spec.and(ExamSpecification.hasSubjectId(request.getSubjectId()));
+        }
 
         return spec;
     }
