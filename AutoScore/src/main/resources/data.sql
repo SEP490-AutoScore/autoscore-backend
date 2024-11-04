@@ -304,19 +304,19 @@ Request Body (JSON):
 
 
 
-INSERT INTO `postman_for_grading`
-(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`)
-VALUES
-(2.5, 1, 1, null, 2, 'login'),
-(2.5, 1, 2, 1, 4, 'get'),
-(2.5, 1, 3, 1, 2, 'post'),
-(2.5, 1, 4, 3, 2, 'delete');
+-- INSERT INTO `postman_for_grading`
+-- (`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`)
+-- VALUES
+-- (2.5, 1, 1, null, 2, 'login'),
+-- (2.5, 1, 2, 1, 4, 'get'),
+-- (2.5, 1, 3, 1, 2, 'post'),
+-- (2.5, 1, 4, 3, 2, 'delete');
 
 INSERT INTO `AI_Info`
 (`ai_api_key`, `ai_name`, `purpose`)
 VALUES
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini', 'Generate GherkinFormat'),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Create file collection Postman');
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Generate Postman Collection');
 
 
 INSERT INTO `Content`
@@ -335,7 +335,7 @@ Scenario:
 }}', 2, 1),
 ('Save to your memory, do not reply', 1, 2),
 ('Save to your memory, do not reply', 2, 2),
-('- Write many pm test in the form of postman json file collection only for gherkin format below, should have "info" and "item",
+('- Write many pm test javascript in the form of postman json file collection only for gherkin format below, should have "info" and "item",
 - "info" needs "_postman_id", "name", "schema", _exporter_id,
 - "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test ', 3, 2);
 

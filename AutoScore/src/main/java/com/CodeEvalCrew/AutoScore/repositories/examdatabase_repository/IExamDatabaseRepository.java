@@ -19,5 +19,7 @@ public interface IExamDatabaseRepository extends JpaRepository<Exam_Database, Lo
     // Tìm Exam_Database dựa vào examQuestionId
     @Query("SELECT e FROM Exam_Database e JOIN e.examPaper p JOIN p.examQuestions q WHERE q.examQuestionId = :examQuestionId")
     Optional<Exam_Database> findByExamQuestionId(@Param("examQuestionId") Long examQuestionId);
+
+    Optional<Exam_Database> findByExamPaper_ExamPaperId(Long examPaperId);
     
 }

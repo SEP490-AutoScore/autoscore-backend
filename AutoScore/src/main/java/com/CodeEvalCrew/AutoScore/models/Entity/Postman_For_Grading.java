@@ -46,7 +46,7 @@ public class Postman_For_Grading {
     private byte[] fileCollectionPostman;
 
     @ManyToOne
-    @JoinColumn(name = "examQuestionId", nullable = false)
+    @JoinColumn(name = "examQuestionId")
     private Exam_Question examQuestion;
 
     @OneToOne
@@ -54,6 +54,6 @@ public class Postman_For_Grading {
     private Gherkin_Scenario gherkinScenario;
 
     @ManyToOne
-    @JoinColumn(name = "examPaperId", nullable = false)
+    @JoinColumn(name = "examPaperId")
     private Exam_Paper examPaper;
 }
