@@ -20,6 +20,7 @@ import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_paper_service.IExamPaperService;
 
 @RestController
@@ -131,5 +132,13 @@ public class ExamPaperController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/{examPaperId}/gherkin-scenarios")
+    public ResponseEntity<List<GherkinScenarioInfoDTO>> getGherkinScenariosByExamPaperId(
+            @PathVariable Long examPaperId) throws NotFoundException {
+        List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService.getGherkinScenariosByExamPaperId(examPaperId);
+        return new ResponseEntity<>(gherkinScenarioInfoList, HttpStatus.OK);
+    }
+    
 
 }

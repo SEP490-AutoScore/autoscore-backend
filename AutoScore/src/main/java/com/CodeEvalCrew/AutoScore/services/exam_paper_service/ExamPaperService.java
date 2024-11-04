@@ -22,9 +22,11 @@ import com.CodeEvalCrew.AutoScore.mappers.ExamPaperMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
@@ -292,6 +294,25 @@ public class ExamPaperService implements IExamPaperService {
                 .collect(Collectors.toList());
 
         return questionIds;
+    }
+
+    @Override
+    public List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException {
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new NotFoundException("Exam Paper không tồn tại"));
+
+        List<GherkinScenarioInfoDTO> result = new ArrayList<>();
+        examPaper.getExamQuestions().forEach(examQuestion -> {
+            Set<Gherkin_Scenario> gherkinScenarios = examQuestion.getGherkinScenarios();
+            gherkinScenarios.forEach(gherkinScenario -> {
+                result.add(new GherkinScenarioInfoDTO(
+                        examPaperId,
+                        examQuestion.getExamQuestionId(),
+                        gherkinScenario.getGherkinScenarioId()));
+            });
+        });
+
+        return result;
     }
 
 }
