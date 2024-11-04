@@ -1,5 +1,7 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +18,15 @@ public class GherkinScenarioController {
     @Autowired
     private IGherkinScenarioService gherkinScenarioService;
  
+    // @GetMapping("/generate_gherkin_format")
+    // public ResponseEntity<String> generateGherkinFormat(@RequestParam Long examQuestionId) {
+    //     String result = gherkinScenarioService.generateGherkinFormat(examQuestionId);
+    //     return ResponseEntity.ok(result);
+    // }
     @GetMapping("/generate_gherkin_format")
-    public ResponseEntity<String> generateGherkinFormat(@RequestParam Long examQuestionId) {
-        String result = gherkinScenarioService.generateGherkinFormat(examQuestionId);
+    public ResponseEntity<String> generateGherkinFormat(@RequestParam List<Long> examQuestionIds) {
+        String result = gherkinScenarioService.generateGherkinFormat(examQuestionIds);
         return ResponseEntity.ok(result);
     }
+    
 }
