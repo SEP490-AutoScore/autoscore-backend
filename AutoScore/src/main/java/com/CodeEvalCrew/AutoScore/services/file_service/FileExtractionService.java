@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -26,12 +25,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
-import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
-import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -54,71 +50,119 @@ public class FileExtractionService {
         File tempFile = new File(uploadDir, file.getOriginalFilename());
         file.transferTo(tempFile);
 
-        // Lấy thông tin campus
-        Set<Organization> organizations = Util.getOrganizations();
-        String campus = null;
-        if (organizations != null) {
-            for (Organization organization : organizations) {
-                if (organization.getType() == Organization_Enum.CAMPUS) {
-                    campus = organization.getName();
-                    break;
-                }
-            }
-        }
-
         String rootFolder = null;
-        File outputDir = new File(uploadDir, campus);
-        outputDir.mkdir();
-
-        long startTime = System.currentTimeMillis();  // Bắt đầu theo dõi thời gian
 
         try (SevenZFile sevenZFile = new SevenZFile(tempFile)) {
             SevenZArchiveEntry entry;
-            byte[] buffer = new byte[4 * 1024 * 1024]; 
+            File outputDir = null;
+
             while ((entry = sevenZFile.getNextEntry()) != null) {
-                File outFile = new File(outputDir, entry.getName());
+                String entryName = entry.getName();
+
+                // Xác định tên thư mục gốc nếu chưa được đặt
+                if (rootFolder == null) {
+                    rootFolder = entryName.split("/")[0]; // Lấy tên thư mục gốc đầu tiên từ file nén
+                    outputDir = new File(uploadDir, rootFolder);
+                    if (!outputDir.exists()) {
+                        outputDir.mkdir(); // Tạo thư mục gốc nếu chưa tồn tại
+
+                                    }}
+
+                // Tạo đường dẫn giải nén với outputDir là thư mục gốc
+                File outFile = new File(outputDir, entryName.substring(rootFolder.length()));
 
                 if (entry.isDirectory()) {
-                    if (rootFolder == null) {
-                        rootFolder = outFile.getName();  // Lưu tên thư mục gốc
-                    }
                     Files.createDirectories(outFile.toPath());
-                    logger.info("Directory created: {}", outFile.getPath());
                 } else {
                     Files.createDirectories(outFile.getParentFile().toPath());
-
-                    // Ghi file
                     try (FileOutputStream out = new FileOutputStream(outFile)) {
+                        byte[] buffer = new byte[8192];
                         int len;
                         while ((len = sevenZFile.read(buffer)) > 0) {
                             out.write(buffer, 0, len);
                         }
                     }
-                    logger.info("File extracted: {}", outFile.getPath());
-                }
-
-                // Kiểm tra thời gian xử lý và log cảnh báo nếu cần
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                if (elapsedTime > 60000) {  // Quá 60 giây
-                    logger.warn("Extracting file took longer than expected: {}, elapsedTime: {} ms", entry.getName(), elapsedTime);
                 }
             }
         } catch (IOException e) {
-            logger.error("Failed to extract 7z file: {}", e.getMessage());
-            throw new IOException("Error extracting file: " + e.getMessage());
+            throw new IOException("Error extracting 7z file: " + e.getMessage(), e);
         } finally {
-            // Dọn dẹp file tạm
-            if (tempFile.exists()) {
-                tempFile.delete();
-            }
+            tempFile.delete(); // Xóa file tạm sau khi giải nén
         }
 
         if (rootFolder == null) {
-            logger.error("Invalid folder structure in archive");
-            throw new IOException("Invalid folder structure in archive");
+            throw new IOException("Invalid archive structure: no root folder found");
         }
 
-        return campus + "\\" + rootFolder;
+        return new File(uploadDir, rootFolder).getAbsolutePath();
+    }
+
+    // Giải nén đệ quy và tìm tệp .sln
+    public File processExtractedFolder(File folder, Source source, Student student) throws IOException {
+        File[] files = folder.listFiles();
+        if (files == null) {
+            return null;
+        }
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                File slnFile = processExtractedFolder(file, source, student);
+                if (slnFile != null) {
+                    return slnFile; // Trả về thư mục chứa file .sln nếu tìm thấy
+
+                            }} else if (file.getName().endsWith(".sln")) {
+                return folder; // Trả về thư mục chứa file .sln
+            } else if (file.getName().matches(".*\\.(zip|rar|7z|tar|gz)$")) {
+                // Giải nén file nén đệ quy
+                extractArchive(file, folder, source, student);
+                if (!file.delete()) {
+                    logger.warn("Failed to delete archive: {}", file.getPath());
+                }
+                return processExtractedFolder(folder, source, student); // Tiếp tục xử lý thư mục sau khi giải nén
+            }
+        }
+        return null;
+    }
+
+    public File extractAllNestedArchives(File archive, Source source, Student student) throws IOException {
+        File outputDir = new File(archive.getParentFile(), archive.getName() + "_extracted");
+        if (!outputDir.exists()) {
+            outputDir.mkdir();
+        }
+
+        extractArchive(archive, outputDir, source, student);
+
+        return outputDir;
+    }
+
+    public File findSlnFile(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    File slnFile = findSlnFile(file);
+                    if (slnFile != null) {
+                        return slnFile;
+                    }
+                } else if (file.getName().endsWith(".sln")) {
+                    return file;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Hàm giải nén file tổng quát
+    public void extractArchive(File archive, File outputDir, Source source, Student student) throws IOException {
+        if (archive.getName().endsWith(".zip")) {
+            extractZipWithZip4j(archive, outputDir, source, student);
+        } else if (archive.getName().endsWith(".rar")) {
+            extractRarWith7ZipCommand(archive, outputDir, source, student);
+        } else if (archive.getName().endsWith(".7z")) {
+            extract7zFile(archive, outputDir, source, student);
+        } else {
+            extractWithCommonsCompress(archive, outputDir, source, student);
+        }
     }
 
     // Giải nén file ZIP bằng Zip4j
@@ -161,20 +205,24 @@ public class FileExtractionService {
 
     // Giải nên file 7z
     public void extract7zFile(File archive, File outputDir, Source source, Student student) throws IOException {
+        // Ensure the output directory exists
         if (!outputDir.exists()) {
             outputDir.mkdirs(); // Create the output directory if it doesn't exist
         }
 
         try (SevenZFile sevenZFile = new SevenZFile(archive)) {
             SevenZArchiveEntry entry;
-            byte[] buffer = new byte[8192]; // Adjust the buffer size if needed
+            byte[] buffer = new byte[8192]; // Buffer size for reading
 
             while ((entry = sevenZFile.getNextEntry()) != null) {
-                File outFile = new File(outputDir, entry.getName());
+                // Create a file in the output directory with just the file name (no path)
+                File outFile = new File(outputDir, entry.getName().substring(entry.getName().lastIndexOf(File.separator) + 1));
 
                 if (entry.isDirectory()) {
-                    outFile.mkdirs(); // Create directories for the extracted entries
+                    // Create directories if the entry is a directory (optional)
+                    outFile.mkdirs(); // This may be unnecessary if you are not extracting directories
                 } else {
+                    // Write the file data to the output file
                     try (FileOutputStream fos = new FileOutputStream(outFile)) {
                         int bytesRead;
                         while ((bytesRead = sevenZFile.read(buffer)) > 0) {
@@ -227,8 +275,8 @@ public class FileExtractionService {
         errorThread.start();
 
         try {
-            // Đợi tiến trình kết thúc với thời gian chờ tối đa (ví dụ: 5 phút)
-            boolean finished = process.waitFor(5, TimeUnit.MINUTES);
+            // Đợi tiến trình kết thúc với thời gian chờ tối đa
+            boolean finished = process.waitFor(10, TimeUnit.SECONDS);
             if (!finished) {
                 process.destroyForcibly();
                 throw new IOException("RAR decompression process timed out.");
