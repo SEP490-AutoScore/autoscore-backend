@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -34,11 +35,14 @@ public class Exam_Question {
     private String httpMethod;
     private String description;
     private String payloadType;
+    @Lob
     private String payload;
     private String validation;
+    @Lob
     private String sucessResponse;
+    @Lob
     private String errorResponse;
-    private boolean status;
+    private boolean status = true;
     private Long orderBy;
     private LocalDateTime createdAt;
     private Long createdBy;

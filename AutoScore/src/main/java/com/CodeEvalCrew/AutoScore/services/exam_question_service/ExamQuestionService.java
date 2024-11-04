@@ -82,7 +82,6 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView createNewExamQuestion(ExamQuestionCreateRequest request) throws NotFoundException {
-        ExamQuestionView result;
         try {
             // check examPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
@@ -97,7 +96,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {
