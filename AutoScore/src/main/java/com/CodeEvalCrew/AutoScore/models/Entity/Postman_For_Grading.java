@@ -1,12 +1,16 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,7 +40,20 @@ public class Postman_For_Grading {
 
     private Long postmanForGradingParentId;
 
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    @Basic(fetch = FetchType.EAGER) // Buộc tải ngay lập tức
+    private byte[] fileCollectionPostman;
+
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;
+
+    @OneToOne
+    @JoinColumn(name = "gherkinScenarioId", referencedColumnName = "gherkinScenarioId")
+    private Gherkin_Scenario gherkinScenario;
+
+    @ManyToOne
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 }

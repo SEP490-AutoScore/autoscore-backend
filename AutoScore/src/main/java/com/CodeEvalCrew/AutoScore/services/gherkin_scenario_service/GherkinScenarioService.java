@@ -43,49 +43,103 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
     @Override
     @Transactional
-    public String generateGherkinFormat(Long examQuestionId) {
-        // Lấy AI_Info với purpose là "Generate GherkinFormat"
-        List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate GherkinFormat");
-
-        // Truy vấn Exam_Database dựa trên examQuestionId
-        Exam_Database examDatabase = examDatabaseRepository.findByExamQuestionId(examQuestionId)
-                .orElseThrow(() -> new RuntimeException("Exam Database không tồn tại"));
-        String databaseScript = examDatabase.getDatabaseScript();
-
-        // Truy vấn Exam_Question dựa trên examQuestionId
-        Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
-                .orElseThrow(() -> new RuntimeException("Exam Question không tồn tại"));
-
-        StringBuilder responseBuilder = new StringBuilder();
-        aiInfos.forEach(aiInfo -> {
-            List<Content> orderedContents = aiInfo.getContents()
-                    .stream()
-                    .sorted((c1, c2) -> Long.compare(c1.getOrderPriority(), c2.getOrderPriority()))
-                    .collect(Collectors.toList());
-
-            orderedContents.forEach(content -> {
-                String question = content.getQuestionContent();
-                if (content.getOrderPriority() == 1) {
-                    question += "\n" + databaseScript;
-                } else if (content.getOrderPriority() == 2) {
-                    question += "\n\n\n"
-                            + "\n -Question Content:" + examQuestion.getQuestionContent()
-                            + "\n -Role" + examQuestion.getRoleAllow()
-                            + "\n" + examQuestion.getDescription();
-                }
-
-                String response = sendToAI(question, aiInfo.getAiApiKey());
-                responseBuilder.append(response).append("\n");
-
-                if (content.getOrderPriority() == 2) {
-                    List<String> gherkinDataList = extractGherkinData(response);
-                    saveGherkinData(gherkinDataList, examQuestion);
-                }
+    public String generateGherkinFormat(List<Long> examQuestionIds) {
+        StringBuilder overallResponseBuilder = new StringBuilder();
+    
+        for (Long examQuestionId : examQuestionIds) {
+            // Lấy AI_Info với purpose là "Generate GherkinFormat"
+            List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate GherkinFormat");
+    
+            // Truy vấn Exam_Database dựa trên examQuestionId
+            Exam_Database examDatabase = examDatabaseRepository.findByExamQuestionId(examQuestionId)
+                    .orElseThrow(() -> new RuntimeException("Exam Database không tồn tại"));
+            String databaseScript = examDatabase.getDatabaseScript();
+    
+            // Truy vấn Exam_Question dựa trên examQuestionId
+            Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
+                    .orElseThrow(() -> new RuntimeException("Exam Question không tồn tại"));
+    
+            StringBuilder responseBuilder = new StringBuilder();
+            
+            // Tạo đoạn chat mới cho mỗi examQuestionId
+            aiInfos.forEach(aiInfo -> {
+                List<Content> orderedContents = aiInfo.getContents()
+                        .stream()
+                        .sorted((c1, c2) -> Long.compare(c1.getOrderPriority(), c2.getOrderPriority()))
+                        .collect(Collectors.toList());
+    
+                orderedContents.forEach(content -> {
+                    String question = content.getQuestionContent();
+                    if (content.getOrderPriority() == 1) {
+                        question += "\n" + databaseScript;
+                    } else if (content.getOrderPriority() == 2) {
+                        question += "\n\n\n"
+                                + "\n -Question Content:" + examQuestion.getQuestionContent()
+                                + "\n -Role" + examQuestion.getRoleAllow()
+                                + "\n" + examQuestion.getDescription();
+                    }
+    
+                    String response = sendToAI(question, aiInfo.getAiApiKey());
+                    responseBuilder.append(response).append("\n");
+    
+                    if (content.getOrderPriority() == 2) {
+                        List<String> gherkinDataList = extractGherkinData(response);
+                        saveGherkinData(gherkinDataList, examQuestion);
+                    }
+                });
             });
-        });
-
-        return responseBuilder.toString();
+    
+            // Thêm kết quả từ examQuestionId hiện tại vào tổng kết quả
+            overallResponseBuilder.append("Exam Question ID: ").append(examQuestionId).append("\n")
+                                  .append(responseBuilder.toString()).append("\n\n");
+        }
+    
+        return overallResponseBuilder.toString();
     }
+    
+    // public String generateGherkinFormat(Long examQuestionId) {
+    //     // Lấy AI_Info với purpose là "Generate GherkinFormat"
+    //     List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate GherkinFormat");
+
+    //     // Truy vấn Exam_Database dựa trên examQuestionId
+    //     Exam_Database examDatabase = examDatabaseRepository.findByExamQuestionId(examQuestionId)
+    //             .orElseThrow(() -> new RuntimeException("Exam Database không tồn tại"));
+    //     String databaseScript = examDatabase.getDatabaseScript();
+
+    //     // Truy vấn Exam_Question dựa trên examQuestionId
+    //     Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
+    //             .orElseThrow(() -> new RuntimeException("Exam Question không tồn tại"));
+
+    //     StringBuilder responseBuilder = new StringBuilder();
+    //     aiInfos.forEach(aiInfo -> {
+    //         List<Content> orderedContents = aiInfo.getContents()
+    //                 .stream()
+    //                 .sorted((c1, c2) -> Long.compare(c1.getOrderPriority(), c2.getOrderPriority()))
+    //                 .collect(Collectors.toList());
+
+    //         orderedContents.forEach(content -> {
+    //             String question = content.getQuestionContent();
+    //             if (content.getOrderPriority() == 1) {
+    //                 question += "\n" + databaseScript;
+    //             } else if (content.getOrderPriority() == 2) {
+    //                 question += "\n\n\n"
+    //                         + "\n -Question Content:" + examQuestion.getQuestionContent()
+    //                         + "\n -Role" + examQuestion.getRoleAllow()
+    //                         + "\n" + examQuestion.getDescription();
+    //             }
+
+    //             String response = sendToAI(question, aiInfo.getAiApiKey());
+    //             responseBuilder.append(response).append("\n");
+
+    //             if (content.getOrderPriority() == 2) {
+    //                 List<String> gherkinDataList = extractGherkinData(response);
+    //                 saveGherkinData(gherkinDataList, examQuestion);
+    //             }
+    //         });
+    //     });
+
+    //     return responseBuilder.toString();
+    // }
 
     private List<String> extractGherkinData(String response) {
         List<String> gherkinDataList = new ArrayList<>();

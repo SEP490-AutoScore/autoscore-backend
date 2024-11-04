@@ -68,6 +68,11 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
     private static final String DB_URL = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
     private static final String DB_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
+    // private static final String DB_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver"; // Cập nhật driver
+    // private static final String DB_URL = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=true;trustServerCertificate=true;";
+
+
+
     @Autowired
     private SourceRepository sourceRepository;
     @Autowired
@@ -483,29 +488,67 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         }
     }
 
+    // public void updateAppsettingsJson(Path filePath, Long examPaperId, int port) throws IOException {
+    //     String content = Files.readString(filePath, StandardCharsets.UTF_8);
+    //     ObjectMapper objectMapper = new ObjectMapper();
+    //     ObjectNode rootNode = (ObjectNode) objectMapper.readTree(content);
+    //     String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
+    //     if (rootNode.has("ConnectionStrings")) {
+    //         ObjectNode connectionStringsNode = (ObjectNode) rootNode.get("ConnectionStrings");
+    //         connectionStringsNode.fieldNames().forEachRemaining(key -> {
+    //             connectionStringsNode.put(key, String.join(";",
+    //                     "Server=192.168.2.8\\SQLEXPRESS",
+    //                     "uid=sa",
+    //                     "pwd=1234567890",
+    //                     "database=" + databaseName,
+    //                     "TrustServerCertificate=True"));
+    //         });
+    //     }
+    //     content = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+
+    //     String portPattern = "\"Url\"\\s*:\\s*\"http://\\*:[0-9]+\"";
+    //     String replacement = "\"Url\": \"http://*:" + port + "\"";
+    //     content = content.replaceAll(portPattern, replacement);
+    //     Files.writeString(filePath, content, StandardCharsets.UTF_8);
+    // }
+
     public void updateAppsettingsJson(Path filePath, Long examPaperId, int port) throws IOException {
         String content = Files.readString(filePath, StandardCharsets.UTF_8);
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode rootNode = (ObjectNode) objectMapper.readTree(content);
         String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
+        
         if (rootNode.has("ConnectionStrings")) {
             ObjectNode connectionStringsNode = (ObjectNode) rootNode.get("ConnectionStrings");
+            
             connectionStringsNode.fieldNames().forEachRemaining(key -> {
-                connectionStringsNode.put(key, String.join(";",
-                        "Server=192.168.2.16\\SQLEXPRESS",
-                        "uid=sa",
-                        "pwd=1234567890",
-                        "database=" + databaseName,
-                        "TrustServerCertificate=True"));
+                String originalConnectionString = connectionStringsNode.get(key).asText();
+                
+                // Cập nhật giá trị sau dấu "=" cho các thành phần của chuỗi kết nối
+                String updatedConnectionString = originalConnectionString
+                    .replaceAll("(=.*?;)", "=192.168.2.8\\\\SQLEXPRESS;")  // Thay đổi phần sau dấu "=" với bất kỳ trường nào chứa địa chỉ server
+                    .replaceAll("(uid=)[^;]*", "$1" + "sa")  // Cập nhật tên người dùng
+                    .replaceAll("(pwd=)[^;]*", "$1" + "1234567890")  // Cập nhật mật khẩu
+                    .replaceAll("(database=)[^;]*", "$1" + databaseName)  // Cập nhật tên database
+                    .replaceAll("(TrustServerCertificate=)[^;]*", "$1" + "True");  // Cập nhật TrustServerCertificate
+                
+                connectionStringsNode.put(key, updatedConnectionString);
             });
         }
+        
         content = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-
+    
         String portPattern = "\"Url\"\\s*:\\s*\"http://\\*:[0-9]+\"";
         String replacement = "\"Url\": \"http://*:" + port + "\"";
         content = content.replaceAll(portPattern, replacement);
         Files.writeString(filePath, content, StandardCharsets.UTF_8);
     }
+
+    
+
+  
+    
+  
 
     public void findAndUpdateAppsettings(Path dirPath, Long examPaperId, int port) throws IOException {
         try (Stream<Path> folders = Files.walk(dirPath, 1)) {
@@ -539,30 +582,32 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         try {
             Class.forName(DB_DRIVER);
             try (Connection connection = DriverManager.getConnection(DB_URL);
-                    Statement statement = connection.createStatement()) {
-
+                 Statement statement = connection.createStatement()) {
+    
                 String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
                 Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
-
+    
                 if (examDatabase != null) {
                     Long examDatabaseId = examDatabase.getExamDatabaseId();
                     System.out.println("Found Exam_Database ID: " + examDatabaseId);
-
+    
                     if (databaseName != null && !databaseName.isEmpty()) {
                         String sql = "IF EXISTS (SELECT name FROM sys.databases WHERE name = '" + databaseName + "') " +
-                                "BEGIN " +
-                                "   ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
-                                "   DROP DATABASE [" + databaseName + "]; " +
-                                "END";
+                                     "BEGIN " +
+                                     "   ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
+                                     "   DROP DATABASE [" + databaseName + "]; " +
+                                     "END";
                         statement.executeUpdate(sql);
                         System.out.println("Database " + databaseName + " has been deleted.");
                     }
-
-                    if (examDatabase.getDatabaseFile() != null) {
-                        String createDatabaseSQL = new String(examDatabase.getDatabaseFile());
-
+    
+                    // Retrieve and use databaseScript instead of databaseFile
+                    if (examDatabase.getDatabaseScript() != null) {
+                        String createDatabaseSQL = examDatabase.getDatabaseScript();
+    
+                        // Split commands by "GO" keyword (case-insensitive)
                         String[] sqlCommands = createDatabaseSQL.split("(?i)\\bGO\\b");
-
+    
                         for (String sqlCommand : sqlCommands) {
                             if (!sqlCommand.trim().isEmpty()) {
                                 statement.executeUpdate(sqlCommand.trim());
@@ -570,7 +615,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                         }
                         System.out.println("Database " + databaseName + " has been created.");
                     } else {
-                        System.out.println("No database file found for examPaperId: " + examPaperId);
+                        System.out.println("No database script found for examPaperId: " + examPaperId);
                     }
                 } else {
                     System.out.println("No Exam_Database found for examPaperId: " + examPaperId);
@@ -584,6 +629,58 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
             throw new RuntimeException("SQL Server JDBC Driver not found.");
         }
     }
+
+    
+
+    // private void deleteAndCreateDatabaseByExamPaperId(Long examPaperId) {
+    //     try {
+    //         Class.forName(DB_DRIVER);
+    //         try (Connection connection = DriverManager.getConnection(DB_URL);
+    //                 Statement statement = connection.createStatement()) {
+
+    //             String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
+    //             Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
+
+    //             if (examDatabase != null) {
+    //                 Long examDatabaseId = examDatabase.getExamDatabaseId();
+    //                 System.out.println("Found Exam_Database ID: " + examDatabaseId);
+
+    //                 if (databaseName != null && !databaseName.isEmpty()) {
+    //                     String sql = "IF EXISTS (SELECT name FROM sys.databases WHERE name = '" + databaseName + "') " +
+    //                             "BEGIN " +
+    //                             "   ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
+    //                             "   DROP DATABASE [" + databaseName + "]; " +
+    //                             "END";
+    //                     statement.executeUpdate(sql);
+    //                     System.out.println("Database " + databaseName + " has been deleted.");
+    //                 }
+
+    //                 if (examDatabase.getDatabaseFile() != null) {
+    //                     String createDatabaseSQL = new String(examDatabase.getDatabaseFile());
+
+    //                     String[] sqlCommands = createDatabaseSQL.split("(?i)\\bGO\\b");
+
+    //                     for (String sqlCommand : sqlCommands) {
+    //                         if (!sqlCommand.trim().isEmpty()) {
+    //                             statement.executeUpdate(sqlCommand.trim());
+    //                         }
+    //                     }
+    //                     System.out.println("Database " + databaseName + " has been created.");
+    //                 } else {
+    //                     System.out.println("No database file found for examPaperId: " + examPaperId);
+    //                 }
+    //             } else {
+    //                 System.out.println("No Exam_Database found for examPaperId: " + examPaperId);
+    //             }
+    //         } catch (SQLException e) {
+    //             e.printStackTrace();
+    //             throw new RuntimeException("Failed to delete and create database for examPaperId: " + examPaperId);
+    //         }
+    //     } catch (ClassNotFoundException e) {
+    //         e.printStackTrace();
+    //         throw new RuntimeException("SQL Server JDBC Driver not found.");
+    //     }
+    // }
 
     public void deleteContainerAndImages() throws IOException { 
         DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375")

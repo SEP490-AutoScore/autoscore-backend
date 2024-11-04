@@ -27,9 +27,9 @@ public class Exam_Database {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examDatabaseId;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] databaseFile;
+    // @Lob
+    // @Column(columnDefinition = "LONGBLOB")
+    // private byte[] databaseFile;
 
     @Lob
     @Column(columnDefinition = "LONGTEXT")

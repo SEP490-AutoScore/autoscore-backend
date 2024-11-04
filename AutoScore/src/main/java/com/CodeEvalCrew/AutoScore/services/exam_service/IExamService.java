@@ -20,7 +20,7 @@ public interface IExamService{
 
     ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception,NotFoundException;
 
-    ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity) throws Exception,NotFoundException;
+    ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity,Long id) throws Exception,NotFoundException;
 
     public byte[] mergeDataIntoTemplate(String templatePath, Map<String, Object> data) throws Exception;
 

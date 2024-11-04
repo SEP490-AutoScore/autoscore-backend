@@ -14,7 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,8 +29,6 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_service.IExamService;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 @RestController
 @RequestMapping("api/exam/")
 public class ExamController {
@@ -42,7 +39,7 @@ public class ExamController {
         this.examService = examService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @GetMapping("{id}")
     public ResponseEntity<?> getExamById(@PathVariable long id) {
         ExamViewResponseDTO result;
@@ -56,8 +53,8 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
-    @PostMapping("")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PostMapping("/list")
     public ResponseEntity<?> getExam(@RequestBody ExamViewRequestDTO request) {
         List<ExamViewResponseDTO> result;
         try {
@@ -72,8 +69,8 @@ public class ExamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
-    @PutMapping("")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PostMapping("")
     public ResponseEntity<?> creatNewExam(@RequestBody ExamCreateRequestDTO entity) {
         try {
             //call service for create new exam
@@ -87,12 +84,12 @@ public class ExamController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> putMethodName(@PathVariable String id, @RequestBody ExamCreateRequestDTO request) {
+    public ResponseEntity<?> updateExam(@PathVariable Long id, @RequestBody ExamCreateRequestDTO request) {
         try {
             //call service for update exam
-            ExamViewResponseDTO result = examService.updateExam(request);
+            ExamViewResponseDTO result = examService.updateExam(request, id);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException nfe) {
             return new ResponseEntity<>(nfe.getMessage(), HttpStatus.NOT_FOUND);
@@ -143,8 +140,8 @@ public class ExamController {
 
     @GetMapping("/generate-word")
     public ResponseEntity<byte[]> generateWord() {
-        Dotenv dotenv = Dotenv.load();
-        String path = dotenv.get("PATH");
+        // Dotenv dotenv = Dotenv.load();
+        // String path = dotenv.get("PATH");
         try {
             // Define the path of the template and output file
             String templatePath = "AutoScore\\src\\main\\resources\\Template.docx";
@@ -173,23 +170,4 @@ public class ExamController {
         }
 
     }
-
-    @GetMapping("test")
-    public String getMethodName(@RequestParam String param) {
-        Dotenv dotenv = Dotenv.load();
-
-        // Retrieve the environment variables
-        String dbHost = dotenv.get("DB_HOST");
-        String dbUser = dotenv.get("DB_USER");
-        String dbPassword = dotenv.get("DB_PASSWORD");
-
-        // Use the variables
-        System.out.println("Database Host: " + dbHost);
-        System.out.println("Database User: " + dbUser);
-        System.out.println("Database Password: " + dbPassword);
-        return dbHost + " " + dbUser;
-    }
-    
-
-
 }
