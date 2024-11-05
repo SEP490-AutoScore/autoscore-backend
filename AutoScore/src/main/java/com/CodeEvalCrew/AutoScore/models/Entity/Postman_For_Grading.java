@@ -46,14 +46,14 @@ public class Postman_For_Grading {
     private byte[] fileCollectionPostman;
 
     @ManyToOne
-    @JoinColumn(name = "examQuestionId")
+    @JoinColumn(name = "examQuestionId", nullable = true)
     private Exam_Question examQuestion;
 
     @OneToOne
-    @JoinColumn(name = "gherkinScenarioId", referencedColumnName = "gherkinScenarioId")
+    @JoinColumn(name = "gherkinScenarioId", referencedColumnName = "gherkinScenarioId", nullable = true)
     private Gherkin_Scenario gherkinScenario;
 
     @ManyToOne
-    @JoinColumn(name = "examPaperId")
+    @JoinColumn(name = "examPaperId", nullable = false)
     private Exam_Paper examPaper;
 }
