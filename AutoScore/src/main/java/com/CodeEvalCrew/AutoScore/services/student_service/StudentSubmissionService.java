@@ -134,12 +134,6 @@ public class StudentSubmissionService {
                 return null;
             }
 
-            File solutionZip = new File(studentFolder, "solution.zip");
-            if (!solutionZip.exists()) {
-                studentErrorService.saveStudentError(source, studentOpt.get(), "solution file not found");
-                return null;
-            }
-
             try {
                 // Giải nén đệ quy và tìm thư mục chứa .sln
                 File slnFileFolder = fileExtractionService.processExtractedFolder(studentFolder, source, studentOpt.get());

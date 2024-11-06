@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ public class Student_Error {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long studentErrorId;
+    @Lob
     private String errorContent;
 
     @ManyToOne
