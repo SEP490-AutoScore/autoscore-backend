@@ -58,7 +58,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
-            Specification<Exam_Question> spec = ExamQuestionSpecification.hasForeignKey(request.getExamPaperId(), "exam_paper", "examPaperId");
+            Specification<Exam_Question> spec = ExamQuestionSpecification.hasForeignKey(request.getExamPaperId(), "examPaper", "examPaperId");
             spec.and(ExamQuestionSpecification.hasTrueStatus());
 
             List<Exam_Question> listEntity = examQuestionRepository.findAll(spec);
@@ -82,7 +82,6 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView createNewExamQuestion(ExamQuestionCreateRequest request) throws NotFoundException {
-        ExamQuestionView result;
         try {
             // check examPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
@@ -97,7 +96,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {
@@ -118,9 +117,6 @@ public class ExamQuestionService implements IExamQuestionService {
 
             //update
             examQuestion.setQuestionContent(request.getQuestionContent());
-            examQuestion.setQuestionNumber(request.getQuestionNumber());
-            examQuestion.setMaxScore(request.getMaxScore());
-            examQuestion.setType(request.getType());
             examQuestion.setExamPaper(examPaper);
             examQuestion.setUpdatedAt(Util.getCurrentDateTime());
             examQuestion.setUpdatedBy(Util.getAuthenticatedAccountId());

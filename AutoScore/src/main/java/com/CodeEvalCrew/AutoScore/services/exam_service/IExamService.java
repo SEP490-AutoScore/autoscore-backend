@@ -20,11 +20,11 @@ public interface IExamService{
 
     ExamViewResponseDTO createNewExam(ExamCreateRequestDTO entity) throws Exception,NotFoundException;
 
-    ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity) throws Exception,NotFoundException;
+    ExamViewResponseDTO updateExam (ExamCreateRequestDTO entity,Long id) throws Exception,NotFoundException;
 
     public byte[] mergeDataIntoTemplate(String templatePath, Map<String, Object> data) throws Exception;
 
     void mergeDataIntoWord(String templatePath, String outputPath, Map<DataFieldName, String> data) throws Exception;
 
-    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException;
+    public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException, Exception;
 }

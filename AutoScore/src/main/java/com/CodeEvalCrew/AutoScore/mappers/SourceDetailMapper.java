@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 public interface SourceDetailMapper {
 
     @Mapping(source = "student.studentId", target = "studentId")
-    @Mapping(source = "source.sourceId", target = "sourceId")
+    // @Mapping(source = "source.sourceId", target = "sourceId")
     SourceDetailDTO toDTO(Source_Detail sourceDetail);
 
     @Mapping(target = "student", ignore = true)  // Ignored as you will set it manually later

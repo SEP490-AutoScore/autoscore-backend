@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "SourceCheckUtil",
+            "request": "launch",
+            "mainClass": "com.CodeEvalCrew.AutoScore.utils.SourceCheckUtil",
+            "projectName": "AutoScore"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"

@@ -25,5 +25,5 @@ public class ExamExport {
     private String databaseName;
     private String databaseNote;
     private List<ExamQuestionExport> questions;
-    // private byte[] databaseImage;
+    private byte[] databaseImage;
 }

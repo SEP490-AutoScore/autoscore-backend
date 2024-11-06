@@ -5,6 +5,7 @@ import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,37 +29,23 @@ public class Exam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examId;
-
     private String examCode;
-
     private LocalDateTime examAt;
-
     private LocalDateTime gradingAt;
-
     private LocalDateTime publishAt;
-
     private boolean status;
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
-
+    
     //Relationship
     //n-1 subject
-    @ManyToOne
-    @JoinColumn(name = "subjectId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subjectId", nullable = true)
     private Subject subject;
-
-    //1-n - score
-    @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
-    private Set<Score> scores;
 
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
     private Set<Exam_Paper> exam_papers;    
@@ -66,7 +53,7 @@ public class Exam {
     @OneToMany(mappedBy = "exam", cascade= CascadeType.ALL)
     private Set<Student> students;    
 
-    @ManyToOne
-    @JoinColumn(name = "semesterId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semesterId", nullable = true)
     private Semester semester;
 }

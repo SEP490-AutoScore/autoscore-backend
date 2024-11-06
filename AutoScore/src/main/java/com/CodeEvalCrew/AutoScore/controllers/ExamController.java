@@ -14,7 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,7 +39,7 @@ public class ExamController {
         this.examService = examService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @GetMapping("{id}")
     public ResponseEntity<?> getExamById(@PathVariable long id) {
         ExamViewResponseDTO result;
@@ -54,8 +53,8 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
-    @PostMapping("")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PostMapping("/list")
     public ResponseEntity<?> getExam(@RequestBody ExamViewRequestDTO request) {
         List<ExamViewResponseDTO> result;
         try {
@@ -70,8 +69,8 @@ public class ExamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
-    @PutMapping("")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PostMapping("")
     public ResponseEntity<?> creatNewExam(@RequestBody ExamCreateRequestDTO entity) {
         try {
             //call service for create new exam
@@ -85,12 +84,12 @@ public class ExamController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> putMethodName(@PathVariable String id, @RequestBody ExamCreateRequestDTO request) {
+    public ResponseEntity<?> updateExam(@PathVariable Long id, @RequestBody ExamCreateRequestDTO request) {
         try {
             //call service for update exam
-            ExamViewResponseDTO result = examService.updateExam(request);
+            ExamViewResponseDTO result = examService.updateExam(request, id);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException nfe) {
             return new ResponseEntity<>(nfe.getMessage(), HttpStatus.NOT_FOUND);
@@ -140,17 +139,16 @@ public class ExamController {
     }
 
     @GetMapping("/generate-word")
-    public ResponseEntity<byte[]> generateWord() throws IOException, InvalidFormatException {
-
+    public ResponseEntity<byte[]> generateWord() {
+        // Dotenv dotenv = Dotenv.load();
+        // String path = dotenv.get("PATH");
         try {
             // Define the path of the template and output file
-            String templatePath = "C:\\Project\\SEP490\\tp.docx";
+            String templatePath = "AutoScore\\src\\main\\resources\\Template.docx";
             String outputPath = "C:\\Project\\SEP490\\output.docx";
 
             // Create a map of data to be merged into the document
             Map<String, String> data = new HashMap<>();
-            // data.put("ExamCode", name);
-            // data.put("ExamPaperCode", date);
 
             // Merge data into the Word template
             examService.mergeDataToWord(templatePath, outputPath, data);
@@ -165,10 +163,11 @@ public class ExamController {
                     .body(documentContent);
         } catch (IOException e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-
+        } catch (InvalidFormatException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
-
-
 }

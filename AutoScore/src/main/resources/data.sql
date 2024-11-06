@@ -10,7 +10,7 @@ VALUES
 (true, 7, 'MANAGE_EXAM'),
 (true, 8, 'MANAGE_SCORE'),
 (true, 9, 'MANAGE_EXAM_DATABASE'),
-(true, 10, 'MANAGE_TESTCASE');
+(true, 10, 'MANAGE_GHERKIN_SCENARIO');
 
 INSERT INTO `permission`
 (`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
@@ -24,7 +24,7 @@ VALUES
 ('VIEW_EXAM', 7, 'View exam', 7, 1),
 ('VIEW_SCORE', 8, 'View score', 8, 1),
 ('VIEW_EXAM_DATABASE', 30, 'View exam database', 9, 1),
-('VIEW_TESTCASE', 34, 'View testcase', 10, 1),
+('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 10, 1),
 
 ('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
 ('CREATE_ROLE', 10, 'Create role', 2, 1),
@@ -34,7 +34,7 @@ VALUES
 ('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
 ('CREATE_EXAM', 15, 'Create exam', 7, 1),
 ('CREATE_EXAM_DATABASE', 31, 'Create exam database', 9, 1),
-('CREATE_TESTCASE', 35, 'Create testcase', 10, 1),
+('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 10, 1),
 
 ('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
 ('UPDATE_ROLE', 17, 'Update role', 2, 1),
@@ -44,7 +44,7 @@ VALUES
 ('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
 ('UPDATE_EXAM', 22, 'Update exam', 7, 1),
 ('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 9, 1),
-('UPDATE_TESTCASE', 36, 'Update testcase', 10, 1),
+('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 10, 1),
 
 ('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
 ('DELETE_ROLE', 24, 'Delete role', 2, 1),
@@ -54,7 +54,7 @@ VALUES
 ('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
 ('DELETE_EXAM', 29, 'Delete exam', 7, 1),
 ('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1),
-('DELETE_TESTCASE', 37, 'Delete testcase', 10, 1);
+('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 10, 1);
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
@@ -159,63 +159,238 @@ VALUES
 INSERT INTO `exam` 
 (`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_id`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
 VALUES 
-('PRN231_SP24_PE', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 2, true, '2024-09-30 09:00:00', 1, null, null, null, null, 1),
+('PRN231_FA24_PE', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 2, true, '2024-09-30 09:00:00', 1, null, null, null, null, 1),
 ('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
 ('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
 
-INSERT INTO `exam_database` 
-(`database_script`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `database_description`, `database_image`, `database_name`, `database_note`) 
-VALUES 
-('CREATE TABLE example_table (id INT, name VARCHAR(100));', true, '2024-09-30 10:00:00', 1, null, null, null, null, 'Example Database', 'example_database.png', 'Example Database', 'This is an example database.'),
-('CREATE TABLE another_table (id INT, description TEXT);', true, '2024-09-30 10:05:00', 1, null, null, null, null, 'Another Database', 'another_database.png', 'Another Database', 'This is another database.'),
-('CREATE TABLE sample_table (id INT, value FLOAT);', true, '2024-09-30 10:10:00', 1, null, null, null, null, 'Sample Database', 'sample_database.png', 'Sample Database', 'This is a sample database.');
-
-INSERT INTO `instructions` 
-(`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
-VALUES 
-('Introduction 1', 'Important 1', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
-('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
-('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
+-- INSERT INTO `instructions` 
+-- (`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
+-- VALUES 
+-- ('You are NOT allowed to use any device to share data with others.
+-- You must use Visual Studio 2019 or above, MSSQL Server 2012 or above for your development tools. ', '1.	Create Solution/Project in Visual Studio named PE_PRN231_FA24_TrialTest_StudentFullname_BE for API, and PE_PRN231_FA24_TrialTest_StudentCode_FE for Client Application. Set the default Client application for your project as Login page.', '2024-09-30 10:00:00', 1, null, null, null, null, 1),
+-- ('Introduction 2', 'Important 2', '2024-09-30 10:05:00', 1, null, null, null, null, 1),
+-- ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
 INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`, `exam_database_id`, `instructions_id`) 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`) 
 VALUES 
-('009909', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 1, 1),
-('110100', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 2, 2),
-('001001', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2, 3, 3);
+('Trial_test', true, '2024-10-30 10:00:00', 1, null, null, null, null, 1),
+('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2),
+('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2);
 
-INSERT INTO `exam_question`
-(`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
+
+INSERT INTO `Exam_Question`
+(`question_content`, `exam_question_score`, `end_point`, `role_allow`, `http_method`, `description`, `payload_type`, `payload`, `validation`, `sucess_response`, `error_response`, `status`, `order_by`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('What is the output of the following code snippet?', 'Q1', 10, 'MULTIPLE_CHOICE', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Explain the concept of OOP.', 'Q2', 15, 'OPEN_ENDED', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Write a function to reverse a string.', 'Q3', 20, 'PROGRAMMING', true, NOW(), 1, NULL, NULL, NULL, NULL, 1);
+('Login', 2, '/api/login', 'Administrator, Doctor, Patient', 'POST', 'This function allows the user to access the system', 'JSON', '{
+  "email": "user@example.com",
+  "password": "securepassword123"
+}', 'Check validation of email and password cannot be null', '
+        Response Code: 200 OK
+		Response Body (JSON):
+{ 
+"message": "Login successful", 
+"token": "example token", 
+"user": { 
+"id": 1, 
+"email": "user@example.com", 
+"role": "admin" 
+} 
+}
+', 'Response Code: 401 Unauthorized (for incorrect email/password)
+		Response Body (JSON):
+		{ "error": "Invalid email or password" }
+', true, 1, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+('Create (Add a person and the viruses they are infected with)', 2, '/api/person', 'Administrator, Doctor, Patient', 'POST', 'Retrieves details of a person, including any viruses they are infected with.', 'JSON',
+'{ 
+  "personID": 1,
+  "fullName": "John Doe",
+  "birthDay": "1990-05-15",
+  "phone": "1234567890",
+  "viruses": [
+    { 
+      "virusName": "COVID-19",
+      "resistanceRate": 0.2 
+    }, 
+    { 
+      "virusName": "Influenza",
+      "resistanceRate": 0.0 
+    } 
+  ] 
+}', 
+'',
+'
+Response: 201 Created
+{ 
+"personId": 1, 
+"message": "Person and viruses added successfully"
+ }',
+ 'Response Code: 500 (for incorrect phone/viruses)
+		Response Body (JSON):
+		{ "error": "Invalid viruses or phone" }
+', true, 2, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+('Read (Retrieve person details and associated viruses)', 2, '/api/person/{id}', 'Administrator, Doctor, Patient', 'GET', 'Retrieves details of a person, including any viruses they are infected with.', 'URL Parameters',
+'id (ID of the person to retrieve)
+',
+'',
+'
+Response: 200 OK
+{ 
+"personId": 1,
+ "fullName": "John Doe", 
+"birthDay": "1990-05-15",
+"phone": "1234567890", 
+"viruses":
+ [
+    { 
+      "virusName": "COVID-19", 
+      "resistanceRate": 0.2 
+    }, 
+    { 
+      "virusName": "Influenza", 
+      "resistanceRate": 0.0 
+    }
+ ] 
+}
+',
+ '', true, 3, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+('Retrieve all persons and their viruses', 2, '/api/persons', 'Administrator, Doctor, Patient', 'GET', 'Retrieve all persons and their viruses', NULL, NULL, NULL,
+'[ 
+    { 
+      "personId": 1, 
+      "fullName": "John Doe", 
+      "birthDay": "1990-05-15", 
+      "phone": "1234567890", 
+      "viruses": 
+      [ 
+        { 
+          "virusName": "COVID-19", 
+          "resistanceRate": 0.2 
+        }
+      ]
+    },
+    { 
+      "personId": 2,
+      "fullName": "Jane Smith", 
+      "birthDay": "1985-10-22", 
+      "phone": "0987654321", 
+      "viruses": [] 
+    }
+ ]', 
+ 'Response Code: 500', true, 4, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+('Update (Update person details and their viruses)', 2, '/api/person/{id}', 'Doctor', 'PUT', 'Updates the details of a person, including their associated viruses.', 'URL Parameters', '
+id (ID of the person to update)
+Request Body (JSON):
+{ 
+  "fullName": "Jonathan Doe", 
+  "birthDay": "1990-05-15", 
+  "phone": "1234567890", 
+  "viruses": [
+    { 
+      "virusName": "COVID-19", 
+      "resistanceRate": 0.5 
+    }, 
+    { 
+      "virusName": "Influenza", 
+      "resistanceRate": 0.1 
+    } 
+  ] 
+}', NULL, 'Response: 200 OK
+{ "message": "Person and viruses updated successfully" }
+', NULL, true, 5, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+('Delete (Delete a person and their associated viruses)', 2, '/api/person/{id}', 'Doctor', 'DELETE', 'Deletes a person and their relationship with any viruses they are infected with.', 'URL Parameters', 'id (ID of the person to delete)', NULL, 'Response: 200 OK
+{ "message": "Person and related viruses deleted successfully" }
+', NULL, true, 6, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1);
 
-INSERT INTO `exam_barem`
-(`barem_content`, `barem_max_score`, `baremurl`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_question_id`)
+
+
+INSERT INTO `postman_for_grading`
+(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`)
 VALUES
-('create FootballPlayer', 10, 'http://localhost:8080/api/footballplayer', true, NOW(), 1, NULL, NULL, NULL, NULL, 1),
-('Barem for Question 2: Expected key points.', 15, 'http://example.com/barem/q2', true, NOW(), 1, NULL, NULL, NULL, NULL, 2),
-('Barem for Question 3: Function should handle empty strings.', 20, 'http://example.com/barem/q3', true, NOW(), 1, NULL, NULL, NULL, NULL, 3);
+(2, 1, 1, null, 2, 'login',1),
+(2, 2, 2, 1, 2, 'login fail',1),
+(2, 1, 3, 1, 4, 'get',1),
+(2, 3, 4, 1, 4, 'get id',1),
+(2, 2, 5, 1, 3, 'delete',1);
+
+INSERT INTO `AI_Info`
+(`ai_api_key`, `ai_name`, `purpose`)
+VALUES
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini', 'Generate GherkinFormat'),
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Generate Postman Collection');
 
 
--- INSERT INTO `exam_question` 
--- (`question_content`, `question_number`, `max_score`, `type`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `account_id`, `exam_paper_id`, `deleted_by`) 
--- VALUES 
--- ('What is the capital of France?', 'Q1', 5.0, 'Multiple Choice', true, '2023-09-30 10:00:00', 1, '2023-09-30 10:00:00', 1, 1, 1, 1),
--- ('Explain Newton\'s first law of motion.', 'Q2', 10.0, 'Essay', true, '2023-09-30 10:00:00', 2, '2023-09-30 10:00:00', 1, 2, 2, 1),
--- ('Solve the equation: 2x + 3 = 7.', 'Q3', 5.0, 'Short Answer', true, '2023-09-30 10:00:00', 3, '2023-09-30 10:00:00', 1, 3, 3, 1);
+INSERT INTO `Content`
+(`question_content`, `order_priority`, `ai_info_id`)
+VALUES
+('Save to your memory, do not reply', 1, 1),
+('Write many gherkin format for me to suit the assignment requirements, respond to the AI prompt below, Each Scenario and content are enclosed in {{ }}
 
--- INSERT INTO ai_prompt (content, language_code, for_ai, type, status, parent)
--- VALUES 
---     ('Defaut.', 'en', 'GPT-3', 'text', true, NULL),
---     ('Explain the laws of thermodynamics in simple terms.', 'en', 'GPT-3', 'text', true, 1),
---     ('Generate an image of a futuristic city.', 'es', 'DALL·E', 'image', true, 1),
---     ('Translate this text into Spanish.', 'en', 'GPT-3', 'text', true, 1),
---     ('Create a voiceover for this podcast script.', 'en', 'VoiceAI', 'voice', false, 1),
---     ('What is quantum computing?', 'fr', 'GPT-4', 'text', true, 1),
---     ('Generate a painting in the style of Van Gogh.', 'en', 'DALL·E', 'image', false, 1),
---     ('What is the current weather in Tokyo?', 'ja', 'GPT-3', 'text', true, 2),
---     ('Generate an image of a medieval castle.', 'en', 'DALL·E', 'image', true, 2),
---     ('Write a short story about a time-traveling detective.', 'en', 'GPT-3', 'text', true, 2);
+{{
+Scenario:
+.....
+}}
+{{
+Scenario:
+.....
+}}', 2, 1),
+('Save to your memory, do not reply', 1, 2),
+('Save to your memory, do not reply', 2, 2),
+('- Write many pm test javascript in the form of postman json file collection only for gherkin format below, should have "info" and "item",
+- "info" needs "_postman_id", "name", "schema", _exporter_id,
+- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test ', 3, 2);
+
+
+-- INSERT INTO `autoscore`.`exam_barem` 
+-- (`barem_max_score`, `order_by`, `status`, `exam_question_id`, `allow_role`, `barem_function`, `endpoint`, `error_response`, `method`, `payload`, `payload_type`, `success_response`, `validation`, `barem_content`) 
+-- VALUES (
+--   2, 
+--   1, 
+--   true, 
+--   1, 
+--   'Administrator, Patients, Doctor', 
+--   'Authenticates the user using their email and password. On successful authentication, the API returns a token (JWT or session token) that can be used for further authenticated requests.', 
+--   '/api/login', 
+--   'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }', 
+--   'POST', 
+--   '{
+--   "email": "user@example.com",
+--   "password": "yourpassword"
+--   }', 
+--   'Request Body (JSON)', 
+--   'Response Code: 200 OK\nResponse Body (JSON):\n{ "message": "Login successful", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", "user": { "id": 1, "email": "user@example.com", "role": "admin" }}', 
+--   'Email: Must be a valid email address format. Password: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.', 
+--   'Login function'
+-- ),
+-- (2,
+--  1,
+--  true,
+--  2,
+--  'Administrator, Patients, Doctor',
+--  'Adds a new person and, if applicable, the viruses they are infected with.',
+--  '/api/person',
+--  'Response Code: 401 Unauthorized (for incorrect email/password)\nResponse Body (JSON):\n{ "error": "Invalid email or password" }',
+--  'POST',
+--  '{\n
+--                   \"personID\": 1,\n
+--                    \"fullName\": \"John Doe\",\n
+--                     \"birthDay\": \"1990-05-15\",\n
+--                     \"phone\": \"1234567890\",\n
+--                     \"viruses\": [\n
+--                         { \n" +
+--                            \"virusName\": \"COVID-19\",\n
+--                            \"resistanceRate\": 0.2 \n
+--                         }, \n
+--                        { \n
+--                             \"virusName\": \"Influenza\",\n
+--                             \"resistanceRate\": 0.0 \n
+--                         } \n
+--                    ]\n
+--                 }',
+--  'Request Body (JSON)',
+--  'Response: 201 Created\nResponse Body (JSON):\\n{ "personId": 1, "message": "Person and viruses added successfully" }',
+--  'Email: Must be a valid email address format.\\nPassword: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.',
+--  'Create (Add a person and the viruses they are infected with)'
+-- );
+
 

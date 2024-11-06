@@ -49,5 +49,5 @@ public class Subject {
     private Set<Exam> exams;
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
-    private Set<Instructions> instructionses;
+    private Set<Important> importants;
 }

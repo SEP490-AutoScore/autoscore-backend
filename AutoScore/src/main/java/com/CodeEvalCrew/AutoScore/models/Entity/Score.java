@@ -28,24 +28,15 @@ public class Score {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scoreId;
 
-    private float totalScore;
-
-    private float reReviewTotalScore;
+    private Float totalScore;
+    private String reason;
 
     private LocalDateTime gradedAt;
 
-    private LocalDateTime updatedAt;
-
-    private boolean status;
-
-    private boolean flag;
+    private Boolean flag; // 0 = không bị đánh cờ, 1 = kiểm tra đặc biệt
+    private String flagReason;
 
     //Relationship
-    //n-1 exam
-    @ManyToOne
-    @JoinColumn(name = "examId", nullable = false)
-    private Exam exam;
-
     //n-1 exam paper
     @ManyToOne
     @JoinColumn(name = "examPaperId", nullable = false)
@@ -56,15 +47,11 @@ public class Score {
     @JoinColumn(name = "studentId", nullable = false)
     private Student student;
 
-    @ManyToOne
-    @JoinColumn(name = "organizationId", nullable = false)
-    private Organization organization;
+    // @ManyToOne
+    // @JoinColumn(name = "organizationId", nullable = false)
+    // private Organization organization;
 
     //1-n score detail
-    // @OneToMany
-    // @JoinColumn(name = "score_detailId", nullable = false)
-    // private Set<Score_Detail> score_details;
-
-    @OneToMany(mappedBy = "score", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "score", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Score_Detail> scoreDetails;
 }

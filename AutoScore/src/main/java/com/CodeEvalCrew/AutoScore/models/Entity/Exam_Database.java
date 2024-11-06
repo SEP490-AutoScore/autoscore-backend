@@ -7,7 +7,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,10 +27,14 @@ public class Exam_Database {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examDatabaseId;
 
+    // @Lob
+    // @Column(columnDefinition = "LONGBLOB")
+    // private byte[] databaseFile;
+
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String databaseScript;
-
+    
     private String databaseDescription;
 
     private String databaseName;
@@ -39,7 +45,7 @@ public class Exam_Database {
 
     private String databaseNote;
 
-    private boolean status;
+    private Boolean status;
 
     private LocalDateTime createdAt;
 
@@ -52,5 +58,10 @@ public class Exam_Database {
     private LocalDateTime deletedAt;
 
     private Long deletedBy;
+
+    //1-1 exam 
+    @OneToOne
+    @JoinColumn(name = "examPaperId", nullable = false)
+    private Exam_Paper examPaper;
 
 }
