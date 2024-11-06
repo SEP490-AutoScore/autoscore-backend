@@ -7,4 +7,5 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 public interface  IPostmanForGradingService {
       List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId);
       void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs);
+      String generatePostmanCollection(Long gherkinScenarioId);
 }

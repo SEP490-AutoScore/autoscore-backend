@@ -322,6 +322,13 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+        <!-- Json for generate AI -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version> 
+        </dependency>
+
     </dependencies>
     
     <build>

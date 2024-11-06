@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,10 +67,10 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
     private static final String DB_URL = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
     private static final String DB_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    // private static final String DB_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver"; // Cập nhật driver
-    // private static final String DB_URL = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=true;trustServerCertificate=true;";
-
-
+    // private static final String DB_DRIVER =
+    // "com.microsoft.sqlserver.jdbc.SQLServerDriver"; // Cập nhật driver
+    // private static final String DB_URL =
+    // "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=true;trustServerCertificate=true;";
 
     @Autowired
     private SourceRepository sourceRepository;
@@ -224,7 +223,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         Map<String, Integer> functionResults = new HashMap<>();
         String currentFunction = null;
         int passCount = 0;
-        boolean hasError = false; // Cờ để kiểm tra xem hàm hiện tại có lỗi hay không
+        // boolean hasError = false; // Cờ để kiểm tra xem hàm hiện tại có lỗi hay không
 
         try {
             // Tạo thư mục sinh viên nếu chưa có
@@ -237,17 +236,17 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
 
             Path postmanFilePath = studentDir.resolve(studentId + ".json");
 
-            // Đảm bảo tải `fileCollectionPostman`
-            Hibernate.initialize(sourceDetail.getFileCollectionPostman());
+            // // Đảm bảo tải `fileCollectionPostman`
+            // Hibernate.initialize(sourceDetail.getFileCollectionPostman());
+           
+
+            // try {
+            //     // Tạm dừng 3 giây (3000 milliseconds)
+            //     Thread.sleep(3000);
+            // } catch (InterruptedException e) {
+            //     e.printStackTrace();
+            // }
             byte[] postmanCollection = sourceDetail.getFileCollectionPostman();
-
-            try {
-                // Tạm dừng 3 giây (3000 milliseconds)
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             System.out.println("Debug: fileCollectionPostman for sourceDetailId " + sourceDetailId + " is "
                     + (postmanCollection == null ? "null" : "not null"));
             Objects.requireNonNull(postmanCollection,
@@ -291,45 +290,108 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
 
                     line = line.trim();
 
+                    // if (line.startsWith("→")) {
+                    //     // Nếu có hàm trước đó và không bị lỗi, lưu kết quả
+                    //     if (currentFunction != null && !hasError) {
+                    //         functionResults.put(currentFunction, passCount);
+                    //     }
+                    //     // Khởi tạo lại biến cho hàm mới
+                    //     currentFunction = line.split("\\s+")[1];
+                    //     passCount = 0;
+                    //     hasError = false; // Reset lỗi cho hàm mới
+                    //     // } else if (line.matches(".*\\[(4\\d{2}|5\\d{2}) .+\\].*") || line.contains("[errored]")) {
+                    //     } else if (line.contains("[errored]")) {
+                
+
+                    //     // Đánh dấu hàm hiện tại là lỗi
+                    //     hasError = true;
+                    // } else if (line.startsWith("√") && !hasError) {
+                    //     // Chỉ tăng passCount nếu không có lỗi
+                    //     passCount++;
+                    // }
+
+                    // if (line.startsWith("→")) {
+                    //     // Save the previous function's result
+                    //     if (currentFunction != null) {
+                    //         functionResults.put(currentFunction, passCount);
+                    //     }
+                    //     // Start counting for the new function
+                    //     currentFunction = line.split("\\s+")[1]; // Get the function name
+                    //     passCount = 0; // Reset pass count for the new function
+                    // } else if (line.startsWith("√")) {
+                    //     passCount++; // Increment pass count for each passed test
+                    // }
+
+                    // if (line.startsWith("→")) {
+                    //     // Save the previous function's result
+                    //     if (currentFunction != null) {
+                    //         functionResults.put(currentFunction, passCount);
+                    //         System.out.println("Detected function: " + currentFunction + " with pass count: " + passCount);
+                    //     }
+                    //     // Start counting for the new function
+                    //     currentFunction = line.split("\\s+")[1];
+                    //     passCount = 0;
+                    // } else if (line.startsWith("√")) {
+                    //     passCount++;
+                    // }
+                    
                     if (line.startsWith("→")) {
-                        // Nếu có hàm trước đó và không bị lỗi, lưu kết quả
-                        if (currentFunction != null && !hasError) {
+                        // If there's an existing function, store its pass count
+                        if (currentFunction != null) {
                             functionResults.put(currentFunction, passCount);
+                            System.out.println("Detected function: " + currentFunction + " with pass count: " + passCount);
                         }
-                        // Khởi tạo lại biến cho hàm mới
-                        currentFunction = line.split("\\s+")[1];
-                        passCount = 0;
-                        hasError = false; // Reset lỗi cho hàm mới
-                    } else if (line.matches(".*\\[(4\\d{2}|5\\d{2}) .+\\].*") || line.contains("[errored]")) {
-                        // Đánh dấu hàm hiện tại là lỗi
-                        hasError = true;
-                    } else if (line.startsWith("√") && !hasError) {
-                        // Chỉ tăng passCount nếu không có lỗi
-                        passCount++;
+    
+                        // Get the entire function name (everything after "→")
+                        currentFunction = line.substring(2).trim(); // Trim whitespace after the arrow
+                        passCount = 0; // Reset pass count for the new function
+                    } else if (line.startsWith("√")) {
+                        // Capture the full message of the passed assertion
+                        String successMessage = line.substring(1).trim(); // Get everything after "√"
+                        passCount++; // Increment pass count for successful assertions
+                        System.out.println("Success for function " + currentFunction + ": " + successMessage);
                     }
+                                   
+                    
+                    
                 }
 
                 // Lưu kết quả của hàm cuối cùng nếu có và không bị lỗi
-                if (currentFunction != null && !hasError) {
+                // if (currentFunction != null && !hasError) {
+                //     functionResults.put(currentFunction, passCount);
+                // }
+
+                // if (currentFunction != null) {
+                //     functionResults.put(currentFunction, passCount);
+                // }
+                if (currentFunction != null) {
                     functionResults.put(currentFunction, passCount);
+                    System.out.println("Detected function: " + currentFunction + " with pass count: " + passCount);
                 }
+               
             }
 
             int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                System.out.println("Newman executed successfully for studentId: " + studentId);
+            // if (exitCode == 0) {
+            //     System.out.println("Newman executed successfully for studentId: " + studentId);
+            // } else {
+  
+            //     System.err.println(
+            //             "Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId +
+            //                     ". Please check " + outputFile.toString() + " for detailed error logs.");
+            // }
+            if (exitCode != 0) {
+                System.out.println("Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId);
             } else {
-                // System.err.println(
-                //         "Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId);
-                System.err.println(
-                    "Newman execution failed with exit code: " + exitCode + " for studentId: " + studentId +
-                    ". Please check " + outputFile.toString() + " for detailed error logs."
-                );
+                System.out.println("Newman executed successfully for studentId: " + studentId);
             }
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Error running Newman or storing Postman collection for studentId " + studentId + ": "
-                    + e.getMessage());
-        }
+        // } catch (IOException | InterruptedException e) {
+        //     System.err.println("Error running Newman or storing Postman collection for studentId " + studentId + ": "
+        //             + e.getMessage());
+        // }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
 
         // In kết quả cuối cùng
         functionResults.forEach((function, count) -> {
@@ -488,67 +550,67 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         }
     }
 
-    // public void updateAppsettingsJson(Path filePath, Long examPaperId, int port) throws IOException {
-    //     String content = Files.readString(filePath, StandardCharsets.UTF_8);
-    //     ObjectMapper objectMapper = new ObjectMapper();
-    //     ObjectNode rootNode = (ObjectNode) objectMapper.readTree(content);
-    //     String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
-    //     if (rootNode.has("ConnectionStrings")) {
-    //         ObjectNode connectionStringsNode = (ObjectNode) rootNode.get("ConnectionStrings");
-    //         connectionStringsNode.fieldNames().forEachRemaining(key -> {
-    //             connectionStringsNode.put(key, String.join(";",
-    //                     "Server=192.168.2.8\\SQLEXPRESS",
-    //                     "uid=sa",
-    //                     "pwd=1234567890",
-    //                     "database=" + databaseName,
-    //                     "TrustServerCertificate=True"));
-    //         });
-    //     }
-    //     content = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-
-    //     String portPattern = "\"Url\"\\s*:\\s*\"http://\\*:[0-9]+\"";
-    //     String replacement = "\"Url\": \"http://*:" + port + "\"";
-    //     content = content.replaceAll(portPattern, replacement);
-    //     Files.writeString(filePath, content, StandardCharsets.UTF_8);
-    // }
-
     public void updateAppsettingsJson(Path filePath, Long examPaperId, int port) throws IOException {
         String content = Files.readString(filePath, StandardCharsets.UTF_8);
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode rootNode = (ObjectNode) objectMapper.readTree(content);
         String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
-        
         if (rootNode.has("ConnectionStrings")) {
             ObjectNode connectionStringsNode = (ObjectNode) rootNode.get("ConnectionStrings");
-            
             connectionStringsNode.fieldNames().forEachRemaining(key -> {
-                String originalConnectionString = connectionStringsNode.get(key).asText();
-                
-                // Cập nhật giá trị sau dấu "=" cho các thành phần của chuỗi kết nối
-                String updatedConnectionString = originalConnectionString
-                    .replaceAll("(=.*?;)", "=192.168.2.8\\\\SQLEXPRESS;")  // Thay đổi phần sau dấu "=" với bất kỳ trường nào chứa địa chỉ server
-                    .replaceAll("(uid=)[^;]*", "$1" + "sa")  // Cập nhật tên người dùng
-                    .replaceAll("(pwd=)[^;]*", "$1" + "1234567890")  // Cập nhật mật khẩu
-                    .replaceAll("(database=)[^;]*", "$1" + databaseName)  // Cập nhật tên database
-                    .replaceAll("(TrustServerCertificate=)[^;]*", "$1" + "True");  // Cập nhật TrustServerCertificate
-                
-                connectionStringsNode.put(key, updatedConnectionString);
+                connectionStringsNode.put(key, String.join(";",
+                        "Server=192.168.2.8\\SQLEXPRESS",
+                        "uid=sa",
+                        "pwd=1234567890",
+                        "database=" + databaseName,
+                        "TrustServerCertificate=True"));
             });
         }
-        
         content = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-    
+
         String portPattern = "\"Url\"\\s*:\\s*\"http://\\*:[0-9]+\"";
         String replacement = "\"Url\": \"http://*:" + port + "\"";
         content = content.replaceAll(portPattern, replacement);
         Files.writeString(filePath, content, StandardCharsets.UTF_8);
     }
 
-    
+    // public void updateAppsettingsJson(Path filePath, Long examPaperId, int port)
+    // throws IOException {
+    // String content = Files.readString(filePath, StandardCharsets.UTF_8);
+    // ObjectMapper objectMapper = new ObjectMapper();
+    // ObjectNode rootNode = (ObjectNode) objectMapper.readTree(content);
+    // String databaseName =
+    // examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
 
-  
-    
-  
+    // if (rootNode.has("ConnectionStrings")) {
+    // ObjectNode connectionStringsNode = (ObjectNode)
+    // rootNode.get("ConnectionStrings");
+
+    // connectionStringsNode.fieldNames().forEachRemaining(key -> {
+    // String originalConnectionString = connectionStringsNode.get(key).asText();
+
+    // // Cập nhật giá trị sau dấu "=" cho các thành phần của chuỗi kết nối
+    // String updatedConnectionString = originalConnectionString
+    // .replaceAll("(=.*?;)", "=192.168.2.8\\\\SQLEXPRESS;") // Thay đổi phần sau
+    // dấu "=" với bất kỳ trường nào chứa địa chỉ server
+    // .replaceAll("(uid=)[^;]*", "$1" + "sa") // Cập nhật tên người dùng
+    // .replaceAll("(pwd=)[^;]*", "$1" + "1234567890") // Cập nhật mật khẩu
+    // .replaceAll("(database=)[^;]*", "$1" + databaseName) // Cập nhật tên database
+    // .replaceAll("(TrustServerCertificate=)[^;]*", "$1" + "True"); // Cập nhật
+    // TrustServerCertificate
+
+    // connectionStringsNode.put(key, updatedConnectionString);
+    // });
+    // }
+
+    // content =
+    // objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+
+    // String portPattern = "\"Url\"\\s*:\\s*\"http://\\*:[0-9]+\"";
+    // String replacement = "\"Url\": \"http://*:" + port + "\"";
+    // content = content.replaceAll(portPattern, replacement);
+    // Files.writeString(filePath, content, StandardCharsets.UTF_8);
+    // }
 
     public void findAndUpdateAppsettings(Path dirPath, Long examPaperId, int port) throws IOException {
         try (Stream<Path> folders = Files.walk(dirPath, 1)) {
@@ -582,32 +644,32 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         try {
             Class.forName(DB_DRIVER);
             try (Connection connection = DriverManager.getConnection(DB_URL);
-                 Statement statement = connection.createStatement()) {
-    
+                    Statement statement = connection.createStatement()) {
+
                 String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
                 Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
-    
+
                 if (examDatabase != null) {
                     Long examDatabaseId = examDatabase.getExamDatabaseId();
                     System.out.println("Found Exam_Database ID: " + examDatabaseId);
-    
+
                     if (databaseName != null && !databaseName.isEmpty()) {
                         String sql = "IF EXISTS (SELECT name FROM sys.databases WHERE name = '" + databaseName + "') " +
-                                     "BEGIN " +
-                                     "   ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
-                                     "   DROP DATABASE [" + databaseName + "]; " +
-                                     "END";
+                                "BEGIN " +
+                                "   ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
+                                "   DROP DATABASE [" + databaseName + "]; " +
+                                "END";
                         statement.executeUpdate(sql);
                         System.out.println("Database " + databaseName + " has been deleted.");
                     }
-    
+
                     // Retrieve and use databaseScript instead of databaseFile
                     if (examDatabase.getDatabaseScript() != null) {
                         String createDatabaseSQL = examDatabase.getDatabaseScript();
-    
+
                         // Split commands by "GO" keyword (case-insensitive)
                         String[] sqlCommands = createDatabaseSQL.split("(?i)\\bGO\\b");
-    
+
                         for (String sqlCommand : sqlCommands) {
                             if (!sqlCommand.trim().isEmpty()) {
                                 statement.executeUpdate(sqlCommand.trim());
@@ -630,72 +692,76 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         }
     }
 
-    
-
     // private void deleteAndCreateDatabaseByExamPaperId(Long examPaperId) {
-    //     try {
-    //         Class.forName(DB_DRIVER);
-    //         try (Connection connection = DriverManager.getConnection(DB_URL);
-    //                 Statement statement = connection.createStatement()) {
+    // try {
+    // Class.forName(DB_DRIVER);
+    // try (Connection connection = DriverManager.getConnection(DB_URL);
+    // Statement statement = connection.createStatement()) {
 
-    //             String databaseName = examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
-    //             Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
+    // String databaseName =
+    // examDatabaseRepository.findDatabaseNameByExamPaperId(examPaperId);
+    // Exam_Database examDatabase =
+    // examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
 
-    //             if (examDatabase != null) {
-    //                 Long examDatabaseId = examDatabase.getExamDatabaseId();
-    //                 System.out.println("Found Exam_Database ID: " + examDatabaseId);
+    // if (examDatabase != null) {
+    // Long examDatabaseId = examDatabase.getExamDatabaseId();
+    // System.out.println("Found Exam_Database ID: " + examDatabaseId);
 
-    //                 if (databaseName != null && !databaseName.isEmpty()) {
-    //                     String sql = "IF EXISTS (SELECT name FROM sys.databases WHERE name = '" + databaseName + "') " +
-    //                             "BEGIN " +
-    //                             "   ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
-    //                             "   DROP DATABASE [" + databaseName + "]; " +
-    //                             "END";
-    //                     statement.executeUpdate(sql);
-    //                     System.out.println("Database " + databaseName + " has been deleted.");
-    //                 }
-
-    //                 if (examDatabase.getDatabaseFile() != null) {
-    //                     String createDatabaseSQL = new String(examDatabase.getDatabaseFile());
-
-    //                     String[] sqlCommands = createDatabaseSQL.split("(?i)\\bGO\\b");
-
-    //                     for (String sqlCommand : sqlCommands) {
-    //                         if (!sqlCommand.trim().isEmpty()) {
-    //                             statement.executeUpdate(sqlCommand.trim());
-    //                         }
-    //                     }
-    //                     System.out.println("Database " + databaseName + " has been created.");
-    //                 } else {
-    //                     System.out.println("No database file found for examPaperId: " + examPaperId);
-    //                 }
-    //             } else {
-    //                 System.out.println("No Exam_Database found for examPaperId: " + examPaperId);
-    //             }
-    //         } catch (SQLException e) {
-    //             e.printStackTrace();
-    //             throw new RuntimeException("Failed to delete and create database for examPaperId: " + examPaperId);
-    //         }
-    //     } catch (ClassNotFoundException e) {
-    //         e.printStackTrace();
-    //         throw new RuntimeException("SQL Server JDBC Driver not found.");
-    //     }
+    // if (databaseName != null && !databaseName.isEmpty()) {
+    // String sql = "IF EXISTS (SELECT name FROM sys.databases WHERE name = '" +
+    // databaseName + "') " +
+    // "BEGIN " +
+    // " ALTER DATABASE [" + databaseName + "] SET SINGLE_USER WITH ROLLBACK
+    // IMMEDIATE; " +
+    // " DROP DATABASE [" + databaseName + "]; " +
+    // "END";
+    // statement.executeUpdate(sql);
+    // System.out.println("Database " + databaseName + " has been deleted.");
     // }
 
-    public void deleteContainerAndImages() throws IOException { 
+    // if (examDatabase.getDatabaseFile() != null) {
+    // String createDatabaseSQL = new String(examDatabase.getDatabaseFile());
+
+    // String[] sqlCommands = createDatabaseSQL.split("(?i)\\bGO\\b");
+
+    // for (String sqlCommand : sqlCommands) {
+    // if (!sqlCommand.trim().isEmpty()) {
+    // statement.executeUpdate(sqlCommand.trim());
+    // }
+    // }
+    // System.out.println("Database " + databaseName + " has been created.");
+    // } else {
+    // System.out.println("No database file found for examPaperId: " + examPaperId);
+    // }
+    // } else {
+    // System.out.println("No Exam_Database found for examPaperId: " + examPaperId);
+    // }
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // throw new RuntimeException("Failed to delete and create database for
+    // examPaperId: " + examPaperId);
+    // }
+    // } catch (ClassNotFoundException e) {
+    // e.printStackTrace();
+    // throw new RuntimeException("SQL Server JDBC Driver not found.");
+    // }
+    // }
+
+    public void deleteContainerAndImages() throws IOException {
         DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375")
                 .withDockerCmdExecFactory(new OkHttpDockerCmdExecFactory())
                 .build();
-    
+
         try {
             // Remove all containers
             List<Container> containers = dockerClient.listContainersCmd().withShowAll(true).exec();
             for (Container container : containers) {
-                System.out.println("Removing container " + container.getNames()[0] + " (" + container.getId().substring(0, 12) + ")");
+                System.out.println("Removing container " + container.getNames()[0] + " ("
+                        + container.getId().substring(0, 12) + ")");
                 dockerClient.removeContainerCmd(container.getId()).withForce(true).exec();
             }
             System.out.println("All containers have been removed.");
-    
+
             // Remove all images
             List<Image> images = dockerClient.listImagesCmd().withDanglingFilter(false).exec();
             for (Image image : images) {
@@ -703,18 +769,20 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                 dockerClient.removeImageCmd(image.getId()).withForce(true).exec();
             }
             System.out.println("All images have been removed.");
-    
+
             // Remove unused networks
             List<Network> networks = dockerClient.listNetworksCmd().exec();
             for (Network network : networks) {
                 // Ignore default Docker networks
-                if (!network.getName().equals("bridge") && !network.getName().equals("host") && !network.getName().equals("none")) {
-                    System.out.println("Removing network " + network.getName() + " (" + network.getId().substring(0, 12) + ")");
+                if (!network.getName().equals("bridge") && !network.getName().equals("host")
+                        && !network.getName().equals("none")) {
+                    System.out.println(
+                            "Removing network " + network.getName() + " (" + network.getId().substring(0, 12) + ")");
                     dockerClient.removeNetworkCmd(network.getId()).exec();
                 }
             }
             System.out.println("All unused networks have been removed.");
-    
+
         } catch (DockerException e) {
             e.printStackTrace();
             throw new RuntimeException("Docker operation failed: " + e.getMessage());
