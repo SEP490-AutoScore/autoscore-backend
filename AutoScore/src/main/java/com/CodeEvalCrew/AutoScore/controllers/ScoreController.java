@@ -25,7 +25,7 @@ public class ScoreController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('EXPORT_SCORE')")
     @PostMapping
-    public ResponseEntity<List<ScoreResponseDTO>> exportFileExcel(@RequestParam Long exampaperid) {
+    public ResponseEntity<List<ScoreResponseDTO>> getScoreJSON(@RequestParam Long exampaperid) {
         try {
             List<ScoreResponseDTO> scoreResponseDTOs = scoreService.getScoresByExamPaperId(exampaperid);
             if (scoreResponseDTOs.isEmpty()) {
