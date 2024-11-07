@@ -87,15 +87,17 @@ VALUES
 INSERT INTO `organization`
 (`organization_id`, `name`, `type`, `parent_id`, `status`)
 VALUES
-(1, 'FPT University', 'UNIVERSITY', null, true),
-(2, 'Ho Chi Minh', 'CAMPUS', 1, true),
-(3, 'Ha Noi', 'CAMPUS', 1, true),
-(4, 'Da Nang', 'CAMPUS', 1, true),
-(5, 'Can Tho', 'CAMPUS', 1, true),
+(1, 'FPTU', 'UNIVERSITY', null, true),
+(2, 'HoChiMinh', 'CAMPUS', 1, true),
+(3, 'HaNoi', 'CAMPUS', 1, true),
+(4, 'DaNang', 'CAMPUS', 1, true),
+(5, 'CanTho', 'CAMPUS', 1, true),
+(18, 'QuyNhon', 'CAMPUS', 1, true),
 (6, 'SE', 'MAJOR', 2, true),
 (7, 'SE', 'MAJOR', 3, true),
 (8, 'SE', 'MAJOR', 4, true),
 (9, 'SE', 'MAJOR', 5, true),
+(19, 'SE', 'MAJOR', 18, true),
 (10, 'JAVA', 'DEPARTMENT', 6, true),
 (11, '.NET', 'DEPARTMENT', 6, true),
 (12, 'JAVA', 'DEPARTMENT', 7, true),
@@ -103,7 +105,9 @@ VALUES
 (14, 'JAVA', 'DEPARTMENT', 8, true),
 (15, '.NET', 'DEPARTMENT', 8, true),
 (16, 'JAVA', 'DEPARTMENT', 9, true),
-(17, '.NET', 'DEPARTMENT', 9, true);
+(17, '.NET', 'DEPARTMENT', 9, true),
+(20, 'JAVA', 'DEPARTMENT', 19, true),
+(21, '.NET', 'DEPARTMENT', 19, true);
 
 INSERT INTO `account_organization`
 (`status`, `account_id`, `organization_id`)

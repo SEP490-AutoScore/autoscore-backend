@@ -69,7 +69,7 @@ public class StudentSubmissionService {
 
         // Giải nén tệp đã upload và lấy thư mục gốc
         String rootFolder = fileExtractionService.extract7zWithApacheCommons(file, uploadDir);
-        String mainSourcePath = rootFolder + "\\" + mainSourceName;
+        String mainSourcePath = rootFolder + File.separator + mainSourceName;
         File studentSolutionFolder = new File(mainSourcePath);
 
         Source source = sourceService.saveMainSource(mainSourcePath, examPaperId);
@@ -131,12 +131,6 @@ public class StudentSubmissionService {
             Optional<Student> studentOpt = studentRepository.findByStudentCode(studentCode);
             if (!studentOpt.isPresent()) {
                 studentErrorService.saveStudentError(source, null, "Student not found with student code: " + studentCode);
-                return null;
-            }
-
-            File solutionZip = new File(studentFolder, "solution.zip");
-            if (!solutionZip.exists()) {
-                studentErrorService.saveStudentError(source, studentOpt.get(), "solution file not found");
                 return null;
             }
 
