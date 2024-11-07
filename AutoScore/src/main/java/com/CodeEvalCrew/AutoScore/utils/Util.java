@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.services.account_service.UserDetailsImpl;
 
@@ -53,4 +54,14 @@ public class Util {
         }
         return null;
     }   
+
+    // Get campus
+    public static String getCampus() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            return userDetails.getOrganizations().stream().filter(org -> org.getType() == Organization_Enum.CAMPUS).findFirst().get().getName();
+        }
+        return null;
+    }
 }
