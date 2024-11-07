@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,18 +15,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Student_Error {
+public class NGram {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long studentErrorId;
+    private Long id;
+
     @Lob
-    private String errorContent;
+    private String nGramValue;
 
     @ManyToOne
-    @JoinColumn(name = "sourceId", nullable = false)
-    private Source source;
-
-    @OneToOne
-    @JoinColumn(name = "studentId", nullable = true)
-    private Student student;
+    @JoinColumn(name = "sourceDetailId")
+    private Source_Detail sourceDetail;
 }

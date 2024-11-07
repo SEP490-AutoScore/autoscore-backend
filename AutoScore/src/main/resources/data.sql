@@ -54,8 +54,9 @@ VALUES
 ('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
 ('DELETE_EXAM', 29, 'Delete exam', 7, 1),
 ('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1),
-('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 10, 1);
+('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 10, 1),
 
+('EXPORT_SCORE', 39, 'Export score', 8, 1);
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
 VALUES
@@ -69,9 +70,9 @@ INSERT INTO `role_permission`
 VALUES
 (true, 1, 1),(true, 1, 2),(true, 1, 3),(true, 1, 4),(true, 1, 5),(true, 1, 6),(true, 1, 7),(true, 1, 8),(true, 1, 9),(true, 1, 10),(true, 1, 11),(true, 1, 12),(true, 1, 13),
 (true, 1, 14),(true, 1, 15),(true, 1, 16),(true, 1, 17),(true, 1, 18),(true, 1, 19),(true, 1, 20),(true, 1, 21),(true, 1, 22),(true, 1, 23),(true, 1, 24),(true, 1, 25),(true, 1, 26),
-(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),(true, 1, 34),(true, 1, 35),(true, 1, 36),(true, 1, 37),
+(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),(true, 1, 34),(true, 1, 35),(true, 1, 36),(true, 1, 37),(true, 1, 39),
 (true, 2, 1),(true, 2, 4),(true, 2, 5),(true, 2, 6),(true, 2, 7),(true, 2, 8),(true, 2, 9),(true, 2, 12),(true, 2, 13),(true, 2, 14),(true, 2, 15),(true, 2, 16),(true, 2, 19),(true, 2, 20),
-(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),(true, 2, 34),(true, 2, 35),(true, 2, 36),(true, 2, 37),
+(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),(true, 2, 34),(true, 2, 35),(true, 2, 36),(true, 2, 37),(true, 2, 39),
 (true, 3, 1),(true, 3, 4),(true, 3, 5),(true, 3, 6),(true, 3, 7),(true, 3, 8),(true, 3, 9),(true, 3, 12);
 
 INSERT INTO `account`
@@ -86,15 +87,17 @@ VALUES
 INSERT INTO `organization`
 (`organization_id`, `name`, `type`, `parent_id`, `status`)
 VALUES
-(1, 'FPT University', 'UNIVERSITY', null, true),
-(2, 'Ho Chi Minh', 'CAMPUS', 1, true),
-(3, 'Ha Noi', 'CAMPUS', 1, true),
-(4, 'Da Nang', 'CAMPUS', 1, true),
-(5, 'Can Tho', 'CAMPUS', 1, true),
+(1, 'FPTU', 'UNIVERSITY', null, true),
+(2, 'HoChiMinh', 'CAMPUS', 1, true),
+(3, 'HaNoi', 'CAMPUS', 1, true),
+(4, 'DaNang', 'CAMPUS', 1, true),
+(5, 'CanTho', 'CAMPUS', 1, true),
+(18, 'QuyNhon', 'CAMPUS', 1, true),
 (6, 'SE', 'MAJOR', 2, true),
 (7, 'SE', 'MAJOR', 3, true),
 (8, 'SE', 'MAJOR', 4, true),
 (9, 'SE', 'MAJOR', 5, true),
+(19, 'SE', 'MAJOR', 18, true),
 (10, 'JAVA', 'DEPARTMENT', 6, true),
 (11, '.NET', 'DEPARTMENT', 6, true),
 (12, 'JAVA', 'DEPARTMENT', 7, true),
@@ -102,7 +105,9 @@ VALUES
 (14, 'JAVA', 'DEPARTMENT', 8, true),
 (15, '.NET', 'DEPARTMENT', 8, true),
 (16, 'JAVA', 'DEPARTMENT', 9, true),
-(17, '.NET', 'DEPARTMENT', 9, true);
+(17, '.NET', 'DEPARTMENT', 9, true),
+(20, 'JAVA', 'DEPARTMENT', 19, true),
+(21, '.NET', 'DEPARTMENT', 19, true);
 
 INSERT INTO `account_organization`
 (`status`, `account_id`, `organization_id`)
@@ -305,18 +310,19 @@ Request Body (JSON):
 
 
 INSERT INTO `postman_for_grading`
-(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`)
+(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`)
 VALUES
-(2.5, 1, 1, null, 2, 'login'),
-(2.5, 1, 2, 1, 4, 'get'),
-(2.5, 1, 3, 1, 2, 'post'),
-(2.5, 1, 4, 3, 2, 'delete');
+(2, 1, 1, null, 2, 'login',1),
+(2, 2, 2, 1, 2, 'login fail',1),
+(2, 1, 3, 1, 4, 'get',1),
+(2, 3, 4, 1, 4, 'get id',1),
+(2, 2, 5, 1, 3, 'delete',1);
 
 INSERT INTO `AI_Info`
 (`ai_api_key`, `ai_name`, `purpose`)
 VALUES
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini', 'Generate GherkinFormat'),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Create file collection Postman');
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Generate Postman Collection');
 
 
 INSERT INTO `Content`
@@ -335,7 +341,7 @@ Scenario:
 }}', 2, 1),
 ('Save to your memory, do not reply', 1, 2),
 ('Save to your memory, do not reply', 2, 2),
-('- Write many pm test in the form of postman json file collection only for gherkin format below, should have "info" and "item",
+('- Write many pm test javascript in the form of postman json file collection only for gherkin format below, should have "info" and "item",
 - "info" needs "_postman_id", "name", "schema", _exporter_id,
 - "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test ', 3, 2);
 
