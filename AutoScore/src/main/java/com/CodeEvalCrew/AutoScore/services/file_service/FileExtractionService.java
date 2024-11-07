@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -50,6 +51,12 @@ public class FileExtractionService {
         File tempFile = new File(uploadDir, file.getOriginalFilename());
         file.transferTo(tempFile);
 
+        // Lấy campus
+        String campus = Util.getCampus();
+        String uploadDirect = uploadDir;
+        if (campus != null) {
+            uploadDirect = uploadDir + File.separator + campus;
+        }
         String rootFolder = null;
 
         try (SevenZFile sevenZFile = new SevenZFile(tempFile)) {
@@ -62,11 +69,11 @@ public class FileExtractionService {
                 // Xác định tên thư mục gốc nếu chưa được đặt
                 if (rootFolder == null) {
                     rootFolder = entryName.split("/")[0]; // Lấy tên thư mục gốc đầu tiên từ file nén
-                    outputDir = new File(uploadDir, rootFolder);
+                    outputDir = new File(uploadDirect, rootFolder);
                     if (!outputDir.exists()) {
                         outputDir.mkdir(); // Tạo thư mục gốc nếu chưa tồn tại
-
-                                    }}
+                    }
+                }
 
                 // Tạo đường dẫn giải nén với outputDir là thư mục gốc
                 File outFile = new File(outputDir, entryName.substring(rootFolder.length()));
@@ -94,7 +101,7 @@ public class FileExtractionService {
             throw new IOException("Invalid archive structure: no root folder found");
         }
 
-        return new File(uploadDir, rootFolder).getAbsolutePath();
+        return new File(uploadDirect, rootFolder).getAbsolutePath();
     }
 
     // Giải nén đệ quy và tìm tệp .sln
@@ -110,7 +117,8 @@ public class FileExtractionService {
                 if (slnFile != null) {
                     return slnFile; // Trả về thư mục chứa file .sln nếu tìm thấy
 
-                            }} else if (file.getName().endsWith(".sln")) {
+                }
+            } else if (file.getName().endsWith(".sln")) {
                 return folder; // Trả về thư mục chứa file .sln
             } else if (file.getName().matches(".*\\.(zip|rar|7z|tar|gz)$")) {
                 // Giải nén file nén đệ quy

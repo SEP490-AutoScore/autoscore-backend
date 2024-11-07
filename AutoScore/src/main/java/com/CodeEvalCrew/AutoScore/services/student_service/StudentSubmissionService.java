@@ -69,7 +69,7 @@ public class StudentSubmissionService {
 
         // Giải nén tệp đã upload và lấy thư mục gốc
         String rootFolder = fileExtractionService.extract7zWithApacheCommons(file, uploadDir);
-        String mainSourcePath = rootFolder + "\\" + mainSourceName;
+        String mainSourcePath = rootFolder + File.separator + mainSourceName;
         File studentSolutionFolder = new File(mainSourcePath);
 
         Source source = sourceService.saveMainSource(mainSourcePath, examPaperId);
