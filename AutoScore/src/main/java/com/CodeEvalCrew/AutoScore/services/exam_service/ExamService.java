@@ -397,66 +397,6 @@ public class ExamService implements IExamService {
         return result;
     }
 
-// Function to add a numbered list for barems
-    // private void addNumberedBaremList(XWPFDocument document, List<ExamBaremExport> barems) {
-    //     try {
-    //         // Create a numbering element for numbered list
-    //         CTAbstractNum abstractNum = CTAbstractNum.Factory.newInstance();
-    //         abstractNum.setAbstractNumId(BigInteger.valueOf(0));
-
-    //         // Create numbering
-    //         XWPFNumbering numbering = document.createNumbering();
-    //         BigInteger abstractNumID = numbering.addAbstractNum(new XWPFAbstractNum(abstractNum));
-    //         BigInteger numID = numbering.addNum(abstractNumID);
-
-    //         // Add each barem as a numbered item
-    //         for (ExamBaremExport barem : barems) {
-    //             XWPFParagraph paragraph = document.createParagraph();
-    //             paragraph.setNumID(numID);  // Set numbering
-
-    //             XWPFRun run = paragraph.createRun();
-    //             run.setText(barem.getBaremContent() + " (" + barem.getBaremMaxScore() + " points)");
-    //             run.addBreak();
-
-    //             // Detailed information about the endpoint
-    //             run.setText("Endpoint: " + (barem.getEndpoint() != null ? barem.getEndpoint() : "N/A"));
-    //             run.addBreak();
-
-    //             run.setText("Method: " + (barem.getMethod() != null ? barem.getMethod() : "N/A"));
-    //             run.addBreak();
-
-    //             run.setText("Function: " + (barem.getBaremFunction() != null ? barem.getBaremFunction() : "N/A"));
-    //             run.addBreak();
-
-    //             run.setText("\t" + (barem.getPayloadType() != null ? barem.getPayloadType() : "N/A"));
-    //             run.addBreak();
-
-    //             run.setText((barem.getPayload() != null ? barem.getPayload() : "N/A"));
-    //             run.addBreak();
-
-    //             run.setText("Validations: ");
-    //             run.addBreak();
-
-    //             run.setText((barem.getValidation() != null ? barem.getValidation() : "N/A"));
-    //             run.addBreak();
-
-    //             run.setText("Success Response: ");
-    //             run.addBreak();
-
-    //             run.setText((barem.getSuccessResponse() != null ? barem.getSuccessResponse() : "N/A"));
-    //             run.addBreak();
-
-    //             run.setText("Error Response: ");
-    //             run.addBreak();
-
-    //             run.setText((barem.getErrorResponse() != null ? barem.getErrorResponse() : "N/A"));
-    //         }
-    //     } catch (Exception e) {
-    //         e.printStackTrace();  // Log the error for debugging purposes
-    //     }
-
-    // }
-
     private String addDatabaseImage(XWPFDocument document, ExamExport exportExam) throws IOException {
         String message = "Image added successfully.";
         String placeholder = "${imagePlaceholder}";
