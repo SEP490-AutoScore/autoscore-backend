@@ -40,9 +40,9 @@ public class Source_Detail {
     @Column(columnDefinition = "LONGBLOB")
     private byte[] fileCollectionPostman;
 
-    private Boolean is_pass_first_progress;
-    private Boolean is_pass_second_progress;
-    private Boolean is_pass_third_progress;
+    // private Boolean is_pass_first_progress;
+    // private Boolean is_pass_second_progress;
+    // private Boolean is_pass_third_progress;
 
     //Relationship
     //n-1 student
