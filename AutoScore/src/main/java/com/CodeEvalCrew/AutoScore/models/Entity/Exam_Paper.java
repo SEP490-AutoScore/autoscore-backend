@@ -35,6 +35,8 @@ public class Exam_Paper {
     private String examPaperCode;
     private boolean status;
     private String instruction;
+    @Column(columnDefinition = "int default 90")
+    private int duration = 90;
     private LocalDateTime createdAt;
     private Long createdBy;
     private LocalDateTime updatedAt;

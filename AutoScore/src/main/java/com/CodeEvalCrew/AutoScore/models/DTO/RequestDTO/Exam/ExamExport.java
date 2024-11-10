@@ -20,7 +20,7 @@ public class ExamExport {
     private String SubjectCode;
     private int duration;
     private String instructions;
-    private String important;
+    private List<Long> importants;
     private String databaseDescpription;
     private String databaseName;
     private String databaseNote;
