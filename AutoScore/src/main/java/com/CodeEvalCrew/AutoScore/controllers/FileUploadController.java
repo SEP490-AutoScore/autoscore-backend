@@ -35,12 +35,13 @@ public class FileUploadController {
                     }
             )
     )
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("exam_paper_id") Long examPaperId) {
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file, 
+    @RequestParam("exam_paper_id") Long examPaperId, @RequestParam("exam_type") String examType) {
         List<String> unmatchedStudents;
 
         try {
             // Gọi service để xử lý submission của sinh viên
-            unmatchedStudents = studentSubmissionService.processFileSubmission(file, examPaperId);
+            unmatchedStudents = studentSubmissionService.processFileSubmission(file, examPaperId, examType);
         } catch (IOException e) {
             // Xử lý lỗi nếu gặp vấn đề với quá trình upload hoặc giải nén
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

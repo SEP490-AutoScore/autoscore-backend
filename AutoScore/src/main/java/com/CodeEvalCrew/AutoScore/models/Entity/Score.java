@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -33,8 +34,10 @@ public class Score {
 
     private LocalDateTime gradedAt;
 
-    private Boolean flag; // 0 = không bị đánh cờ, 1 = kiểm tra đặc biệt
-    private String flagReason;
+    private String levelOfPlagiarism;
+    private String plagiarismReason;
+    @Lob
+    private String codePlagiarism;
 
     //Relationship
     //n-1 exam paper
