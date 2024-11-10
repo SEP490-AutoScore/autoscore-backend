@@ -28,8 +28,8 @@ public interface ScoreMapper {
     @Mapping(source = "totalScore", target = "totalScore")
     @Mapping(source = "reason", target = "reason")
     @Mapping(source = "gradedAt", target = "gradedAt")
-    @Mapping(source = "flag", target = "flag")
-    @Mapping(source = "flagReason", target = "flagReason")
+    @Mapping(source = "levelOfPlagiarism", target = "levelOfPlagiarism")
+    @Mapping(source = "plagiarismReason", target = "plagiarismReason")
     ScoreResponseDTO toScoreResponseDTO(Score score);
 
     List<ScoreResponseDTO> scoreEntityToScoreResponseDTO(List<Score> scores);

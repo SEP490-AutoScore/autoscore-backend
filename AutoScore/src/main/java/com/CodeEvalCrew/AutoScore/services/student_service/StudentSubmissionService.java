@@ -64,7 +64,7 @@ public class StudentSubmissionService {
     private static final int MAX_THREADS = 4;
 
     // Phương thức chính để xử lý file submission
-    public List<String> processFileSubmission(MultipartFile file, Long examPaperId) throws IOException {
+    public List<String> processFileSubmission(MultipartFile file, Long examPaperId, String examType) throws IOException {
         List<String> unmatchedStudents = Collections.synchronizedList(new ArrayList<>());
 
         // Giải nén tệp đã upload và lấy thư mục gốc
@@ -87,7 +87,7 @@ public class StudentSubmissionService {
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
 
         for (File studentFolder : studentFolders) {
-            completionService.submit(new SubmissionTask(studentFolder, source, unmatchedStudents));
+            completionService.submit(new SubmissionTask(studentFolder, source, unmatchedStudents, examType));
         }
 
         for (int i = 0; i < studentFolders.length; i++) {
@@ -113,11 +113,13 @@ public class StudentSubmissionService {
         private final File studentFolder;
         private final Source source;
         private final List<String> unmatchedStudents;
+        private final String examType;
 
-        public SubmissionTask(File studentFolder, Source source, List<String> unmatchedStudents) {
+        public SubmissionTask(File studentFolder, Source source, List<String> unmatchedStudents, String examType) {
             this.studentFolder = studentFolder;
             this.source = source;
             this.unmatchedStudents = unmatchedStudents;
+            this.examType = examType;
         }
 
         @Override
@@ -139,7 +141,7 @@ public class StudentSubmissionService {
                 File slnFileFolder = fileExtractionService.processExtractedFolder(studentFolder, source, studentOpt.get());
 
                 if (slnFileFolder != null) {
-                    sourceDetailService.saveStudentSubmission(slnFileFolder, studentOpt.get(), source);
+                    sourceDetailService.saveStudentSubmission(slnFileFolder, studentOpt.get(), source, examType);
                 } else {
                     studentErrorService.saveStudentError(source, studentOpt.get(), "No .sln file found");
                 }

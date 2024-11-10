@@ -162,11 +162,11 @@ VALUES
 ('FA24', 'Fall 2024', true);
 
 INSERT INTO `exam` 
-(`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_id`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
+(`exam_code`, `exam_at`, `grading_at`, `publish_at`, `semester_id`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`, `type`) 
 VALUES 
-('PRN231_FA24_PE', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 2, true, '2024-09-30 09:00:00', 1, null, null, null, null, 1),
-('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1),
-('PRN231_FA24_PE', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1);
+('PRN231_FA24_PE', '2024-10-01 10:00:00', '2024-10-02 15:00:00', '2024-10-03 12:00:00', 2, true, '2024-09-30 09:00:00', 1, null, null, null, null, 1, 'EXAM'),
+('PRN231_SU24_PE', '2024-11-01 10:00:00', '2024-11-02 15:00:00', '2024-11-03 12:00:00', 2, true, '2024-09-30 09:00:00', 2, null, null, null, null, 1, 'EXAM'),  
+('PRN231_SU24_ASS', '2024-12-01 10:00:00', '2024-12-02 15:00:00', '2024-12-03 12:00:00', 2, true, '2024-09-30 09:00:00', 3, null, null, null, null, 1, 'ASSIGNMENT');
 
 -- INSERT INTO `instructions` 
 -- (`introduction`, `important`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `subject_id`) 
@@ -329,7 +329,7 @@ INSERT INTO `Content`
 (`question_content`, `order_priority`, `ai_info_id`)
 VALUES
 ('Save to your memory, do not reply', 1, 1),
-('Write many gherkin format for me to suit the assignment requirements, respond to the AI prompt below, Each Scenario and content are enclosed in {{ }}
+('Write some gherkin format for me to suit the assignment requirements, respond to the AI prompt below, Each Scenario and content are enclosed in {{ }}
 
 {{
 Scenario:
@@ -339,11 +339,13 @@ Scenario:
 Scenario:
 .....
 }}', 2, 1),
-('Save to your memory, do not reply', 1, 2),
-('Save to your memory, do not reply', 2, 2),
-('- Write many pm test javascript in the form of postman json file collection only for gherkin format below, should have "info" and "item",
-- "info" needs "_postman_id", "name", "schema", _exporter_id,
-- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test ', 3, 2);
+('This is Database, Save to your memory, do not reply', 1, 2),
+('This is topic, Save to your memory, do not reply', 2, 2),
+('- Write json postman collection for 1 item.name gherkin format below, No Explanation
+- json postman collection have "info" and "item":
+- "info" needs "_postman_id", "name", "schema", _exporter_id
+- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
+- http://localhost:10000/...', 3, 2);
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 
