@@ -1,5 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion;
 
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,5 +12,14 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ExamQuestionExport {
     private String questionContent;
-    private double questionScore;
+    private Float examQuestionScore;
+    private String endPoint;
+    private String roleAllow;
+    private String httpMethod;
+    private String description;
+    private String payloadType;
+    private String payload;
+    private String validation;
+    private String sucessResponse;
+    private String errorResponse;
 }

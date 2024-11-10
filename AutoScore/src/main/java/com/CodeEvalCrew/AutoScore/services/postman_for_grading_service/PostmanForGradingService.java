@@ -1,6 +1,10 @@
 package com.CodeEvalCrew.AutoScore.services.postman_for_grading_service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,16 +88,29 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                         .append("\n\n\n")
                         .append("\n - Question Content: ")
                         .append(gherkinScenario.getExamQuestion().getQuestionContent())
-                        .append("\n - Role: ")
-                        .append(gherkinScenario.getExamQuestion().getRoleAllow())
-                        .append("\n")
-                        .append(gherkinScenario.getExamQuestion().getDescription());
+                        .append("\n - EndPoint: ")
+                        .append(gherkinScenario.getExamQuestion().getEndPoint())
+                        .append("\n - Description: ")
+                        .append(gherkinScenario.getExamQuestion().getDescription())
+                        .append("\n - Payload: ")
+                        .append(gherkinScenario.getExamQuestion().getPayload())
+                        .append("\n - Payload type: ")
+                        .append(gherkinScenario.getExamQuestion().getPayloadType())
+                        .append("\n - Http method: ")
+                        .append(gherkinScenario.getExamQuestion().getHttpMethod())
+                        .append("\n - Error response: ")
+                        .append(gherkinScenario.getExamQuestion().getErrorResponse())
+                        .append("\n - Success response: ")
+                        .append(gherkinScenario.getExamQuestion().getSucessResponse());
             } else if (content.getOrderPriority() == 3) {
                 // Thêm gherkinData từ Gherkin_Scenario
                 promptBuilder.append(content.getQuestionContent())
                         .append("\n")
                         .append(gherkinScenario.getGherkinData());
+                System.out.println("Gherkin Data: " + gherkinScenario.getGherkinData());
+
             }
+
         });
 
         String prompt = new String(promptBuilder.toString().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
@@ -112,18 +129,24 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         }
 
         // 2. Gọi newman để kiểm tra chạy thành công
-        boolean isNewmanRunSuccessful = runNewman(collectionJson);
-        if (!isNewmanRunSuccessful) {
-            throw new RuntimeException("Newman run failed.");
+        // boolean isNewmanRunSuccessful = runNewman(collectionJson);
+        // if (!isNewmanRunSuccessful) {
+        //     throw new RuntimeException("Newman run failed.");
+        // }
+        String postmanFunctionName = runNewman(collectionJson);
+        if (postmanFunctionName == null) {
+            throw new RuntimeException("Newman run failed or postmanFunctionName not found.");
         }
+        
 
         // Lưu Postman Collection vào Postman_For_Grading
         Postman_For_Grading postmanForGrading = new Postman_For_Grading();
         postmanForGrading.setGherkinScenario(gherkinScenario);
         postmanForGrading.setExamQuestion(gherkinScenario.getExamQuestion());
         postmanForGrading.setFileCollectionPostman(collectionJson.getBytes(StandardCharsets.UTF_8));
+        postmanForGrading.setExamPaper(gherkinScenario.getExamQuestion().getExamPaper());
+        postmanForGrading.setPostmanFunctionName(postmanFunctionName);
         postmanForGradingRepository.save(postmanForGrading);
-
         return "Postman Collection được tạo và lưu thành công.";
     }
 
@@ -152,48 +175,138 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     }
 
     // Hàm chạy newman và kiểm tra kết quả
-    private boolean runNewman(String collectionJson) {
+    private String runNewman(String collectionJson) {
+        String postmanFunctionName = null;
         try {
             // Ghi collection JSON vào file tạm thời
-            java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("collection", ".json");
-            java.nio.file.Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8));
-    
-            // Đường dẫn đến Newman
+            Path tempFile = Files.createTempFile("collection", ".json");
+            Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8));
+
             String newmanPath = "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd"; // Hoặc .exe nếu cần
-    
-            // Đặt thời gian chờ cho các yêu cầu (ví dụ: 5000 ms = 5 giây)
-            String timeout = "1000"; // Thay đổi giá trị này nếu cần
-    
+            String timeout = "1000"; // Đặt thời gian chờ
+
             // Gọi newman bằng ProcessBuilder với tùy chọn timeout
-            ProcessBuilder processBuilder = new ProcessBuilder(newmanPath, "run", tempFile.toAbsolutePath().toString(), "--timeout", timeout);
+            ProcessBuilder processBuilder = new ProcessBuilder(newmanPath, "run", tempFile.toAbsolutePath().toString(),
+                    "--timeout", timeout);
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
-    
-            // Đọc kết quả chạy newman
-            StringBuilder outputBuilder = new StringBuilder(); // Khởi tạo StringBuilder để ghi lại đầu ra
-            try (java.io.BufferedReader reader = new java.io.BufferedReader(
-                    new java.io.InputStreamReader(process.getInputStream()))) {
+
+            StringBuilder outputBuilder = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    outputBuilder.append(line).append("\n"); // Ghi lại kết quả chạy
-                    System.out.println(line); // In ra console
+                    outputBuilder.append(line).append("\n");
+
+                    // Tìm postmanFunctionName từ chuỗi có dấu '→'
+                    if (line.contains("→")) {
+                        postmanFunctionName = line.substring(line.indexOf("→") + 1).trim();
+                    }
                 }
             }
-    
+
             int exitCode = process.waitFor();
-            // Nếu exitCode là 0 hoặc có ít nhất một request được thực hiện thì coi là thành công
             if (exitCode == 0 || outputBuilder.toString().contains("executed")) {
-                return true;
+                return postmanFunctionName; // Trả về postmanFunctionName nếu thành công
             } else {
-                // Bạn có thể kiểm tra thêm các thông điệp lỗi cụ thể nếu cần
-                System.out.println("Newman run encountered errors.");
-                return false;
+                return null;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
+
+    // private boolean runNewman(String collectionJson) {
+    // try {
+    // // Ghi collection JSON vào file tạm thời
+    // Path tempFile = Files.createTempFile("collection", ".json");
+    // Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8));
+
+    // // Đường dẫn đến Newman
+    // String newmanPath = "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd"; //
+    // Hoặc .exe nếu cần
+    // String timeout = "1000"; // Đặt thời gian chờ
+
+    // // Gọi newman bằng ProcessBuilder với tùy chọn timeout
+    // ProcessBuilder processBuilder = new ProcessBuilder(newmanPath, "run",
+    // tempFile.toAbsolutePath().toString(), "--timeout", timeout);
+    // processBuilder.redirectErrorStream(true);
+    // Process process = processBuilder.start();
+
+    // // Đọc và lưu kết quả chạy newman vào StringBuilder
+    // StringBuilder outputBuilder = new StringBuilder();
+    // try (BufferedReader reader = new BufferedReader(
+    // new java.io.InputStreamReader(process.getInputStream()))) {
+    // String line;
+    // while ((line = reader.readLine()) != null) {
+    // outputBuilder.append(line).append("\n");
+    // }
+    // }
+
+    // // Lưu kết quả vào file D:\Desktop\result.txt
+    // try (BufferedWriter writer = new BufferedWriter(new
+    // FileWriter("D:\\Desktop\\result.txt"))) {
+    // writer.write(outputBuilder.toString());
+    // }
+
+    // int exitCode = process.waitFor();
+    // // Nếu exitCode là 0 hoặc có ít nhất một request được thực hiện thì coi là
+    // thành công
+    // return exitCode == 0 || outputBuilder.toString().contains("executed");
+
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // return false;
+    // }
+    // }
+
+    // private boolean runNewman(String collectionJson) {
+    // try {
+    // // Ghi collection JSON vào file tạm thời
+    // java.nio.file.Path tempFile =
+    // java.nio.file.Files.createTempFile("collection", ".json");
+    // java.nio.file.Files.write(tempFile,
+    // collectionJson.getBytes(StandardCharsets.UTF_8));
+
+    // // Đường dẫn đến Newman
+    // String newmanPath = "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd"; //
+    // Hoặc .exe nếu cần
+
+    // String timeout = "1000"; // Đặt thời gian chờ
+
+    // // Gọi newman bằng ProcessBuilder với tùy chọn timeout
+    // ProcessBuilder processBuilder = new ProcessBuilder(newmanPath, "run",
+    // tempFile.toAbsolutePath().toString(), "--timeout", timeout);
+    // processBuilder.redirectErrorStream(true);
+    // Process process = processBuilder.start();
+
+    // // Đọc kết quả chạy newman
+    // StringBuilder outputBuilder = new StringBuilder(); // Khởi tạo StringBuilder
+    // để ghi lại đầu ra
+    // try (java.io.BufferedReader reader = new java.io.BufferedReader(
+    // new java.io.InputStreamReader(process.getInputStream()))) {
+    // String line;
+    // while ((line = reader.readLine()) != null) {
+    // outputBuilder.append(line).append("\n"); // Ghi lại kết quả chạy
+    // System.out.println(line); // In ra console
+    // }
+    // }
+
+    // int exitCode = process.waitFor();
+    // // Nếu exitCode là 0 hoặc có ít nhất một request được thực hiện thì coi là
+    // thành công
+    // if (exitCode == 0 || outputBuilder.toString().contains("executed")) {
+    // return true;
+    // } else {
+    // // Bạn có thể kiểm tra thêm các thông điệp lỗi cụ thể nếu cần
+    // System.out.println("Newman run encountered errors.");
+    // return false;
+    // }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // return false;
+    // }
+    // }
 
     private String sendToAI(String prompt, String aiApiKey) {
         // Set up the request to the AI service
