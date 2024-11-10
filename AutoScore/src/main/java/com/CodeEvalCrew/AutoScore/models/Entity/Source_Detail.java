@@ -3,9 +3,13 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,10 +43,8 @@ public class Source_Detail {
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] fileCollectionPostman;
-
-    // private Boolean is_pass_first_progress;
-    // private Boolean is_pass_second_progress;
-    // private Boolean is_pass_third_progress;
+    @Enumerated(EnumType.STRING)
+    private Exam_Type_Enum type;
 
     //Relationship
     //n-1 student

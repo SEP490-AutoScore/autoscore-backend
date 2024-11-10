@@ -19,6 +19,6 @@ public class ScoreResponseDTO {
 
     private LocalDateTime gradedAt;
 
-    private Boolean flag; // 0 = không bị đánh cờ, 1 = kiểm tra đặc biệt
-    private String flagReason;
+    private String levelOfPlagiarism;
+    private String plagiarismReason;
 }

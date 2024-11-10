@@ -15,6 +15,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SourceDetailDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source_Detail;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceDetailRepository;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceRepository;
 import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentRepository;
@@ -77,13 +78,14 @@ public class SourceDetailService {
     }
 
     @Transactional
-    public void saveStudentSubmission(File studentFolder, Student student, Source source) {
+    public void saveStudentSubmission(File studentFolder, Student student, Source source, String examType) {
         try {
             // Lưu thông tin chi tiết về mã nguồn
             Source_Detail sourceDetail = new Source_Detail();
             sourceDetail.setStudentSourceCodePath(studentFolder.getPath());
             sourceDetail.setStudent(student);
             sourceDetail.setSource(source);
+            sourceDetail.setType(Exam_Type_Enum.valueOf(examType));
             sourceDetailRepository.save(sourceDetail);
 
             logger.info("Successfully saved submission for student: {}", student.getStudentCode());
