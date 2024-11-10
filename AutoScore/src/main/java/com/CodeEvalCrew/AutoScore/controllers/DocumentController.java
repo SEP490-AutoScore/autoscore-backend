@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
-import com.CodeEvalCrew.AutoScore.services.document_service.DocumentService;
+import com.CodeEvalCrew.AutoScore.services.document_service.IDocumentService;
 
 @RestController
 @RequestMapping("api/document/")
 public class DocumentController {
     
     @Autowired
-    private DocumentService documentService;
+    private IDocumentService documentService;
 
     @GetMapping("/generate-word")
     public ResponseEntity<byte[]> generateWord(@RequestParam Long examPaperId) {
