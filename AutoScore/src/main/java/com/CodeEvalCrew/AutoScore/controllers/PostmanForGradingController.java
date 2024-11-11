@@ -48,4 +48,14 @@ public class PostmanForGradingController {
         }
     }
 
+    @PostMapping("/merge/{examPaperId}")
+    public ResponseEntity<String> mergePostmanCollections(@PathVariable Long examPaperId) {
+        try {
+            String message = postmanForGradingService.mergePostmanCollections(examPaperId);
+            return new ResponseEntity<>(message, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

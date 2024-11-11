@@ -291,7 +291,6 @@ public class ExamService implements IExamService {
         data.put("subjectCode", exam.getSubjectCode());
         data.put("duration", duration);
         data.put("instructions", exam.getInstructions());
-        data.put("important", exam.getImportant());
         data.put("semester", exam.getSemester());
         data.put("databaseDescription", exam.getDatabaseDescpription());
         data.put("databaseName", exam.getDatabaseName());
