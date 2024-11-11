@@ -35,9 +35,8 @@ public class Score {
     private LocalDateTime gradedAt;
 
     private String levelOfPlagiarism;
-    private String plagiarismReason;
     @Lob
-    private String codePlagiarism;
+    private String plagiarismReason;
 
     //Relationship
     //n-1 exam paper
@@ -57,4 +56,7 @@ public class Score {
     //1-n score detail
     @OneToMany(mappedBy = "score", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Score_Detail> scoreDetails;
+
+    @OneToMany(mappedBy = "score", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Code_Plagiarism> codePlagiarisms;
 }
