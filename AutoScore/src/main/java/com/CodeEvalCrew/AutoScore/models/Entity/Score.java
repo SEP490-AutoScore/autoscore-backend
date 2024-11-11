@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,6 +38,10 @@ public class Score {
     private String levelOfPlagiarism;
     @Lob
     private String plagiarismReason;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String logRunPostman;
 
     //Relationship
     //n-1 exam paper

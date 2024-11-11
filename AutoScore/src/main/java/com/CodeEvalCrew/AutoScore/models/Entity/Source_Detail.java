@@ -44,7 +44,6 @@ public class Source_Detail {
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] fileCollectionPostman;
-
     @Enumerated(EnumType.STRING)
     private Exam_Type_Enum type;
 

@@ -77,9 +77,16 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         question += "\n" + databaseScript;
                     } else if (content.getOrderPriority() == 2) {
                         question += "\n\n\n"
-                                + "\n -Question Content:" + examQuestion.getQuestionContent()
-                                + "\n -Role" + examQuestion.getRoleAllow()
-                                + "\n" + examQuestion.getDescription();
+                                + "\n - Question Content: " + examQuestion.getQuestionContent()
+                                + "\n - Role: " + examQuestion.getRoleAllow()
+                                + "\n - Description: " + examQuestion.getDescription()
+                                + "\n - End point: " + examQuestion.getEndPoint()
+                                + "\n - Http method: " + examQuestion.getHttpMethod()
+                                + "\n - Payload type: " + examQuestion.getPayloadType()
+                                + "\n - Validation: " + examQuestion.getValidation()
+                                + "\n - Success response: " + examQuestion.getSucessResponse()
+                                + "\n - Error response: " + examQuestion.getErrorResponse()
+                                + "\n - Payload: " + examQuestion.getPayload();
                     }
 
                     String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
