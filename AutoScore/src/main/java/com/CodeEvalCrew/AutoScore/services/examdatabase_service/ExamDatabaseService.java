@@ -140,4 +140,96 @@ public class ExamDatabaseService implements IExamDatabaseService {
             }
         }
     }
+
+    public String updateSqlFile(MultipartFile sqlFile, MultipartFile imageFile, Long examPaperId) throws Exception {
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            throw new Exception("SQL Server driver not found: " + e.getMessage());
+        }
+    
+        // Chuyển đổi nội dung file .sql thành chuỗi và lưu vào `databaseScript`
+        String databaseScript;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(sqlFile.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder scriptBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                scriptBuilder.append(line).append("\n");
+            }
+            databaseScript = scriptBuilder.toString();
+        }
+    
+        String dbName = extractDatabaseName(databaseScript);
+        if (dbName == null) {
+            throw new Exception("Database name not found in .sql file");
+        }
+    
+        // Kiểm tra và xóa các thông tin databaseImage, databaseName, và databaseScript nếu có
+        Exam_Database existingDatabase = examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId).orElse(null);
+        if (existingDatabase != null) {
+            existingDatabase.setDatabaseImage(null);
+            existingDatabase.setDatabaseName(null);
+            existingDatabase.setDatabaseScript(null);
+            examDatabaseRepository.save(existingDatabase);
+        }
+    
+        try (Connection conn = DriverManager.getConnection(url)) {
+            conn.setAutoCommit(false);
+            Statement stmt = conn.createStatement();
+    
+            try {
+                dropDatabaseIfExists(stmt, dbName);
+    
+                stmt.execute("CREATE DATABASE " + dbName);
+                stmt.execute("USE " + dbName);
+    
+                executeSqlStatements(stmt, databaseScript.replaceFirst("(?i)CREATE DATABASE\\s+[a-zA-Z0-9_]+\\s*GO", "")
+                        .replaceFirst("(?i)USE\\s+[a-zA-Z0-9_]+\\s*GO", ""), dbName);
+    
+                conn.commit();
+    
+                // Xử lý tệp ảnh
+                if (imageFile == null || imageFile.isEmpty()) {
+                    throw new Exception("Invalid or missing image file.");
+                }
+    
+                String contentType = imageFile.getContentType();
+                if (!"image/png".equals(contentType) && !"image/jpeg".equals(contentType) && !"image/jpg".equals(contentType)) {
+                    throw new Exception("Only PNG, JPEG, JPG files are accepted");
+                }
+    
+                byte[] imageData = imageFile.getBytes();
+    
+                // Lấy thông tin về bài thi
+                Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                        .orElseThrow(() -> new Exception("Exam paper not found with id: " + examPaperId));
+    
+                Long authenticatedUserId = Util.getAuthenticatedAccountId();
+                LocalDateTime now = Util.getCurrentDateTime();
+    
+                Exam_Database updatedDatabase = existingDatabase != null ? existingDatabase : new Exam_Database();
+                updatedDatabase.setDatabaseScript(databaseScript);
+                updatedDatabase.setDatabaseName(dbName);
+                updatedDatabase.setDatabaseImage(imageData);
+                updatedDatabase.setStatus(true);
+                updatedDatabase.setUpdatedAt(now);
+                updatedDatabase.setUpdatedBy(authenticatedUserId);
+                updatedDatabase.setExamPaper(examPaper);
+    
+                examDatabaseRepository.save(updatedDatabase);
+    
+                return "Database " + dbName + " has been updated successfully.";
+    
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new Exception("Transaction failed and rolled back: " + e.getMessage());
+            }
+    
+        } catch (SQLException e) {
+            throw new Exception("SQL connection or execution error: " + e.getMessage());
+        }
+    }
+    
+
+
 }
