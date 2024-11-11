@@ -2,6 +2,7 @@ package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +22,6 @@ public class ScoreResponseDTO {
 
     private String levelOfPlagiarism;
     private String plagiarismReason;
+    @Lob
+    private String codePlagiarism;
 }
