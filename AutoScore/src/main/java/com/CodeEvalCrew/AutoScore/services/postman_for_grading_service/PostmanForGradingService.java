@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.persistence.exceptions.JSONException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -24,9 +25,11 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Info;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.repositories.ai_info_repository.AIInfoRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
@@ -44,6 +47,8 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
     @Autowired
     private IExamDatabaseRepository examDatabaseRepository;
+    @Autowired
+    private IExamPaperRepository examPaperRepository;
 
     @Autowired
     private AIInfoRepository aiInfoRepository;
@@ -52,6 +57,78 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     private RestTemplate restTemplate;
 
     private Long totalPmTest;
+
+    @Override
+    public String mergePostmanCollections(Long examPaperId) {
+        try {
+            // Lấy danh sách các Postman_For_Grading theo examPaperId
+            List<Postman_For_Grading> postmanList = postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId);
+    
+            if (postmanList.isEmpty()) {
+                return "Không tìm thấy file Postman Collection nào cho Exam Paper ID: " + examPaperId;
+            }
+    
+            // Khởi tạo JSONObject để lưu file collection đã gộp
+            JSONObject mergedCollection = new JSONObject();
+            JSONArray mergedItems = new JSONArray();
+    
+            // Lấy info và item từ file đầu tiên
+            Postman_For_Grading firstPostman = postmanList.get(0);
+            JSONObject firstFileCollection = new JSONObject(
+                    new String(firstPostman.getFileCollectionPostman(), StandardCharsets.UTF_8));
+            
+            // Lấy info và item từ file đầu tiên
+            if (firstFileCollection.has("info")) {
+                mergedCollection.put("info", firstFileCollection.getJSONObject("info"));
+            }
+    
+            if (firstFileCollection.has("item")) {
+                JSONArray firstItems = firstFileCollection.getJSONArray("item");
+                for (int i = 0; i < firstItems.length(); i++) {
+                    mergedItems.put(firstItems.getJSONObject(i));
+                }
+            }
+    
+            // Gộp các item từ các file tiếp theo
+            for (int index = 1; index < postmanList.size(); index++) {
+                Postman_For_Grading postman = postmanList.get(index);
+                byte[] fileBytes = postman.getFileCollectionPostman();
+                String fileContent = new String(fileBytes, StandardCharsets.UTF_8);
+                JSONObject jsonObject = new JSONObject(fileContent);
+    
+                // Lấy các item và thêm vào mergedItems
+                if (jsonObject.has("item")) {
+                    JSONArray items = jsonObject.getJSONArray("item");
+                    for (int i = 0; i < items.length(); i++) {
+                        mergedItems.put(items.getJSONObject(i));
+                    }
+                }
+            }
+    
+            // Gán danh sách item đã gộp vào mergedCollection
+            mergedCollection.put("item", mergedItems);
+    
+            // Chuyển JSONObject mergedCollection thành byte[]
+            byte[] mergedFileContent = mergedCollection.toString().getBytes(StandardCharsets.UTF_8);
+    
+            // Lưu file đã gộp vào Exam_Paper
+            Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElseThrow(
+                    () -> new RuntimeException("Exam Paper không tồn tại với ID: " + examPaperId));
+            examPaper.setFileCollectionPostman(mergedFileContent);
+            examPaper.setIsComfirmFile(false);
+            examPaperRepository.save(examPaper);
+    
+            return "Gộp file Postman Collection thành công cho Exam Paper ID: " + examPaperId;
+    
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+            return "Lỗi xảy ra khi gộp file Postman Collection: " + e.getMessage();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Lỗi không xác định xảy ra: " + e.getMessage();
+        }
+    }
+    
 
     @Transactional
     public String generatePostmanCollection(Long gherkinScenarioId) {

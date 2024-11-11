@@ -315,4 +315,14 @@ public class ExamPaperService implements IExamPaperService {
         return result;
     }
 
+    @Override
+    public byte[] exportPostmanCollection(Long examPaperId) throws Exception {
+        // Lấy Exam_Paper từ ID
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new Exception("Exam Paper not found with ID: " + examPaperId));
+
+        // Trả về nội dung fileCollectionPostman dưới dạng byte[]
+        return examPaper.getFileCollectionPostman();
+    }
+
 }
