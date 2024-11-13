@@ -1,10 +1,6 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,31 +8,28 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
-import com.CodeEvalCrew.AutoScore.services.document_service.DocumentService;
+import com.CodeEvalCrew.AutoScore.services.document_service.IDocumentService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
+@RestController
+@RequestMapping("api/document/")
 public class DocumentController {
     
     @Autowired
-    private DocumentService documentService;
+    private IDocumentService documentService;
 
-    @PostMapping("/generate-word")
-    public ResponseEntity<byte[]> generateWord(@RequestBody Long examPaperId) {
+    @GetMapping("/generate-word")
+    public ResponseEntity<byte[]> generateWord(@RequestParam Long examPaperId) {
         // Dotenv dotenv = Dotenv.load();
         // String path = dotenv.get("PATH");
         try {
             // Merge data into the Word template
-            documentService.mergeDataToWord(examPaperId);
-            
-            String outputPath = "C:\\Project\\SEP490\\output.docx";
-            
-            // Read the output file and return it as a downloadable file
-            File file = new File(outputPath);
-            byte[] documentContent = new FileInputStream(file).readAllBytes();
+            byte[] documentContent = documentService.mergeDataToWord(examPaperId);
             // Return the file as a response
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=examPaper.docx")

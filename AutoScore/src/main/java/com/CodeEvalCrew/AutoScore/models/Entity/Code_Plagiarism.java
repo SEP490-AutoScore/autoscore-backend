@@ -8,26 +8,24 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Entity
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
-@Getter
-@Setter
-@ToString
-public class Important {
+@AllArgsConstructor
+public class Code_Plagiarism {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long importantId;
-    private String importantName;
-    private String importantCode;
+    private Long codePlagiarismId;
     @Lob
-    private String importantScrip;
+    private String selfCode;
+    private String studentCodePlagiarism;
+    @Lob
+    private String studentPlagiarism;
+
     @ManyToOne
-    @JoinColumn(name = "subjectId", nullable = false)
-    private Subject subject;
+    @JoinColumn(name = "scoreId", nullable = false)
+    private Score score;
 }

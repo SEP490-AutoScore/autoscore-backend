@@ -4,8 +4,13 @@ import java.util.List;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 
-public interface  IPostmanForGradingService {
+public interface IPostmanForGradingService {
       List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId);
+
       void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs);
+
       String generatePostmanCollection(Long gherkinScenarioId);
+
+      // Hàm merge các file Postman collection của cùng 1 examPaperId
+      String mergePostmanCollections(Long examPaperId);
 }

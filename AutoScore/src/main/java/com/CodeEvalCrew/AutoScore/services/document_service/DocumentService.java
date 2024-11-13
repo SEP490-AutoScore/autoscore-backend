@@ -22,19 +22,24 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
+import com.CodeEvalCrew.AutoScore.mappers.ExamQuestionMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionExport;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.Important;
+import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
-import com.CodeEvalCrew.AutoScore.specification.ExamDatabaseSpecification;
+import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
+import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
 
 @Service
 public class DocumentService implements IDocumentService {
@@ -45,6 +50,12 @@ public class DocumentService implements IDocumentService {
     private IExamPaperRepository examPaperRepository;
     @Autowired
     private IExamDatabaseRepository examDatabaseRepository;
+    @Autowired
+    private IExamRepository examRepository;
+    @Autowired
+    private ImportantRepository importantRepository;
+    @Autowired
+    private ImportantExamPaperRepository importantExamPaperRepository;
 
     @Override
     public byte[] mergeDataToWord(Long examPaperId) throws Exception, NotFoundException {
@@ -69,7 +80,6 @@ public class DocumentService implements IDocumentService {
         data.put("subjectCode", exam.getSubjectCode());
         data.put("duration", duration);
         data.put("instructions", exam.getInstructions());
-        data.put("important", exam.getImportant());
         data.put("semester", exam.getSemester());
         data.put("databaseDescription", exam.getDatabaseDescpription());
         data.put("databaseName", exam.getDatabaseName());
@@ -80,6 +90,9 @@ public class DocumentService implements IDocumentService {
 
             // Replace placeholders in paragraphs
             replacePlaceholdersInDocument(document, data);
+
+            //add important to the word
+            fillImportantField(document, exam);
 
             // Add image in to the exam paper
             addDatabaseImage(document, exam);
@@ -94,8 +107,53 @@ public class DocumentService implements IDocumentService {
             }
         }
         File file = new File(outputPath);
-        byte[] documentContent = new FileInputStream(file).readAllBytes();
+        byte[] documentContent;
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            documentContent = fileInputStream.readAllBytes();
+        }
+        file.delete();
         return documentContent;
+    }
+
+    private void fillImportantField(XWPFDocument document, ExamExport exam) {
+        List<Long> importantIds = exam.getImportants();
+    
+        if (importantIds == null || importantIds.isEmpty()) {
+            return;  // Exit if there are no important IDs to process
+        }
+        
+        // Locate {important} placeholder
+        for (XWPFParagraph paragraph : document.getParagraphs()) {
+            for (XWPFRun run : paragraph.getRuns()) {
+                String text = run.getText(0);
+                if (text != null && text.contains("{important}")) {
+                    // Clear existing text and add the title for important instructions
+                    run.setText("IMPORTANT – before you start doing your solution, MUST do the following steps:", 0);
+                    run.addBreak();
+                    
+                    // Iterate over each important ID and add the corresponding instruction with breaks
+                    for (Long importantId : importantIds) {
+                        String importantText = getImportantText(importantId);
+                        if (importantText != null) {
+                            run.setText("\t" + importantText);
+                            run.addBreak();  // Additional line break after each step for spacing
+                        }
+                    }
+                    break;  // Stop after replacing {important}
+                }
+            }
+        }
+    }
+
+    //fortest
+    private String getImportantText(Long importantId) {
+        // Logic to retrieve the information for the important ID
+        Optional<Important> important = importantRepository.findById(importantId);
+        if (important.isEmpty()) {
+            return "";
+        }
+        return important.get().getImportantScrip();
+        // Return null if no matching ID is found
     }
 
     private ExamExport getExamToExamExport(Long examPaperId) throws NotFoundException, Exception {
@@ -103,24 +161,34 @@ public class DocumentService implements IDocumentService {
         try {
             List<ExamQuestionExport> questions = new ArrayList<>(getListExamQuestionExport(examPaperId));
 
+            //getExam paper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper", examPaperId);
 
-            // Exam exam = checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()), "Exam", examPaper.getExam().getExamId());
-            Specification<Exam_Database> spec = ExamDatabaseSpecification.hasForeignKey(examPaperId, "exam_paper", "examPaperId");
+            //check exam
+            Exam exam = checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()), "Exam", examPaper.getExam().getExamId());
 
-            //get error
+            //get list important id
+            List<Important_Exam_Paper> importants = importantExamPaperRepository.findImportantExamPaperIdByExamPaper_ExamPaperId(examPaperId);
+            List<Long> importantIds = new ArrayList<>();
+            for (Important_Exam_Paper important : importants) {
+                importantIds.add(important.getImportant().getImportantId());
+            }
+
+            //get exam database
             Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
 
-            // result.setExamCode(exam.getExamCode());
+            result.setExamCode(exam.getExamCode());
             result.setExamPaperCode(examPaper.getExamPaperCode());
-            // result.setSemester(exam.getSemester().getSemesterCode());
-            // result.setSubjectCode(exam.getSubject().getSubjectCode());
-            result.setDuration(90);
-            result.setDatabaseDescpription("Database Descpription");
-            result.setDatabaseNote("databaseNote");
+            result.setSemester(exam.getSemester().getSemesterCode());
+            result.setSubjectCode(exam.getSubject().getSubjectCode());
+            result.setInstructions(examPaper.getInstruction());
+            result.setImportants(importantIds);
+            result.setDuration(examPaper.getDuration());
             result.setQuestions(questions);
-            result.setDatabaseName("Database Name");
-            result.setDatabaseImage(getImageAsByteArray(""));
+            result.setDatabaseDescpription("Database Descpription");
+            result.setDatabaseNote(examDatabase.getDatabaseNote());
+            result.setDatabaseName(examDatabase.getDatabaseName());
+            result.setDatabaseImage(examDatabase.getDatabaseImage());
 
         } catch (NotFoundException ex) {
             throw ex;
@@ -142,9 +210,7 @@ public class DocumentService implements IDocumentService {
         }
 
         for (Exam_Question examQuestion : listQuestions) {
-            ExamQuestionExport export = new ExamQuestionExport();
-            // export.setQuestionContent(examQuestion.getQuestionContent());
-            // export.setQuestionScore(examQuestion.getMaxScore());
+            ExamQuestionExport export = ExamQuestionMapper.INSTANCE.questionToExport(examQuestion);
             result.add(export);
         }
 
@@ -208,9 +274,9 @@ public class DocumentService implements IDocumentService {
                             imageRun.addPicture(
                                     imageInputStream,
                                     XWPFDocument.PICTURE_TYPE_PNG, // Correct image type
-                                    "image.png", // Image name (for internal Word reference)
-                                    Units.toEMU(200), // Width in EMUs
-                                    Units.toEMU(150) // Height in EMUs
+                                    "DatabaseImage.png", // Image name (for internal Word reference)
+                                    Units.toEMU(300), // Width in EMUs
+                                    Units.toEMU(200) // Height in EMUs
                             );
                         } catch (InvalidFormatException e) {
                             message = "Error adding image to document.";
@@ -225,10 +291,8 @@ public class DocumentService implements IDocumentService {
             }
         } catch (IOException e) {
             message = "Error reading the image file.";
-            e.printStackTrace();
         } catch (Exception e) {
             message = "An unexpected error occurred.";
-            e.printStackTrace();
         }
 
         return message;
@@ -240,11 +304,6 @@ public class DocumentService implements IDocumentService {
             XWPFParagraph questionParagraph = document.createParagraph();
             XWPFRun questionRun = questionParagraph.createRun();
             questionRun.setBold(true);  // Highlight the question
-            // questionRun.setText("Question: " + question.getQuestionContent() + " (" + question.getQuestionScore() + " points)");
-
-            // Create numbered list for the barems
-            // addNumberedBaremList(document, question.getBarems());
-            // Add space between questions
             document.createParagraph().createRun();
         }
     }

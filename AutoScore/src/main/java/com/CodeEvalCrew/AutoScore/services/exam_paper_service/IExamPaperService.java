@@ -29,4 +29,7 @@ public interface IExamPaperService {
 
   List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException;
 
+  // Method to export Postman collection from the Exam_Paper
+  byte[] exportPostmanCollection(Long examPaperId) throws Exception;
+
 }

@@ -3,6 +3,7 @@ package com.CodeEvalCrew.AutoScore.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -139,6 +140,26 @@ public class ExamPaperController {
         List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService.getGherkinScenariosByExamPaperId(examPaperId);
         return new ResponseEntity<>(gherkinScenarioInfoList, HttpStatus.OK);
     }
+
+    
+    @GetMapping("/export-postman/{examPaperId}")
+    public ResponseEntity<byte[]> exportPostmanCollection(@PathVariable Long examPaperId) {
+        try {
+            byte[] fileContent = examPaperService.exportPostmanCollection(examPaperId);
+    
+            // Set the response headers for file download
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "attachment; filename=postman_collection.json");
+            headers.add("Content-Type", "application/json");
+    
+            return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            // Return error message as a byte array
+            byte[] errorMessage = ("Failed to export Postman Collection: " + e.getMessage()).getBytes();
+            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+        }
+    }
+    
     
 
 }

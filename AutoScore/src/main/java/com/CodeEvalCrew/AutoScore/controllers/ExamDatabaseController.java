@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,4 +41,24 @@ public class ExamDatabaseController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') or hasAuthority('UPDATE_EXAM_DATABASE')")
+    @PutMapping(value = "/update", consumes = {"multipart/form-data"})
+    @Operation(
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = { @Content(mediaType = "multipart/form-data") }
+        )
+    )
+    public ResponseEntity<String> updateSqlFile(@RequestParam("file.sql") MultipartFile sqlFile,
+                                                @RequestParam("fileimage") MultipartFile imageFile,
+                                                @RequestParam("examPaperId") Long examPaperId) {
+        try {
+            String result = examDatabaseService.updateSqlFile(sqlFile, imageFile, examPaperId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+
 }
