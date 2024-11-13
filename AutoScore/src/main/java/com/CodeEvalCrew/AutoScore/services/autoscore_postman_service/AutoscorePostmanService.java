@@ -222,7 +222,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                     e.printStackTrace();
                 }
             }
-       
+
             // Run Newman for successful deployments
             if (!successfulDeployments.isEmpty()) {
                 for (StudentSourceInfoDTO successfulStudent : successfulDeployments) {
@@ -254,34 +254,6 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
 
         }
     }
-
-        // if (!successfulDeployments.isEmpty()) {
-        // for (StudentSourceInfoDTO successfulStudent : successfulDeployments) {
-
-        // Map<String, Integer> passedFunctionNames = getAndRunPostmanCollection(
-        // successfulStudent.getStudentId(), successfulStudent.getSourceDetailId());
-
-        // // Convert List to Map to get count of each function's success
-        // Map<String, Long> functionPassedCountMap =
-        // passedFunctionNames.entrySet().stream()
-        // .collect(Collectors.groupingBy(Map.Entry::getKey,
-        // Collectors.summingLong(Map.Entry::getValue)));
-
-        // System.out.println(
-        // "Function passed count map for studentId " + successfulStudent.getStudentId()
-        // + ": "
-        // + functionPassedCountMap);
-
-        // // Call saveScoreAndScoreDetail with the Map and logBuilder
-        // saveScoreAndScoreDetail(successfulStudent.getStudentId(), examPaperId,
-        // functionPassedCountMap,logBuilder);
-        // deleteAndCreateDatabaseByExamPaperId(examPaperId);
-        // }
-        // } else {
-        // System.out.println("No successful deployments found to run Newman.");
-        // }
-        // }
-    
 
     private Pair<Map<String, Integer>, String> getAndRunPostmanCollection(Long studentId, Long sourceDetailId) {
         Map<String, Integer> functionResults = new HashMap<>();
@@ -375,268 +347,103 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         return Pair.of(functionResults, logBuilder.toString());
     }
 
-    // private Map<String, Integer> getAndRunPostmanCollection(Long studentId, Long
-    // sourceDetailId) {
-    // Map<String, Integer> functionResults = new HashMap<>();
-    // String currentFunction = null;
-    // int passCount = 0;
-    // StringBuilder logBuilder = new StringBuilder(); // Dùng StringBuilder để lưu
-    // log
-
-    // try {
-    // // Tạo thư mục sinh viên nếu chưa có
-    // Path studentDir = Paths.get(directoryPath, String.valueOf(studentId));
-    // Files.createDirectories(studentDir);
-
-    // // Lấy dữ liệu collection và tạo file Postman
-    // Source_Detail sourceDetail = sourceDetailRepository.findById(sourceDetailId)
-    // .orElseThrow(() -> new RuntimeException("Source_Detail not found with ID: " +
-    // sourceDetailId));
-
-    // Path postmanFilePath = studentDir.resolve(studentId + ".json");
-
-    // byte[] postmanCollection = sourceDetail.getFileCollectionPostman();
-    // System.out.println("Debug: fileCollectionPostman for sourceDetailId " +
-    // sourceDetailId + " is "
-    // + (postmanCollection == null ? "null" : "not null"));
-    // Objects.requireNonNull(postmanCollection,
-    // "fileCollectionPostman is null for sourceDetailId: " + sourceDetailId);
-    // Files.write(postmanFilePath, postmanCollection);
-
-    // // Chờ cho file được tạo thành công trước khi tiếp tục
-    // int waitTimeInSeconds = 10; // Thời gian chờ tối đa (giây)
-    // int intervalInMilliseconds = 500; // Khoảng thời gian giữa các lần kiểm tra
-    // (ms)
-    // int waited = 0;
-    // while (!Files.exists(postmanFilePath) && waited < waitTimeInSeconds * 1000) {
-    // Thread.sleep(intervalInMilliseconds);
-    // waited += intervalInMilliseconds;
-    // }
-
-    // if (!Files.exists(postmanFilePath)) {
-    // throw new IOException("Failed to create Postman collection file within
-    // timeout.");
-    // }
-
-    // System.out.println("Running Newman for studentId: " + studentId);
-
-    // // Cấu hình ProcessBuilder
-    // ProcessBuilder processBuilder = new ProcessBuilder(NEWMAN_CMD_PATH, "run",
-    // postmanFilePath.toString());
-
-    // processBuilder.redirectErrorStream(true);
-    // Process process = processBuilder.start();
-
-    // // Đặt tên file lưu output
-    // Path outputFile = studentDir.resolve(studentId + ".txt");
-
-    // try (
-    // BufferedReader reader = new BufferedReader(
-    // new InputStreamReader(process.getInputStream(), "UTF-8"));
-    // BufferedWriter writer = Files.newBufferedWriter(outputFile)) {
-
-    // String line;
-    // while ((line = reader.readLine()) != null) {
-    // writer.write(line); // Ghi dòng đầu ra vào file
-    // writer.newLine();
-
-    // line = line.trim();
-    // logBuilder.append(line).append("\n"); // Lưu log vào StringBuilder
-
-    // if (line.startsWith("→")) {
-    // // If there's an existing function, store its pass count
-    // if (currentFunction != null) {
-    // functionResults.put(currentFunction, passCount);
-    // System.out.println(
-    // "Detected function: " + currentFunction + " with pass count: " + passCount);
-    // }
-
-    // // Get the entire function name (everything after "→")
-    // currentFunction = line.substring(2).trim(); // Trim whitespace after the
-    // arrow
-    // passCount = 0; // Reset pass count for the new function
-    // } else if (line.startsWith("√")) {
-    // // Capture the full message of the passed assertion
-    // String successMessage = line.substring(1).trim(); // Get everything after "√"
-    // passCount++; // Increment pass count for successful assertions
-    // System.out.println("Success for function " + currentFunction + ": " +
-    // successMessage);
-    // }
-
-    // }
-
-    // if (currentFunction != null) {
-    // functionResults.put(currentFunction, passCount);
-    // System.out.println("Detected function: " + currentFunction + " with pass
-    // count: " + passCount);
-    // }
-
-    // }
-
-    // int exitCode = process.waitFor();
-
-    // if (exitCode != 0) {
-    // System.out.println(
-    // "Newman execution failed with exit code: " + exitCode + " for studentId: " +
-    // studentId);
-    // } else {
-    // System.out.println("Newman executed successfully for studentId: " +
-    // studentId);
-    // }
-
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-
-    // // In kết quả cuối cùng
-    // functionResults.forEach((function, count) -> {
-    // System.out.println("noPmtestAchieve for " + function + ": " + count);
-    // });
-
-    // return functionResults;
-    // }
-
     public void saveScoreAndScoreDetail(Long studentId, Long examPaperId,
             Map<String, Long> functionPassedCountMap, String logBuilder) {
-    Student student = studentRepository.findById(studentId).orElse(null);
-    Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElse(null);
+        Student student = studentRepository.findById(studentId).orElse(null);
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElse(null);
 
-    if (student == null || examPaper == null) {
-        System.err.println("Student hoặc Exam Paper không tồn tại.");
-        return;
-    }
-
-    Score score = new Score();
-    score.setStudent(student);
-    score.setExamPaper(examPaper);
-    score.setGradedAt(LocalDateTime.now());
-
-    score.setLogRunPostman(logBuilder.toString()); // Lưu log vào trường logRunPostman
-    // Lưu tạm Score để có thể dùng làm khóa ngoại cho Score_Detail
-    scoreRepository.save(score);
-
-    Map<Long, Float> parentScoreMap = new HashMap<>(); // Lưu điểm của chức năng cha
-    float totalScoreAchieve = 0f; // Biến để lưu tổng điểm của tất cả các Score_Detail
-
-    // Fetch all Postman_For_Grading for the given examPaperId, sorted by order (e.g., sequence)
-    List<Postman_For_Grading> postmanFunctions = postmanForGradingRepository.findByExamPaperIdOrderByOrderBy(examPaperId);
-
-    for (Postman_For_Grading postmanFunction : postmanFunctions) {
-        // Assuming there is no need to get the Exam_Question here directly, 
-        // otherwise you would join or fetch Exam_Questions based on each Postman_For_Grading
-        Exam_Question question = postmanFunction.getExamQuestion(); // Get the associated question
-
-        // Create Score_Detail for each Postman_For_Grading
-        Score_Detail scoreDetail = new Score_Detail();
-        scoreDetail.setScore(score);
-        scoreDetail.setExamQuestion(question);
-        scoreDetail.setPostmanFunctionName(postmanFunction.getPostmanFunctionName());
-        scoreDetail.setScoreOfFunction(postmanFunction.getScoreOfFunction());
-        scoreDetail.setTotalPmtest(postmanFunction.getTotalPmTest());
-
-        Long noPmtestAchieve = functionPassedCountMap.getOrDefault(postmanFunction.getPostmanFunctionName(), 0L);
-        System.out.println("noPmtestAchieve for function " + postmanFunction.getPostmanFunctionName() + ": " + noPmtestAchieve);
-
-        scoreDetail.setNoPmtestAchieve(noPmtestAchieve);
-
-        // Tính scoreAchieve
-        Float scoreAchieve = calculateScoreAchieve(postmanFunction, noPmtestAchieve, functionPassedCountMap, parentScoreMap);
-        scoreDetail.setScoreAchieve(scoreAchieve);
-
-        // Cộng dồn scoreAchieve vào totalScoreAchieve
-        totalScoreAchieve += scoreAchieve;
-
-        // Nếu là chức năng cha, cập nhật parentScoreMap với scoreAchieve
-        if (postmanFunction.getPostmanForGradingParentId() == null || 
-            postmanFunction.getPostmanForGradingParentId().equals(postmanFunction.getPostmanForGradingId())) {
-            parentScoreMap.put(postmanFunction.getPostmanForGradingId(), scoreAchieve);
-            System.out.println("Updated parentScoreMap for function " + postmanFunction.getPostmanFunctionName() + " with scoreAchieve: " + scoreAchieve);
+        if (student == null || examPaper == null) {
+            System.err.println("Student hoặc Exam Paper không tồn tại.");
+            return;
         }
 
-        // Lưu scoreDetail vào database
-        scoreDetailRepository.save(scoreDetail);
-        System.out.println("Saved score detail for function " + postmanFunction.getPostmanFunctionName() + ", scoreAchieve: " + scoreAchieve);
+        // Sử dụng StringBuilder để lưu lý do
+        StringBuilder reasonBuilder = new StringBuilder();
+
+        Score score = new Score();
+        score.setStudent(student);
+        score.setExamPaper(examPaper);
+        score.setGradedAt(LocalDateTime.now());
+
+        score.setLogRunPostman(logBuilder.toString()); // Lưu log vào trường logRunPostman
+        // Lưu tạm Score để có thể dùng làm khóa ngoại cho Score_Detail
+        scoreRepository.save(score);
+
+        Map<Long, Float> parentScoreMap = new HashMap<>(); // Lưu điểm của chức năng cha
+        float totalScoreAchieve = 0f; // Biến để lưu tổng điểm của tất cả các Score_Detail
+
+        // Fetch all Postman_For_Grading for the given examPaperId, sorted by order
+        // (e.g., sequence)
+        List<Postman_For_Grading> postmanFunctions = postmanForGradingRepository
+                .findByExamPaperIdOrderByOrderBy(examPaperId);
+
+        for (Postman_For_Grading postmanFunction : postmanFunctions) {
+            // Assuming there is no need to get the Exam_Question here directly,
+            // otherwise you would join or fetch Exam_Questions based on each
+            // Postman_For_Grading
+            Exam_Question question = postmanFunction.getExamQuestion(); // Get the associated question
+
+            // Create Score_Detail for each Postman_For_Grading
+            Score_Detail scoreDetail = new Score_Detail();
+            scoreDetail.setScore(score);
+            scoreDetail.setExamQuestion(question);
+            scoreDetail.setPostmanFunctionName(postmanFunction.getPostmanFunctionName());
+            scoreDetail.setScoreOfFunction(postmanFunction.getScoreOfFunction());
+            scoreDetail.setTotalPmtest(postmanFunction.getTotalPmTest());
+
+            Long noPmtestAchieve = functionPassedCountMap.getOrDefault(postmanFunction.getPostmanFunctionName(), 0L);
+            System.out.println("noPmtestAchieve for function " + postmanFunction.getPostmanFunctionName() + ": "
+                    + noPmtestAchieve);
+            reasonBuilder.append("noPmtestAchieve for function ")
+                    .append(postmanFunction.getPostmanFunctionName())
+                    .append(": ")
+                    .append(noPmtestAchieve)
+                    .append("\n");
+
+            scoreDetail.setNoPmtestAchieve(noPmtestAchieve);
+
+            // Tính scoreAchieve
+            Float scoreAchieve = calculateScoreAchieve(postmanFunction, noPmtestAchieve, functionPassedCountMap,
+                    parentScoreMap,reasonBuilder);
+            scoreDetail.setScoreAchieve(scoreAchieve);
+
+            // Cộng dồn scoreAchieve vào totalScoreAchieve
+            totalScoreAchieve += scoreAchieve;
+
+            // Nếu là chức năng cha, cập nhật parentScoreMap với scoreAchieve
+            if (postmanFunction.getPostmanForGradingParentId() == null ||
+                    postmanFunction.getPostmanForGradingParentId().equals(postmanFunction.getPostmanForGradingId())) {
+                parentScoreMap.put(postmanFunction.getPostmanForGradingId(), scoreAchieve);
+                System.out.println("Updated parentScoreMap for function " + postmanFunction.getPostmanFunctionName()
+                        + " with scoreAchieve: " + scoreAchieve);
+                reasonBuilder.append("Updated parentScoreMap for function ")
+                        .append(postmanFunction.getPostmanFunctionName())
+                        .append(" with scoreAchieve: ")
+                        .append(scoreAchieve)
+                        .append("\n");
+            }
+
+            // Lưu scoreDetail vào database
+            scoreDetailRepository.save(scoreDetail);
+            System.out.println("Saved score detail for function " + postmanFunction.getPostmanFunctionName()
+                    + ", scoreAchieve: " + scoreAchieve);
+            reasonBuilder.append("Saved score detail for function ")
+                    .append(postmanFunction.getPostmanFunctionName())
+                    .append(", scoreAchieve: ")
+                    .append(scoreAchieve)
+                    .append("\n");
+        }
+
+        // Cập nhật lại tổng điểm vào Score
+        score.setTotalScore(totalScoreAchieve);
+        scoreRepository.save(score); // Lưu lại Score với totalScore đã cập nhật
+        score.setReason(reasonBuilder.toString()); // Gán lý do vào trường reason
+        System.out.println("Saved total score: " + totalScoreAchieve);
+        reasonBuilder.append("Saved total score: ").append(totalScoreAchieve).append("\n");
     }
 
-    // Cập nhật lại tổng điểm vào Score
-    score.setTotalScore(totalScoreAchieve);
-    scoreRepository.save(score); // Lưu lại Score với totalScore đã cập nhật
-    System.out.println("Saved total score: " + totalScoreAchieve);
-}
-
-
-
-    // public void saveScoreAndScoreDetail(Long studentId, Long examPaperId,
-    //         Map<String, Long> functionPassedCountMap, String logBuilder) {
-    //     Student student = studentRepository.findById(studentId).orElse(null);
-    //     Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElse(null);
-
-    //     if (student == null || examPaper == null) {
-    //         System.err.println("Student hoặc Exam Paper không tồn tại.");
-    //         return;
-    //     }
-
-    //     Score score = new Score();
-    //     score.setStudent(student);
-    //     score.setExamPaper(examPaper);
-    //     score.setGradedAt(LocalDateTime.now());
-
-    //     score.setLogRunPostman(logBuilder.toString()); // Lưu log vào trường logRunPostman
-    //     // Lưu tạm Score để có thể dùng làm khóa ngoại cho Score_Detail
-    //     scoreRepository.save(score);
-
-    //     Map<Long, Float> parentScoreMap = new HashMap<>(); // Lưu điểm của chức năng cha
-    //     float totalScoreAchieve = 0f; // Biến để lưu tổng điểm của tất cả các Score_Detail
-
-    //     for (Exam_Question question : examPaper.getExamQuestions()) {
-    //         for (Postman_For_Grading postmanFunction : question.getPostmanForGradingEntries()) {
-    //             Score_Detail scoreDetail = new Score_Detail();
-    //             scoreDetail.setScore(score);
-    //             scoreDetail.setExamQuestion(question);
-    //             scoreDetail.setPostmanFunctionName(postmanFunction.getPostmanFunctionName());
-    //             scoreDetail.setScoreOfFunction(postmanFunction.getScoreOfFunction());
-    //             scoreDetail.setTotalPmtest(postmanFunction.getTotalPmTest());
-
-    //             Long noPmtestAchieve = functionPassedCountMap.getOrDefault(postmanFunction.getPostmanFunctionName(),
-    //                     0L);
-    //             System.out.println("noPmtestAchieve for function " + postmanFunction.getPostmanFunctionName() + ": " +
-    //                     noPmtestAchieve);
-
-    //             scoreDetail.setNoPmtestAchieve(noPmtestAchieve);
-
-    //             // Tính scoreAchieve
-    //             Float scoreAchieve = calculateScoreAchieve(postmanFunction, noPmtestAchieve,
-    //                     functionPassedCountMap, parentScoreMap);
-    //             scoreDetail.setScoreAchieve(scoreAchieve);
-
-    //             // Cộng dồn scoreAchieve vào totalScoreAchieve
-    //             totalScoreAchieve += scoreAchieve;
-
-    //             // Nếu là chức năng cha, cập nhật parentScoreMap với scoreAchieve
-    //             if (postmanFunction.getPostmanForGradingParentId() == null ||
-    //                     postmanFunction.getPostmanForGradingParentId()
-    //                             .equals(postmanFunction.getPostmanForGradingId())) {
-    //                 parentScoreMap.put(postmanFunction.getPostmanForGradingId(), scoreAchieve);
-    //                 System.out
-    //                         .println("Updated parentScoreMap for function " + postmanFunction.getPostmanFunctionName() +
-    //                                 " with scoreAchieve: " + scoreAchieve);
-    //             }
-
-    //             // Lưu scoreDetail vào database
-    //             scoreDetailRepository.save(scoreDetail);
-    //             System.out.println("Saved score detail for function " + postmanFunction.getPostmanFunctionName() +
-    //                     ", scoreAchieve: " + scoreAchieve);
-    //         }
-    //     }
-
-    //     // Cập nhật lại tổng điểm vào Score
-    //     score.setTotalScore(totalScoreAchieve);
-    //     scoreRepository.save(score); // Lưu lại Score với totalScore đã cập nhật
-    //     System.out.println("Saved total score: " + totalScoreAchieve);
-    // }
-
     private Float calculateScoreAchieve(Postman_For_Grading postmanFunction, Long noPmtestAchieve,
-            Map<String, Long> functionPassedCountMap, Map<Long, Float> parentScoreMap) {
+            Map<String, Long> functionPassedCountMap, Map<Long, Float> parentScoreMap, StringBuilder reasonBuilder) {
         Long totalPmtest = postmanFunction.getTotalPmTest();
         Float scoreOfFunction = postmanFunction.getScoreOfFunction();
         Long parentId = postmanFunction.getPostmanForGradingParentId();
@@ -649,6 +456,15 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                     ", noPmtestAchieve: " + noPmtestAchieve +
                     ", totalPmtest: " + totalPmtest +
                     ", scoreAchieve: " + scoreAchieve);
+            reasonBuilder.append("Calculating score for parent function: ")
+                    .append(postmanFunction.getPostmanFunctionName())
+                    .append(", noPmtestAchieve: ")
+                    .append(noPmtestAchieve)
+                    .append(", totalPmtest: ")
+                    .append(totalPmtest)
+                    .append(", scoreAchieve: ")
+                    .append(scoreAchieve)
+                    .append("\n");
             return scoreAchieve;
         }
         // Nếu là chức năng con và chức năng cha có scoreAchieve = 0
@@ -658,6 +474,10 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
 
             System.out.println("Parent function '" + parentFunctionName + "' has scoreAchieve = 0, so child function '"
                     + postmanFunction.getPostmanFunctionName() + "' will also have scoreAchieve = 0");
+            reasonBuilder.append("Parent function '").append(parentFunctionName)
+                    .append("' has scoreAchieve = 0, so child function '")
+                    .append(postmanFunction.getPostmanFunctionName())
+                    .append("' will also have scoreAchieve = 0\n");
             return 0.0f;
         }
         // Trường hợp khác
@@ -666,6 +486,15 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
                 ", noPmtestAchieve: " + noPmtestAchieve +
                 ", totalPmtest: " + totalPmtest +
                 ", scoreAchieve: " + scoreAchieve);
+        reasonBuilder.append("Calculating score for child function: ")
+                .append(postmanFunction.getPostmanFunctionName())
+                .append(", noPmtestAchieve: ")
+                .append(noPmtestAchieve)
+                .append(", totalPmtest: ")
+                .append(totalPmtest)
+                .append(", scoreAchieve: ")
+                .append(scoreAchieve)
+                .append("\n");
         return scoreAchieve;
     }
 
