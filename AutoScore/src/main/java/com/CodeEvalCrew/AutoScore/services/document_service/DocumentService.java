@@ -32,6 +32,8 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.Important;
+import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
@@ -90,7 +92,7 @@ public class DocumentService implements IDocumentService {
             replacePlaceholdersInDocument(document, data);
 
             //add important to the word
-            addImportant(document, exam);
+            fillImportantField(document, exam);
 
             // Add image in to the exam paper
             addDatabaseImage(document, exam);
@@ -105,45 +107,53 @@ public class DocumentService implements IDocumentService {
             }
         }
         File file = new File(outputPath);
-        byte[] documentContent = new FileInputStream(file).readAllBytes();
+        byte[] documentContent;
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            documentContent = fileInputStream.readAllBytes();
+        }
+        file.delete();
         return documentContent;
     }
 
-    private void addImportant(XWPFDocument document, ExamExport exam) {
-        // Assuming 'important' is a list of important IDs
+    private void fillImportantField(XWPFDocument document, ExamExport exam) {
         List<Long> importantIds = exam.getImportants();
-
-        // Check if the list is not empty
-        if (importantIds != null && !importantIds.isEmpty()) {
-            // Create a new paragraph to add the important information
-            XWPFParagraph paragraph = document.createParagraph();
-            XWPFRun run = paragraph.createRun();
-            run.setText("IMPORTANT – Before you begin, you MUST complete the following steps:\n");
-
-            // Iterate through the list of important IDs and add corresponding information
-            for (Long importantId : importantIds) {
-                String importantText = getImportantText(importantId); // Retrieve the text for the ID
-                if (importantText != null) {
-                    run.addBreak(); // Add a line break between steps
-                    run.setText(importantText);
+    
+        if (importantIds == null || importantIds.isEmpty()) {
+            return;  // Exit if there are no important IDs to process
+        }
+        
+        // Locate {important} placeholder
+        for (XWPFParagraph paragraph : document.getParagraphs()) {
+            for (XWPFRun run : paragraph.getRuns()) {
+                String text = run.getText(0);
+                if (text != null && text.contains("{important}")) {
+                    // Clear existing text and add the title for important instructions
+                    run.setText("IMPORTANT – before you start doing your solution, MUST do the following steps:", 0);
+                    run.addBreak();
+                    
+                    // Iterate over each important ID and add the corresponding instruction with breaks
+                    for (Long importantId : importantIds) {
+                        String importantText = getImportantText(importantId);
+                        if (importantText != null) {
+                            run.setText("\t" + importantText);
+                            run.addBreak();  // Additional line break after each step for spacing
+                        }
+                    }
+                    break;  // Stop after replacing {important}
                 }
-
             }
         }
     }
 
-
     //fortest
     private String getImportantText(Long importantId) {
         // Logic to retrieve the information for the important ID
-        // This can be a database lookup or a static mapping
-        switch (importantId) {
-            case 1L: return "Step 1: Read the instructions carefully.";
-            case 2L: return "Step 2: Ensure your environment is set up correctly.";
-            case 3L: return "Step 3: Review the exam topics.";
-            // Add more cases as needed
-            default: return " thissadsfnhsabdfunull"; // Return null if no matching ID is found
+        Optional<Important> important = importantRepository.findById(importantId);
+        if (important.isEmpty()) {
+            return "";
         }
+        return important.get().getImportantScrip();
+        // Return null if no matching ID is found
     }
 
     private ExamExport getExamToExamExport(Long examPaperId) throws NotFoundException, Exception {
@@ -158,7 +168,11 @@ public class DocumentService implements IDocumentService {
             Exam exam = checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()), "Exam", examPaper.getExam().getExamId());
 
             //get list important id
-            List<Long> importantIds = importantExamPaperRepository.findImportantExamPaperIdByExamPaper_ExamPaperId(examPaperId);
+            List<Important_Exam_Paper> importants = importantExamPaperRepository.findImportantExamPaperIdByExamPaper_ExamPaperId(examPaperId);
+            List<Long> importantIds = new ArrayList<>();
+            for (Important_Exam_Paper important : importants) {
+                importantIds.add(important.getImportant().getImportantId());
+            }
 
             //get exam database
             Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
@@ -172,12 +186,9 @@ public class DocumentService implements IDocumentService {
             result.setDuration(examPaper.getDuration());
             result.setQuestions(questions);
             result.setDatabaseDescpription("Database Descpription");
-            // result.setDatabaseNote(examDatabase.getDatabaseNote());
-            // result.setDatabaseName(examDatabase.getDatabaseName());
-            // result.setDatabaseImage(examDatabase.getDatabaseImage());
-            result.setDatabaseNote("examDatabase.getDatabaseNote()");
-            result.setDatabaseName("examDatabase.getDatabaseName()");
-            result.setDatabaseImage(getImageAsByteArray("pathToImage"));
+            result.setDatabaseNote(examDatabase.getDatabaseNote());
+            result.setDatabaseName(examDatabase.getDatabaseName());
+            result.setDatabaseImage(examDatabase.getDatabaseImage());
 
         } catch (NotFoundException ex) {
             throw ex;
@@ -263,9 +274,9 @@ public class DocumentService implements IDocumentService {
                             imageRun.addPicture(
                                     imageInputStream,
                                     XWPFDocument.PICTURE_TYPE_PNG, // Correct image type
-                                    "image.png", // Image name (for internal Word reference)
-                                    Units.toEMU(200), // Width in EMUs
-                                    Units.toEMU(150) // Height in EMUs
+                                    "DatabaseImage.png", // Image name (for internal Word reference)
+                                    Units.toEMU(300), // Width in EMUs
+                                    Units.toEMU(200) // Height in EMUs
                             );
                         } catch (InvalidFormatException e) {
                             message = "Error adding image to document.";
@@ -280,10 +291,8 @@ public class DocumentService implements IDocumentService {
             }
         } catch (IOException e) {
             message = "Error reading the image file.";
-            e.printStackTrace();
         } catch (Exception e) {
             message = "An unexpected error occurred.";
-            e.printStackTrace();
         }
 
         return message;
