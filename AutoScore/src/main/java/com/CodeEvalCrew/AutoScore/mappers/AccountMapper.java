@@ -11,16 +11,15 @@ import org.mapstruct.factory.Mappers;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AccountResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Mapper
 public interface AccountMapper {
     AccountMapper INSTANCE = Mappers.getMapper(AccountMapper.class);
 
-    @Mapping(source = "accountId", target = "accountId")
     @Mapping(source = "email", target = "email")
-    @Mapping(expression = "java(getRoleName(account))", target = "roleName")
-    @Mapping(expression = "java(getPermissions(account))", target = "permissions")
+    @Mapping(expression = "java(getRoleName(account))", target = "role")
     SignInWithGoogleResponseDTO accountToSignInWithGoogleResponseDTO(Account account);
 
     @Mapping(expression= "java(util.getEmployeeFullName(account.getCreatedBy()))", target = "createdBy")

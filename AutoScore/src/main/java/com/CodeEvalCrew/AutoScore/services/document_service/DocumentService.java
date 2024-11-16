@@ -117,11 +117,11 @@ public class DocumentService implements IDocumentService {
 
     private void fillImportantField(XWPFDocument document, ExamExport exam) {
         List<Long> importantIds = exam.getImportants();
-    
+
         if (importantIds == null || importantIds.isEmpty()) {
             return;  // Exit if there are no important IDs to process
         }
-        
+
         // Locate {important} placeholder
         for (XWPFParagraph paragraph : document.getParagraphs()) {
             for (XWPFRun run : paragraph.getRuns()) {
@@ -130,7 +130,7 @@ public class DocumentService implements IDocumentService {
                     // Clear existing text and add the title for important instructions
                     run.setText("IMPORTANT – before you start doing your solution, MUST do the following steps:", 0);
                     run.addBreak();
-                    
+
                     // Iterate over each important ID and add the corresponding instruction with breaks
                     for (Long importantId : importantIds) {
                         String importantText = getImportantText(importantId);
@@ -159,6 +159,7 @@ public class DocumentService implements IDocumentService {
     private ExamExport getExamToExamExport(Long examPaperId) throws NotFoundException, Exception {
         ExamExport result = new ExamExport();
         try {
+            //getListQeustion
             List<ExamQuestionExport> questions = new ArrayList<>(getListExamQuestionExport(examPaperId));
 
             //getExam paper
@@ -300,11 +301,31 @@ public class DocumentService implements IDocumentService {
 
     private void addExamQuestions(XWPFDocument document, ExamExport exam) {
         for (ExamQuestionExport question : exam.getQuestions()) {
-            // Create a paragraph for the question content and score
-            XWPFParagraph questionParagraph = document.createParagraph();
-            XWPFRun questionRun = questionParagraph.createRun();
-            questionRun.setBold(true);  // Highlight the question
-            document.createParagraph().createRun();
+            XWPFParagraph paragraph = document.createParagraph();
+            XWPFRun boldRun = paragraph.createRun();
+            XWPFRun run = paragraph.createRun();
+
+            boldRun.setBold(true);
+            boldRun.setText(question.getQuestionContent() + " (" + question.getExamQuestionScore().toString() + " Points)");
+            boldRun.addBreak();
+
+            run.setText("End Point: " + question.getHttpMethod() + " " + question.getEndPoint());
+            run.addBreak();
+
+            run.setText("Role Allow: " + question.getRoleAllow());
+            run.addBreak();
+
+            run.setText("Description: " + question.getDescription());
+
+            addFieldToDocument(document, "Request body (" + question.getPayloadType() + ")", question.getPayload());
+            addFieldToDocument(document, "Validation: ", question.getValidation());
+            addFieldToDocument(document, "Success Response: ", question.getSucessResponse());
+            addFieldToDocument(document, "Error Response: ", question.getErrorResponse());
+
+            // Add a separator between items
+            XWPFParagraph separator = document.createParagraph();
+            XWPFRun separatorRun = separator.createRun();
+            separatorRun.addBreak();
         }
     }
 
@@ -313,4 +334,25 @@ public class DocumentService implements IDocumentService {
         return Files.readAllBytes(Paths.get(imgPath));
     }
 
+    private static void addFieldToDocument(XWPFDocument document, String fieldName, String fieldValue) {
+        XWPFParagraph paragraph = document.createParagraph();
+        XWPFRun run = paragraph.createRun();
+
+        XWPFRun valueRun = paragraph.createRun();
+
+        if (fieldValue != null) {
+            run.setBold(true);
+            run.setText(fieldName);
+            run.addBreak();
+            String[] lines = fieldValue.split("\n");
+            for (int i = 0; i < lines.length; i++) {
+                valueRun.setText(lines[i]);
+                if (i < lines.length - 1) { // Add a break after each line except the last one
+                    valueRun.addBreak();
+                }
+            }
+        } else {
+
+        }
+    }
 }

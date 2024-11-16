@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion;
 
-import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

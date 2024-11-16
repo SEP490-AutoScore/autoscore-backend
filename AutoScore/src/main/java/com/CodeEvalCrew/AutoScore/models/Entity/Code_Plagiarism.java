@@ -24,6 +24,8 @@ public class Code_Plagiarism {
     private String studentCodePlagiarism;
     @Lob
     private String studentPlagiarism;
+    private String plagiarismPercentage;
+    private String type;
 
     @ManyToOne
     @JoinColumn(name = "scoreId", nullable = false)

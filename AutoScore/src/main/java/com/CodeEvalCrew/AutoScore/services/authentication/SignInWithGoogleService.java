@@ -1,5 +1,12 @@
 package com.CodeEvalCrew.AutoScore.services.authentication;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -7,25 +14,20 @@ import org.springframework.stereotype.Service;
 import com.CodeEvalCrew.AutoScore.mappers.AccountMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.models.Entity.OAuthRefreshToken;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IOAuthRefreshTokenRepository;
 import com.CodeEvalCrew.AutoScore.security.JwtTokenProvider;
-
-import java.security.SecureRandom;
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 
 @Service
 public class SignInWithGoogleService implements ISingInWithGoogleService {
 
     private final IAccountRepository accountRepository;
+    private final IEmployeeRepository employeeRepository;
     private final IOAuthRefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -36,10 +38,12 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
     @Autowired
     public SignInWithGoogleService(IAccountRepository accountRepository,
                                    IOAuthRefreshTokenRepository refreshTokenRepository,
-                                   JwtTokenProvider jwtTokenProvider) {
+                                   JwtTokenProvider jwtTokenProvider,
+                                   IEmployeeRepository employeeRepository) {
         this.accountRepository = accountRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -81,6 +85,18 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
 
         refreshTokenRepository.save(oauthRefreshToken);
         response.setRefreshToken(refreshToken);
+
+        Employee employee = employeeRepository.findByAccount_AccountId(account.getAccountId());
+        // Lấy tên campus
+        String campus = employee.getOrganization().getName();
+        // Lấy tên employee
+        String employeeName = employee.getFullName();
+        // Lấy position
+        String position = employee.getPosition().getName();
+        
+        response.setName(employeeName);
+        response.setCampus(campus);
+        response.setPosition(position);
 
         return response;
     }

@@ -1,22 +1,27 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IOAuthRefreshTokenRepository;
-import com.CodeEvalCrew.AutoScore.security.JwtTokenProvider;
-import com.CodeEvalCrew.AutoScore.services.authentication.ISingInWithGoogleService;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleResponseDTO;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-
 import java.sql.Timestamp;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IOAuthRefreshTokenRepository;
+import com.CodeEvalCrew.AutoScore.security.JwtTokenProvider;
+import com.CodeEvalCrew.AutoScore.services.authentication.ISingInWithGoogleService;
 
 @RestController
 @RequestMapping("/api/auth")

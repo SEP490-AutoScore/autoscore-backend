@@ -31,6 +31,8 @@ public class Score {
     private Long scoreId;
 
     private Float totalScore;
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String reason;
 
     private LocalDateTime gradedAt;
