@@ -1,5 +1,8 @@
 package com.CodeEvalCrew.AutoScore.configuration;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -100,10 +103,16 @@ public class SecurityConfig {
                     OAuth2User oauthUser = token.getPrincipal();
                     // Lấy thuộc tính email từ OAuth2User
                     String email = oauthUser.getAttribute("email");
+                    String picture = oauthUser.getAttribute("picture");
 
-                    if (email != null) {
-                        // Chuyển hướng tới endpoint signInGoogle với email
-                        response.sendRedirect("/api/auth/signingoogle?email=" + email);
+                    if (email != null && picture != null) {
+                    // Redirect đến trang login frontend với thông tin email và hình ảnh
+                    String redirectUrl = String.format(
+                        "http://localhost:5173/login?email=%s&picture=%s", 
+                        email, 
+                        URLEncoder.encode(picture, StandardCharsets.UTF_8.toString())
+                    );
+                    response.sendRedirect(redirectUrl);
                     } else {
                         // Chuyển hướng tới trang login với lỗi
                         response.sendRedirect("/login?error=true");
