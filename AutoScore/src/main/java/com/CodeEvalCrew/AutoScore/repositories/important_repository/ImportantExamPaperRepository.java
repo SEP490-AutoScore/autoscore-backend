@@ -9,5 +9,5 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
 
 @Repository
 public interface  ImportantExamPaperRepository extends JpaRepository<Important_Exam_Paper, Long> {
-    List<Long> findImportantExamPaperIdByExamPaper_ExamPaperId(Long examPaperId);
+    List<Important_Exam_Paper> findImportantExamPaperIdByExamPaper_ExamPaperId(Long examPaperId);
 }
