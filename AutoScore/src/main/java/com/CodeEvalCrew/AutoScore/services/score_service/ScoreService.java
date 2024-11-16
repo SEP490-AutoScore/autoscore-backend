@@ -44,8 +44,13 @@ public class ScoreService implements IScoreService {
     }
 
     public void exportScoresToExcel(HttpServletResponse response, List<ScoreResponseDTO> scores) throws IOException {
+        if (scores == null || scores.isEmpty()) {
+            throw new IllegalArgumentException("No scores available to export.");
+        }
+        String examPaperCode = scores.get(0).getExamPaperCode();
+        String fileName = examPaperCode + "_score.xlsx";
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=scores.xlsx");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
         Workbook workbook = new XSSFWorkbook();
 
         CellStyle boldStyle = workbook.createCellStyle();
@@ -116,8 +121,8 @@ public class ScoreService implements IScoreService {
             Cell plagiarismReasonCell2 = row.createCell(1);
             plagiarismReasonCell2.setCellValue(scoreDTO.getPlagiarismReason());
 
-            Cell codePlagiarismCell = row.createCell(2);
-            codePlagiarismCell.setCellValue(scoreDTO.getCodePlagiarism());
+            // Cell codePlagiarismCell = row.createCell(2);
+            // codePlagiarismCell.setCellValue(scoreDTO.getCodePlagiarism());
             // row.setHeight((short) (plagiarismSheet.getDefaultRowHeightInPoints() * calculateRowHeight(scoreDTO)));
         }
         // Autosize columns for better readability
