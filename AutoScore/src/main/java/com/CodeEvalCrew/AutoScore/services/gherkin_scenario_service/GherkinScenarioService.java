@@ -13,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Info;
@@ -27,6 +26,8 @@ import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamData
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class GherkinScenarioService implements IGherkinScenarioService {
@@ -98,6 +99,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                     if (content.getOrderPriority() == 2) {
                         List<String> gherkinDataList = extractGherkinData(response);
                         saveGherkinData(gherkinDataList, examQuestion);
+                        // extractGherkinDataAndSave(response, examQuestion);
                     }
                 });
             });
@@ -110,6 +112,46 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         return overallResponseBuilder.toString();
     }
 
+    // private void extractGherkinDataAndSave(String response, Exam_Question examQuestion) {
+    //     // Tách nội dung thành từng dòng để xử lý dễ dàng
+    //     String[] lines = response.split("\n");
+    //     StringBuilder scenarioBuilder = new StringBuilder();
+    //     long priority = 1;
+    
+    //     for (String line : lines) {
+    //         // Nếu dòng chứa "Scenario Outline:" hoặc "Scenario:", lưu kịch bản cũ và bắt đầu mới
+    //         if (line.trim().startsWith("Scenario Outline:") || line.trim().startsWith("Scenario:")) {
+    //             System.out.println("Detected new scenario line: " + line.trim());
+       
+    //             // Lưu kịch bản cũ nếu có
+    //             if (scenarioBuilder.length() > 0) {
+    //                 saveScenario(scenarioBuilder.toString().trim(), examQuestion, priority++);
+    //                 scenarioBuilder.setLength(0); // Reset builder
+    //             }
+    //         }
+    //         // Ghi thêm dòng hiện tại vào builder
+    //         scenarioBuilder.append(line).append("\n");
+    //     }
+    
+    //     // Lưu kịch bản cuối cùng nếu còn trong builder
+    //     if (scenarioBuilder.length() > 0) {
+    //         saveScenario(scenarioBuilder.toString().trim(), examQuestion, priority);
+    //     }
+    // }
+    
+    // private void saveScenario(String gherkinData, Exam_Question examQuestion, long priority) {
+    //     Gherkin_Scenario scenario = new Gherkin_Scenario();
+    //     scenario.setGherkinData(gherkinData);
+    //     scenario.setOrderPriority(priority);
+    //     scenario.setExamQuestion(examQuestion);
+    //     scenario.setIsUpdateCreate(true);
+    
+    //     // Lưu vào cơ sở dữ liệu
+    //     gherkinScenarioRepository.save(scenario);
+    // }
+    
+
+    
     private List<String> extractGherkinData(String response) {
         List<String> gherkinDataList = new ArrayList<>();
         Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}", Pattern.DOTALL);
@@ -121,12 +163,16 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
             // Thay thế dấu ** và xuống dòng \n để chuẩn hóa cho MySQL
             gherkinData = gherkinData.replace("**", "  ") // Bỏ dấu ** để dễ đọc
-                    .replace("\\n", "\n"); // Chuyển ký tự \\n thành dòng mới
+                    .replace("\\n", "\n") // Chuyển ký tự \\n thành dòng mới
+                    .replace("\"", "")
+                    .replace("\\", "");
 
             gherkinDataList.add(gherkinData);
         }
         return gherkinDataList;
     }
+
+
 
     private void saveGherkinData(List<String> gherkinDataList, Exam_Question examQuestion) {
         long priority = 1;
