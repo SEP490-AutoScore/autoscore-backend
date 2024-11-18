@@ -4,4 +4,6 @@ import java.util.List;
 public interface IGherkinScenarioService {
     // String generateGherkinFormat(Long examQuestionId);
     String generateGherkinFormat(List<Long> examQuestionIds);
+    String getAllGherkinScenariosByExamQuestionId(Long examQuestionId);
+
 }

@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Info;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
@@ -44,6 +46,64 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     private RestTemplate restTemplate;
 
     @Override
+    public String getAllGherkinScenariosByExamQuestionId(Long examQuestionId) {
+        if (examQuestionId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exam Question ID is required.");
+        }
+    
+        // Lấy danh sách Gherkin_Scenario theo examQuestionId
+        List<Gherkin_Scenario> scenarios = gherkinScenarioRepository.findByExamQuestion_ExamQuestionIdOrderByOrderPriorityAsc(examQuestionId);
+    
+        // Kiểm tra nếu không tìm thấy kết quả
+        if (scenarios.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Gherkin Scenarios found for the provided Exam Question ID.");
+        }
+    
+        // Gộp các GherkinData thành chuỗi
+        return scenarios.stream()
+                .map(Gherkin_Scenario::getGherkinData)
+                .map(this::trimEdges)
+                .collect(Collectors.joining("\n\n")); // Cách nhau bởi 1 dòng trống
+    }
+    
+    //Hàm xóa ký tự xuống dòng đầu và cuối của một chuỗi nếu tồn tại.
+     
+    private String trimEdges(String gherkinData) {
+        if (gherkinData == null) {
+            return "";
+        }
+        if (gherkinData.startsWith("\n")) {
+            gherkinData = gherkinData.substring(1);
+        }
+        if (gherkinData.endsWith("\n")) {
+            gherkinData = gherkinData.substring(0, gherkinData.length() - 1);
+        }
+        return gherkinData;
+    }
+
+    
+    // @Override
+    // public List<GherkinFormatDTO> getAllGherkinScenariosByExamQuestionId(Long examQuestionId) {
+    //     if (examQuestionId == null) {
+    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exam Question ID is required.");
+    //     }
+
+    //     return gherkinScenarioRepository.findByExamQuestion_ExamQuestionIdOrderByOrderPriorityAsc(examQuestionId)
+    //             .stream()
+    //             .map(this::convertToDTO)
+    //             .collect(Collectors.toList());
+    // }
+
+    // private GherkinFormatDTO convertToDTO(Gherkin_Scenario scenario) {
+    //     return new GherkinFormatDTO(
+    //             scenario.getGherkinScenarioId(),
+    //             scenario.getGherkinData(),
+    //             scenario.getOrderPriority(),
+    //             scenario.getIsUpdateCreate(),
+    //             scenario.getExamQuestion().getExamQuestionId());
+    // }
+
+    @Override
     @Transactional
     public String generateGherkinFormat(List<Long> examQuestionIds) {
         StringBuilder overallResponseBuilder = new StringBuilder();
@@ -55,7 +115,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             // Truy vấn Exam_Database dựa trên examQuestionId
             Exam_Database examDatabase = examDatabaseRepository.findByExamQuestionId(examQuestionId)
                     .orElseThrow(() -> new RuntimeException("Exam Database không tồn tại"));
-     
+
             String databaseScript = examDatabase.getDatabaseScript();
             System.out.println("Database Script: " + databaseScript);
 
@@ -77,7 +137,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                     if (content.getOrderPriority() == 1) {
                         question += "\n" + databaseScript;
                     } else if (content.getOrderPriority() == 2) {
-                        question += "\n\n\n"
+                        // question += "\n\n\n"
+                        question += ""
                                 + "\n - Question Content: " + examQuestion.getQuestionContent()
                                 + "\n - Role: " + examQuestion.getRoleAllow()
                                 + "\n - Description: " + examQuestion.getDescription()
@@ -112,46 +173,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         return overallResponseBuilder.toString();
     }
 
-    // private void extractGherkinDataAndSave(String response, Exam_Question examQuestion) {
-    //     // Tách nội dung thành từng dòng để xử lý dễ dàng
-    //     String[] lines = response.split("\n");
-    //     StringBuilder scenarioBuilder = new StringBuilder();
-    //     long priority = 1;
-    
-    //     for (String line : lines) {
-    //         // Nếu dòng chứa "Scenario Outline:" hoặc "Scenario:", lưu kịch bản cũ và bắt đầu mới
-    //         if (line.trim().startsWith("Scenario Outline:") || line.trim().startsWith("Scenario:")) {
-    //             System.out.println("Detected new scenario line: " + line.trim());
-       
-    //             // Lưu kịch bản cũ nếu có
-    //             if (scenarioBuilder.length() > 0) {
-    //                 saveScenario(scenarioBuilder.toString().trim(), examQuestion, priority++);
-    //                 scenarioBuilder.setLength(0); // Reset builder
-    //             }
-    //         }
-    //         // Ghi thêm dòng hiện tại vào builder
-    //         scenarioBuilder.append(line).append("\n");
-    //     }
-    
-    //     // Lưu kịch bản cuối cùng nếu còn trong builder
-    //     if (scenarioBuilder.length() > 0) {
-    //         saveScenario(scenarioBuilder.toString().trim(), examQuestion, priority);
-    //     }
-    // }
-    
-    // private void saveScenario(String gherkinData, Exam_Question examQuestion, long priority) {
-    //     Gherkin_Scenario scenario = new Gherkin_Scenario();
-    //     scenario.setGherkinData(gherkinData);
-    //     scenario.setOrderPriority(priority);
-    //     scenario.setExamQuestion(examQuestion);
-    //     scenario.setIsUpdateCreate(true);
-    
-    //     // Lưu vào cơ sở dữ liệu
-    //     gherkinScenarioRepository.save(scenario);
-    // }
-    
-
-    
     private List<String> extractGherkinData(String response) {
         List<String> gherkinDataList = new ArrayList<>();
         Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}", Pattern.DOTALL);
@@ -167,12 +188,13 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                     .replace("\"", "")
                     .replace("\\", "");
 
+            // Loại bỏ \n đầu và cuối chuỗi nếu có
+            gherkinData = gherkinData.replaceAll("^\\n+|\\n+$", "").trim();
+
             gherkinDataList.add(gherkinData);
         }
         return gherkinDataList;
     }
-
-
 
     private void saveGherkinData(List<String> gherkinDataList, Exam_Question examQuestion) {
         long priority = 1;
