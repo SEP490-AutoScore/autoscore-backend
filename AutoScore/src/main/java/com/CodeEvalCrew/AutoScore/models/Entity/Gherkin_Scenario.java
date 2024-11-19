@@ -35,6 +35,8 @@ public class Gherkin_Scenario {
 
     private Boolean isUpdateCreate;
 
+    private Boolean status;
+
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;
