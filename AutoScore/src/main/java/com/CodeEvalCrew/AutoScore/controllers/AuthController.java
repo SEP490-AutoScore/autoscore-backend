@@ -22,6 +22,8 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IOAuthRefreshTokenRepository;
 import com.CodeEvalCrew.AutoScore.security.JwtTokenProvider;
 import com.CodeEvalCrew.AutoScore.services.authentication.ISingInWithGoogleService;
+import com.CodeEvalCrew.AutoScore.services.authentication.VerificationResponse;
+import com.CodeEvalCrew.AutoScore.services.authentication.VerificationService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,12 +32,15 @@ public class AuthController {
     private final IOAuthRefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final ISingInWithGoogleService singInWithGoogleService;
+    private final VerificationService verificationService;
 
     @Autowired
-    public AuthController(IOAuthRefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider, ISingInWithGoogleService singInWithGoogleService) {
+    public AuthController(IOAuthRefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider,
+            ISingInWithGoogleService singInWithGoogleService, VerificationService verificationService) {
         this.singInWithGoogleService = singInWithGoogleService;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.verificationService = verificationService;
     }
 
     @GetMapping("/signingoogle")
@@ -78,7 +83,7 @@ public class AuthController {
                     if (oldAccessToken != null) {
                         jwtTokenProvider.revokeToken(oldAccessToken, account);
                     }
-                    
+
                     Role role = account.getRole();
                     if (role == null || role.getRoleName() == null) {
                         throw new IllegalStateException("Account does not have a valid active role");
@@ -88,7 +93,7 @@ public class AuthController {
                     Set<String> permissions = role.getRole_permissions().stream()
                             .filter(Role_Permission::isStatus)
                             .map(rolePermission -> rolePermission.getPermission().getAction())
-                            .collect(Collectors.toSet()); 
+                            .collect(Collectors.toSet());
 
                     // Tạo access token mới
                     String newAccessToken = jwtTokenProvider.generateToken(
@@ -102,4 +107,13 @@ public class AuthController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token"));
     }
 
+    @PostMapping("/verify")
+    public ResponseEntity<VerificationResponse> verifyToken(@RequestHeader(value = "Authorization", required = false) String token) {
+        // Loại bỏ "Bearer " nếu token có định dạng "Bearer <token>"
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        VerificationResponse response = verificationService.verifyToken(token);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }

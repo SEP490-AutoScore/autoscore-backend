@@ -32,8 +32,11 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
     private final JwtTokenProvider jwtTokenProvider;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.access-token.expiration}")
     private long jwtExpiration;
+
+    @Value("${jwt.refresh-token.expiration}")
+    public long getJwtRefreshExpiration;
 
     @Autowired
     public SignInWithGoogleService(IAccountRepository accountRepository,
@@ -81,7 +84,7 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         OAuthRefreshToken oauthRefreshToken = new OAuthRefreshToken();
         oauthRefreshToken.setToken(refreshToken);
         oauthRefreshToken.setAccount(account);
-        oauthRefreshToken.setExpiryDate(Timestamp.from(Instant.now().plusMillis(jwtExpiration)));
+        oauthRefreshToken.setExpiryDate(Timestamp.from(Instant.now().plusMillis(getJwtRefreshExpiration)));
 
         refreshTokenRepository.save(oauthRefreshToken);
         response.setRefreshToken(refreshToken);
