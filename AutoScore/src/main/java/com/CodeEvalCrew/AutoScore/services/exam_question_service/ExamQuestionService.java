@@ -14,6 +14,7 @@ import com.CodeEvalCrew.AutoScore.mappers.ExamQuestionMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamQuestionView;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
@@ -139,7 +140,7 @@ public class ExamQuestionService implements IExamQuestionService {
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam question", id);
 
             //update
-            examQuestion.setStatus(false);
+            examQuestion.setStatus(Exam_Status_Enum.UNACTIVE);
             examQuestion.setDeletedAt(Util.getCurrentDateTime());
             examQuestion.setDeletedBy(Util.getAuthenticatedAccountId());
 
