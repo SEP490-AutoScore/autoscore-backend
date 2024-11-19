@@ -1,10 +1,9 @@
 package com.CodeEvalCrew.AutoScore.services.authentication;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +29,6 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
     private final IEmployeeRepository employeeRepository;
     private final IOAuthRefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final SecureRandom secureRandom = new SecureRandom();
-
-    @Value("${jwt.access-token.expiration}")
-    private long jwtExpiration;
 
     @Value("${jwt.refresh-token.expiration}")
     public long getJwtRefreshExpiration;
@@ -100,13 +95,13 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         response.setName(employeeName);
         response.setCampus(campus);
         response.setPosition(position);
-        
+        response.setExp(getJwtRefreshExpiration);
 
         return response;
     }
 
     private String generateRefreshToken() {
-        return new BigInteger(130, secureRandom).toString(32);
+        return UUID.randomUUID().toString();
     }
 }
 
