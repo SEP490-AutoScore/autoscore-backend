@@ -14,7 +14,7 @@ public class ExamDatabaseResponseDTO {
     private String databaseName;
     private byte[] databaseImage;
     private String databaseNote;
-    private boolean status;
+    // private boolean status;
     private LocalDateTime createdAt;
     private Long createdBy;
     private LocalDateTime updatedAt;
