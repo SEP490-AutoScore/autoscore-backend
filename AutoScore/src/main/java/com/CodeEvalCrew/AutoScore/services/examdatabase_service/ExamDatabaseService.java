@@ -95,7 +95,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 examDatabase.setDatabaseScript(databaseScript); // Lưu chuỗi SQL vào `databaseScript`
                 examDatabase.setDatabaseName(dbName);
                 examDatabase.setDatabaseImage(imageData);
-                examDatabase.setStatus(true);
+                // examDatabase.setStatus(true);
                 examDatabase.setCreatedAt(now);
                 examDatabase.setCreatedBy(authenticatedUserId);
                 examDatabase.setExamPaper(examPaper);
@@ -211,7 +211,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 updatedDatabase.setDatabaseScript(databaseScript);
                 updatedDatabase.setDatabaseName(dbName);
                 updatedDatabase.setDatabaseImage(imageData);
-                updatedDatabase.setStatus(true);
+                // updatedDatabase.setStatus(true);
                 updatedDatabase.setUpdatedAt(now);
                 updatedDatabase.setUpdatedBy(authenticatedUserId);
                 updatedDatabase.setExamPaper(examPaper);

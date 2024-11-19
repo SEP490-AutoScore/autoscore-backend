@@ -3,6 +3,8 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -33,7 +35,7 @@ public class Exam_Paper {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examPaperId;
     private String examPaperCode;
-    private boolean status;
+    private Exam_Status_Enum status;
     private String instruction;
     @Column(columnDefinition = "int default 90")
     private int duration = 90;

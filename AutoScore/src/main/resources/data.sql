@@ -331,15 +331,14 @@ INSERT INTO `Content`
 (`question_content`, `order_priority`, `ai_info_id`)
 VALUES
 ('Save to your memory, do not reply', 1, 1),
-('Write some gherkin format for me to suit the assignment requirements, respond to the AI prompt below, Each Scenario and content are enclosed in {{ }}
-
-{{
-Scenario:
-.....
-}}
-{{
-Scenario:
-.....
+('Write Gherkin format scenarios for the given feature or API. 
+Ensure each complete Gherkin scenario, including its title and all steps, is enclosed in double curly braces {{ }}. 
+Use this structure for all scenarios, for example:
+{{ 
+Scenario: [Scenario Title]
+  Given [initial state or context]
+  When [event or action]
+  Then [expected outcome or result]
 }}', 2, 1),
 ('This is Database, Save to your memory, do not reply', 1, 2),
 ('This is topic, Save to your memory, do not reply', 2, 2),

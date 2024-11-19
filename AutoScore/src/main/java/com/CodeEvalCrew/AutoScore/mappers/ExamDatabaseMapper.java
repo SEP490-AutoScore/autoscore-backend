@@ -16,7 +16,7 @@ public interface ExamDatabaseMapper {
     @Mapping(source = "databaseName", target = "databaseName")
     @Mapping(source = "databaseImage", target = "databaseImage")
     @Mapping(source = "databaseNote", target = "databaseNote")
-    @Mapping(source = "status", target = "status")
+    // @Mapping(source = "status", target = "status")
     @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "createdBy", target = "createdBy")
     @Mapping(source = "updatedAt", target = "updatedAt")

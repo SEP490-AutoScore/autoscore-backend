@@ -14,6 +14,7 @@ import com.CodeEvalCrew.AutoScore.mappers.ExamQuestionMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamQuestionView;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
@@ -37,12 +38,11 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView getById(Long id) throws NotFoundException {
-        ExamQuestionView result;
         try {
 
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam Question", id);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -56,7 +56,7 @@ public class ExamQuestionService implements IExamQuestionService {
         List<ExamQuestionView> result = new ArrayList<>();
         try {
 
-            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
+            checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
             Specification<Exam_Question> spec = ExamQuestionSpecification.hasForeignKey(request.getExamPaperId(), "examPaper", "examPaperId");
             spec.and(ExamQuestionSpecification.hasTrueStatus());
@@ -140,7 +140,7 @@ public class ExamQuestionService implements IExamQuestionService {
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam question", id);
 
             //update
-            examQuestion.setStatus(false);
+            examQuestion.setStatus(Exam_Status_Enum.UNACTIVE);
             examQuestion.setDeletedAt(Util.getCurrentDateTime());
             examQuestion.setDeletedBy(Util.getAuthenticatedAccountId());
 
