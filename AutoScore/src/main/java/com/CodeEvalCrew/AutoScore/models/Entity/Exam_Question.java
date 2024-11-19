@@ -3,6 +3,8 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,7 +44,7 @@ public class Exam_Question {
     private String sucessResponse;
     @Lob
     private String errorResponse;
-    private boolean status = true;
+    private Exam_Status_Enum status;
     private Long orderBy;
     private LocalDateTime createdAt;
     private Long createdBy;

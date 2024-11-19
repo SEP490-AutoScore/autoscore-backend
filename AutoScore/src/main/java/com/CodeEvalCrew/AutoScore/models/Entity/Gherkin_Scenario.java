@@ -35,10 +35,16 @@ public class Gherkin_Scenario {
 
     private Boolean isUpdateCreate;
 
+    private Boolean status;
+
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
     private Exam_Question examQuestion;
 
-    @OneToOne(mappedBy = "gherkinScenario")
+    // @OneToOne(mappedBy = "gherkinScenario")
+    // private Postman_For_Grading postmanForGrading;
+
+    @OneToOne
+    @JoinColumn(name = "postmanForGradingId") // Thêm JoinColumn ở đây
     private Postman_For_Grading postmanForGrading;
 }

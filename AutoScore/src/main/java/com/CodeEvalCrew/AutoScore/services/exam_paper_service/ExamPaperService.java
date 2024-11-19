@@ -23,6 +23,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreat
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
@@ -127,7 +128,7 @@ public class ExamPaperService implements IExamPaperService {
                 Important important = checkEntityExistence(importantRepository.findById(importantId), "Important",
                         importantId);
 
-                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, important, examPaper);
+                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null,Exam_Status_Enum.DRAFT, important, examPaper);
 
                 importants.add(importantExamPaper);
             }
@@ -135,7 +136,7 @@ public class ExamPaperService implements IExamPaperService {
             // update side in4
             examPaper.setExam(exam);
             examPaper.setImportants(importants);
-            examPaper.setStatus(true);
+            examPaper.setStatus(Exam_Status_Enum.DRAFT);
             examPaper.setCreatedAt(Util.getCurrentDateTime());
             examPaper.setCreatedBy(Util.getAuthenticatedAccountId());
 
@@ -163,7 +164,7 @@ public class ExamPaperService implements IExamPaperService {
             // update side in4
             examPaper.setExamPaperCode(request.getExamPaperCode());
             examPaper.setExam(exam);
-            examPaper.setStatus(true);
+            examPaper.setStatus(Exam_Status_Enum.DRAFT);
             examPaper.setUpdatedAt(Util.getCurrentDateTime());
             examPaper.setUpdatedBy(Util.getAuthenticatedAccountId());
 
@@ -184,7 +185,7 @@ public class ExamPaperService implements IExamPaperService {
 
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(id), "Exam Paper", id);
 
-            examPaper.setStatus(false);
+            examPaper.setStatus(Exam_Status_Enum.UNACTIVE);
             examPaper.setDeletedAt(Util.getCurrentDateTime());
             examPaper.setDeletedBy(Util.getAuthenticatedAccountId());
 
