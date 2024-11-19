@@ -37,12 +37,11 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView getById(Long id) throws NotFoundException {
-        ExamQuestionView result;
         try {
 
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam Question", id);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -56,7 +55,7 @@ public class ExamQuestionService implements IExamQuestionService {
         List<ExamQuestionView> result = new ArrayList<>();
         try {
 
-            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
+            checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
             Specification<Exam_Question> spec = ExamQuestionSpecification.hasForeignKey(request.getExamPaperId(), "examPaper", "examPaperId");
             spec.and(ExamQuestionSpecification.hasTrueStatus());
