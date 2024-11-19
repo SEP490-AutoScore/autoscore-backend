@@ -36,10 +36,10 @@ public class GherkinScenarioController {
     }
 
      
-    @GetMapping("")
-    public ResponseEntity<String> getAllGherkinScenarios(@RequestParam Long examQuestionId) {
-        String combinedGherkinData = gherkinScenarioService.getAllGherkinScenariosByExamQuestionId(examQuestionId);
-        return ResponseEntity.ok(combinedGherkinData);
+    @GetMapping("/questionId")
+    public ResponseEntity<List<GherkinScenarioDTO>> getAllGherkinScenarios(@RequestParam Long examQuestionId) {
+        List<GherkinScenarioDTO> scenarios = gherkinScenarioService.getAllGherkinScenariosByExamQuestionId(examQuestionId);
+        return ResponseEntity.ok(scenarios);
     }
 
     @PutMapping("")
