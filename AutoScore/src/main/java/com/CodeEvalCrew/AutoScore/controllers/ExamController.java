@@ -30,7 +30,7 @@ public class ExamController {
         this.examService = examService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAuthority('VIEW_EXAM')")
     @GetMapping("{id}")
     public ResponseEntity<?> getExamById(@PathVariable long id) {
         ExamViewResponseDTO result;
@@ -44,7 +44,7 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_EXAMINER','ROLE_HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @PostMapping("/list")
     public ResponseEntity<?> getExam(@RequestBody ExamViewRequestDTO request) {
         List<ExamViewResponseDTO> result;
@@ -60,7 +60,7 @@ public class ExamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @PostMapping("")
     public ResponseEntity<?> creatNewExam(@RequestBody ExamCreateRequestDTO entity) {
         try {
