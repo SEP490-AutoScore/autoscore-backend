@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Info;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
@@ -44,6 +45,24 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     private GherkinScenarioRepository gherkinScenarioRepository;
     @Autowired
     private RestTemplate restTemplate;
+
+@Override
+  public List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId) {
+        // Lấy danh sách các Gherkin_Scenario từ repository
+        List<Gherkin_Scenario> scenarios = gherkinScenarioRepository
+                .findByExamQuestion_ExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriority(examPaperId);
+
+        // Chuyển đổi từ Entity sang DTO
+        return scenarios.stream().map(scenario -> new GherkinScenarioDTO(
+                scenario.getGherkinScenarioId(),
+                scenario.getGherkinData(),
+                scenario.getOrderPriority(),
+                scenario.getIsUpdateCreate(),
+                scenario.getStatus(),
+                scenario.getExamQuestion().getExamQuestionId(),
+                scenario.getPostmanForGrading() != null ? scenario.getPostmanForGrading().getPostmanForGradingId() : null
+        )).collect(Collectors.toList());
+    }
 
     @Override
     public void updateGherkinScenarios(Long examQuestionId, String gherkinDataBody) {

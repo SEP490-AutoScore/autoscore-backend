@@ -44,7 +44,7 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @PostMapping("/list")
     public ResponseEntity<?> getExam(@RequestBody ExamViewRequestDTO request) {
         List<ExamViewResponseDTO> result;
