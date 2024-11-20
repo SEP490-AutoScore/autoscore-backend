@@ -33,6 +33,8 @@ public class AI_Info {
     @NotNull
     private String aiName;
 
+    private Long createdBy;
+    
     private String purpose;
 
     // Relationship
