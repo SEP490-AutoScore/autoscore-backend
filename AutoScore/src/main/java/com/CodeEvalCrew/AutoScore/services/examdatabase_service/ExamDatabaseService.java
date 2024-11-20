@@ -8,13 +8,16 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamDatabaseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
@@ -228,6 +231,28 @@ public class ExamDatabaseService implements IExamDatabaseService {
         } catch (SQLException e) {
             throw new Exception("SQL connection or execution error: " + e.getMessage());
         }
+    }
+    @Override
+    public ExamDatabaseDTO getExamDatabaseByExamPaperId(Long examPaperId) {
+        Exam_Database examDatabase = examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam database not found for examPaperId: " + examPaperId));
+    
+        return new ExamDatabaseDTO(
+                examDatabase.getExamDatabaseId(),
+                examDatabase.getDatabaseScript(),
+                examDatabase.getDatabaseDescription(),
+                examDatabase.getDatabaseName(),
+                examDatabase.getDatabaseImage(),
+                examDatabase.getDatabaseNote(),
+                examDatabase.getStatus(),
+                examDatabase.getCreatedAt(),
+                examDatabase.getCreatedBy(),
+                examDatabase.getUpdatedAt(),
+                examDatabase.getUpdatedBy(),
+                examDatabase.getDeletedAt(),
+                examDatabase.getDeletedBy(),
+                examDatabase.getExamPaper().getExamPaperId()
+        );
     }
     
 
