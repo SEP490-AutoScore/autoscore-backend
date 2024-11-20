@@ -57,18 +57,13 @@ public class VerificationService {
         }
     }
 
-    public ResponseEntity<TokenResponseDTO> rotationToken(String refreshToken, String oldAccessToken) {
+    public ResponseEntity<TokenResponseDTO> rotationToken(String refreshToken) {
         return refreshTokenRepository.findByToken(refreshToken)
                 .filter(oauthRefreshToken -> oauthRefreshToken.getExpiryDate().after(new Timestamp(System.currentTimeMillis())))
                 .map(oauthRefreshToken -> {
                     Account account = oauthRefreshToken.getAccount();
                     if (account == null || account.getAccountId() == null) {
                         throw new IllegalStateException("Account or account_id cannot be null");
-                    }
-
-                    // Thu hồi access token cũ (nếu có)
-                    if (oldAccessToken != null) {
-                        jwtTokenProvider.revokeToken(oldAccessToken, account);
                     }
 
                     // Thu hồi refresh token cũ

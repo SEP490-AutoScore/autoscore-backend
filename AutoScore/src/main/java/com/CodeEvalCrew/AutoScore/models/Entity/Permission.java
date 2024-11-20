@@ -27,11 +27,9 @@ public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long permissionId;
-
     private String permissionName;
-
     private String action;
-
+    private String description;
     private boolean status;
 
     // Relationships
