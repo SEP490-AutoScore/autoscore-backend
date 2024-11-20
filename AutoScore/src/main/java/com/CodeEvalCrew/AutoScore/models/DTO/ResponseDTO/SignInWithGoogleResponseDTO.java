@@ -20,4 +20,5 @@ public class SignInWithGoogleResponseDTO {
     private String position;
     private String campus;
     private Set<String> permissions;
+    private long exp;
 }

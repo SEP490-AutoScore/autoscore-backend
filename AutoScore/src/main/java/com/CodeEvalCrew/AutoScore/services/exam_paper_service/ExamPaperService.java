@@ -19,10 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamPaperMapper;
+import com.CodeEvalCrew.AutoScore.mappers.ImportantMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ImportantView;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
@@ -98,7 +100,16 @@ public class ExamPaperService implements IExamPaperService {
                 throw new NoSuchElementException("No exam paper found");
 
             for (Exam_Paper exam_Paper : listEntities) {
-                result.add(ExamPaperMapper.INSTANCE.examPAperToView(exam_Paper));
+                ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(exam_Paper);
+                Set<ImportantView> set = new HashSet<>();
+                for (Important_Exam_Paper a : exam_Paper.getImportants()) {
+                    Important important = checkEntityExistence(importantRepository.findById(a.getImportant().getImportantId()), "Improtant", a.getImportant().getImportantId());
+                    ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
+                    set.add(view);
+                }
+                examPaperView.setImportants(set);
+
+                result.add(examPaperView);
             }
 
             return result;
