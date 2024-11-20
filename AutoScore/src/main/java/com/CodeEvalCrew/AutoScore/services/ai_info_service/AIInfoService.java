@@ -21,7 +21,7 @@ public class AIInfoService implements IAIInfoService {
                 .orElseThrow(() -> new RuntimeException("AI_Info not found for authenticated user"));
 
         aiInfo.setAiApiKey(aiApiKey);
-        aiInfo.setCreatedBy(authenticatedUserId);
+        aiInfo.setUpdateBy(authenticatedUserId);
         aiInfoRepository.save(aiInfo);
     }
 }
