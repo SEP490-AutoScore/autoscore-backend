@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -274,8 +275,9 @@ public class ExamPaperService implements IExamPaperService {
         File resultFile = new File("D:\\Desktop\\result.txt");
         try {
             // Tạo ProcessBuilder để chạy lệnh Newman
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                    "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd", "run", "\"" + file.getAbsolutePath() + "\"");
+            // ProcessBuilder processBuilder = new ProcessBuilder(
+            //         "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd", "run", "\"" + file.getAbsolutePath() + "\"");
+            ProcessBuilder processBuilder = new ProcessBuilder(PathUtil.NEWMAN_CMD_PATH, "run", "\"" + file.getAbsolutePath() + "\"");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
