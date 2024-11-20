@@ -376,9 +376,21 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     @Override
     public List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId) {
         List<Postman_For_Grading> postmanForGradingEntries = postmanForGradingRepository
-                .findByExamQuestion_ExamPaper_ExamPaperId(examPaperId);
-
+                .findByExamPaper_ExamPaperId(examPaperId);
+    
         return postmanForGradingEntries.stream()
+                .filter(entry -> Boolean.TRUE.equals(entry.getStatus())) // Lọc theo status = true
+                .sorted((entry1, entry2) -> {
+                    if (entry1.getOrderBy() == null && entry2.getOrderBy() == null) {
+                        return 0; // Cả hai đều null, giữ nguyên thứ tự
+                    } else if (entry1.getOrderBy() == null) {
+                        return 1; // entry1 null, đưa xuống dưới
+                    } else if (entry2.getOrderBy() == null) {
+                        return -1; // entry2 null, đưa xuống dưới
+                    } else {
+                        return entry1.getOrderBy().compareTo(entry2.getOrderBy()); // So sánh theo giá trị orderBy
+                    }
+                })
                 .map(entry -> {
                     PostmanForGradingDTO dto = new PostmanForGradingDTO();
                     dto.setPostmanForGradingId(entry.getPostmanForGradingId());
@@ -386,16 +398,44 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                     dto.setScoreOfFunction(entry.getScoreOfFunction());
                     dto.setTotalPmTest(entry.getTotalPmTest());
                     dto.setOrderBy(entry.getOrderBy());
+                    dto.setStatus(entry.getStatus());
                     dto.setPostmanForGradingParentId(entry.getPostmanForGradingParentId()); // Lấy từ thực thể
-                    dto.setExamQuestionId(entry.getExamQuestion().getExamQuestionId()); // Lấy từ thực thể
-                    dto.setGherkinScenarioId(
-                            entry.getGherkinScenario() != null ? entry.getGherkinScenario().getGherkinScenarioId()
-                                    : null); // Lấy từ thực thể
-
+                    dto.setExamQuestionId(entry.getExamQuestion() != null 
+                            ? entry.getExamQuestion().getExamQuestionId() 
+                            : null); // Lấy từ thực thể, kiểm tra null
+                    dto.setGherkinScenarioId(entry.getGherkinScenario() != null 
+                            ? entry.getGherkinScenario().getGherkinScenarioId() 
+                            : null); // Lấy từ thực thể, kiểm tra null
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+    
+
+
+    // @Override
+    // public List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId) {
+    //     List<Postman_For_Grading> postmanForGradingEntries = postmanForGradingRepository
+    //             .findByExamQuestion_ExamPaper_ExamPaperId(examPaperId);
+
+    //     return postmanForGradingEntries.stream()
+    //             .map(entry -> {
+    //                 PostmanForGradingDTO dto = new PostmanForGradingDTO();
+    //                 dto.setPostmanForGradingId(entry.getPostmanForGradingId());
+    //                 dto.setPostmanFunctionName(entry.getPostmanFunctionName());
+    //                 dto.setScoreOfFunction(entry.getScoreOfFunction());
+    //                 dto.setTotalPmTest(entry.getTotalPmTest());
+    //                 dto.setOrderBy(entry.getOrderBy());
+    //                 dto.setPostmanForGradingParentId(entry.getPostmanForGradingParentId()); // Lấy từ thực thể
+    //                 dto.setExamQuestionId(entry.getExamQuestion().getExamQuestionId()); // Lấy từ thực thể
+    //                 dto.setGherkinScenarioId(
+    //                         entry.getGherkinScenario() != null ? entry.getGherkinScenario().getGherkinScenarioId()
+    //                                 : null); // Lấy từ thực thể
+
+    //                 return dto;
+    //             })
+    //             .collect(Collectors.toList());
+    // }
 
     @Transactional
     public void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs) {

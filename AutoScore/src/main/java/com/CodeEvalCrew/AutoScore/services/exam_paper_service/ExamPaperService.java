@@ -338,38 +338,7 @@ public class ExamPaperService implements IExamPaperService {
     return result;
 }
 
-//     private NewmanResult handleNewmanResult(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo)
-//         throws NotFoundException {
-//     // Phân tích đầu ra của Newman và tạo kết quả
-//     NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
 
-//     // Duyệt qua các functionNames từ kết quả Newman
-//     for (int i = 0; i < result.getFunctionNames().size(); i++) {
-//         String functionName = result.getFunctionNames().get(i);
-//         Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
-
-//         // Tìm functionName trong expectedFunctionInfo (database)
-//         Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
-//                 .filter(info -> info.getFunctionName().equals(functionName))
-//                 .findFirst();
-
-//         if (expectedInfoOpt.isPresent()) {
-//             PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
-
-//             // Nếu totalPmTests khác, cập nhật database
-//             if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
-//                 updateTotalPmTestInDatabase(functionName, newTotalPmTest);
-//             }
-//             System.out.println("Updated function in database: " + functionName);
-//         } else {
-//             // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
-//             createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
-//             System.out.println("Created new function in database: " + functionName);
-//         }
-//     }
-
-//     return result;
-// }
 
 private void createNewPostmanForGrading(String functionName, Long totalPmTest, Long examPaperId) throws NotFoundException {
     // Lấy Exam_Paper từ database
@@ -381,45 +350,13 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
     newPostmanForGrading.setPostmanFunctionName(functionName);
     newPostmanForGrading.setTotalPmTest(totalPmTest);
     newPostmanForGrading.setExamPaper(examPaper);
+    newPostmanForGrading.setStatus(true);
 
     // Lưu vào database
     postmanForGradingRepository.save(newPostmanForGrading);
 }
 
-    // private NewmanResult handleNewmanResult(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo)
-    //         throws NotFoundException {
-    //     // Phân tích đầu ra của Newman và tạo kết quả
-    //     NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
-
-    //     // Duyệt qua các functionNames từ kết quả Newman
-    //     for (int i = 0; i < result.getFunctionNames().size(); i++) {
-    //         String functionName = result.getFunctionNames().get(i);
-    //         Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
-
-    //         // Tìm functionName trong expectedFunctionInfo (database)
-    //         Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
-    //                 .filter(info -> info.getFunctionName().equals(functionName))
-    //                 .findFirst();
-
-    //         if (expectedInfoOpt.isPresent()) {
-    //             PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
-
-    //             // Nếu totalPmTests khác, cập nhật database
-    //             if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
-    //                 updateTotalPmTestInDatabase(functionName, newTotalPmTest);
-    //             }
-    //             System.out.println("Newman Function: " + functionName + ", Newman Total: " + newTotalPmTest);
-    //             System.out.println("Database Function: " + expectedInfo.getFunctionName() + ", Database Total: "
-    //                     + expectedInfo.getTotalPmTest());
-    //         } else {
-    //             System.out.println("Function not found in database: " + functionName);
-    //         }
-
-    //     }
-
-    //     return result;
-    // }
-
+   
     private void updateTotalPmTestInDatabase(String functionName, Long newTotalPmTest) throws NotFoundException {
         Postman_For_Grading postmanForGrading = postmanForGradingRepository
                 .findByPostmanFunctionName(functionName)
@@ -516,11 +453,22 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
     private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
         return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
                 .stream()
+                .filter(postmanForGrading -> Boolean.TRUE.equals(postmanForGrading.getStatus())) // Lọc theo status = true
                 .map(postmanForGrading -> new PostmanFunctionInfo(
                         postmanForGrading.getPostmanFunctionName(),
                         postmanForGrading.getTotalPmTest()))
                 .collect(Collectors.toList());
     }
+
+    
+    // private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
+    //     return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
+    //             .stream()
+    //             .map(postmanForGrading -> new PostmanFunctionInfo(
+    //                     postmanForGrading.getPostmanFunctionName(),
+    //                     postmanForGrading.getTotalPmTest()))
+    //             .collect(Collectors.toList());
+    // }
 
     public List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException {
         Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
