@@ -339,51 +339,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         return count;
     }
 
-    // Hàm chạy newman và kiểm tra kết quả
-    // private String runNewman(String collectionJson) {
-    // String postmanFunctionName = null;
-    // try {
-    // // Ghi collection JSON vào file tạm thời
-    // Path tempFile = Files.createTempFile("collection", ".json");
-    // Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8));
-
-    // String newmanPath = "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd"; //
-    // Hoặc .exe nếu cần
-    // String timeout = "1000"; // Đặt thời gian chờ
-
-    // // Gọi newman bằng ProcessBuilder với tùy chọn timeout
-    // ProcessBuilder processBuilder = new ProcessBuilder(newmanPath, "run",
-    // tempFile.toAbsolutePath().toString(),
-    // "--timeout", timeout);
-    // processBuilder.redirectErrorStream(true);
-    // Process process = processBuilder.start();
-
-    // StringBuilder outputBuilder = new StringBuilder();
-    // try (BufferedReader reader = new BufferedReader(new
-    // InputStreamReader(process.getInputStream()))) {
-    // String line;
-    // while ((line = reader.readLine()) != null) {
-    // outputBuilder.append(line).append("\n");
-
-    // // Tìm postmanFunctionName từ chuỗi có dấu '→'
-    // if (line.contains("→")) {
-    // postmanFunctionName = line.substring(line.indexOf("→") + 1).trim();
-    // }
-    // }
-    // }
-
-    // int exitCode = process.waitFor();
-    // if (exitCode == 0 || outputBuilder.toString().contains("executed")) {
-    // return postmanFunctionName; // Trả về postmanFunctionName nếu thành công
-    // } else {
-    // return null;
-    // }
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // return null;
-    // }
-    // }
-
+  
     private String sendToAI(String prompt, String aiApiKey) {
         // Set up the request to the AI service
         String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key="
