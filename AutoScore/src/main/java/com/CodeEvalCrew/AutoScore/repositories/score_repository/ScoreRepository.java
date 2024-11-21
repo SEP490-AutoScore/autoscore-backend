@@ -17,4 +17,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     Student findStudentById(@Param("studentId") Long studentId);
 
     List<Score> findByExamPaperExamPaperId(Long examPaperId);
+
+    @Query("SELECT DISTINCT s.examPaper.examPaperId FROM Score s")
+    List<Long> findDistinctExamPaperIds();
+
 }

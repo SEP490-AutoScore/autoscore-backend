@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
 import com.CodeEvalCrew.AutoScore.services.score_service.IScoreService;
 
@@ -23,14 +24,11 @@ public class ScoreController {
     @Autowired
     private IScoreService scoreService;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('EXPORT_SCORE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
     @PostMapping
     public ResponseEntity<List<ScoreResponseDTO>> getScoreJSON(@RequestParam Long exampaperid) {
         try {
             List<ScoreResponseDTO> scoreResponseDTOs = scoreService.getScoresByExamPaperId(exampaperid);
-            if (scoreResponseDTOs.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
             return ResponseEntity.ok(scoreResponseDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -45,6 +43,17 @@ public class ScoreController {
             scoreService.exportScoresToExcel(response, scores);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @GetMapping("/getAll")
+    public ResponseEntity<List<ScoreOverViewResponseDTO>> getAllScoreOverView() {
+        try {
+            List<ScoreOverViewResponseDTO> scores = scoreService.getScoreOverView();
+            return ResponseEntity.ok(scores);
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }
