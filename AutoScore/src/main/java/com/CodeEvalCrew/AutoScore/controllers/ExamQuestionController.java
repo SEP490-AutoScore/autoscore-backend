@@ -57,7 +57,7 @@ public class ExamQuestionController {
             
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NoSuchElementException nse) {
-            return new ResponseEntity<>(nse.getMessage() ,HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (NotFoundException nfe) {
             return new ResponseEntity<>(nfe.getMessage() ,HttpStatus.BAD_REQUEST);
         } catch (Exception ex) {
