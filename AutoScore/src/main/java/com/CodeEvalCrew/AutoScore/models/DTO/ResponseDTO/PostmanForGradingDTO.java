@@ -12,7 +12,8 @@ public class PostmanForGradingDTO {
     private Long orderBy;
     private Long postmanForGradingParentId; 
     private Long examQuestionId;           
-    private Long gherkinScenarioId;        
+    private Long gherkinScenarioId;   
+    private Boolean status;     
 }
 
 

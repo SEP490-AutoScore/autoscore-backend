@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 
-import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,5 +14,6 @@ import lombok.Setter;
 public class ExamPaperView {
     private Long examPaperId;
     private String examPaperCode;
-    private List<ImportantView> importants;
+    private Set<ImportantView> importants;
+    private Boolean isUsed;
 }

@@ -50,7 +50,7 @@ public class Exam_Paper {
     @Basic(fetch = FetchType.EAGER) // Buộc tải ngay lập tức
     private byte[] fileCollectionPostman;
     private Boolean isComfirmFile;
-    private Boolean isUsed;
+    private Boolean isUsed = false;
 
     //Relationship
     //1-n score

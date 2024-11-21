@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamDatabaseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
@@ -33,14 +33,14 @@ public class ExamDatabaseService implements IExamDatabaseService {
     @Autowired
     private IExamPaperRepository examPaperRepository;
 
-    private final String url = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
-    private final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    // private final String url = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
+    // private final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
 
 
       public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId) throws Exception {
         try {
-            Class.forName(driver);
+            Class.forName(PathUtil.DATABASE_DRIVER);
         } catch (ClassNotFoundException e) {
             throw new Exception("SQL Server driver not found: " + e.getMessage());
         }
@@ -61,7 +61,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
             throw new Exception("Database name not found in .sql file");
         }
 
-        try (Connection conn = DriverManager.getConnection(url)) {
+        try (Connection conn = DriverManager.getConnection(PathUtil.DATABASE_URL)) {
             conn.setAutoCommit(false);
             Statement stmt = conn.createStatement();
 
@@ -146,7 +146,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
 
     public String updateSqlFile(MultipartFile sqlFile, MultipartFile imageFile, Long examPaperId) throws Exception {
         try {
-            Class.forName(driver);
+            Class.forName(PathUtil.DATABASE_DRIVER);
         } catch (ClassNotFoundException e) {
             throw new Exception("SQL Server driver not found: " + e.getMessage());
         }
@@ -176,7 +176,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
             examDatabaseRepository.save(existingDatabase);
         }
     
-        try (Connection conn = DriverManager.getConnection(url)) {
+        try (Connection conn = DriverManager.getConnection(PathUtil.DATABASE_URL)) {
             conn.setAutoCommit(false);
             Statement stmt = conn.createStatement();
     
