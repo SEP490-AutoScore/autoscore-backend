@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +37,7 @@ public class ExamPaperController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<?> getById(@RequestParam Long id) {
+    public ResponseEntity<?> getById(@PathVariable Long id) {
         ExamPaperView result;
         try {
 
@@ -90,6 +91,8 @@ public class ExamPaperController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -1,5 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.permission_service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -7,16 +9,18 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PermissionRequestDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
-import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionRepository;
 import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.mappers.PermissionMapper;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PermissionRequestDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionListResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCategoryResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission_Category;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionCategoryRepository;
+import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRolePermissionRepository;
 
 @Service
@@ -26,7 +30,8 @@ public class PermissionService implements IPermissionService {
     private final IPermissionCategoryRepository permissionCatergoryRepository;
     private final IRolePermissionRepository rolePermissionRepository;
 
-    public PermissionService(IPermissionRepository permissionRepository, IPermissionCategoryRepository permissionCatergoryRepository, IRolePermissionRepository rolePermissionRepository) {
+    public PermissionService(IPermissionRepository permissionRepository, IPermissionCategoryRepository permissionCatergoryRepository,
+            IRolePermissionRepository rolePermissionRepository) {
         this.permissionRepository = permissionRepository;
         this.permissionCatergoryRepository = permissionCatergoryRepository;
         this.rolePermissionRepository = rolePermissionRepository;
@@ -165,7 +170,7 @@ public class PermissionService implements IPermissionService {
             if (savedPermission == null || savedPermission.getPermissionId() == null) {
                 return OperationStatus.FAILURE;
             }
-            
+
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
             return OperationStatus.ERROR;
@@ -185,6 +190,49 @@ public class PermissionService implements IPermissionService {
             return rolePermissions;
         } catch (Exception e) {
             throw new Exception("Error while getting permission category with id: " + permissionId);
+        }
+    }
+
+    @Override
+    public List<PermissionPermissionCategoryResponseDTO> getAllPermissionByPermissionCategory() {
+        try {
+            List<Permission_Category> permissionCategories = permissionCatergoryRepository.findAll()
+                    .stream().filter(permissionCategory -> permissionCategory.isStatus()).collect(Collectors.toList());
+            if (permissionCategories == null || permissionCategories.isEmpty()) {
+                return null;
+            }
+            List<PermissionPermissionCategoryResponseDTO> permissionPermissionCategoryResponseDTOs = new ArrayList<>();
+            for (Permission_Category permissionCategory : permissionCategories) {
+                PermissionPermissionCategoryResponseDTO permissionPermissionCategoryResponseDTO = new PermissionPermissionCategoryResponseDTO();
+                Optional<List<Permission>> permissions = permissionRepository.findAllByPermissionCategory(permissionCategory);
+                if (permissions.isPresent() && !permissions.get().isEmpty()) {
+                    permissionPermissionCategoryResponseDTO.setPermissionCategoryName(permissionCategory.getPermissionCategoryName());
+                    permissionPermissionCategoryResponseDTO.setPermissionCategoryId(permissionCategory.getPermissionCategoryId());
+                    permissionPermissionCategoryResponseDTO.setStatus(permissionCategory.isStatus());
+                    permissionPermissionCategoryResponseDTO.setPermissions(new ArrayList<>());
+
+                    List<Permission> permissionSorted = permissions.get()
+                            .stream().sorted(Comparator.comparing(Permission::getPermissionName).reversed()).collect(Collectors.toList());
+
+                    for (Permission permission : permissionSorted) {
+                        if (permission.isStatus()) {
+                            PermissionListResponseDTO permissionListResponseDTO = new PermissionListResponseDTO(
+                                    permission.getPermissionId(),
+                                    permission.getPermissionName(),
+                                    permission.getDescription(),
+                                    permission.getAction(),
+                                    permission.isStatus());
+                            permissionPermissionCategoryResponseDTO.getPermissions().add(permissionListResponseDTO);
+                        }
+                    }
+                    permissionPermissionCategoryResponseDTOs.add(permissionPermissionCategoryResponseDTO);
+                }
+            }
+            return permissionPermissionCategoryResponseDTOs
+                    .stream().sorted(Comparator.comparing(PermissionPermissionCategoryResponseDTO::getPermissionCategoryName))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new Exception("Error while getting all permissions");
         }
     }
 }

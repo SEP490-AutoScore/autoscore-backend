@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PermissionRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCategoryResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
 import com.CodeEvalCrew.AutoScore.services.permission_service.IPermissionService;
 
@@ -25,7 +26,7 @@ public class PermissionController {
         this.permissionService = permissionService;
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('VIEW_PERMISSION')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION')")
     @GetMapping
     public ResponseEntity<List<PermissionResponseDTO>> getAllPermissions() {
         List<PermissionResponseDTO> permissions = permissionService.getAllPermissions();
@@ -35,7 +36,7 @@ public class PermissionController {
         return ResponseEntity.ok(permissions);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('VIEW_PERMISSION')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION')")
     @GetMapping("/{permissionId}")
     public ResponseEntity<PermissionResponseDTO> getPermissionById(@PathVariable Long permissionId) {
         PermissionResponseDTO permission = permissionService.getPermissionById(permissionId);
@@ -45,7 +46,7 @@ public class PermissionController {
         return ResponseEntity.ok(permission);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('CREATE_PERMISSION')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('CREATE_PERMISSION')")
     @PostMapping("/create")
     public ResponseEntity<?> createPermission(@RequestBody PermissionRequestDTO permissionRequestDTO) {
         OperationStatus status = permissionService.createPermission(permissionRequestDTO);
@@ -61,7 +62,7 @@ public class PermissionController {
         };
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('UPDATE_PERMISSION')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('UPDATE_PERMISSION')")
     @PostMapping("/update")
     public ResponseEntity<?> updatePermission(@RequestBody PermissionRequestDTO permissionRequestDTO) {
         OperationStatus status = permissionService.updatePermission(permissionRequestDTO);
@@ -77,7 +78,7 @@ public class PermissionController {
         };
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('DELETE_PERMISSION')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('DELETE_PERMISSION')")
     @PostMapping("/delete/{permissionId}")
     public ResponseEntity<?> deletePermission(@PathVariable Long permissionId) {
         OperationStatus status = permissionService.deletePermission(permissionId);
@@ -89,5 +90,15 @@ public class PermissionController {
             case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Permission");
             default -> ResponseEntity.status(500).body("Unexpected error occurred");
         };
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION')")
+    @GetMapping("/get-all")
+    public ResponseEntity<List<PermissionPermissionCategoryResponseDTO>> getAllPermissionByPermissionCategory() {
+        List<PermissionPermissionCategoryResponseDTO> permissions = permissionService.getAllPermissionByPermissionCategory();
+        if (permissions == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(permissions);
     }
 }

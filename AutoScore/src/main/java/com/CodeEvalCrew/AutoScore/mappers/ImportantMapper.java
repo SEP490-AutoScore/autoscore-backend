@@ -13,4 +13,6 @@ public interface ImportantMapper {
     ImportantMapper INSTANCE = Mappers.getMapper(ImportantMapper.class);
 
     List<ImportantView> fromListEntityToListView(List<Important> importants);
+
+    ImportantView formImportantToView(Important important);
 }

@@ -1,20 +1,13 @@
 package com.CodeEvalCrew.AutoScore.security;
 
 import java.security.Key;
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-import com.CodeEvalCrew.AutoScore.models.Entity.RevokedToken;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.RevokedTokenRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -36,9 +29,6 @@ public class JwtTokenProvider {
     private long jwtExpiration;
 
     private Key key;
-
-    @Autowired
-    private RevokedTokenRepository revokedTokenRepository; // Thêm Repository để tương tác với CSDL
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
@@ -70,10 +60,6 @@ public class JwtTokenProvider {
 
     // Xác minh JWT token và kiểm tra token có bị thu hồi không
     public boolean validateToken(String token) throws ExpiredJwtException, MalformedJwtException, IllegalArgumentException, JwtException  {
-        if (isTokenRevoked(token)) {
-            logger.warn("JWT token has been revoked");
-            return false;
-        }
     
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -81,16 +67,16 @@ public class JwtTokenProvider {
             return true;
         } catch (ExpiredJwtException e) {
             logger.error("Expired JWT token: " + e.getMessage());
-            throw e; // Ném lại để xử lý trong VerificationService
+            return false;
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: " + e.getMessage());
-            throw e;
+            return false;
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: " + e.getMessage());
-            throw e;
+            return false;
         } catch (JwtException e) {
             logger.error("Unexpected error during JWT validation: " + e.getMessage());
-            throw e;
+            return false;
         }
     }
     
@@ -102,21 +88,5 @@ public class JwtTokenProvider {
                             .parseClaimsJws(token)
                             .getBody();
         return claims.getSubject();
-    }
-
-    // Kiểm tra token có bị thu hồi hay không
-    private boolean isTokenRevoked(String token) {
-        Optional<RevokedToken> revokedToken = revokedTokenRepository.findByToken(token);
-        return revokedToken.isPresent();
-    }
-
-    // Thu hồi token
-    public void revokeToken(String token, Account account) {
-        RevokedToken revokedToken = new RevokedToken();
-        revokedToken.setAccount(account);
-        revokedToken.setToken(token);
-        revokedToken.setRevokedAt(LocalDateTime.now());
-        revokedTokenRepository.save(revokedToken);
-        logger.info("Token has been revoked: " + token);
-    }    
+    }  
 }
