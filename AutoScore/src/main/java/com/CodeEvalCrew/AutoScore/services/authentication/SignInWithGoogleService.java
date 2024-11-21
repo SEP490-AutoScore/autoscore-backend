@@ -30,6 +30,9 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
     private final IOAuthRefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Value("${jwt.access-token.expiration}")
+    public long getJwtAccessExpiration;
+
     @Value("${jwt.refresh-token.expiration}")
     public long getJwtRefreshExpiration;
 
@@ -72,14 +75,16 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         );
         response.setJwtToken(jwtToken);
 
+        Timestamp acessExpire = new Timestamp(Instant.now().plusMillis(getJwtAccessExpiration).toEpochMilli());
+        Timestamp refreshExpire = new Timestamp(Instant.now().plusMillis(getJwtRefreshExpiration).toEpochMilli());
+
         // Tạo refresh token ngẫu nhiên
         String refreshToken = generateRefreshToken();
-
         // Lưu refresh token vào cơ sở dữ liệu
         OAuthRefreshToken oauthRefreshToken = new OAuthRefreshToken();
         oauthRefreshToken.setToken(refreshToken);
         oauthRefreshToken.setAccount(account);
-        oauthRefreshToken.setExpiryDate(Timestamp.from(Instant.now().plusMillis(getJwtRefreshExpiration)));
+        oauthRefreshToken.setExpiryDate(refreshExpire);
 
         refreshTokenRepository.save(oauthRefreshToken);
         response.setRefreshToken(refreshToken);
@@ -95,7 +100,7 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         response.setName(employeeName);
         response.setCampus(campus);
         response.setPosition(position);
-        response.setExp(getJwtRefreshExpiration);
+        response.setExp(acessExpire.getTime());
 
         return response;
     }
