@@ -29,6 +29,10 @@ public class VerificationService {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final IOAuthRefreshTokenRepository refreshTokenRepository;
+
+    @Value("${jwt.access-token.expiration}")
+    public long getJwtAccessExpiration;
+
     @Value("${jwt.refresh-token.expiration}")
     public long getJwtRefreshExpiration;
 
@@ -86,16 +90,21 @@ public class VerificationService {
                             role.getRoleName(),
                             permissions
                     );
+                    
+                    Timestamp acessExpire = new Timestamp(Instant.now().plusMillis(getJwtAccessExpiration).toEpochMilli());
+                    Timestamp refreshExpire = new Timestamp(Instant.now().plusMillis(getJwtRefreshExpiration).toEpochMilli());
 
                     // Tạo refresh token mới
                     OAuthRefreshToken newRefreshToken = new OAuthRefreshToken();
                     newRefreshToken.setToken(UUID.randomUUID().toString());
                     newRefreshToken.setAccount(account);
-                    newRefreshToken.setExpiryDate(Timestamp.from(Instant.now().plusMillis(getJwtRefreshExpiration)));
+                    newRefreshToken.setExpiryDate(refreshExpire);
                     refreshTokenRepository.save(newRefreshToken);
 
                     // Trả về access token và refresh token mới
-                    return ResponseEntity.ok(new TokenResponseDTO(newAccessToken, newRefreshToken.getToken(), getJwtRefreshExpiration));
+                    return ResponseEntity.ok(new TokenResponseDTO(newAccessToken,
+                            newRefreshToken.getToken(),
+                            acessExpire.getTime()));
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null));
     }
