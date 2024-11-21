@@ -76,12 +76,12 @@ VALUES
 ('DASHBOARD', 40, 'Dashboard access', 11, 1, 'Allows access to the dashboard');
 
 INSERT INTO `role`
-(`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
+(`status`, `role_id`, `role_code`, `role_name`, `description`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
 VALUES
-(true, 1, 'ADMIN', '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 2, 'EXAMINER', '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 3, 'HEAD_OF_DEPARTMENT', '2024-09-30 00:00:00', 1, null, null, null, null),
-(true, 4, 'LECTURER', '2024-09-30 00:00:00', 1, null, null, null, null);
+(true, 1, 'ADMIN', 'Administrator', 'Responsible for managing the system and users', '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 2, 'EXAMINER', 'Examiner', 'Responsible for evaluating exams and assessments', '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 3, 'HEAD_OF_DEPARTMENT', 'Head of Department', 'Leads a department and oversees its operations', '2024-09-30 00:00:00', 1, null, null, null, null),
+(true, 4, 'LECTURER', 'Lecturer', 'Create tests and assignments for students and schools', '2024-09-30 00:00:00', 1, null, null, null, null);
 
 INSERT INTO `role_permission`
 (`status`, `role_id`, `permission_id`)

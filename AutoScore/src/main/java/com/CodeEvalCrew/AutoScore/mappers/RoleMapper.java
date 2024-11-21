@@ -12,10 +12,5 @@ import com.CodeEvalCrew.AutoScore.utils.Util;
 @Mapper
 public interface RoleMapper {
     RoleMapper INSTANCE = Mappers.getMapper(RoleMapper.class); 
-
-    @Mapping(expression= "java(util.getEmployeeFullName(role.getCreatedBy()))", target = "createdBy")
-    @Mapping(expression= "java(util.getEmployeeFullName(role.getUpdatedBy()))", target = "updatedBy")
-    @Mapping(expression= "java(util.getEmployeeFullName(role.getDeletedBy()))", target = "deletedBy")
     RoleResponseDTO roleToRoleResponseDTO(Role role, @Context Util util);
-
 }

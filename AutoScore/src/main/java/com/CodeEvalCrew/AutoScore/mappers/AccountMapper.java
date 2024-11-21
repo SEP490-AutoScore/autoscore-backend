@@ -28,7 +28,7 @@ public interface AccountMapper {
     AccountResponseDTO accountToAccountResponseDTO(Account account, @Context Util util);
 
     default String getRoleName(Account account) {
-        return account.getRole() != null ? account.getRole().getRoleName() : "Unknown";
+        return account.getRole() != null ? account.getRole().getRoleCode() : "Unknown";
     }
 
     default Set<String> getPermissions(Account account) {
