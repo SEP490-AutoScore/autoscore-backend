@@ -49,15 +49,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<TokenResponseDTO> refreshToken(@RequestHeader(value = "Authorization", required = false) String authorizationHeader, @RequestBody String refreshToken) {
-        final String oldAccessToken;
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            oldAccessToken = authorizationHeader.substring(7); // Loại bỏ tiền tố "Bearer "
-        } else {
-            oldAccessToken = null;
-        }
-
-        return verificationService.rotationToken(refreshToken, oldAccessToken);
+    public ResponseEntity<TokenResponseDTO> refreshToken(@RequestBody String refreshToken) {
+        return verificationService.rotationToken(refreshToken);
     }
 
     @PostMapping("/verify")

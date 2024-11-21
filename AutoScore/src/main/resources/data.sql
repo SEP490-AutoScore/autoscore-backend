@@ -1,64 +1,80 @@
 INSERT INTO `permission_category`
 (`status`, `permission_category_id`, `permission_category_name`)
 VALUES
-(true, 1, 'MANAGE_ACCOUNT'),
-(true, 2, 'MANAGE_ROLE'),
-(true, 3, 'MANAGE_PERMISSION'),
-(true, 4, 'MANAGE_CAMPUS'),
-(true, 5, 'MANAGE_SUBJECT'),
-(true, 6, 'MANAGE_DEPARTMENT'),
-(true, 7, 'MANAGE_EXAM'),
-(true, 8, 'MANAGE_SCORE'),
-(true, 9, 'MANAGE_EXAM_DATABASE'),
-(true, 10, 'MANAGE_GHERKIN_SCENARIO'),
-(true, 11, 'ANALYZE');
+(true, 1, 'Account Management'),
+(true, 2, 'Role Management'),
+(true, 3, 'Permission Management'),
+(true, 4, 'Organization Management'),
+(true, 5, 'Subject Management'),
+(true, 6, 'Department Management'),
+(true, 7, 'Exam Management'),
+(true, 8, 'Score Management'),
+(true, 11, 'Other');
 
 INSERT INTO `permission`
-(`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`)
+(`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`, `description`)
 VALUES
-('VIEW_ACCOUNT', 1, 'View account', 1, 1),
-('VIEW_ROLE', 2, 'View role', 2, 1),
-('VIEW_PERMISSION', 3, 'View permission', 3, 1),
-('VIEW_CAMPUS', 4, 'View campus', 4, 1),
-('VIEW_SUBJECT', 5, 'View subject', 5, 1),
-('VIEW_DEPARTMENT', 6, 'View department', 6, 1),
-('VIEW_EXAM', 7, 'View exam', 7, 1),
-('VIEW_SCORE', 8, 'View score', 8, 1),
-('VIEW_EXAM_DATABASE', 30, 'View exam database', 9, 1),
-('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 10, 1),
+-- Account Management
+('VIEW_ACCOUNT', 1, 'View account', 1, 1, 'Allows viewing details of accounts'),
+('CREATE_ACCOUNT', 9, 'Create account', 1, 1, 'Allows creating new accounts'),
+('UPDATE_ACCOUNT', 16, 'Update account', 1, 1, 'Allows updating account information'),
+('DELETE_ACCOUNT', 23, 'Delete account', 1, 1, 'Allows deleting accounts'),
 
-('CREATE_ACCOUNT', 9, 'Create account', 1, 1),
-('CREATE_ROLE', 10, 'Create role', 2, 1),
-('CREATE_PERMISSION', 11, 'Create permission', 3, 1),
-('CREATE_CAMPUS', 12, 'Create campus', 4, 1),
-('CREATE_SUBJECT', 13, 'Create subject', 5, 1),
-('CREATE_DEPARTMENT', 14, 'Create department', 6, 1),
-('CREATE_EXAM', 15, 'Create exam', 7, 1),
-('CREATE_EXAM_DATABASE', 31, 'Create exam database', 9, 1),
-('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 10, 1),
+-- Role Management
+('VIEW_ROLE', 2, 'View role', 2, 1, 'Allows viewing role details'),
+('CREATE_ROLE', 10, 'Create role', 2, 1, 'Allows creating new roles'),
+('UPDATE_ROLE', 17, 'Update role', 2, 1, 'Allows updating role information'),
+('DELETE_ROLE', 24, 'Delete role', 2, 1, 'Allows deleting roles'),
 
-('UPDATE_ACCOUNT', 16, 'Update account', 1, 1),
-('UPDATE_ROLE', 17, 'Update role', 2, 1),
-('UPDATE_PERMISSION', 18, 'Update permission', 3, 1),
-('UPDATE_CAMPUS', 19, 'Update campus', 4, 1),
-('UPDATE_SUBJECT', 20, 'Update subject', 5, 1),
-('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1),
-('UPDATE_EXAM', 22, 'Update exam', 7, 1),
-('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 9, 1),
-('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 10, 1),
+-- Permission Management
+('VIEW_PERMISSION', 3, 'View permission', 3, 1, 'Allows viewing permission settings'),
+('CREATE_PERMISSION', 11, 'Create permission', 3, 1, 'Allows creating new permissions'),
+('UPDATE_PERMISSION', 18, 'Update permission', 3, 1, 'Allows updating existing permissions'),
+('DELETE_PERMISSION', 25, 'Delete permission', 3, 1, 'Allows deleting permissions'),
 
-('DELETE_ACCOUNT', 23, 'Delete account', 1, 1),
-('DELETE_ROLE', 24, 'Delete role', 2, 1),
-('DELETE_PERMISSION', 25, 'Delete permission', 3, 1),
-('DELETE_CAMPUS', 26, 'Delete campus', 4, 1),
-('DELETE_SUBJECT', 27, 'Delete subject', 5, 1),
-('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1),
-('DELETE_EXAM', 29, 'Delete exam', 7, 1),
-('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 9, 1),
-('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 10, 1),
+-- Organization Management
+('VIEW_CAMPUS', 4, 'View campus', 4, 1, 'Allows viewing campus details'),
+('CREATE_CAMPUS', 12, 'Create campus', 4, 1, 'Allows creating new campuses'),
+('UPDATE_CAMPUS', 19, 'Update campus', 4, 1, 'Allows updating campus information'),
+('DELETE_CAMPUS', 26, 'Delete campus', 4, 1, 'Allows deleting campuses'),
 
-('EXPORT_SCORE', 39, 'Export score', 8, 1),
-('DASHBOARD', 40, 'Export score', 11, 1);
+-- Subject Management
+('VIEW_SUBJECT', 5, 'View subject', 5, 1, 'Allows viewing subject details'),
+('CREATE_SUBJECT', 13, 'Create subject', 5, 1, 'Allows creating new subjects'),
+('UPDATE_SUBJECT', 20, 'Update subject', 5, 1, 'Allows updating subject information'),
+('DELETE_SUBJECT', 27, 'Delete subject', 5, 1, 'Allows deleting subjects'),
+
+-- Department Management
+('VIEW_DEPARTMENT', 6, 'View department', 6, 1, 'Allows viewing department details'),
+('CREATE_DEPARTMENT', 14, 'Create department', 6, 1, 'Allows creating new departments'),
+('UPDATE_DEPARTMENT', 21, 'Update department', 6, 1, 'Allows updating department information'),
+('DELETE_DEPARTMENT', 28, 'Delete department', 6, 1, 'Allows deleting departments'),
+
+-- Exam Management
+('VIEW_EXAM', 7, 'View exam', 7, 1, 'Allows viewing exam details'),
+('CREATE_EXAM', 15, 'Create exam', 7, 1, 'Allows creating new exams'),
+('UPDATE_EXAM', 22, 'Update exam', 7, 1, 'Allows updating exam information'),
+('DELETE_EXAM', 29, 'Delete exam', 7, 1, 'Allows deleting exams'),
+
+-- Exam Database
+('VIEW_EXAM_DATABASE', 30, 'View exam database', 7, 1, 'Allows viewing exam database details'),
+('CREATE_EXAM_DATABASE', 31, 'Create exam database', 7, 1, 'Allows creating new exam database entries'),
+('UPDATE_EXAM_DATABASE', 32, 'Update exam database', 7, 1, 'Allows updating exam database entries'),
+('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 7, 1, 'Allows deleting exam database entries'),
+
+-- Gherkin Scenario
+('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 7, 1, 'Allows viewing Gherkin scenario details'),
+('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 7, 1, 'Allows creating new Gherkin scenarios'),
+('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 7, 1, 'Allows updating Gherkin scenarios'),
+('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 7, 1, 'Allows deleting Gherkin scenarios'),
+
+-- Score Management
+('VIEW_SCORE', 8, 'View score', 8, 1, 'Allows viewing scores'),
+('EXPORT_SCORE', 39, 'Export score', 8, 1, 'Allows exporting score reports'),
+
+-- Dashboard
+('DASHBOARD', 40, 'Dashboard access', 11, 1, 'Allows access to the dashboard');
+
 INSERT INTO `role`
 (`status`, `role_id`, `role_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
 VALUES

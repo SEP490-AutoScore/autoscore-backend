@@ -25,7 +25,7 @@ public class PermissionCategoryController {
     @Autowired
     private IPermisionCategoryService permisionCategoryService;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
     @GetMapping
     public ResponseEntity<List<PermissionCategoryDTO>> getPermissionCategories() {
         List<PermissionCategoryDTO> permissionCategories = permisionCategoryService.getAllPermissionCategory();
@@ -35,7 +35,7 @@ public class PermissionCategoryController {
         return ResponseEntity.ok(permissionCategories);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
     @GetMapping("/{id}")
     public ResponseEntity<PermissionCategoryDTO> getPermissionCategoryById(@PathVariable Long id) {
         Optional<PermissionCategoryDTO> permissionCategory = permisionCategoryService.getPermissionCategoryById(id);
@@ -45,7 +45,7 @@ public class PermissionCategoryController {
         return ResponseEntity.ok(permissionCategory.get());
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION_CATEGORY')")
     @GetMapping("/getbyname/{name}")
     public ResponseEntity<PermissionCategoryDTO> getPermissionCategoryByName(@PathVariable String name) {
         Optional<PermissionCategoryDTO> permissionCategory = permisionCategoryService.getPermissionCategoryByName(name);
@@ -55,7 +55,7 @@ public class PermissionCategoryController {
         return ResponseEntity.ok(permissionCategory.get());
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('CREATE_PERMISSION_CATEGORY')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAuthority('CREATE_PERMISSION_CATEGORY')")
     @PostMapping("/create")
     public ResponseEntity<?> createPermissionCategory(@RequestBody PermissionCategoryRequestDTO permissionCategoryRequestDTO) {
         OperationStatus permissionCategory = permisionCategoryService.createPermissionCategory(permissionCategoryRequestDTO);
@@ -70,7 +70,7 @@ public class PermissionCategoryController {
         };
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('UPDATE_PERMISSION_CATEGORY')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAuthority('UPDATE_PERMISSION_CATEGORY')")
     @PostMapping("/update")
     public ResponseEntity<?> updatePermissionCategory(@RequestBody PermissionCategoryRequestDTO permissionCategoryRequestDTO) {
         OperationStatus permissionCategory = permisionCategoryService.updatePermissionCategory(permissionCategoryRequestDTO);
@@ -85,7 +85,7 @@ public class PermissionCategoryController {
         };
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') or hasAuthority('DELETE_PERMISSION_CATEGORY')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAuthority('DELETE_PERMISSION_CATEGORY')")
     @PostMapping("/delete/{categoryId}")
     public ResponseEntity<?> deletePermissionCategory(@PathVariable long categoryId) {
         OperationStatus permissionCategory = permisionCategoryService.deletePermissionCategory(categoryId);
