@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.score_service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -13,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.mappers.ScoreMapper;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score;
 import com.CodeEvalCrew.AutoScore.repositories.score_repository.ScoreRepository;
@@ -135,6 +137,46 @@ public class ScoreService implements IScoreService {
         // Write the output to response output stream
         workbook.write(response.getOutputStream());
         workbook.close();
+    }
+
+    @Override
+    @SuppressWarnings("CallToPrintStackTrace")
+    public List<ScoreOverViewResponseDTO> getScoreOverView() {
+        try {
+            // Lấy danh sách các examPaperId duy nhất
+            List<Long> examPaperIdList = scoreRepository.findDistinctExamPaperIds();
+            if (examPaperIdList == null || examPaperIdList.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Danh sách response DTOs
+            List<ScoreOverViewResponseDTO> responseDTOs = new ArrayList<>();
+
+            // Duyệt qua từng examPaperId
+            for (Long examPaperId : examPaperIdList) {
+                // Lấy danh sách các scores theo examPaperId
+                List<Score> scores = scoreRepository.findByExamPaperExamPaperId(examPaperId);
+                if (scores == null || scores.isEmpty()) {
+                    continue; // Bỏ qua nếu không có scores
+                }
+
+                // Tạo DTO và gán giá trị
+                ScoreOverViewResponseDTO scoreOverViewResponseDTO = new ScoreOverViewResponseDTO();
+                scoreOverViewResponseDTO.setExamPaperId(examPaperId);
+                scoreOverViewResponseDTO.setExamCode(scores.get(0).getExamPaper().getExam().getExamCode());
+                scoreOverViewResponseDTO.setExamPaperCode(scores.get(0).getExamPaper().getExamPaperCode());
+                scoreOverViewResponseDTO.setSemesterName(scores.get(0).getExamPaper().getExam().getSemester().getSemesterName());
+                scoreOverViewResponseDTO.setTotalStudents(scores.size());
+
+                // Thêm vào danh sách
+                responseDTOs.add(scoreOverViewResponseDTO);
+            }
+
+            return responseDTOs;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // private int calculateRowHeight(ScoreResponseDTO scoreDTO) {
