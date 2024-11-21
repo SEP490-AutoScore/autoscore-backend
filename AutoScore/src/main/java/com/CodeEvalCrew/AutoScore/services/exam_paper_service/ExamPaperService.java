@@ -2,11 +2,12 @@ package com.CodeEvalCrew.AutoScore.services.exam_paper_service;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -15,9 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
-import java.io.File;
-import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -47,6 +45,7 @@ import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExa
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamPaperSpecification;
+import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,6 +53,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ExamPaperService implements IExamPaperService {
+
     @Autowired
     private final IExamPaperRepository examPaperRepository;
     @Autowired
@@ -85,7 +85,16 @@ public class ExamPaperService implements IExamPaperService {
 
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(id), "Exam Paper", id);
 
-            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            Set<ImportantView> set = new HashSet<>();
+            for (Important_Exam_Paper a : examPaper.getImportants()) {
+                Important important = checkEntityExistence(importantRepository.findById(a.getImportant().getImportantId()), "Improtant", a.getImportant().getImportantId());
+                ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
+                set.add(view);
+            }
+            examPaperView.setImportants(set);
+
+            return examPaperView;
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -108,8 +117,9 @@ public class ExamPaperService implements IExamPaperService {
 
             List<Exam_Paper> listEntities = examPaperRepository.findAll(spec);
 
-            if (listEntities.isEmpty())
+            if (listEntities.isEmpty()) {
                 throw new NoSuchElementException("No exam paper found");
+            }
 
             for (Exam_Paper exam_Paper : listEntities) {
                 ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(exam_Paper);
@@ -265,7 +275,6 @@ public class ExamPaperService implements IExamPaperService {
                 String newmanOutput = runNewmanTest(tempFile);
                 NewmanResult newmanResult = handleNewmanResult(newmanOutput, expectedFunctionInfo, examPaperId);
 
-
                 // Lưu thông tin vào examPaper bất kể kết quả Newman
                 examPaper.setFileCollectionPostman(fileData);
                 examPaper.setIsComfirmFile(false);
@@ -319,57 +328,54 @@ public class ExamPaperService implements IExamPaperService {
 
     // Hàm xử lý kết quả từ Newman
     private NewmanResult handleNewmanResult(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo, Long examPaperId)
-        throws NotFoundException {
-    // Phân tích đầu ra của Newman và tạo kết quả
-    NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
+            throws NotFoundException {
+        // Phân tích đầu ra của Newman và tạo kết quả
+        NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
 
-    // Duyệt qua các functionNames từ kết quả Newman
-    for (int i = 0; i < result.getFunctionNames().size(); i++) {
-        String functionName = result.getFunctionNames().get(i);
-        Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
+        // Duyệt qua các functionNames từ kết quả Newman
+        for (int i = 0; i < result.getFunctionNames().size(); i++) {
+            String functionName = result.getFunctionNames().get(i);
+            Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
 
-        // Tìm functionName trong expectedFunctionInfo (database)
-        Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
-                .filter(info -> info.getFunctionName().equals(functionName))
-                .findFirst();
+            // Tìm functionName trong expectedFunctionInfo (database)
+            Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
+                    .filter(info -> info.getFunctionName().equals(functionName))
+                    .findFirst();
 
-        if (expectedInfoOpt.isPresent()) {
-            PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
+            if (expectedInfoOpt.isPresent()) {
+                PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
 
-            // Nếu totalPmTests khác, cập nhật database
-            if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
-                updateTotalPmTestInDatabase(functionName, newTotalPmTest);
+                // Nếu totalPmTests khác, cập nhật database
+                if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
+                    updateTotalPmTestInDatabase(functionName, newTotalPmTest);
+                }
+                System.out.println("Updated function in database: " + functionName);
+            } else {
+                // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
+                createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
+                System.out.println("Created new function in database: " + functionName);
             }
-            System.out.println("Updated function in database: " + functionName);
-        } else {
-            // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
-            createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
-            System.out.println("Created new function in database: " + functionName);
         }
+
+        return result;
     }
 
-    return result;
-}
+    private void createNewPostmanForGrading(String functionName, Long totalPmTest, Long examPaperId) throws NotFoundException {
+        // Lấy Exam_Paper từ database
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new NotFoundException("Exam Paper not found for ID: " + examPaperId));
 
+        // Tạo mới Postman_For_Grading
+        Postman_For_Grading newPostmanForGrading = new Postman_For_Grading();
+        newPostmanForGrading.setPostmanFunctionName(functionName);
+        newPostmanForGrading.setTotalPmTest(totalPmTest);
+        newPostmanForGrading.setExamPaper(examPaper);
+        newPostmanForGrading.setStatus(true);
 
+        // Lưu vào database
+        postmanForGradingRepository.save(newPostmanForGrading);
+    }
 
-private void createNewPostmanForGrading(String functionName, Long totalPmTest, Long examPaperId) throws NotFoundException {
-    // Lấy Exam_Paper từ database
-    Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
-            .orElseThrow(() -> new NotFoundException("Exam Paper not found for ID: " + examPaperId));
-
-    // Tạo mới Postman_For_Grading
-    Postman_For_Grading newPostmanForGrading = new Postman_For_Grading();
-    newPostmanForGrading.setPostmanFunctionName(functionName);
-    newPostmanForGrading.setTotalPmTest(totalPmTest);
-    newPostmanForGrading.setExamPaper(examPaper);
-    newPostmanForGrading.setStatus(true);
-
-    // Lưu vào database
-    postmanForGradingRepository.save(newPostmanForGrading);
-}
-
-   
     private void updateTotalPmTestInDatabase(String functionName, Long newTotalPmTest) throws NotFoundException {
         Postman_For_Grading postmanForGrading = postmanForGradingRepository
                 .findByPostmanFunctionName(functionName)
@@ -388,19 +394,19 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
         String[] lines = newmanOutput.split("\n");
         String currentFunctionName = null;
         int currentFunctionTestCount = 0;
-    
+
         boolean isParsingFunctions = true; // Cờ để dừng khi gặp bảng
-    
+
         for (String line : lines) {
             // Nếu gặp bảng, dừng phân tích
             if (line.trim().startsWith("┌") || line.trim().startsWith("│") || line.trim().startsWith("└")) {
                 isParsingFunctions = false;
             }
-    
+
             if (!isParsingFunctions) {
                 break; // Ngừng xử lý nếu bảng đã xuất hiện
             }
-    
+
             // Nếu dòng bắt đầu bằng "→", đó là tên function mới
             if (line.startsWith("→")) {
                 if (currentFunctionName != null) { // Lưu function trước đó nếu có
@@ -410,25 +416,24 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
                 currentFunctionName = line.substring(2).trim(); // Bỏ "→" và lấy tên function
                 currentFunctionTestCount = 0; // Reset bộ đếm
             }
-    
+
             // Nếu dòng là test (bắt đầu bằng số hoặc dấu "√"), tăng bộ đếm
             if (line.trim().matches("^\\d+.*") || line.trim().startsWith("√")) {
                 currentFunctionTestCount++;
             }
         }
-    
+
         // Thêm function cuối cùng vào danh sách kết quả nếu còn function chưa lưu
         if (currentFunctionName != null) {
             functionNames.add(currentFunctionName);
             totalPmTests.add(currentFunctionTestCount);
         }
-    
+
         result.setFunctionNames(functionNames);
         result.setTotalPmTests(totalPmTests);
         return result;
     }
 
-    
     // private NewmanResult parseNewmanOutput(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo) {
     //     NewmanResult result = new NewmanResult();
     //     List<String> functionNames = new ArrayList<>();
@@ -436,7 +441,6 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
     //     String[] lines = newmanOutput.split("\n");
     //     String currentFunctionName = null;
     //     int currentFunctionTestCount = 0;
-
     //     for (String line : lines) {
     //         if (line.startsWith("→")) {
     //             if (currentFunctionName != null) {
@@ -448,8 +452,6 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
     //         }
     //         // if (line.trim().matches("^\\d+.*")) {
     //         if (line.trim().matches("^\\d+.*") || line.trim().startsWith("√")) {
-
-
     //             currentFunctionTestCount++;
     //         }
     //     }
@@ -457,23 +459,20 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
     //         functionNames.add(currentFunctionName);
     //         totalPmTests.add(currentFunctionTestCount);
     //     }
-
     //     result.setFunctionNames(functionNames);
     //     result.setTotalPmTests(totalPmTests);
     //     return result;
     // }
-
     private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
         return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
                 .stream()
                 .filter(postmanForGrading -> Boolean.TRUE.equals(postmanForGrading.getStatus())) // Lọc theo status = true
                 .map(postmanForGrading -> new PostmanFunctionInfo(
-                        postmanForGrading.getPostmanFunctionName(),
-                        postmanForGrading.getTotalPmTest()))
+                postmanForGrading.getPostmanFunctionName(),
+                postmanForGrading.getTotalPmTest()))
                 .collect(Collectors.toList());
     }
 
-    
     // private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
     //     return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
     //             .stream()
@@ -482,7 +481,6 @@ private void createNewPostmanForGrading(String functionName, Long totalPmTest, L
     //                     postmanForGrading.getTotalPmTest()))
     //             .collect(Collectors.toList());
     // }
-
     public List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException {
         Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
                 examPaperId);

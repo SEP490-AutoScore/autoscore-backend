@@ -37,7 +37,7 @@ public class ExamPaperController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<?> getById(@RequestParam Long id) {
+    public ResponseEntity<?> getById(@PathVariable Long id) {
         ExamPaperView result;
         try {
 
