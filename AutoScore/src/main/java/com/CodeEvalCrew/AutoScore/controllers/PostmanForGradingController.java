@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 import com.CodeEvalCrew.AutoScore.services.postman_for_grading_service.IPostmanForGradingService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("/api/postman-grading")
@@ -25,8 +26,16 @@ public class PostmanForGradingController {
     @Autowired
     private IPostmanForGradingService postmanForGradingService;
 
+    @PutMapping("")
+    public ResponseEntity<String> updatePostmanForGrading(@RequestBody PostmanForGradingUpdateRequest request) {
+        String result = postmanForGradingService.updatePostmanForGrading(request.getExamPaperId(), request.getUpdateDTOs());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+
     @GetMapping("")
-    public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading_forFunctionTree(@RequestParam Long examPaperId) {
+    public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading_forFunctionTree(
+            @RequestParam Long examPaperId) {
         List<PostmanForGradingDTO> postmanForGradingList = postmanForGradingService
                 .getPostmanForGradingByExamPaperId(examPaperId);
         return new ResponseEntity<>(postmanForGradingList, HttpStatus.OK);
