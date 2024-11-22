@@ -15,4 +15,6 @@ public interface GherkinScenarioRepository extends JpaRepository<Gherkin_Scenari
 
       List<Gherkin_Scenario> findByExamQuestionAndStatusTrue(Exam_Question examQuestion);
       boolean existsByExamQuestion_ExamQuestionIdAndStatusTrue(Long examQuestionId);
+    
+
 }
