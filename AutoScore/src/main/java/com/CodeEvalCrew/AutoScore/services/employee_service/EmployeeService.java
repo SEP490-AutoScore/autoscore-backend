@@ -37,7 +37,7 @@ public class EmployeeService implements IEmployeeService{
 
                 if (organization.getType() == Organization_Enum.CAMPUS) {
                     
-                List<Employee> employees = employeeRepository.findByOrganization_OrganizationId(organization.getOrganizationId());
+                List<Employee> employees = employeeRepository.findAllByOrganization_OrganizationId(organization.getOrganizationId());
                 if (employees != null) {
                     return EmployeeMapper.INSTANCE.employeesToEmployeeResponseDTOs(employees);
                 }

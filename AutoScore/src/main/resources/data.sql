@@ -70,10 +70,10 @@ VALUES
 
 -- Score Management
 ('VIEW_SCORE', 8, 'View score', 8, 1, 'Allows viewing scores'),
-('EXPORT_SCORE', 39, 'Export score', 8, 1, 'Allows exporting score reports'),
+('EXPORT_SCORE', 38, 'Export score', 8, 1, 'Allows exporting score reports'),
 
 -- Dashboard
-('DASHBOARD', 40, 'Dashboard access', 11, 1, 'Allows access to the dashboard');
+('DASHBOARD', 39, 'Dashboard access', 11, 1, 'Allows access to the dashboard');
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_code`, `role_name`, `description`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
@@ -86,12 +86,21 @@ VALUES
 INSERT INTO `role_permission`
 (`status`, `role_id`, `permission_id`)
 VALUES
-(true, 1, 1),(true, 1, 2),(true, 1, 3),(true, 1, 4),(true, 1, 5),(true, 1, 6),(true, 1, 7),(true, 1, 8),(true, 1, 9),(true, 1, 10),(true, 1, 11),(true, 1, 12),(true, 1, 13),
-(true, 1, 14),(true, 1, 15),(true, 1, 16),(true, 1, 17),(true, 1, 18),(true, 1, 19),(true, 1, 20),(true, 1, 21),(true, 1, 22),(true, 1, 23),(true, 1, 24),(true, 1, 25),(true, 1, 26),
-(true, 1, 27),(true, 1, 28),(true, 1, 29),(true, 1, 30),(true, 1, 31),(true, 1, 32),(true, 1, 33),(true, 1, 34),(true, 1, 35),(true, 1, 36),(true, 1, 37),(true, 1, 39),(true, 1, 40),
-(true, 2, 1),(true, 2, 4),(true, 2, 5),(true, 2, 6),(true, 2, 7),(true, 2, 8),(true, 2, 9),(true, 2, 12),(true, 2, 13),(true, 2, 14),(true, 2, 15),(true, 2, 16),(true, 2, 19),(true, 2, 20),
-(true, 2, 21),(true, 2, 22),(true, 2, 26),(true, 2, 27),(true, 2, 28),(true, 2, 29),(true, 2, 30),(true, 2, 31),(true, 2, 32),(true, 2, 33),(true, 2, 34),(true, 2, 35),(true, 2, 36),(true, 2, 37),(true, 2, 39),(true, 2, 40),
-(true, 3, 1),(true, 3, 4),(true, 3, 5),(true, 3, 6),(true, 3, 7),(true, 3, 8),(true, 3, 9),(true, 3, 12);
+-- Admin
+(true, 1, 1), (true, 1, 2), (true, 1, 3), (true, 1, 4), (true, 1, 5), (true, 1, 6), (true, 1, 7), (true, 1, 8), (true, 1, 9), (true, 1, 10),
+(true, 1, 11), (true, 1, 12), (true, 1, 13), (true, 1, 14), (true, 1, 15), (true, 1, 16), (true, 1, 17), (true, 1, 18), (true, 1, 19), (true, 1, 20),
+(true, 1, 21), (true, 1, 22), (true, 1, 23), (true, 1, 24), (true, 1, 25), (true, 1, 26), (true, 1, 27), (true, 1, 28), (true, 1, 29), (true, 1, 30),
+(true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39),
+-- Examiner
+(false, 2, 2), (false, 2, 3), (false, 2, 10), (false, 2, 11), (false, 2, 17), (false, 2, 18), (false, 2, 23), (false, 2, 24), (false, 2, 25), (false, 2, 39),
+(true, 2, 1), (true, 2, 4), (true, 2, 5), (true, 2, 6), (true, 2, 7), (true, 2, 8), (true, 2, 9), (true, 2, 12), (true, 2, 13), (true, 2, 14),
+(true, 2, 15), (true, 2, 16), (true, 2, 19), (true, 2, 20), (true, 2, 21), (true, 2, 22), (true, 2, 26), (true, 2, 27), (true, 2, 28), (true, 2, 29),
+(true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39),
+-- Head of Department
+(false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26), 
+(false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30), 
+(false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
+(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14);
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
@@ -147,7 +156,7 @@ VALUES
 (1, 'Head of Department', true),
 (2, 'Examiner', true),
 (3, 'Lecturer', true),
-(4, 'Admin', true);
+(4, 'Software Engineering ', true);
 
 INSERT INTO `employee`
 (`employee_id`, `full_name`, `employee_code`, `account_id`, `position_id`, `organization_id`, `ai_prompt_id`, `status`)

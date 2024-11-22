@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -37,6 +38,8 @@ public class Account {
     @Email(message = "Email should be valid")
     @Column(unique = true)
     private String email;
+    @Lob
+    private String avatar;
 
     @NotNull
     @Size(min = 1, max = 20)
