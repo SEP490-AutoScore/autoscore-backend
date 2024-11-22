@@ -23,7 +23,7 @@ public class RolePermisisionController {
         this.rolePermissionService = rolePermissionService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') and hasAuthority('VIEW_ROLE_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('VIEW_ROLE')")
     @GetMapping("/{id}")
     public ResponseEntity<RolePermissionResponseDTO> getRolePermissionById(@PathVariable Long id) {
         RolePermissionResponseDTO rolePermissionResponseDTO = rolePermissionService.getRolePermissionById(id);
@@ -33,7 +33,7 @@ public class RolePermisisionController {
         return ResponseEntity.ok(rolePermissionResponseDTO);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') and hasAuthority('CREATE_ROLE_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('CREATE_ROLE')")
     @PostMapping("/create")
     public ResponseEntity<?> createRolePermission(@RequestBody RolePermissionRequestDTO rolePermissionRequestDTO) {
         OperationStatus operationStatus = rolePermissionService.createRolePermission(rolePermissionRequestDTO);
@@ -48,7 +48,7 @@ public class RolePermisisionController {
         };
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') and hasAuthority('UPDATE_ROLE_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('UPDATE_ROLE')")
     @PostMapping("/update")
     public ResponseEntity<?> updateRolePermission(@RequestBody RolePermissionRequestDTO rolePermissionRequestDTO) {
         OperationStatus operationStatus = rolePermissionService.updateRolePermission(rolePermissionRequestDTO);
@@ -63,7 +63,7 @@ public class RolePermisisionController {
         };
     }
 
-    // @PreAuthorize("hasAnyAuthority('ADMIN') and hasAuthority('DELETE_ROLE_PERMISSION')")
+    // @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('DELETE_ROLE')")
     // @DeleteMapping("/delete/{id}")
     // public ResponseEntity<?> deleteRolePermission(@PathVariable Long id) {
     //     OperationStatus operationStatus = rolePermissionService.deleteRolePermission(id);

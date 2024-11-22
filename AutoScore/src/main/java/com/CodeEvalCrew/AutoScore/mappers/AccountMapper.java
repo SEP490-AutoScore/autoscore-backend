@@ -22,13 +22,13 @@ public interface AccountMapper {
     @Mapping(expression = "java(getPermissions(account))", target = "permissions")
     SignInWithGoogleResponseDTO accountToSignInWithGoogleResponseDTO(Account account);
 
-    @Mapping(expression= "java(util.getEmployeeFullName(account.getCreatedBy()))", target = "createdBy")
-    @Mapping(expression= "java(util.getEmployeeFullName(account.getUpdatedBy()))", target = "updatedBy")
-    @Mapping(expression= "java(util.getEmployeeFullName(account.getDeletedBy()))", target = "deletedBy")
-    AccountResponseDTO accountToAccountResponseDTO(Account account, @Context Util util);
+    // @Mapping(expression= "java(util.getEmployeeFullName(account.getCreatedBy()))", target = "createdBy")
+    // @Mapping(expression= "java(util.getEmployeeFullName(account.getUpdatedBy()))", target = "updatedBy")
+    // @Mapping(expression= "java(util.getEmployeeFullName(account.getDeletedBy()))", target = "deletedBy")
+    // AccountResponseDTO accountToAccountResponseDTO(Account account, @Context Util util);
 
     default String getRoleName(Account account) {
-        return account.getRole() != null ? account.getRole().getRoleName() : "Unknown";
+        return account.getRole() != null ? account.getRole().getRoleCode() : "Unknown";
     }
 
     default Set<String> getPermissions(Account account) {

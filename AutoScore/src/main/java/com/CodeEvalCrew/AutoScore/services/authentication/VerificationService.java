@@ -74,7 +74,7 @@ public class VerificationService {
                     refreshTokenRepository.delete(oauthRefreshToken);
 
                     Role role = account.getRole();
-                    if (role == null || role.getRoleName() == null) {
+                    if (role == null || role.getRoleCode() == null) {
                         throw new IllegalStateException("Account does not have a valid active role");
                     }
 
@@ -87,7 +87,7 @@ public class VerificationService {
                     // Tạo access token mới
                     String newAccessToken = jwtTokenProvider.generateToken(
                             account.getEmail(),
-                            role.getRoleName(),
+                            role.getRoleCode(),
                             permissions
                     );
                     

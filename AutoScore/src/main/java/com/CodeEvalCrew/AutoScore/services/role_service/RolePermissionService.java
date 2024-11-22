@@ -9,20 +9,21 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.RolePermissionRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionListResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCategoryResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.RolePermissionResponseDTO;
-import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRolePermissionRepository;
-import com.CodeEvalCrew.AutoScore.exceptions.Exception;
-import com.CodeEvalCrew.AutoScore.mappers.RolePermissionMapper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionRepository;
+import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRolePermissionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
+import com.CodeEvalCrew.AutoScore.services.permission_service.PermissionService;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
@@ -31,14 +32,15 @@ public class RolePermissionService implements IRolePermissionService {
     private final IRolePermissionRepository rolePermissionRepository;
     private final IRoleRepositoty roleRepositoty;
     private final IPermissionRepository permissionRepository;
-    private final Util util;
+    private final PermissionService permissionService;
 
     public RolePermissionService(IRolePermissionRepository rolePermissionRepository, IRoleRepositoty roleRepositoty,
-            IPermissionRepository permissionRepository, IAccountRepository accountRepository, IEmployeeRepository employeeRepository) {
+            IPermissionRepository permissionRepository, IAccountRepository accountRepository, IEmployeeRepository employeeRepository,
+            PermissionService permissionService) {
         this.rolePermissionRepository = rolePermissionRepository;
         this.roleRepositoty = roleRepositoty;
         this.permissionRepository = permissionRepository;
-        this.util = new Util(employeeRepository);
+        this.permissionService = permissionService;
     }
 
     @Override
@@ -47,24 +49,35 @@ public class RolePermissionService implements IRolePermissionService {
             if (id == null) {
                 throw new IllegalArgumentException("Id cannot be null");
             }
-
+            Role role = roleRepositoty.findById(id).get();
             List<Role_Permission> rolePermissions = rolePermissionRepository.findAllByRole_RoleId(id);
-
             if (rolePermissions == null || rolePermissions.isEmpty()) {
                 return null;
             }
 
-            // Lấy đối tượng Role đầu tiên (tất cả Role_Permission đều có cùng một Role)
-            Role_Permission rolePermission = rolePermissions.get(0);
+            List<PermissionPermissionCategoryResponseDTO> permissionCategories = permissionService.getAllPermissionByPermissionCategory();
+            if (permissionCategories == null || permissionCategories.isEmpty()) {
+                return null;
+            }
 
-            // Chuyển các permission của Role sang Set<PermissionResponseDTO>
-            Set<PermissionResponseDTO> permissions = RolePermissionMapper.INSTANCE.mapPermissions(rolePermissions.stream().collect(Collectors.toSet()));
+            for (Role_Permission rolePermission : rolePermissions) {
+                for (PermissionPermissionCategoryResponseDTO permissionCategory : permissionCategories) {
+                    for (PermissionListResponseDTO permission : permissionCategory.getPermissions()) {
+                        if (rolePermission.getPermission().getPermissionId().equals(permission.getPermissionId())) {
+                            permission.setStatus(rolePermission.isStatus());
+                        }
+                    }
+                }
+            }
 
-            // Ánh xạ Role_Permission sang RolePermissionResponseDTO
-            RolePermissionResponseDTO responseDTO = RolePermissionMapper.INSTANCE.rolePermissionToRolePermissionResponseDTO(rolePermission, util);
-            responseDTO.setPermissions(permissions); // Set danh sách permission
-
-            return responseDTO;
+            RolePermissionResponseDTO rolePermissionResponseDTO = new RolePermissionResponseDTO();
+            rolePermissionResponseDTO.setRoleId(role.getRoleId());
+            rolePermissionResponseDTO.setRoleName(role.getRoleName());
+            rolePermissionResponseDTO.setRoleCode(role.getRoleCode());
+            rolePermissionResponseDTO.setDescription(role.getDescription());
+            rolePermissionResponseDTO.setStatus(role.isStatus());
+            rolePermissionResponseDTO.setPermissionsCategory(permissionCategories);
+            return rolePermissionResponseDTO;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -194,12 +207,10 @@ public class RolePermissionService implements IRolePermissionService {
     //         if (rolePermissions == null || rolePermissions.isEmpty()) {
     //             return OperationStatus.NOT_FOUND;
     //         }
-
     //         List<Account_Role> accountRoles = accountRoleRepository.findAllByRole_RoleId(id);
     //         if (accountRoles != null && !accountRoles.isEmpty()) {
     //             return OperationStatus.CANNOT_DELETE;
     //         }
-
     //         for (Role_Permission rolePermission : rolePermissions) {
     //             rolePermissionRepository.delete(rolePermission);
     //         }
@@ -208,7 +219,6 @@ public class RolePermissionService implements IRolePermissionService {
     //         return OperationStatus.ERROR;
     //     }
     // }
-
     private Role getRoleById(Long roleId) {
         try {
             if (roleId == null) {
