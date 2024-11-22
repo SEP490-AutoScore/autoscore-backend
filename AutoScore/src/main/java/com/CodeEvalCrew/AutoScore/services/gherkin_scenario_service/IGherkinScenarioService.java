@@ -2,6 +2,7 @@ package com.CodeEvalCrew.AutoScore.services.gherkin_scenario_service;
 
 import java.util.List;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinPostmanPairDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
 
 public interface IGherkinScenarioService {
@@ -14,5 +15,7 @@ public interface IGherkinScenarioService {
     void updateGherkinScenarios(Long examQuestionId, String gherkinDataBody);
 
     List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId);
+
+     List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairs(Long examPaperId);
 
 }
