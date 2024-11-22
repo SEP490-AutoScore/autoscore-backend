@@ -61,7 +61,7 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         }
 
         // Lấy tên Role và các quyền từ Role_Permissions
-        String roleName = role.getRoleName();
+        String roleName = role.getRoleCode();
         Set<String> permissions = role.getRole_permissions().stream()
                 .filter(Role_Permission::isStatus)
                 .map(rolePermission -> rolePermission.getPermission().getAction())

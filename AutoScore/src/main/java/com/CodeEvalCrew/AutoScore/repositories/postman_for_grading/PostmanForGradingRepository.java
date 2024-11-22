@@ -23,4 +23,5 @@ public interface PostmanForGradingRepository extends JpaRepository<Postman_For_G
 Optional<Postman_For_Grading> findByPostmanFunctionName(String functionName);
 
 List<Postman_For_Grading> findByExamPaper_ExamPaperIdAndStatusTrue(Long examPaperId);
+
 }

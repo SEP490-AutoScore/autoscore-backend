@@ -8,4 +8,6 @@ import lombok.Setter;
 public class RoleRequestDTO {
     private Long roleId;
     private String roleName;
+    private String roleCode;
+    private String description;
 }

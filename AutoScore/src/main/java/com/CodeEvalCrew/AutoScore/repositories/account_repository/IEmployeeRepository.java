@@ -10,5 +10,5 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 @Repository
 public interface  IEmployeeRepository extends JpaRepository<Employee, Long>{
     Employee findByAccount_AccountId(Long accountId);
-    List<Employee> findByOrganization_OrganizationId(Long organizationId);
+    List<Employee> findAllByOrganization_OrganizationId(Long organizationId);
 }

@@ -1,23 +1,24 @@
 package com.CodeEvalCrew.AutoScore.services.account_service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.*;
-import org.springframework.stereotype.Service;
-
-import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-import com.CodeEvalCrew.AutoScore.models.Entity.Role;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
-
-import jakarta.transaction.Transactional;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -34,7 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // Kiểm tra Role của Account
         Role role = account.getRole();
-        if (role == null || !role.isStatus() || role.getRoleName() == null) {
+        if (role == null || !role.isStatus() || role.getRoleCode() == null) {
             throw new UsernameNotFoundException("Account has no valid role assigned.");
         }
 
@@ -45,7 +46,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .collect(Collectors.toSet());
 
         // Thêm quyền hạn của Role (ROLE_)
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleCode()));
 
         // Lấy danh sách các tổ chức mà tài khoản liên kết
         Set<Organization> organizations = account.getAccountOrganizations().stream()
