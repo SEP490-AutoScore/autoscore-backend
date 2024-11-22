@@ -13,23 +13,25 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
 
 public interface IExamPaperService {
 
-  ExamPaperView getById(Long id) throws NotFoundException;
+    ExamPaperView getById(Long id) throws NotFoundException;
 
-  List<ExamPaperView> getList(ExamPaperViewRequest request) throws NotFoundException, NoSuchElementException;
+    List<ExamPaperView> getList(ExamPaperViewRequest request) throws NotFoundException, NoSuchElementException;
 
-  ExamPaperView createNewExamPaper(ExamPaperCreateRequest request) throws NotFoundException;
+    ExamPaperView createNewExamPaper(ExamPaperCreateRequest request) throws NotFoundException;
 
-  ExamPaperView updateExamPaper(Long id, ExamPaperCreateRequest request) throws NotFoundException;
+    ExamPaperView updateExamPaper(Long id, ExamPaperCreateRequest request) throws NotFoundException;
 
-  ExamPaperView deleteExamPaper(Long id) throws NotFoundException;
+    ExamPaperView deleteExamPaper(Long id) throws NotFoundException;
 
-  void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception;
+    void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception;
 
-  List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException;
+    List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException;
 
-  List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException;
+    List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException;
 
-  // Method to export Postman collection from the Exam_Paper
-  byte[] exportPostmanCollection(Long examPaperId) throws Exception;
+    // Method to export Postman collection from the Exam_Paper
+    byte[] exportPostmanCollection(Long examPaperId) throws Exception;
+
+    List<ExamPaperView> getAllExamNotUsed() throws NotFoundException, Exception;
 
 }

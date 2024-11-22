@@ -17,20 +17,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinPostmanPairDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Info;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
+import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.repositories.ai_info_repository.AIInfoRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
+import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class GherkinScenarioService implements IGherkinScenarioService {
@@ -45,6 +48,89 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     private GherkinScenarioRepository gherkinScenarioRepository;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private PostmanForGradingRepository postmanForGradingRepository;
+
+    @Override
+    public List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairs(Long examPaperId) {
+        // Lấy tất cả Exam_Question theo examPaperId
+        List<Exam_Question> examQuestions = examQuestionRepository.findByExamPaper_ExamPaperId(examPaperId);
+
+        // Lấy tất cả Postman_For_Grading theo examPaperId và status = true
+        List<Postman_For_Grading> postmanForGradings = postmanForGradingRepository
+                .findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+
+        List<GherkinPostmanPairDTO> pairs = new ArrayList<>();
+
+        for (Exam_Question examQuestion : examQuestions) {
+            // Lấy tất cả Gherkin_Scenario liên quan và có status = true
+            List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository
+                    .findByExamQuestionAndStatusTrue(examQuestion);
+
+            // Tạo cặp Gherkin và Postman nếu có liên kết
+            for (Gherkin_Scenario gherkin : gherkinScenarios) {
+                Postman_For_Grading matchedPostman = postmanForGradings.stream()
+                        .filter(postman -> postman.getGherkinScenario() != null
+                                && postman.getGherkinScenario().getGherkinScenarioId()
+                                        .equals(gherkin.getGherkinScenarioId()))
+                        .findFirst()
+                        .orElse(null);
+
+                GherkinDTO gherkinDTO = new GherkinDTO(
+                        gherkin.getGherkinScenarioId(),
+                        gherkin.getGherkinData(),
+                        gherkin.getOrderPriority(),
+                        gherkin.getIsUpdateCreate(),
+                        gherkin.getStatus(),
+                        examQuestion.getExamQuestionId(),
+                        matchedPostman != null ? matchedPostman.getPostmanForGradingId() : null);
+
+                PostmanDTO postmanDTO = matchedPostman != null
+                        ? new PostmanDTO(
+                                matchedPostman.getPostmanForGradingId(),
+                                matchedPostman.getPostmanFunctionName(),
+                                matchedPostman.getScoreOfFunction(),
+                                matchedPostman.getTotalPmTest(),
+                                matchedPostman.getStatus(),
+                                matchedPostman.getOrderBy(),
+                                matchedPostman.getPostmanForGradingParentId(),
+                                matchedPostman.getFileCollectionPostman(),
+                                matchedPostman.getExamQuestion() != null
+                                        ? matchedPostman.getExamQuestion().getExamQuestionId()
+                                        : null,
+                                matchedPostman.getGherkinScenario() != null
+                                        ? matchedPostman.getGherkinScenario().getGherkinScenarioId()
+                                        : null,
+                                matchedPostman.getExamPaper() != null ? matchedPostman.getExamPaper().getExamPaperId()
+                                        : null)
+                        : null;
+
+                pairs.add(new GherkinPostmanPairDTO(gherkinDTO, postmanDTO));
+            }
+        }
+
+        // Xử lý trường hợp chỉ có Postman mà không có Gherkin
+        for (Postman_For_Grading postman : postmanForGradings) {
+            if (postman.getGherkinScenario() == null) {
+                PostmanDTO postmanDTO = new PostmanDTO(
+                        postman.getPostmanForGradingId(),
+                        postman.getPostmanFunctionName(),
+                        postman.getScoreOfFunction(),
+                        postman.getTotalPmTest(),
+                        postman.getStatus(),
+                        postman.getOrderBy(),
+                        postman.getPostmanForGradingParentId(),
+                        postman.getFileCollectionPostman(),
+                        postman.getExamQuestion() != null ? postman.getExamQuestion().getExamQuestionId() : null,
+                        null, // Không có Gherkin Scenario
+                        postman.getExamPaper() != null ? postman.getExamPaper().getExamPaperId() : null);
+
+                pairs.add(new GherkinPostmanPairDTO(null, postmanDTO));
+            }
+        }
+
+        return pairs;
+    }
 
     @Override
     public List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId) {
@@ -117,11 +203,19 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     }
 
     @Override
-    @Transactional
     public String generateGherkinFormat(List<Long> examQuestionIds) {
-        StringBuilder overallResponseBuilder = new StringBuilder();
+        
+      // Kiểm tra nếu đã có Gherkin cho bất kỳ examQuestionId nào
+      for (Long examQuestionId : examQuestionIds) {
+        if (gherkinScenarioRepository.existsByExamQuestion_ExamQuestionIdAndStatusTrue(examQuestionId)) {
+            // Trả về thông báo lỗi thay vì ném ngoại lệ
+            return ", Unsuccessfully, Gherkin has exits for Exam Question ID: " + examQuestionId;
+        }
+    }
 
+        StringBuilder overallResponseBuilder = new StringBuilder();
         for (Long examQuestionId : examQuestionIds) {
+
             // Lấy AI_Info với purpose là "Generate GherkinFormat"
             List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate GherkinFormat");
 

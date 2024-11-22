@@ -12,4 +12,6 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 public interface IExamQuestionRepository extends JpaRepository<Exam_Question,Long>, JpaSpecificationExecutor<Exam_Question> {
     List<Exam_Question> getByExamPaperExamPaperId(Long examPaperId);
     // Optional<Exam_Question> findByPostmanForGradingId(Long postmanForGradingId);
+    List<Exam_Question> findByExamPaper_ExamPaperId(Long examPaperId);
+
 }

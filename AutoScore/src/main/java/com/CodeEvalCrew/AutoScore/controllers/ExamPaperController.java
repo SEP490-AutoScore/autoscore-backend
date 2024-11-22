@@ -163,6 +163,21 @@ public class ExamPaperController {
         }
     }
     
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllExamPaper() {
+        List<ExamPaperView> result;
+        try {
+            result = examPaperService.getAllExamNotUsed();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     
 
 }
