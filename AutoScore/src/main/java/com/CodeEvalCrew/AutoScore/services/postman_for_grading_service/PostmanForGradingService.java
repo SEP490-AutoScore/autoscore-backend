@@ -414,22 +414,22 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     
 
 
-    // @Transactional
-    // public void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs) {
-    //     for (PostmanForGradingDTO dto : postmanForGradingDTOs) {
-    //         // Tìm kiếm thực thể theo ID
-    //         Postman_For_Grading postmanForGrading = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
-    //                 .orElseThrow(() -> new RuntimeException(
-    //                         "Postman_For_Grading not found with id: " + dto.getPostmanForGradingId()));
+    @Transactional
+    public void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs) {
+        for (PostmanForGradingDTO dto : postmanForGradingDTOs) {
+            // Tìm kiếm thực thể theo ID
+            Postman_For_Grading postmanForGrading = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Postman_For_Grading not found with id: " + dto.getPostmanForGradingId()));
 
-    //         // Cập nhật các trường từ DTO
-    //         postmanForGrading.setScoreOfFunction(dto.getScoreOfFunction());
-    //         postmanForGrading.setOrderBy(dto.getOrderBy());
-    //         postmanForGrading.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
+            // Cập nhật các trường từ DTO
+            postmanForGrading.setScoreOfFunction(dto.getScoreOfFunction());
+            postmanForGrading.setOrderBy(dto.getOrderBy());
+            postmanForGrading.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
 
-    //         // Lưu lại thực thể đã cập nhật
-    //         postmanForGradingRepository.save(postmanForGrading);
-    //     }
-    // }
+            // Lưu lại thực thể đã cập nhật
+            postmanForGradingRepository.save(postmanForGrading);
+        }
+    }
 
 }
