@@ -8,20 +8,20 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.CodeEvalCrew.AutoScore.utils.PathUtil;
+
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamDatabaseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
@@ -38,7 +38,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
 
 
 
-      public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId) throws Exception {
+      public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId, String databaseNote, String databaseDescription) throws Exception {
         try {
             Class.forName(PathUtil.DATABASE_DRIVER);
         } catch (ClassNotFoundException e) {
@@ -102,6 +102,8 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 examDatabase.setCreatedAt(now);
                 examDatabase.setCreatedBy(authenticatedUserId);
                 examDatabase.setExamPaper(examPaper);
+                examDatabase.setDatabaseNote(databaseNote); 
+                examDatabase.setDatabaseDescription(databaseDescription); 
 
                 examDatabaseRepository.save(examDatabase);
 
@@ -144,7 +146,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
         }
     }
 
-    public String updateSqlFile(MultipartFile sqlFile, MultipartFile imageFile, Long examPaperId) throws Exception {
+    public String updateSqlFile(MultipartFile sqlFile, MultipartFile imageFile, Long examPaperId, String databaseNote, String databaseDescription ) throws Exception {
         try {
             Class.forName(PathUtil.DATABASE_DRIVER);
         } catch (ClassNotFoundException e) {
@@ -218,6 +220,8 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 updatedDatabase.setUpdatedAt(now);
                 updatedDatabase.setUpdatedBy(authenticatedUserId);
                 updatedDatabase.setExamPaper(examPaper);
+                updatedDatabase.setDatabaseNote(databaseNote); 
+                updatedDatabase.setDatabaseDescription(databaseDescription); 
     
                 examDatabaseRepository.save(updatedDatabase);
     
@@ -232,29 +236,49 @@ public class ExamDatabaseService implements IExamDatabaseService {
             throw new Exception("SQL connection or execution error: " + e.getMessage());
         }
     }
-    @Override
-    public ExamDatabaseDTO getExamDatabaseByExamPaperId(Long examPaperId) {
-        Exam_Database examDatabase = examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId)
-                .orElseThrow(() -> new IllegalArgumentException("Exam database not found for examPaperId: " + examPaperId));
+    // @Override
+    // public ExamDatabaseDTO getExamDatabaseByExamPaperId(Long examPaperId) {
+    //     Exam_Database examDatabase = examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId)
+    //             .orElseThrow(() -> new IllegalArgumentException("Exam database not found for examPaperId: " + examPaperId));
     
-        return new ExamDatabaseDTO(
-                examDatabase.getExamDatabaseId(),
-                examDatabase.getDatabaseScript(),
-                examDatabase.getDatabaseDescription(),
-                examDatabase.getDatabaseName(),
-                examDatabase.getDatabaseImage(),
-                examDatabase.getDatabaseNote(),
-                examDatabase.getStatus(),
-                examDatabase.getCreatedAt(),
-                examDatabase.getCreatedBy(),
-                examDatabase.getUpdatedAt(),
-                examDatabase.getUpdatedBy(),
-                examDatabase.getDeletedAt(),
-                examDatabase.getDeletedBy(),
-                examDatabase.getExamPaper().getExamPaperId()
-        );
+    //     return new ExamDatabaseDTO(
+    //             examDatabase.getExamDatabaseId(),
+    //             examDatabase.getDatabaseScript(),
+    //             examDatabase.getDatabaseDescription(),
+    //             examDatabase.getDatabaseName(),
+    //             examDatabase.getDatabaseImage(),
+    //             examDatabase.getDatabaseNote(),
+    //             examDatabase.getStatus(),
+    //             examDatabase.getCreatedAt(),
+    //             examDatabase.getCreatedBy(),
+    //             examDatabase.getUpdatedAt(),
+    //             examDatabase.getUpdatedBy(),
+    //             examDatabase.getDeletedAt(),
+    //             examDatabase.getDeletedBy(),
+    //             examDatabase.getExamPaper().getExamPaperId()
+    //     );
+    // }
+    
+    @Override
+    public Optional<ExamDatabaseDTO> getExamDatabaseByExamPaperId(Long examPaperId) {
+        return examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId)
+                .map(examDatabase -> new ExamDatabaseDTO(
+                        examDatabase.getExamDatabaseId(),
+                        examDatabase.getDatabaseScript(),
+                        examDatabase.getDatabaseDescription(),
+                        examDatabase.getDatabaseName(),
+                        examDatabase.getDatabaseImage(),
+                        examDatabase.getDatabaseNote(),
+                        examDatabase.getStatus(),
+                        examDatabase.getCreatedAt(),
+                        examDatabase.getCreatedBy(),
+                        examDatabase.getUpdatedAt(),
+                        examDatabase.getUpdatedBy(),
+                        examDatabase.getDeletedAt(),
+                        examDatabase.getDeletedBy(),
+                        examDatabase.getExamPaper().getExamPaperId()
+                ));
     }
     
-
 
 }
