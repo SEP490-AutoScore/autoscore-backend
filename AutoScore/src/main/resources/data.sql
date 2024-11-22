@@ -426,4 +426,23 @@ Scenario: [Scenario Title]
 --  'Create (Add a person and the viruses they are infected with)'
 -- );
 
+INSERT INTO `autoscore`.`important`
+(`subject_id`,
+`important_code`,
+`important_name`)
+VALUES
+(1,
+'CNS',
+'Check connection String of the appsetting'),
+(1,
+'SLN',
+'Check solution name'),
+(1,
+'SST',
+'Check source structure');
+
+INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '1', '1');
+INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '2', '2');
+
+
 
