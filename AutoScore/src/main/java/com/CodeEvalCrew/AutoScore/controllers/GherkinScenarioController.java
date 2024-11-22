@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GherkinScenario.GenerateGherkinFormatDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinPostmanPairDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
 import com.CodeEvalCrew.AutoScore.services.gherkin_scenario_service.IGherkinScenarioService;
 
@@ -22,6 +23,13 @@ public class GherkinScenarioController {
 
     @Autowired
     private IGherkinScenarioService gherkinScenarioService;
+
+
+    @GetMapping("/pairs")
+    public ResponseEntity<List<GherkinPostmanPairDTO>> getAllGherkinAndPostmanPairs(@RequestParam Long examPaperId) {
+        List<GherkinPostmanPairDTO> result = gherkinScenarioService.getAllGherkinAndPostmanPairs(examPaperId);
+        return ResponseEntity.ok(result);
+    }
 
       @GetMapping("/all")
     public ResponseEntity<List<GherkinScenarioDTO>> getAllByExamPaperId(@RequestParam Long examPaperId) {
