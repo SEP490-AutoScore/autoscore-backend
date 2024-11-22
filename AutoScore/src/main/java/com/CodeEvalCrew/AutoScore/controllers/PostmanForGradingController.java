@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
@@ -24,8 +25,8 @@ public class PostmanForGradingController {
     @Autowired
     private IPostmanForGradingService postmanForGradingService;
 
-    @GetMapping("/{examPaperId}")
-    public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading(@PathVariable Long examPaperId) {
+    @GetMapping("")
+    public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading_forFunctionTree(@RequestParam Long examPaperId) {
         List<PostmanForGradingDTO> postmanForGradingList = postmanForGradingService
                 .getPostmanForGradingByExamPaperId(examPaperId);
         return new ResponseEntity<>(postmanForGradingList, HttpStatus.OK);
