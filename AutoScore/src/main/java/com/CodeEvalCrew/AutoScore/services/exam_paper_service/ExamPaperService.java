@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -157,6 +158,7 @@ public class ExamPaperService implements IExamPaperService {
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
 
             // check important to add to exam paper
+            Set<ImportantView> set = new HashSet<>();
             for (Long importantId : request.getImportantIdList()) {
                 Important important = checkEntityExistence(importantRepository.findById(importantId), "Important",
                         importantId);
@@ -165,6 +167,8 @@ public class ExamPaperService implements IExamPaperService {
                         important, examPaper);
 
                 importants.add(importantExamPaper);
+                ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
+                set.add(view);
             }
 
             // update side in4
@@ -176,7 +180,10 @@ public class ExamPaperService implements IExamPaperService {
 
             examPaperRepository.save(examPaper);
 
-            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            examPaperView.setImportants(set);
+
+            return examPaperView;
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -520,6 +527,44 @@ public class ExamPaperService implements IExamPaperService {
 
         // Trả về nội dung fileCollectionPostman dưới dạng byte[]
         return examPaper.getFileCollectionPostman();
+    }
+
+    @Override
+    public List<ExamPaperView> getAllExamNotUsed() throws NotFoundException,Exception {
+        List<ExamPaperView> result = new ArrayList<>();
+        try {
+            // Tạo một đối tượng mẫu với isUsed = false
+            Exam_Paper probe = new Exam_Paper();
+            probe.setIsUsed(false);
+
+            // Tìm tất cả các exam paper khớp với đối tượng mẫu
+            Example<Exam_Paper> example = Example.of(probe);
+
+            List<Exam_Paper> listExamPaper = examPaperRepository.findAll(example);
+            
+            if(listExamPaper.isEmpty()){
+                throw new NoSuchElementException("No exam paper found");
+            }
+
+            for (Exam_Paper exam_Paper : listExamPaper) {
+                ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(exam_Paper);
+                Set<ImportantView> set = new HashSet<>();
+                for (Important_Exam_Paper a : exam_Paper.getImportants()) {
+                    Important important = checkEntityExistence(importantRepository.findById(a.getImportant().getImportantId()), "Improtant", a.getImportant().getImportantId());
+                    ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
+                    set.add(view);
+                }
+                examPaperView.setImportants(set);
+                result.add(examPaperView);
+            }
+
+            return result;
+        } catch (NoSuchElementException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            System.out.println(e.getCause());
+            throw e;
+        }
     }
 
 }
