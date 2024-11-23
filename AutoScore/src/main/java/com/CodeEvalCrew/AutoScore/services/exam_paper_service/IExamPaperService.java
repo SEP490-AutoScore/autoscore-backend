@@ -34,4 +34,6 @@ public interface IExamPaperService {
 
     List<ExamPaperView> getAllExamNotUsed() throws NotFoundException, Exception;
 
+    ExamPaperView createNewExamPaperNotUsed(ExamPaperCreateRequest request) throws NotFoundException;
+
 }

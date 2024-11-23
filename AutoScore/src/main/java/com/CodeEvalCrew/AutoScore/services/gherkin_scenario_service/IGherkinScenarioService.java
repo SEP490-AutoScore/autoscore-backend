@@ -18,4 +18,5 @@ public interface IGherkinScenarioService {
 
      List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairs(Long examPaperId);
 
+     List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairsByQuestionId(Long questionId);
 }

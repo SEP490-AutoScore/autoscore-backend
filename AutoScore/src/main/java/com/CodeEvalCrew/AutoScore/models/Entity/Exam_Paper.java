@@ -59,7 +59,7 @@ public class Exam_Paper {
 
     //n-1 exam
     @ManyToOne
-    @JoinColumn(name = "examId", nullable = false)
+    @JoinColumn(name = "examId", nullable = true)
     private Exam exam;
 
     //1-n examquestion

@@ -15,5 +15,6 @@ public class ExamPaperCreateRequest {
     private String examPaperCode;
     private Long examId;
     private String instruction;
+    private int duration;
     private List<Long> importantIdList;//list important id
 }
