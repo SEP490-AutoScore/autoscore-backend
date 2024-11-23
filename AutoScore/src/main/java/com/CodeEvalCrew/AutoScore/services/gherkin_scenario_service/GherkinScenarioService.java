@@ -486,9 +486,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             }
 
             else if (content.getOrderPriority() == 3) {
-               
 
-                        question += ""
+                question += ""
                         + "\n - Question Content: " + examQuestion.getQuestionContent()
                         + "\n - Role alowed: " + examQuestion.getRoleAllow()
                         + "\n - Description: " + examQuestion.getDescription()
@@ -511,12 +510,11 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 saveGherkinData(gherkinDataList, examQuestion);
                 return "Generate gherkin successfully!";
             }
-          
+
         }
         return "Unknown error!";
 
     }
-   
 
     private List<String> extractGherkinData(String response) {
         List<String> gherkinDataList = new ArrayList<>();
@@ -587,6 +585,5 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
         return responseBody;
     }
-
 
 }

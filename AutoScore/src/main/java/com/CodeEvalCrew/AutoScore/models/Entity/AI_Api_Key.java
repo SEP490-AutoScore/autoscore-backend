@@ -38,8 +38,6 @@ public class AI_Api_Key {
     @NotNull
     private String aiApiKey;
 
-    private Long createdBy;
-
     private boolean status;
 
     private LocalDateTime createdAt;
