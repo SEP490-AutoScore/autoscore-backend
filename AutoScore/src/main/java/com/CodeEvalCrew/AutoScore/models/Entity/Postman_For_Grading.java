@@ -36,7 +36,7 @@ public class Postman_For_Grading {
 
     private Long totalPmTest;
 
-    private Boolean status;
+    private boolean status;
     
     private Long orderBy;
 

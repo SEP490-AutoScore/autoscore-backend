@@ -49,7 +49,7 @@ public class Exam_Paper {
     @Column(columnDefinition = "LONGBLOB")
     @Basic(fetch = FetchType.EAGER) // Buộc tải ngay lập tức
     private byte[] fileCollectionPostman;
-    private Boolean isComfirmFile;
+    private Boolean isComfirmFile = false;
     private Boolean isUsed = false;
 
     //Relationship

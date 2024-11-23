@@ -11,8 +11,8 @@ public class GherkinScenarioDTO {
     private Long gherkinScenarioId;
     private String gherkinData;
     // private Long orderPriority;
-    private Boolean isUpdateCreate;
-    private Boolean status;
+    // private Boolean isUpdateCreate;
+    private boolean status;
     private Long examQuestionId;
     private Long postmanForGradingId;
 }

@@ -33,9 +33,9 @@ public class Gherkin_Scenario {
 
     // private Long orderPriority;
 
-    private Boolean isUpdateCreate;
+    // private Boolean isUpdateCreate;
 
-    private Boolean status;
+    private boolean status;
 
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)
