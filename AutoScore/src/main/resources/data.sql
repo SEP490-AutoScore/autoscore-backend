@@ -397,7 +397,7 @@ Avoid duplication with existing gherkinDatas. Generate new and unique scenarios.
 
 ('-This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection More'),
 ('-This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection More'),
-('-More event.script.exec.pm.test json postman collection for 1 item.name postman script below, No Explanation
+('-Write multiple test cases in a single endpoint for 1 item.name postman script below, No Explanation
 - json postman collection have "info" and "item":
 - "info" needs "_postman_id", "name", "schema", _exporter_id
 - "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
