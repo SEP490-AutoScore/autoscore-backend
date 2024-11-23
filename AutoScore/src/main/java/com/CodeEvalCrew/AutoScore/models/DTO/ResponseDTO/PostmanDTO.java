@@ -12,7 +12,7 @@ public class PostmanDTO {
     private String postmanFunctionName;
     private Float scoreOfFunction;
     private Long totalPmTest;
-    private Boolean status;
+    private boolean status;
     private Long orderBy;
     private Long postmanForGradingParentId;
     private byte[] fileCollectionPostman;

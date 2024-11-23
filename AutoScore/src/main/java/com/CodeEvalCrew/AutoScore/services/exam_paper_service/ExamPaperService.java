@@ -475,7 +475,7 @@ public class ExamPaperService implements IExamPaperService {
     private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
         return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
                 .stream()
-                .filter(postmanForGrading -> Boolean.TRUE.equals(postmanForGrading.getStatus())) // Lọc theo status = true
+                .filter(postmanForGrading -> postmanForGrading.isStatus()) // Lọc theo status = true
                 .map(postmanForGrading -> new PostmanFunctionInfo(
                 postmanForGrading.getPostmanFunctionName(),
                 postmanForGrading.getTotalPmTest()))
