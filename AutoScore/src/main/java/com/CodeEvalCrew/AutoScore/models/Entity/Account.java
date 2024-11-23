@@ -57,7 +57,7 @@ public class Account {
     private LocalDateTime deletedAt;
 
     private Long deletedBy;
-    
+
     // Relationships
     @ManyToOne
     @JoinColumn(name = "roleId", nullable = false)
@@ -67,15 +67,15 @@ public class Account {
     @ToString.Exclude
     private Set<OAuthRefreshToken> refreshTokens;
 
-    @OneToMany(mappedBy = "account", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private Set<Account_Organization> accountOrganizations;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<AI_Api_Key> aiApiKeys;
 
-
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Account_Selected_Key accountSelectedKey;
+
 }
