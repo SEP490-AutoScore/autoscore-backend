@@ -9,6 +9,9 @@ public interface IGherkinScenarioService {
     // String generateGherkinFormat(Long examQuestionId);
     String generateGherkinFormat(Long examQuestionId);
 
+    String generateGherkinFormatMore(Long examQuestionId);
+
+
     // String getAllGherkinScenariosByExamQuestionId(Long examQuestionId);
     // List<GherkinScenarioDTO> getAllGherkinScenariosByExamQuestionId(Long examQuestionId);
 

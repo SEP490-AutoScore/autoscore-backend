@@ -51,6 +51,13 @@ public class GherkinScenarioController {
         return ResponseEntity.ok(result);
     }
 
+    
+    @PostMapping("/generate_gherkin_format_more")
+    public ResponseEntity<String> generateGherkinFormatMore(@RequestParam Long examQuestionId) {
+        String result = gherkinScenarioService.generateGherkinFormatMore(examQuestionId);
+        return ResponseEntity.ok(result);
+    }
+
     // @GetMapping("/questionId")
     // public ResponseEntity<List<GherkinScenarioDTO>> getAllGherkinScenarios(@RequestParam Long examQuestionId) {
     //     List<GherkinScenarioDTO> scenarios = gherkinScenarioService

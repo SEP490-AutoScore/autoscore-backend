@@ -28,4 +28,12 @@ public interface PostmanForGradingRepository extends JpaRepository<Postman_For_G
 
     List<Postman_For_Grading> findByExamQuestionAndStatusTrue(Exam_Question examQuestion);
 
+    // Optional<Postman_For_Grading> findByGherkinScenario_GherkinScenarioId(Long gherkinScenarioId);
+
+    
+    Optional<Postman_For_Grading> findByGherkinScenario_GherkinScenarioIdAndStatusTrue(Long gherkinScenarioId);
+
+    
+    
+
 }
