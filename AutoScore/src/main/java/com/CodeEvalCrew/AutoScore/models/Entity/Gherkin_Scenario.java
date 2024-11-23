@@ -31,11 +31,11 @@ public class Gherkin_Scenario {
     @Column(columnDefinition = "LONGTEXT")
     private String gherkinData;
 
-    private Long orderPriority;
+    // private Long orderPriority;
 
-    private Boolean isUpdateCreate;
+    // private Boolean isUpdateCreate;
 
-    private Boolean status;
+    private boolean status;
 
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = false)

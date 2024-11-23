@@ -186,7 +186,7 @@ public class DocumentService implements IDocumentService {
             result.setImportants(importantIds);
             result.setDuration(examPaper.getDuration());
             result.setQuestions(questions);
-            result.setDatabaseDescpription("Database Descpription");
+            result.setDatabaseDescpription(examDatabase.getDatabaseDescription());
             result.setDatabaseNote(examDatabase.getDatabaseNote());
             result.setDatabaseName(examDatabase.getDatabaseName());
             result.setDatabaseImage(examDatabase.getDatabaseImage());

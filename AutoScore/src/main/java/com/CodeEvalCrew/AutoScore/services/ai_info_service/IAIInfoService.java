@@ -1,5 +1,5 @@
-package com.CodeEvalCrew.AutoScore.services.ai_info_service;
+// package com.CodeEvalCrew.AutoScore.services.ai_info_service;
 
-public interface IAIInfoService {
+// public interface IAIInfoService {
     
-}
+// }
