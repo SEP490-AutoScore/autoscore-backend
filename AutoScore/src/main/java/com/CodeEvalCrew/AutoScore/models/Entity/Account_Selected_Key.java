@@ -1,12 +1,11 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,20 +18,18 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "content")
-public class Content {
+@Table(name = "account_selected_key")
+public class Account_Selected_Key {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long contentId;
+    private Long accountSelectedKeyId;
 
-    @NotNull
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String questionContent;
+    @OneToOne
+    @JoinColumn(name = "accountId", nullable = false)
+    private Account account;
 
-    private Long orderPriority;
-
-    private String purpose;
-
+    @OneToOne
+    @JoinColumn(name = "selectedAiApiKeyId", nullable = false)
+    private AI_Api_Key aiApiKey;
 } 

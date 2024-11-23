@@ -51,12 +51,12 @@ public class GherkinScenarioController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/questionId")
-    public ResponseEntity<List<GherkinScenarioDTO>> getAllGherkinScenarios(@RequestParam Long examQuestionId) {
-        List<GherkinScenarioDTO> scenarios = gherkinScenarioService
-                .getAllGherkinScenariosByExamQuestionId(examQuestionId);
-        return ResponseEntity.ok(scenarios);
-    }
+    // @GetMapping("/questionId")
+    // public ResponseEntity<List<GherkinScenarioDTO>> getAllGherkinScenarios(@RequestParam Long examQuestionId) {
+    //     List<GherkinScenarioDTO> scenarios = gherkinScenarioService
+    //             .getAllGherkinScenariosByExamQuestionId(examQuestionId);
+    //     return ResponseEntity.ok(scenarios);
+    // }
 
     @PutMapping("")
     public ResponseEntity<String> updateGherkinScenarios(@RequestParam Long examQuestionId,

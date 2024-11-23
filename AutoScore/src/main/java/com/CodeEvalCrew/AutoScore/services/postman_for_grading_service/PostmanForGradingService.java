@@ -25,17 +25,20 @@ import org.springframework.web.client.RestTemplate;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
-import com.CodeEvalCrew.AutoScore.models.Entity.AI_Info;
+import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
-import com.CodeEvalCrew.AutoScore.repositories.ai_info_repository.AIInfoRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
+import com.CodeEvalCrew.AutoScore.repositories.content_repository.ContentRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -54,7 +57,9 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     private IExamPaperRepository examPaperRepository;
 
     @Autowired
-    private AIInfoRepository aiInfoRepository;
+    private AccountSelectedKeyRepository accountSelectedKeyRepository;
+    @Autowired
+    private ContentRepository contentRepository;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -216,102 +221,201 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         }
     }
 
-    @Transactional
-    public String generatePostmanCollection(Long gherkinScenarioId) {
-        // Tìm Gherkin_Scenario từ ID
-        Gherkin_Scenario gherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId)
-                .orElseThrow(
-                        () -> new RuntimeException("Không tìm thấy Gherkin Scenario với ID: " + gherkinScenarioId));
+@Transactional
+public String generatePostmanCollection(Long gherkinScenarioId) {
+    // Tìm Gherkin_Scenario từ ID
+    Gherkin_Scenario gherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy Gherkin Scenario với ID: " + gherkinScenarioId));
 
-        // Lấy Exam_Database liên kết với Exam_Paper từ Gherkin_Scenario
-        Exam_Database examDatabase = examDatabaseRepository
-                .findByExamPaper_ExamPaperId(gherkinScenario.getExamQuestion().getExamPaper().getExamPaperId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Exam Database liên kết với Exam Paper"));
+    // Lấy Exam_Database liên kết với Exam_Paper từ Gherkin_Scenario
+    Exam_Database examDatabase = examDatabaseRepository
+            .findByExamPaper_ExamPaperId(gherkinScenario.getExamQuestion().getExamPaper().getExamPaperId())
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy Exam Database liên kết với Exam Paper"));
 
-        // Lấy AI_Info với purpose "Generate Postman Collection"
-        List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate Postman Collection");
-        if (aiInfos.isEmpty()) {
-            throw new RuntimeException("Không tìm thấy AI_Info với mục đích 'Generate Postman Collection'");
-        }
+    // Lấy authenticated user ID
+    Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        AI_Info aiInfo = aiInfos.get(0);
-        List<Content> orderedContents = aiInfo.getContents()
-                .stream()
-                .sorted((c1, c2) -> Long.compare(c1.getOrderPriority(), c2.getOrderPriority()))
-                .collect(Collectors.toList());
+    // Lấy Account_Selected_Key cho người dùng
+    Account_Selected_Key accountSelectedKey = accountSelectedKeyRepository.findByAccount_AccountId(authenticatedUserId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy Account_Selected_Key cho người dùng hiện tại"));
 
-        // Tạo prompt từ các Content và gherkinData
-        StringBuilder promptBuilder = new StringBuilder();
-        orderedContents.forEach(content -> {
-            if (content.getOrderPriority() == 1) {
-                // Thêm dữ liệu từ Exam_Database khi orderPriority = 1
-                promptBuilder.append(content.getQuestionContent())
-                        .append("\nDatabase Script: ")
-                        .append(examDatabase.getDatabaseScript());
-            } else if (content.getOrderPriority() == 2) {
-                // Thêm dữ liệu từ Exam_Question
-                promptBuilder.append(content.getQuestionContent())
-                        .append("\n\n\n")
-                        .append("\n - Question Content: ")
-                        .append(gherkinScenario.getExamQuestion().getQuestionContent())
-                        .append("\n - EndPoint: ")
-                        .append(gherkinScenario.getExamQuestion().getEndPoint())
-                        .append("\n - Description: ")
-                        .append(gherkinScenario.getExamQuestion().getDescription())
-                        .append("\n - Payload: ")
-                        .append(gherkinScenario.getExamQuestion().getPayload())
-                        .append("\n - Payload type: ")
-                        .append(gherkinScenario.getExamQuestion().getPayloadType())
-                        .append("\n - Http method: ")
-                        .append(gherkinScenario.getExamQuestion().getHttpMethod())
-                        .append("\n - Error response: ")
-                        .append(gherkinScenario.getExamQuestion().getErrorResponse())
-                        .append("\n - Success response: ")
-                        .append(gherkinScenario.getExamQuestion().getSucessResponse());
-            } else if (content.getOrderPriority() == 3) {
-                // Thêm gherkinData từ Gherkin_Scenario
-                promptBuilder.append(content.getQuestionContent())
-                        .append("\n")
-                        .append(gherkinScenario.getGherkinData());
-                System.out.println("Gherkin Data: " + gherkinScenario.getGherkinData());
-
-            }
-
-        });
-
-        String prompt = new String(promptBuilder.toString().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-
-        // Gọi AI API để lấy JSON Postman Collection
-        String responseBody = sendToAI(prompt, aiInfo.getAiApiKey());
-        if (responseBody == null) {
-            throw new RuntimeException("Lỗi khi gọi AI API để tạo Postman Collection");
-        }
-
-        // Trích xuất JSON từ response body
-        String collectionJson = extractJsonFromResponse(responseBody);
-        // Kiểm tra xem JSON có được trích xuất thành công không
-        if (collectionJson == null || collectionJson.isEmpty()) {
-            throw new IllegalArgumentException("Không tìm thấy JSON trong phần phản hồi.");
-        }
-
-        String postmanFunctionName = runNewman(collectionJson);
-
-        if (postmanFunctionName == null) {
-            throw new RuntimeException("Newman run failed or postmanFunctionName not found.");
-        }
-
-        // Lưu Postman Collection vào Postman_For_Grading
-        Postman_For_Grading postmanForGrading = new Postman_For_Grading();
-        postmanForGrading.setGherkinScenario(gherkinScenario);
-        postmanForGrading.setExamQuestion(gherkinScenario.getExamQuestion());
-        postmanForGrading.setFileCollectionPostman(collectionJson.getBytes(StandardCharsets.UTF_8));
-        postmanForGrading.setExamPaper(gherkinScenario.getExamQuestion().getExamPaper());
-        postmanForGrading.setPostmanFunctionName(postmanFunctionName);
-        postmanForGrading.setTotalPmTest(totalPmTest);
-        postmanForGrading.setStatus(true);
-        postmanForGradingRepository.save(postmanForGrading);
-        return "Postman Collection được tạo và lưu thành công.";
+    // Lấy AI_Api_Key từ Account_Selected_Key
+    AI_Api_Key selectedAiApiKey = accountSelectedKey.getAiApiKey();
+    if (selectedAiApiKey == null) {
+        throw new RuntimeException("AI_Api_Key không tồn tại trong Account_Selected_Key");
     }
+
+    // Lấy danh sách Content được sắp xếp theo orderPriority
+    List<Content> orderedContents = contentRepository
+            .findByPurposeOrderByOrderPriority("Generate Postman Collection");
+
+    // Tạo prompt từ các Content và dữ liệu liên quan
+    StringBuilder promptBuilder = new StringBuilder();
+    orderedContents.forEach(content -> {
+        if (content.getOrderPriority() == 1) {
+            // Thêm dữ liệu từ Exam_Database khi orderPriority = 1
+            promptBuilder.append(content.getQuestionContent())
+                    .append("\nDatabase Script: ")
+                    .append(examDatabase.getDatabaseScript());
+        } else if (content.getOrderPriority() == 2) {
+            // Thêm dữ liệu từ Exam_Question
+            promptBuilder.append(content.getQuestionContent())
+                    .append("\n\n\n")
+                    .append("\n - Question Content: ")
+                    .append(gherkinScenario.getExamQuestion().getQuestionContent())
+                    .append("\n - EndPoint: ")
+                    .append(gherkinScenario.getExamQuestion().getEndPoint())
+                    .append("\n - Description: ")
+                    .append(gherkinScenario.getExamQuestion().getDescription())
+                    .append("\n - Payload: ")
+                    .append(gherkinScenario.getExamQuestion().getPayload())
+                    .append("\n - Payload type: ")
+                    .append(gherkinScenario.getExamQuestion().getPayloadType())
+                    .append("\n - Http method: ")
+                    .append(gherkinScenario.getExamQuestion().getHttpMethod())
+                    .append("\n - Error response: ")
+                    .append(gherkinScenario.getExamQuestion().getErrorResponse())
+                    .append("\n - Success response: ")
+                    .append(gherkinScenario.getExamQuestion().getSucessResponse());
+        } else if (content.getOrderPriority() == 3) {
+            // Thêm gherkinData từ Gherkin_Scenario
+            promptBuilder.append(content.getQuestionContent())
+                    .append("\n")
+                    .append(gherkinScenario.getGherkinData());
+            System.out.println("Gherkin Data: " + gherkinScenario.getGherkinData());
+        }
+    });
+
+    String prompt = new String(promptBuilder.toString().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+
+    // Gọi AI API để lấy JSON Postman Collection
+    String responseBody = sendToAI(prompt, selectedAiApiKey.getAiApiKey());
+    if (responseBody == null) {
+        throw new RuntimeException("Lỗi khi gọi AI API để tạo Postman Collection");
+    }
+
+    // Trích xuất JSON từ response body
+    String collectionJson = extractJsonFromResponse(responseBody);
+    if (collectionJson == null || collectionJson.isEmpty()) {
+        throw new IllegalArgumentException("Không tìm thấy JSON trong phần phản hồi.");
+    }
+
+    String postmanFunctionName = runNewman(collectionJson);
+    if (postmanFunctionName == null) {
+        throw new RuntimeException("Newman run failed or postmanFunctionName not found.");
+    }
+
+    // Lưu Postman Collection vào Postman_For_Grading
+    Postman_For_Grading postmanForGrading = new Postman_For_Grading();
+    postmanForGrading.setGherkinScenario(gherkinScenario);
+    postmanForGrading.setExamQuestion(gherkinScenario.getExamQuestion());
+    postmanForGrading.setFileCollectionPostman(collectionJson.getBytes(StandardCharsets.UTF_8));
+    postmanForGrading.setExamPaper(gherkinScenario.getExamQuestion().getExamPaper());
+    postmanForGrading.setPostmanFunctionName(postmanFunctionName);
+    postmanForGrading.setTotalPmTest(totalPmTest);
+    postmanForGrading.setStatus(true);
+    postmanForGradingRepository.save(postmanForGrading);
+
+    return "Postman Collection được tạo và lưu thành công.";
+}
+
+
+    // @Transactional
+    // public String generatePostmanCollection(Long gherkinScenarioId) {
+    //     // Tìm Gherkin_Scenario từ ID
+    //     Gherkin_Scenario gherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId)
+    //             .orElseThrow(
+    //                     () -> new RuntimeException("Không tìm thấy Gherkin Scenario với ID: " + gherkinScenarioId));
+
+    //     // Lấy Exam_Database liên kết với Exam_Paper từ Gherkin_Scenario
+    //     Exam_Database examDatabase = examDatabaseRepository
+    //             .findByExamPaper_ExamPaperId(gherkinScenario.getExamQuestion().getExamPaper().getExamPaperId())
+    //             .orElseThrow(() -> new RuntimeException("Không tìm thấy Exam Database liên kết với Exam Paper"));
+
+    //     // Lấy AI_Info với purpose "Generate Postman Collection"
+    //     List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate Postman Collection");
+    //     if (aiInfos.isEmpty()) {
+    //         throw new RuntimeException("Không tìm thấy AI_Info với mục đích 'Generate Postman Collection'");
+    //     }
+
+    //     AI_Info aiInfo = aiInfos.get(0);
+    //     List<Content> orderedContents = aiInfo.getContents()
+    //             .stream()
+    //             .sorted((c1, c2) -> Long.compare(c1.getOrderPriority(), c2.getOrderPriority()))
+    //             .collect(Collectors.toList());
+
+    //     // Tạo prompt từ các Content và gherkinData
+    //     StringBuilder promptBuilder = new StringBuilder();
+    //     orderedContents.forEach(content -> {
+    //         if (content.getOrderPriority() == 1) {
+    //             // Thêm dữ liệu từ Exam_Database khi orderPriority = 1
+    //             promptBuilder.append(content.getQuestionContent())
+    //                     .append("\nDatabase Script: ")
+    //                     .append(examDatabase.getDatabaseScript());
+    //         } else if (content.getOrderPriority() == 2) {
+    //             // Thêm dữ liệu từ Exam_Question
+    //             promptBuilder.append(content.getQuestionContent())
+    //                     .append("\n\n\n")
+    //                     .append("\n - Question Content: ")
+    //                     .append(gherkinScenario.getExamQuestion().getQuestionContent())
+    //                     .append("\n - EndPoint: ")
+    //                     .append(gherkinScenario.getExamQuestion().getEndPoint())
+    //                     .append("\n - Description: ")
+    //                     .append(gherkinScenario.getExamQuestion().getDescription())
+    //                     .append("\n - Payload: ")
+    //                     .append(gherkinScenario.getExamQuestion().getPayload())
+    //                     .append("\n - Payload type: ")
+    //                     .append(gherkinScenario.getExamQuestion().getPayloadType())
+    //                     .append("\n - Http method: ")
+    //                     .append(gherkinScenario.getExamQuestion().getHttpMethod())
+    //                     .append("\n - Error response: ")
+    //                     .append(gherkinScenario.getExamQuestion().getErrorResponse())
+    //                     .append("\n - Success response: ")
+    //                     .append(gherkinScenario.getExamQuestion().getSucessResponse());
+    //         } else if (content.getOrderPriority() == 3) {
+    //             // Thêm gherkinData từ Gherkin_Scenario
+    //             promptBuilder.append(content.getQuestionContent())
+    //                     .append("\n")
+    //                     .append(gherkinScenario.getGherkinData());
+    //             System.out.println("Gherkin Data: " + gherkinScenario.getGherkinData());
+
+    //         }
+
+    //     });
+
+    //     String prompt = new String(promptBuilder.toString().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+
+    //     // Gọi AI API để lấy JSON Postman Collection
+    //     String responseBody = sendToAI(prompt, aiInfo.getAiApiKey());
+    //     if (responseBody == null) {
+    //         throw new RuntimeException("Lỗi khi gọi AI API để tạo Postman Collection");
+    //     }
+
+    //     // Trích xuất JSON từ response body
+    //     String collectionJson = extractJsonFromResponse(responseBody);
+    //     // Kiểm tra xem JSON có được trích xuất thành công không
+    //     if (collectionJson == null || collectionJson.isEmpty()) {
+    //         throw new IllegalArgumentException("Không tìm thấy JSON trong phần phản hồi.");
+    //     }
+
+    //     String postmanFunctionName = runNewman(collectionJson);
+
+    //     if (postmanFunctionName == null) {
+    //         throw new RuntimeException("Newman run failed or postmanFunctionName not found.");
+    //     }
+
+    //     // Lưu Postman Collection vào Postman_For_Grading
+    //     Postman_For_Grading postmanForGrading = new Postman_For_Grading();
+    //     postmanForGrading.setGherkinScenario(gherkinScenario);
+    //     postmanForGrading.setExamQuestion(gherkinScenario.getExamQuestion());
+    //     postmanForGrading.setFileCollectionPostman(collectionJson.getBytes(StandardCharsets.UTF_8));
+    //     postmanForGrading.setExamPaper(gherkinScenario.getExamQuestion().getExamPaper());
+    //     postmanForGrading.setPostmanFunctionName(postmanFunctionName);
+    //     postmanForGrading.setTotalPmTest(totalPmTest);
+    //     postmanForGrading.setStatus(true);
+    //     postmanForGradingRepository.save(postmanForGrading);
+    //     return "Postman Collection được tạo và lưu thành công.";
+    // }
 
     // Hàm trích xuất JSON từ response body
     private String extractJsonFromResponse(String responseBody) {

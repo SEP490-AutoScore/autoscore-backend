@@ -31,7 +31,7 @@ public class Gherkin_Scenario {
     @Column(columnDefinition = "LONGTEXT")
     private String gherkinData;
 
-    private Long orderPriority;
+    // private Long orderPriority;
 
     private Boolean isUpdateCreate;
 
