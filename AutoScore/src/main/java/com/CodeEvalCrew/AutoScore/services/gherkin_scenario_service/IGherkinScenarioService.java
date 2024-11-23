@@ -7,10 +7,10 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
 
 public interface IGherkinScenarioService {
     // String generateGherkinFormat(Long examQuestionId);
-    String generateGherkinFormat(List<Long> examQuestionIds);
+    String generateGherkinFormat(Long examQuestionId);
 
     // String getAllGherkinScenariosByExamQuestionId(Long examQuestionId);
-    List<GherkinScenarioDTO> getAllGherkinScenariosByExamQuestionId(Long examQuestionId);
+    // List<GherkinScenarioDTO> getAllGherkinScenariosByExamQuestionId(Long examQuestionId);
 
     void updateGherkinScenarios(Long examQuestionId, String gherkinDataBody);
 
@@ -18,4 +18,5 @@ public interface IGherkinScenarioService {
 
      List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairs(Long examPaperId);
 
+     List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairsByQuestionId(Long questionId);
 }

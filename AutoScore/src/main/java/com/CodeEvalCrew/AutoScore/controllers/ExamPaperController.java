@@ -66,6 +66,21 @@ public class ExamPaperController {
         }
     }
 
+    @PostMapping("/new")
+    public ResponseEntity<?> createNewExamPaperNotUsed(@RequestBody ExamPaperCreateRequest request) {
+        ExamPaperView result;
+        try {
+
+            result = examPaperService.createNewExamPaperNotUsed(request);
+
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PutMapping("{id}")
     public ResponseEntity<?> updateExamPaper(@PathVariable Long id, @RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;

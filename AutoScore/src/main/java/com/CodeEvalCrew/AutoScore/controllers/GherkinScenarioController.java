@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GherkinScenario.GenerateGherkinFormatDTO;
+// import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GherkinScenario.GenerateGherkinFormatDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinPostmanPairDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
 import com.CodeEvalCrew.AutoScore.services.gherkin_scenario_service.IGherkinScenarioService;
@@ -24,35 +24,43 @@ public class GherkinScenarioController {
     @Autowired
     private IGherkinScenarioService gherkinScenarioService;
 
-
     @GetMapping("/pairs")
     public ResponseEntity<List<GherkinPostmanPairDTO>> getAllGherkinAndPostmanPairs(@RequestParam Long examPaperId) {
         List<GherkinPostmanPairDTO> result = gherkinScenarioService.getAllGherkinAndPostmanPairs(examPaperId);
         return ResponseEntity.ok(result);
     }
 
-      @GetMapping("/all")
+    @GetMapping("/pairs/by-question")
+    public ResponseEntity<List<GherkinPostmanPairDTO>> getAllGherkinAndPostmanPairsByQuestionId(
+            @RequestParam Long questionId) {
+        List<GherkinPostmanPairDTO> result = gherkinScenarioService
+                .getAllGherkinAndPostmanPairsByQuestionId(questionId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<List<GherkinScenarioDTO>> getAllByExamPaperId(@RequestParam Long examPaperId) {
         List<GherkinScenarioDTO> result = gherkinScenarioService.getAllGherkinScenariosByExamPaperId(examPaperId);
         return ResponseEntity.ok(result);
- 
+
     }
+
     @PostMapping("/generate_gherkin_format")
-    public ResponseEntity<String> generateGherkinFormat(@RequestBody GenerateGherkinFormatDTO request) {
-        String result = gherkinScenarioService.generateGherkinFormat(request.getExamQuestionIds());
+    public ResponseEntity<String> generateGherkinFormat(@RequestParam Long examQuestionId) {
+        String result = gherkinScenarioService.generateGherkinFormat(examQuestionId);
         return ResponseEntity.ok(result);
     }
 
-     
-    @GetMapping("/questionId")
-    public ResponseEntity<List<GherkinScenarioDTO>> getAllGherkinScenarios(@RequestParam Long examQuestionId) {
-        List<GherkinScenarioDTO> scenarios = gherkinScenarioService.getAllGherkinScenariosByExamQuestionId(examQuestionId);
-        return ResponseEntity.ok(scenarios);
-    }
+    // @GetMapping("/questionId")
+    // public ResponseEntity<List<GherkinScenarioDTO>> getAllGherkinScenarios(@RequestParam Long examQuestionId) {
+    //     List<GherkinScenarioDTO> scenarios = gherkinScenarioService
+    //             .getAllGherkinScenariosByExamQuestionId(examQuestionId);
+    //     return ResponseEntity.ok(scenarios);
+    // }
 
     @PutMapping("")
     public ResponseEntity<String> updateGherkinScenarios(@RequestParam Long examQuestionId,
-                                                         @RequestBody String gherkinDataBody) {
+            @RequestBody String gherkinDataBody) {
         gherkinScenarioService.updateGherkinScenarios(examQuestionId, gherkinDataBody);
         return ResponseEntity.ok("Gherkin Scenarios updated successfully.");
     }

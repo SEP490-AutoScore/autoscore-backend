@@ -337,25 +337,30 @@ Request Body (JSON):
 
 
 INSERT INTO `postman_for_grading`
-(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`)
+(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
 VALUES
-(2, 1, 1, null, 2, 'login',1),
-(2, 2, 2, 1, 2, 'login fail',1),
-(2, 1, 3, 1, 4, 'get',1),
-(2, 3, 4, 1, 4, 'get id',1),
-(2, 2, 5, 1, 3, 'delete',1);
+(2, 1, 1, null, 2, 'login',1,true),
+(2, 2, 2, 1, 2, 'login fail',1,true),
+(2, 1, 3, 1, 4, 'get',1,true),
+(2, 3, 4, 1, 4, 'get id',1,true),
+(2, 2, 5, 1, 3, 'delete',1,true);
 
-INSERT INTO `AI_Info`
-(`ai_api_key`, `ai_name`, `purpose`)
+INSERT INTO `ai_api_key`
+(`ai_api_key`, `ai_name`, `account_id`,`status`,`is_shared`)
 VALUES
-('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini', 'Generate GherkinFormat'),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini', 'Generate Postman Collection');
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',1,true,true),
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',1,true,true);
 
-
-INSERT INTO `Content`
-(`question_content`, `order_priority`, `ai_info_id`)
+INSERT INTO `account_selected_key`
+(`account_id`, `selected_ai_api_key_id`)
 VALUES
-('Save to your memory, do not reply', 1, 1),
+(1, 1);
+
+
+INSERT INTO `content`
+(`question_content`, `order_priority`,`purpose`)
+VALUES
+('Save to your memory, do not reply', 1,'Generate GherkinFormat'),
 ('Write Gherkin format scenarios for the given feature or API. 
 Ensure each complete Gherkin scenario, including its title and all steps, is enclosed in double curly braces {{ }}. 
 Use this structure for all scenarios, for example:
@@ -364,14 +369,14 @@ Scenario: [Scenario Title]
   Given [initial state or context]
   When [event or action]
   Then [expected outcome or result]
-}}', 2, 1),
-('This is Database, Save to your memory, do not reply', 1, 2),
-('This is topic, Save to your memory, do not reply', 2, 2),
+}}', 2,'Generate GherkinFormat'),
+('This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection'),
+('This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection'),
 ('- Write json postman collection for 1 item.name gherkin format below, No Explanation
 - json postman collection have "info" and "item":
 - "info" needs "_postman_id", "name", "schema", _exporter_id
 - "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
-- http://localhost:10000/...', 3, 2);
+- http://localhost:10000/...', 3,'Generate Postman Collection');
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 
@@ -425,5 +430,24 @@ Scenario: [Scenario Title]
 --  'Email: Must be a valid email address format.\\nPassword: Should meet security requirements (e.g., minimum length, complexity), but this check is typically handled during user registration.',
 --  'Create (Add a person and the viruses they are infected with)'
 -- );
+
+INSERT INTO `autoscore`.`important`
+(`subject_id`,
+`important_code`,
+`important_name`)
+VALUES
+(1,
+'CNS',
+'Check connection String of the appsetting'),
+(1,
+'SLN',
+'Check solution name'),
+(1,
+'SST',
+'Check source structure');
+
+INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '1', '1');
+INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '2', '2');
+
 
 
