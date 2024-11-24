@@ -20,6 +20,6 @@ public class AIApiKeyDTO {
     private boolean isShared;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long accountId; 
+    private String fullName; 
     private boolean isSelected;
 }
