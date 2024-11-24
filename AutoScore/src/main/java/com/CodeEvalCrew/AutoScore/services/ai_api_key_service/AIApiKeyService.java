@@ -1,19 +1,26 @@
 package com.CodeEvalCrew.AutoScore.services.ai_api_key_service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAIApiKeyDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIApiKeyDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.repositories.account_organization_repository.AccountOrganizationRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
 import com.CodeEvalCrew.AutoScore.repositories.ai_api_key_repository.AiApiKeyRepository;
 import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationRepoistory;
@@ -32,6 +39,9 @@ public class AIApiKeyService implements IAIApiKeyService {
     private IOrganizationRepoistory organizationRepository;
     @Autowired
     private AccountSelectedKeyRepository accountSelectedKeyRepository;
+    @Autowired
+    private IAccountRepository accountRepository;
+    
 
     @Override
     public List<AIApiKeyDTO> getAllAIApiKeys() {
@@ -148,6 +158,71 @@ public class AIApiKeyService implements IAIApiKeyService {
         }
     }
     
+  @Override
+    public AIApiKeyDTO createAIApiKey(CreateAIApiKeyDTO dto) {
+        // Lấy ID người dùng được xác thực
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
+        // Tìm Account tương ứng
+        Account account = accountRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found"));
+
+        // Tạo mới AI_Api_Key
+        AI_Api_Key newApiKey = new AI_Api_Key();
+        newApiKey.setAiName(dto.getAiName());
+        newApiKey.setAiApiKey(dto.getAiApiKey());
+        newApiKey.setStatus(true); // Mặc định là active
+        newApiKey.setShared(dto.isShared());
+        newApiKey.setCreatedAt(LocalDateTime.now());
+        newApiKey.setUpdatedAt(LocalDateTime.now());
+        newApiKey.setAccount(account);
+
+        // Lưu vào cơ sở dữ liệu
+        AI_Api_Key savedApiKey = aiApiKeyRepository.save(newApiKey);
+
+        // Chuyển đổi sang DTO để trả về
+        return new AIApiKeyDTO(
+                savedApiKey.getAiApiKeyId(),
+                savedApiKey.getAiName(),
+                savedApiKey.getAiApiKey(),
+                savedApiKey.isStatus(),
+                savedApiKey.isShared(),
+                savedApiKey.getCreatedAt(),
+                savedApiKey.getUpdatedAt(),
+                savedApiKey.getAccount().getAccountId(),
+                false // Mặc định chưa được chọn
+        );
+    }
+
+    @Override
+public AI_Api_Key updateAiApiKey(Long aiApiKeyId, String aiApiKey) {
+    // Tìm kiếm AI_Api_Key theo ID
+    Optional<AI_Api_Key> optionalApiKey = aiApiKeyRepository.findById(aiApiKeyId);
+
+    if (optionalApiKey.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "API Key not found with ID: " + aiApiKeyId);
+    }
+
+    AI_Api_Key apiKey = optionalApiKey.get();
+
+    // Cập nhật aiApiKey
+    apiKey.setAiApiKey(aiApiKey);
+
+    // Lưu thay đổi vào cơ sở dữ liệu
+    return aiApiKeyRepository.save(apiKey);
+}
+
+@Override
+public void deleteAiApiKey(Long aiApiKeyId) {
+    // Tìm AI_Api_Key theo ID
+    AI_Api_Key apiKey = aiApiKeyRepository.findById(aiApiKeyId)
+            .orElseThrow(() -> new IllegalArgumentException("AI API Key not found with ID: " + aiApiKeyId));
+
+    // Set status = false (đánh dấu là đã xóa)
+    apiKey.setStatus(false);
+
+    // Lưu thay đổi vào cơ sở dữ liệu
+    aiApiKeyRepository.save(apiKey);
+}
 
 }

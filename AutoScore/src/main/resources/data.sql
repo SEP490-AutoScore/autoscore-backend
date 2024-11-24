@@ -371,7 +371,7 @@ VALUES
 INSERT INTO `content`
 (`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
-('This is Database, Save to your memory, do not reply', 1,'Generate Gherkin Format'),
+('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT'),
 ('Write Gherkin format scenarios for the given feature or API. 
 Ensure each complete Gherkin scenario, including its title and all steps, is enclosed in double curly braces {{ }}. 
 Use this structure for all scenarios, for example:
@@ -383,25 +383,25 @@ Scenario: [Brief and clear description of the scenario]
   And [Optional additional actions or events]
   Then [Describe the primary outcome or result]
   And [Optional additional outcomes or verifications]
-}}', 2,'Generate Gherkin Format'),
-('This is Database, Save to your memory, do not reply', 1,'Generate Gherkin Format More'),
-('Write Gherkin format scenarios for the given feature or API. Each scenario should be enclosed in {{ }} and use this structure.',2,'Generate Gherkin Format More'),
+}}', 2,'GENERATE_GHERKIN_FORMAT'),
+('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
+('Write Gherkin format scenarios for the given feature or API. Each scenario should be enclosed in {{ }} and use this structure.',2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
-('This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection'),
-('This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection'),
+('This is Database, Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION'),
+('This is topic, Save to your memory, do not reply', 2,'GENERATE_POSTMAN_COLLECTION'),
 ('- Write json postman collection for 1 item.name gherkin format below, No Explanation
 - json postman collection have "info" and "item":
 - "info" needs "_postman_id", "name", "schema", _exporter_id
 - "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
-- http://localhost:10000/...', 3,'Generate Postman Collection'),
+- http://localhost:10000/...', 3,'GENERATE_POSTMAN_COLLECTION'),
 
-('-This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection More'),
-('-This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection More'),
+('-This is Database, Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION_MORE'),
+('-This is topic, Save to your memory, do not reply', 2,'GENERATE_POSTMAN_COLLECTION_MORE'),
 ('-Write multiple test cases in a single endpoint for 1 item.name postman script below, No Explanation
 - json postman collection have "info" and "item":
 - "info" needs "_postman_id", "name", "schema", _exporter_id
 - "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
-- http://localhost:10000/...', 3,'Generate Postman Collection More');
+- http://localhost:10000/...', 3,'GENERATE_POSTMAN_COLLECTION_MORE');
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 

@@ -33,6 +33,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetDTO
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Purpose_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
@@ -242,13 +243,6 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             return "Gherkin Scenario ID not found";
         }
 
-//  // Lấy nội dung câu hỏi từ Exam_Question (QuestionContent của Exam_Question)
-//  String examQuestionContent = gherkinScenario.getExamQuestion().getQuestionContent();
-//  if (examQuestionContent == null) {
-//      return "Question Content not found for the associated Gherkin Scenario ID.";
-//  }
-
-
         // Kiểm tra nếu đã có Postman_For_Grading với gherkinScenarioId và status = true
         Optional<Postman_For_Grading> existingPostman = postmanForGradingRepository
                 .findByGherkinScenario_GherkinScenarioIdAndStatusTrue(gherkinScenarioId);
@@ -281,7 +275,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         // Lấy danh sách Content sắp xếp theo orderPriority
         List<Content> orderedContents = contentRepository
-                .findByPurposeOrderByOrderPriority("Generate Postman Collection");
+                .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_POSTMAN_COLLECTION);
 
         // Tạo response tổng hợp
         StringBuilder fullResponseBuilder = new StringBuilder();
@@ -399,7 +393,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         // Lấy danh sách Content sắp xếp theo orderPriority
         List<Content> orderedContents = contentRepository
-                .findByPurposeOrderByOrderPriority("Generate Postman Collection More");
+                .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_POSTMAN_COLLECTION_MORE);
 
         // Tạo response tổng hợp
         StringBuilder fullResponseBuilder = new StringBuilder();

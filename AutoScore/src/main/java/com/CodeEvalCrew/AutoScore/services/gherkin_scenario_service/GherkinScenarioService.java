@@ -28,6 +28,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Purpose_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
@@ -326,7 +327,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         StringBuilder responseBuilder = new StringBuilder();
 
         // Lấy nội dung sắp xếp theo thứ tự ưu tiên
-        List<Content> orderedContents = contentRepository.findByPurposeOrderByOrderPriority("Generate Gherkin Format");
+        List<Content> orderedContents = contentRepository.findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT);
 
         // orderedContents.forEach(content -> {
         for (Content content : orderedContents) {
@@ -432,7 +433,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
         // Lấy nội dung sắp xếp theo thứ tự ưu tiên
         List<Content> orderedContents = contentRepository
-                .findByPurposeOrderByOrderPriority("Generate Gherkin Format More");
+                .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT_MORE);
 
         // orderedContents.forEach(content -> {
         for (Content content : orderedContents) {
