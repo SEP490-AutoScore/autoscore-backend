@@ -13,10 +13,11 @@ import lombok.NoArgsConstructor;
 public class AIApiKeyDTO {
     private Long aiApiKeyId;
     private String aiName;
-    private String aiApiKey; // Có thể mã hóa nếu không muốn hiển thị trực tiếp
+    private String aiApiKey; 
     private boolean status;
     private boolean isShared;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long accountId; // ID của Account liên quan
+    private Long accountId; 
+    private boolean isSelected;
 }

@@ -6,4 +6,6 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIApiKeyDTO;
 
 public interface IAIApiKeyService {
     List<AIApiKeyDTO> getAllAIApiKeys();
+
+    void updateOrCreateAccountSelectedKey(Long aiApiKeyId);
 }
