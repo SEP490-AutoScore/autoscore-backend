@@ -1,6 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,8 +25,8 @@ public class GradingProcess {
     private String status;
     private int successProcess;
     private int totalProcess;
-    private Date startDate;
-    private Date updateDate;
+    private LocalDateTime startDate;
+    private LocalDateTime updateDate;
     //n-1 exam
     @OneToOne
     @JoinColumn(name = "examPaperId", nullable = true)

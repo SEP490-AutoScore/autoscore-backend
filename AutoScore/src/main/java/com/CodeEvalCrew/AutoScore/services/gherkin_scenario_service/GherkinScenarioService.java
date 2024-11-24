@@ -375,7 +375,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         StringBuilder responseBuilder = new StringBuilder();
 
         // Lấy nội dung sắp xếp theo thứ tự ưu tiên
-        List<Content> orderedContents = contentRepository.findByPurposeOrderByOrderPriority("Generate GherkinFormat");
+        List<Content> orderedContents = contentRepository.findByPurposeOrderByOrderPriority("Generate Gherkin Format");
 
         // orderedContents.forEach(content -> {
         for (Content content : orderedContents) {
@@ -411,189 +411,110 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         return "Unknown error!";
 
     }
-    // return responseBuilder.toString();
-    // @Override
-    // public String generateGherkinFormat(List<Long> examQuestionIds) {
 
-    // // Kiểm tra nếu đã có Gherkin cho bất kỳ examQuestionId nào
-    // for (Long examQuestionId : examQuestionIds) {
-    // if
-    // (gherkinScenarioRepository.existsByExamQuestion_ExamQuestionIdAndStatusTrue(examQuestionId))
-    // {
-    // // Trả về thông báo lỗi thay vì ném ngoại lệ
-    // return "Unsuccessfully!, Gherkin has exits for Exam Question ID: " +
-    // examQuestionId;
-    // }
-    // }
+    public List<String> getGherkinDatasByExamQuestionId(Long examQuestionId) {
+        // Kiểm tra xem examQuestionId có tồn tại hay không
+        Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(examQuestionId);
+        if (optionalExamQuestion.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Exam Question not exists");
+        }
 
-    // Long authenticatedUserId = Util.getAuthenticatedAccountId();
-    // StringBuilder overallResponseBuilder = new StringBuilder();
+        // Lấy danh sách các Gherkin_Scenario có status = true
+        List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository
+                .findByExamQuestion_ExamQuestionIdAndStatusTrue(examQuestionId);
 
-    // for (Long examQuestionId : examQuestionIds) {
+        // Trả về danh sách gherkinData
+        return gherkinScenarios.stream()
+                .map(Gherkin_Scenario::getGherkinData)
+                .collect(Collectors.toList());
+    }
 
-    // Optional<Account_Selected_Key> optionalAccountSelectedKey =
-    // accountSelectedKeyRepository.findByAccount_AccountId(authenticatedUserId);
-    // if (optionalAccountSelectedKey.isEmpty()) {
-    // return "Account_Selected_Key not exists";
-    // }
-    // Account_Selected_Key accountSelectedKey = optionalAccountSelectedKey.get();
+    @Override
+    public String generateGherkinFormatMore(Long examQuestionId) {
 
-    // AI_Api_Key selectedAiApiKey = accountSelectedKey.getAiApiKey();
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-    // if (selectedAiApiKey == null) {
-    // return "AI_Api_Key not exits";
+        // Lấy thông tin tài khoản và API key
+        Optional<Account_Selected_Key> optionalAccountSelectedKey = accountSelectedKeyRepository
+                .findByAccount_AccountId(authenticatedUserId);
+        if (optionalAccountSelectedKey.isEmpty()) {
+            return "User has not select AI Key";
+        }
 
-    // }
+        Account_Selected_Key accountSelectedKey = optionalAccountSelectedKey.get();
+        AI_Api_Key selectedAiApiKey = accountSelectedKey.getAiApiKey();
+        if (selectedAiApiKey == null) {
+            return "AI_Api_Key not exists";
+        }
 
-    // Optional<Exam_Database> optionalExamDatabase =
-    // examDatabaseRepository.findByExamQuestionId(examQuestionId);
-    // if (optionalExamDatabase.isEmpty()) {
-    // return "database not exits";
-    // }
+        // Lấy thông tin Exam_Database
+        Optional<Exam_Database> optionalExamDatabase = examDatabaseRepository.findByExamQuestionId(examQuestionId);
+        if (optionalExamDatabase.isEmpty()) {
+            return "Database not exists";
+        }
 
-    // Exam_Database examDatabase = optionalExamDatabase.get();
-    // String databaseScript = examDatabase.getDatabaseScript();
-    // System.out.println("Database Script: " + databaseScript);
+        Exam_Database examDatabase = optionalExamDatabase.get();
+        String databaseScript = examDatabase.getDatabaseScript();
 
-    // // Truy vấn Exam_Question dựa trên examQuestionId
-    // Optional<Exam_Question> optionalExamQuestion =
-    // examQuestionRepository.findById(examQuestionId);
-    // if (optionalExamQuestion.isEmpty()) {
-    // return "Exam Question not exists";
-    // }
+        // Lấy thông tin Exam_Question
+        Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(examQuestionId);
+        if (optionalExamQuestion.isEmpty()) {
+            return "Exam Question not exists";
+        }
 
-    // Exam_Question examQuestion = optionalExamQuestion.get();
+        Exam_Question examQuestion = optionalExamQuestion.get();
 
-    // StringBuilder responseBuilder = new StringBuilder();
+        StringBuilder responseBuilder = new StringBuilder();
+        List<String> gherkinDatas = getGherkinDatasByExamQuestionId(examQuestionId);
+        if (gherkinDatas == null || gherkinDatas.isEmpty()) {
+            return "No Gherkin data found for Exam Question ID: " + examQuestionId;
+        }
 
-    // // Lấy nội dung được sắp xếp theo thứ tự ưu tiên cho AI_Api_Key được chọn
-    // List<Content> orderedContents = contentRepository
-    // .findByPurposeOrderByOrderPriority("Generate GherkinFormat");
+        // Lấy nội dung sắp xếp theo thứ tự ưu tiên
+        List<Content> orderedContents = contentRepository
+                .findByPurposeOrderByOrderPriority("Generate Gherkin Format More");
 
-    // orderedContents.forEach(content -> {
-    // String question = content.getQuestionContent();
-    // if (content.getOrderPriority() == 1) {
-    // question += "\n" + databaseScript;
-    // } else if (content.getOrderPriority() == 2) {
-    // question += ""
-    // + "\n - Question Content: " + examQuestion.getQuestionContent()
-    // + "\n - Role: " + examQuestion.getRoleAllow()
-    // + "\n - Description: " + examQuestion.getDescription()
-    // + "\n - End point: " + examQuestion.getEndPoint()
-    // + "\n - Http method: " + examQuestion.getHttpMethod()
-    // + "\n - Payload type: " + examQuestion.getPayloadType()
-    // + "\n - Validation: " + examQuestion.getValidation()
-    // + "\n - Success response: " + examQuestion.getSucessResponse()
-    // + "\n - Error response: " + examQuestion.getErrorResponse()
-    // + "\n - Payload: " + examQuestion.getPayload();
-    // }
+        // orderedContents.forEach(content -> {
+        for (Content content : orderedContents) {
+            String question = content.getQuestionContent();
 
-    // String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8),
-    // StandardCharsets.UTF_8);
-    // String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
+            if (content.getOrderPriority() == 1) {
+                question += "\n" + databaseScript;
 
-    // responseBuilder.append(response).append("\n");
+            } else if (content.getOrderPriority() == 2) {
+                question += "\n" + gherkinDatas;
+            }
 
-    // if (content.getOrderPriority() == 2) {
-    // List<String> gherkinDataList = extractGherkinData(response);
-    // saveGherkinData(gherkinDataList, examQuestion);
-    // }
-    // });
+            else if (content.getOrderPriority() == 3) {
 
-    // // Thêm kết quả từ examQuestionId hiện tại vào tổng kết quả
-    // overallResponseBuilder.append("Exam Question ID:
-    // ").append(examQuestionId).append("\n")
-    // .append(responseBuilder.toString()).append("\n\n");
-    // }
+                question += ""
+                        + "\n - Question Content: " + examQuestion.getQuestionContent()
+                        + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        + "\n - Description: " + examQuestion.getDescription()
+                        + "\n - End point: " + examQuestion.getEndPoint()
+                        + "\n - Http method: " + examQuestion.getHttpMethod()
+                        + "\n - Payload type: " + examQuestion.getPayloadType()
+                        + "\n - Validation: " + examQuestion.getValidation()
+                        + "\n - Success response: " + examQuestion.getSucessResponse()
+                        + "\n - Error response: " + examQuestion.getErrorResponse()
+                        + "\n - Payload: " + examQuestion.getPayload();
+            }
 
-    // return overallResponseBuilder.toString();
-    // }
+            String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+            String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
 
-    // @Override
-    // public String generateGherkinFormat(List<Long> examQuestionIds) {
+            responseBuilder.append(response).append("\n");
 
-    // // Kiểm tra nếu đã có Gherkin cho bất kỳ examQuestionId nào
-    // for (Long examQuestionId : examQuestionIds) {
-    // if
-    // (gherkinScenarioRepository.existsByExamQuestion_ExamQuestionIdAndStatusTrue(examQuestionId))
-    // {
-    // // Trả về thông báo lỗi thay vì ném ngoại lệ
-    // return ", Unsuccessfully, Gherkin has exits for Exam Question ID: " +
-    // examQuestionId;
-    // }
-    // }
+            if (content.getOrderPriority() == 3) {
+                List<String> gherkinDataList = extractGherkinData(response);
+                saveGherkinData(gherkinDataList, examQuestion);
+                return "Generate gherkin successfully!";
+            }
 
-    // StringBuilder overallResponseBuilder = new StringBuilder();
-    // for (Long examQuestionId : examQuestionIds) {
+        }
+        return "Unknown error!";
 
-    // // Lấy AI_Info với purpose là "Generate GherkinFormat"
-    // List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate
-    // GherkinFormat");
-
-    // // Truy vấn Exam_Database dựa trên examQuestionId
-    // Exam_Database examDatabase =
-    // examDatabaseRepository.findByExamQuestionId(examQuestionId)
-    // .orElseThrow(() -> new RuntimeException("Exam Database không tồn tại"));
-
-    // String databaseScript = examDatabase.getDatabaseScript();
-    // System.out.println("Database Script: " + databaseScript);
-
-    // // Truy vấn Exam_Question dựa trên examQuestionId
-    // Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
-    // .orElseThrow(() -> new RuntimeException("Exam Question không tồn tại"));
-
-    // StringBuilder responseBuilder = new StringBuilder();
-
-    // // Tạo đoạn chat mới cho mỗi examQuestionId
-    // aiInfos.forEach(aiInfo -> {
-    // List<Content> orderedContents = aiInfo.getContents()
-    // .stream()
-    // .sorted((c1, c2) -> Long.compare(c1.getOrderPriority(),
-    // c2.getOrderPriority()))
-    // .collect(Collectors.toList());
-
-    // orderedContents.forEach(content -> {
-    // String question = content.getQuestionContent();
-    // if (content.getOrderPriority() == 1) {
-    // question += "\n" + databaseScript;
-    // } else if (content.getOrderPriority() == 2) {
-    // // question += "\n\n\n"
-    // question += ""
-    // + "\n - Question Content: " + examQuestion.getQuestionContent()
-    // + "\n - Role: " + examQuestion.getRoleAllow()
-    // + "\n - Description: " + examQuestion.getDescription()
-    // + "\n - End point: " + examQuestion.getEndPoint()
-    // + "\n - Http method: " + examQuestion.getHttpMethod()
-    // + "\n - Payload type: " + examQuestion.getPayloadType()
-    // + "\n - Validation: " + examQuestion.getValidation()
-    // + "\n - Success response: " + examQuestion.getSucessResponse()
-    // + "\n - Error response: " + examQuestion.getErrorResponse()
-    // + "\n - Payload: " + examQuestion.getPayload();
-    // }
-
-    // String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8),
-    // StandardCharsets.UTF_8);
-    // String response = sendToAI(promptInUTF8, aiInfo.getAiApiKey());
-
-    // // String response = sendToAI(question, aiInfo.getAiApiKey());
-    // responseBuilder.append(response).append("\n");
-
-    // if (content.getOrderPriority() == 2) {
-    // List<String> gherkinDataList = extractGherkinData(response);
-    // saveGherkinData(gherkinDataList, examQuestion);
-    // // extractGherkinDataAndSave(response, examQuestion);
-    // }
-    // });
-    // });
-
-    // // Thêm kết quả từ examQuestionId hiện tại vào tổng kết quả
-    // overallResponseBuilder.append("Exam Question ID:
-    // ").append(examQuestionId).append("\n")
-    // .append(responseBuilder.toString()).append("\n\n");
-    // }
-
-    // return overallResponseBuilder.toString();
-    // }
+    }
 
     private List<String> extractGherkinData(String response) {
         List<String> gherkinDataList = new ArrayList<>();
@@ -664,45 +585,5 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
         return responseBody;
     }
-
-    // @Override
-    // public List<GherkinScenarioDTO> getAllGherkinScenariosByExamQuestionId(Long
-    // examQuestionId) {
-    // if (examQuestionId == null) {
-    // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exam Question ID
-    // is required.");
-    // }
-
-    // // Lấy danh sách Gherkin_Scenario có status = true
-    // List<Gherkin_Scenario> scenarios = gherkinScenarioRepository
-    // .findByExamQuestion_ExamQuestionIdAndStatusTrueOrderByOrderPriorityAsc(examQuestionId);
-
-    // // Kiểm tra nếu không có dữ liệu
-    // if (scenarios.isEmpty()) {
-    // throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-    // "No Gherkin Scenarios found for the provided Exam Question ID with status =
-    // true.");
-    // }
-
-    // // Chuyển đổi danh sách Gherkin_Scenario sang danh sách GherkinScenarioDTO
-    // return scenarios.stream()
-    // .map(this::convertToDTO)
-    // .collect(Collectors.toList());
-    // }
-
-    // // Hàm helper để chuyển đổi từ Gherkin_Scenario sang GherkinScenarioDTO
-    // private GherkinScenarioDTO convertToDTO(Gherkin_Scenario scenario) {
-    // return new GherkinScenarioDTO(
-    // scenario.getGherkinScenarioId(),
-    // scenario.getGherkinData(),
-    // // scenario.getOrderPriority(),
-    // scenario.getIsUpdateCreate(),
-    // scenario.getStatus(),
-    // scenario.getExamQuestion() != null ?
-    // scenario.getExamQuestion().getExamQuestionId() : null,
-    // scenario.getPostmanForGrading() != null ?
-    // scenario.getPostmanForGrading().getPostmanForGradingId()
-    // : null);
-    // }
 
 }

@@ -9,12 +9,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.services.student_service.ExcelService;
 import com.CodeEvalCrew.AutoScore.services.student_service.IStudentService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/students")
@@ -53,4 +57,16 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to import file");
         }
     }
+
+    @GetMapping("")
+    public ResponseEntity<?> getAllStudentOfSource(@RequestParam Long sourceId) {
+        List<StudentDTO> result;
+        try{
+            result = studentService.getAllStudentOfSource(sourceId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 }

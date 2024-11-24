@@ -51,6 +51,7 @@ public class Postman_For_Grading {
     @JoinColumn(name = "examQuestionId", nullable = true)
     private Exam_Question examQuestion;
 
+   
     @OneToOne
     @JoinColumn(name = "gherkinScenarioId", referencedColumnName = "gherkinScenarioId", nullable = true)
     private Gherkin_Scenario gherkinScenario;

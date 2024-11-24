@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateDTO;
@@ -41,6 +41,8 @@ import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGra
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PostmanForGradingService implements IPostmanForGradingService {
@@ -230,8 +232,19 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             return "Gherkin Scenario ID not found";
         }
 
+//  // Lấy nội dung câu hỏi từ Exam_Question (QuestionContent của Exam_Question)
+//  String examQuestionContent = gherkinScenario.getExamQuestion().getQuestionContent();
+//  if (examQuestionContent == null) {
+//      return "Question Content not found for the associated Gherkin Scenario ID.";
+//  }
 
 
+        // Kiểm tra nếu đã có Postman_For_Grading với gherkinScenarioId và status = true
+        Optional<Postman_For_Grading> existingPostman = postmanForGradingRepository
+                .findByGherkinScenario_GherkinScenarioIdAndStatusTrue(gherkinScenarioId);
+        if (existingPostman.isPresent()) {
+            return "Active Postman collection already exists for this Gherkin Scenario ID.";
+        }
 
         // Lấy Exam_Database
         Exam_Database examDatabase = examDatabaseRepository
@@ -281,10 +294,12 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                         "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
             } else if (content.getOrderPriority() == 3) {
                 question += "\n" + gherkinScenario.getGherkinData();
+
             }
 
             // Gửi từng câu hỏi độc lập tới AI
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+            System.out.println("qrfwefraweft" + promptInUTF8);
             String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
 
             if (response == null || response.isEmpty()) {
@@ -300,8 +315,15 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                 if (collectionJson == null || collectionJson.isEmpty()) {
                     return "Error: JSON not found in the AI response for orderPriority 3.";
                 }
-
+            
                 String postmanFunctionName = runNewman(collectionJson);
+                // Path filePath = Paths.get("D:\\Desktop\\result.txt");
+                // try {
+                //     Files.write(filePath, collectionJson.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                // } catch (java.io.IOException e) {
+                //     e.printStackTrace();
+                //     return "Error: Failed to save collectionJson to file";
+                // }
                 if (postmanFunctionName == null) {
                     return "Error: Newman execution failed or postmanFunctionName not found.";
                 }
@@ -318,224 +340,167 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                 postmanForGradingRepository.save(postmanForGrading);
                 return "Postman Collection generated successfully!";
             }
+        } 
+
+        return "Unknown error!";
+    }
+
+    @Override
+    public String generatePostmanCollectionMore(Long gherkinScenarioId) {
+        // Kiểm tra Gherkin_Scenario
+        Gherkin_Scenario gherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId)
+                .orElse(null);
+        if (gherkinScenario == null) {
+            return "Gherkin Scenario ID not found";
+        }
+
+        Postman_For_Grading postmanForGrading = postmanForGradingRepository
+                .findByGherkinScenario_GherkinScenarioIdAndStatusTrue(gherkinScenarioId)
+                .orElse(null);
+
+        String fileCollectionPostmanText = "";
+        if (postmanForGrading != null && postmanForGrading.getFileCollectionPostman() != null) {
+            fileCollectionPostmanText = new String(postmanForGrading.getFileCollectionPostman(),
+                    StandardCharsets.UTF_8);
+        }
+
+        // Lấy Exam_Database
+        Exam_Database examDatabase = examDatabaseRepository
+                .findByExamPaper_ExamPaperId(gherkinScenario.getExamQuestion().getExamPaper().getExamPaperId())
+                .orElse(null);
+        if (examDatabase == null) {
+            return "Exam Database not found for the associated Exam Paper";
+        }
+
+        // Lấy authenticated user ID
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+
+        Account_Selected_Key accountSelectedKey = accountSelectedKeyRepository
+                .findByAccount_AccountId(authenticatedUserId)
+                .orElse(null);
+        if (accountSelectedKey == null) {
+            return "User has not select AI Key";
+        }
+
+        AI_Api_Key selectedAiApiKey = accountSelectedKey.getAiApiKey();
+        if (selectedAiApiKey == null) {
+            return "AI_Api_Key does not exist in Account_Selected_Key";
+        }
+
+        // Lấy danh sách Content sắp xếp theo orderPriority
+        List<Content> orderedContents = contentRepository
+                .findByPurposeOrderByOrderPriority("Generate Postman Collection More");
+
+        // Tạo response tổng hợp
+        StringBuilder fullResponseBuilder = new StringBuilder();
+
+        // Gửi từng câu hỏi tới AI dựa trên orderPriority
+        for (Content content : orderedContents) {
+            String question = content.getQuestionContent();
+
+            if (content.getOrderPriority() == 1) {
+                question += "\nDatabase Script: " + examDatabase.getDatabaseScript();
+            } else if (content.getOrderPriority() == 2) {
+                question += "\n\n\n" +
+                        "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
+                        "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
+                        "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
+                        "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
+                        "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
+                        "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
+                        "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
+                        "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
+        //            try (FileWriter writer = new FileWriter("D:\\Desktop\\result.txt", true)) {
+        //     writer.write(question + "\n\n"); // Ghi từng câu hỏi cách nhau 2 dòng
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        //     System.out.println("Error writing to file: " + e.getMessage());
+        // }      
+            } else if (content.getOrderPriority() == 3) {
+                question += "\n " + fileCollectionPostmanText;
+                // "\n" + gherkinScenario.getGherkinData()
+              
+            }
+
+            // Gửi từng câu hỏi độc lập tới AI
+            String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+            String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
+
+            if (response == null || response.isEmpty()) {
+                return "Error: Failed to call AI API for orderPriority " + content.getOrderPriority();
+            }
+
+            // Xử lý câu trả lời và thêm vào response tổng hợp
+            fullResponseBuilder.append(response).append("\n");
+
+            // Khi xử lý câu hỏi cuối, lấy JSON từ phản hồi
+            if (content.getOrderPriority() == 3) {
+                String collectionJson = extractJsonFromResponse(response);
+                // try (FileWriter writer = new FileWriter("D:\\Desktop\\result.txt", true)) {
+                //     writer.write(collectionJson + "\n\n"); // Ghi từng câu hỏi cách nhau 2 dòng
+                // } catch (java.io.IOException e) {
+                //     e.printStackTrace();
+                //     System.out.println("Error writing to file: " + e.getMessage());
+                // }
+                if (collectionJson == null || collectionJson.isEmpty()) {
+                    return "Error: JSON not found in the AI response for orderPriority 3.";
+                }
+
+                String postmanFunctionName = runNewman(collectionJson);
+
+        //            Path filePath = Paths.get("D:\\Desktop\\result.txt");
+        // try {
+        //     Files.write(filePath, collectionJson.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        // } catch (java.io.IOException e) {
+        //     e.printStackTrace();
+        //     return "Error: Failed to save collectionJson to file";
+        // }
+
+                if (postmanFunctionName == null) {
+                    return "Error: Newman execution failed or postmanFunctionName not found.";
+                }
+
+                // Update the existing Postman_For_Grading entity
+                postmanForGrading.setFileCollectionPostman(collectionJson.getBytes(StandardCharsets.UTF_8));
+                postmanForGrading.setPostmanFunctionName(postmanFunctionName);
+                postmanForGrading.setTotalPmTest(totalPmTest);
+                postmanForGrading.setStatus(true);
+                postmanForGradingRepository.save(postmanForGrading);
+                return "Postman Collection update successfully!";
+            }
         }
 
         return "Unknown error!";
     }
 
-    // @Override
-    // public String generatePostmanCollection(Long gherkinScenarioId) {
-
-    // Gherkin_Scenario gherkinScenario =
-    // gherkinScenarioRepository.findById(gherkinScenarioId)
-    // .orElse(null);
-    // if (gherkinScenario == null) {
-    // return "Gherkin Scenario ID not found";
+    
+    // private String extractJsonFromResponse(String responseBody) {
+    //     try {
+    //         // Sử dụng regex để tìm chuỗi nằm trong dấu ```
+    //         String pattern = "```json\\n(.*?)```";
+    //         Pattern r = Pattern.compile(pattern, Pattern.DOTALL);  // DOTALL cho phép . khớp với dòng mới
+    //         Matcher m = r.matcher(responseBody);
+    
+    //         // Kiểm tra xem có chuỗi nào nằm trong ``` không
+    //         if (m.find()) {
+    //             String jsonString = m.group(1); // Lấy phần chuỗi tìm được trong ``` và ``` 
+    
+    //             // Bỏ dấu ```json và ``` ở đầu và cuối chuỗi
+    //             jsonString = jsonString.replace("json", "").trim();
+    
+    //             // Chuyển đổi jsonString thành JSONObject nếu cần thiết
+    //             JSONObject jsonResponse = new JSONObject(jsonString);
+    
+    //             // Trích xuất dữ liệu từ JSONObject (tùy vào cấu trúc của JSON)
+    //             return jsonResponse.toString();  // Hoặc trả về một phần của JSON nếu cần
+    //         } else {
+    //             return "No JSON block found in response body";
+    //         }
+    //     } catch (JSONException e) {
+    //         e.printStackTrace();
+    //         return null; // Trả về null nếu có lỗi
+    //     }
     // }
-
-    // Exam_Database examDatabase = examDatabaseRepository
-    // .findByExamPaper_ExamPaperId(gherkinScenario.getExamQuestion().getExamPaper().getExamPaperId())
-    // .orElse(null);
-    // if (examDatabase == null) {
-    // return "Exam Database not found for the associated Exam Paper";
-    // }
-
-    // // Lấy authenticated user ID
-    // Long authenticatedUserId = Util.getAuthenticatedAccountId();
-
-    // Account_Selected_Key accountSelectedKey = accountSelectedKeyRepository
-    // .findByAccount_AccountId(authenticatedUserId)
-    // .orElse(null);
-    // if (accountSelectedKey == null) {
-    // return "Account_Selected_Key not found for the current user";
-    // }
-
-    // AI_Api_Key selectedAiApiKey = accountSelectedKey.getAiApiKey();
-    // if (selectedAiApiKey == null) {
-    // return "AI_Api_Key does not exist in Account_Selected_Key";
-    // }
-
-    // // Lấy danh sách Content được sắp xếp theo orderPriority
-    // List<Content> orderedContents = contentRepository
-    // .findByPurposeOrderByOrderPriority("Generate Postman Collection");
-
-    // // Tạo prompt từ các Content và dữ liệu liên quan
-    // StringBuilder promptBuilder = new StringBuilder();
-    // orderedContents.forEach(content -> {
-    // if (content.getOrderPriority() == 1) {
-    // // Thêm dữ liệu từ Exam_Database khi orderPriority = 1
-    // promptBuilder.append(content.getQuestionContent())
-    // .append("\nDatabase Script: ")
-    // .append(examDatabase.getDatabaseScript());
-    // } else if (content.getOrderPriority() == 2) {
-    // // Thêm dữ liệu từ Exam_Question
-    // promptBuilder.append(content.getQuestionContent())
-    // .append("\n\n\n")
-    // .append("\n - Question Content: ")
-    // .append(gherkinScenario.getExamQuestion().getQuestionContent())
-    // .append("\n - EndPoint: ")
-    // .append(gherkinScenario.getExamQuestion().getEndPoint())
-    // .append("\n - Description: ")
-    // .append(gherkinScenario.getExamQuestion().getDescription())
-    // .append("\n - Payload: ")
-    // .append(gherkinScenario.getExamQuestion().getPayload())
-    // .append("\n - Payload type: ")
-    // .append(gherkinScenario.getExamQuestion().getPayloadType())
-    // .append("\n - Http method: ")
-    // .append(gherkinScenario.getExamQuestion().getHttpMethod())
-    // .append("\n - Error response: ")
-    // .append(gherkinScenario.getExamQuestion().getErrorResponse())
-    // .append("\n - Success response: ")
-    // .append(gherkinScenario.getExamQuestion().getSucessResponse());
-    // } else if (content.getOrderPriority() == 3) {
-    // // Thêm gherkinData từ Gherkin_Scenario
-    // promptBuilder.append(content.getQuestionContent())
-    // .append("\n")
-    // .append(gherkinScenario.getGherkinData());
-    // System.out.println("Gherkin Data: " + gherkinScenario.getGherkinData());
-    // }
-    // });
-
-    // String prompt = new
-    // String(promptBuilder.toString().getBytes(StandardCharsets.UTF_8),
-    // StandardCharsets.UTF_8);
-
-    // String responseBody = sendToAI(prompt, selectedAiApiKey.getAiApiKey());
-    // if (responseBody == null) {
-    // return "Error: Failed to call AI API to generate Postman Collection.";
-    // }
-
-    // String collectionJson = extractJsonFromResponse(responseBody);
-    // if (collectionJson == null || collectionJson.isEmpty()) {
-    // return "Error: JSON not found in the API response.";
-    // }
-
-    // String postmanFunctionName = runNewman(collectionJson);
-    // if (postmanFunctionName == null) {
-    // return "Error: Newman execution failed or postmanFunctionName not found.";
-    // }
-
-    // // Lưu Postman Collection vào Postman_For_Grading
-    // Postman_For_Grading postmanForGrading = new Postman_For_Grading();
-    // postmanForGrading.setGherkinScenario(gherkinScenario);
-    // postmanForGrading.setExamQuestion(gherkinScenario.getExamQuestion());
-    // postmanForGrading.setFileCollectionPostman(collectionJson.getBytes(StandardCharsets.UTF_8));
-    // postmanForGrading.setExamPaper(gherkinScenario.getExamQuestion().getExamPaper());
-    // postmanForGrading.setPostmanFunctionName(postmanFunctionName);
-    // postmanForGrading.setTotalPmTest(totalPmTest);
-    // postmanForGrading.setStatus(true);
-    // postmanForGradingRepository.save(postmanForGrading);
-
-    // return "Postman Collection generated successfully!";
-    // }
-
-    // @Transactional
-    // public String generatePostmanCollection(Long gherkinScenarioId) {
-    // // Tìm Gherkin_Scenario từ ID
-    // Gherkin_Scenario gherkinScenario =
-    // gherkinScenarioRepository.findById(gherkinScenarioId)
-    // .orElseThrow(
-    // () -> new RuntimeException("Không tìm thấy Gherkin Scenario với ID: " +
-    // gherkinScenarioId));
-
-    // // Lấy Exam_Database liên kết với Exam_Paper từ Gherkin_Scenario
-    // Exam_Database examDatabase = examDatabaseRepository
-    // .findByExamPaper_ExamPaperId(gherkinScenario.getExamQuestion().getExamPaper().getExamPaperId())
-    // .orElseThrow(() -> new RuntimeException("Không tìm thấy Exam Database liên
-    // kết với Exam Paper"));
-
-    // // Lấy AI_Info với purpose "Generate Postman Collection"
-    // List<AI_Info> aiInfos = aiInfoRepository.findByPurpose("Generate Postman
-    // Collection");
-    // if (aiInfos.isEmpty()) {
-    // throw new RuntimeException("Không tìm thấy AI_Info với mục đích 'Generate
-    // Postman Collection'");
-    // }
-
-    // AI_Info aiInfo = aiInfos.get(0);
-    // List<Content> orderedContents = aiInfo.getContents()
-    // .stream()
-    // .sorted((c1, c2) -> Long.compare(c1.getOrderPriority(),
-    // c2.getOrderPriority()))
-    // .collect(Collectors.toList());
-
-    // // Tạo prompt từ các Content và gherkinData
-    // StringBuilder promptBuilder = new StringBuilder();
-    // orderedContents.forEach(content -> {
-    // if (content.getOrderPriority() == 1) {
-    // // Thêm dữ liệu từ Exam_Database khi orderPriority = 1
-    // promptBuilder.append(content.getQuestionContent())
-    // .append("\nDatabase Script: ")
-    // .append(examDatabase.getDatabaseScript());
-    // } else if (content.getOrderPriority() == 2) {
-    // // Thêm dữ liệu từ Exam_Question
-    // promptBuilder.append(content.getQuestionContent())
-    // .append("\n\n\n")
-    // .append("\n - Question Content: ")
-    // .append(gherkinScenario.getExamQuestion().getQuestionContent())
-    // .append("\n - EndPoint: ")
-    // .append(gherkinScenario.getExamQuestion().getEndPoint())
-    // .append("\n - Description: ")
-    // .append(gherkinScenario.getExamQuestion().getDescription())
-    // .append("\n - Payload: ")
-    // .append(gherkinScenario.getExamQuestion().getPayload())
-    // .append("\n - Payload type: ")
-    // .append(gherkinScenario.getExamQuestion().getPayloadType())
-    // .append("\n - Http method: ")
-    // .append(gherkinScenario.getExamQuestion().getHttpMethod())
-    // .append("\n - Error response: ")
-    // .append(gherkinScenario.getExamQuestion().getErrorResponse())
-    // .append("\n - Success response: ")
-    // .append(gherkinScenario.getExamQuestion().getSucessResponse());
-    // } else if (content.getOrderPriority() == 3) {
-    // // Thêm gherkinData từ Gherkin_Scenario
-    // promptBuilder.append(content.getQuestionContent())
-    // .append("\n")
-    // .append(gherkinScenario.getGherkinData());
-    // System.out.println("Gherkin Data: " + gherkinScenario.getGherkinData());
-
-    // }
-
-    // });
-
-    // String prompt = new
-    // String(promptBuilder.toString().getBytes(StandardCharsets.UTF_8),
-    // StandardCharsets.UTF_8);
-
-    // // Gọi AI API để lấy JSON Postman Collection
-    // String responseBody = sendToAI(prompt, aiInfo.getAiApiKey());
-    // if (responseBody == null) {
-    // throw new RuntimeException("Lỗi khi gọi AI API để tạo Postman Collection");
-    // }
-
-    // // Trích xuất JSON từ response body
-    // String collectionJson = extractJsonFromResponse(responseBody);
-    // // Kiểm tra xem JSON có được trích xuất thành công không
-    // if (collectionJson == null || collectionJson.isEmpty()) {
-    // throw new IllegalArgumentException("Không tìm thấy JSON trong phần phản
-    // hồi.");
-    // }
-
-    // String postmanFunctionName = runNewman(collectionJson);
-
-    // if (postmanFunctionName == null) {
-    // throw new RuntimeException("Newman run failed or postmanFunctionName not
-    // found.");
-    // }
-
-    // // Lưu Postman Collection vào Postman_For_Grading
-    // Postman_For_Grading postmanForGrading = new Postman_For_Grading();
-    // postmanForGrading.setGherkinScenario(gherkinScenario);
-    // postmanForGrading.setExamQuestion(gherkinScenario.getExamQuestion());
-    // postmanForGrading.setFileCollectionPostman(collectionJson.getBytes(StandardCharsets.UTF_8));
-    // postmanForGrading.setExamPaper(gherkinScenario.getExamQuestion().getExamPaper());
-    // postmanForGrading.setPostmanFunctionName(postmanFunctionName);
-    // postmanForGrading.setTotalPmTest(totalPmTest);
-    // postmanForGrading.setStatus(true);
-    // postmanForGradingRepository.save(postmanForGrading);
-    // return "Postman Collection được tạo và lưu thành công.";
-    // }
-
     // Hàm trích xuất JSON từ response body
     private String extractJsonFromResponse(String responseBody) {
         try {
@@ -745,63 +710,6 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         return updatedList;
     }
-
-    // @Override
-    // public List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long
-    // examPaperId) {
-    // List<Postman_For_Grading> postmanForGradingEntries =
-    // postmanForGradingRepository
-    // .findByExamPaper_ExamPaperId(examPaperId);
-
-    // // Chuyển đổi danh sách các thực thể thành DTO
-    // List<PostmanForGradingDTO> dtoList = postmanForGradingEntries.stream()
-    // .filter(entry -> Boolean.TRUE.equals(entry.getStatus())) // Lọc theo status =
-    // true
-    // .map(entry -> {
-    // PostmanForGradingDTO dto = new PostmanForGradingDTO();
-    // dto.setPostmanForGradingId(entry.getPostmanForGradingId());
-    // dto.setPostmanFunctionName(entry.getPostmanFunctionName());
-    // dto.setScoreOfFunction(entry.getScoreOfFunction());
-    // dto.setTotalPmTest(entry.getTotalPmTest());
-    // dto.setOrderBy(entry.getOrderBy());
-    // dto.setStatus(entry.getStatus());
-
-    // // Nếu parentId là null, set giá trị thành 0
-    // dto.setPostmanForGradingParentId(
-    // entry.getPostmanForGradingParentId() != null
-    // ? entry.getPostmanForGradingParentId()
-    // : 0L
-    // );
-
-    // dto.setExamQuestionId(entry.getExamQuestion() != null
-    // ? entry.getExamQuestion().getExamQuestionId()
-    // : null);
-    // dto.setGherkinScenarioId(entry.getGherkinScenario() != null
-    // ? entry.getGherkinScenario().getGherkinScenarioId()
-    // : null);
-    // return dto;
-    // })
-    // .collect(Collectors.toList());
-
-    // // Tạo phần tử mới cần thêm
-    // PostmanForGradingDTO newElement = new PostmanForGradingDTO();
-    // newElement.setPostmanForGradingId(0L);
-    // newElement.setPostmanFunctionName("Hidden");
-    // newElement.setScoreOfFunction(null);
-    // newElement.setTotalPmTest(null);
-    // newElement.setOrderBy(null);
-    // newElement.setStatus(true);
-    // newElement.setPostmanForGradingParentId(null);
-    // newElement.setExamQuestionId(null);
-    // newElement.setGherkinScenarioId(null);
-
-    // // Thêm phần tử mới vào đầu danh sách
-    // List<PostmanForGradingDTO> updatedList = new ArrayList<>();
-    // updatedList.add(newElement);
-    // updatedList.addAll(dtoList);
-
-    // return updatedList;
-    // }
 
     @Transactional
     public void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs) {
