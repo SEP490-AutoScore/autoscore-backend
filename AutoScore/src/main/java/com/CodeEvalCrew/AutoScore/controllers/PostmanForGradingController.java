@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingCreateDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateGetDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetDTO;
 import com.CodeEvalCrew.AutoScore.services.postman_for_grading_service.IPostmanForGradingService;
 
 
@@ -79,4 +83,30 @@ public class PostmanForGradingController {
         }
     }
 
+     @DeleteMapping("")
+    public ResponseEntity<String> deletePostmanForGrading(@RequestParam Long postmanForGradingId) {
+        String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{postmanForGradingId}")
+    public ResponseEntity<PostmanForGradingGetDTO> getPostmanForGradingById(@PathVariable Long postmanForGradingId) {
+        PostmanForGradingGetDTO dto = postmanForGradingService.getPostmanForGradingById(postmanForGradingId);
+        return ResponseEntity.ok(dto);
+    }
+    
+      @PutMapping("/{postmanForGradingId}")
+    public ResponseEntity<PostmanForGradingGetDTO> updatePostmanForGrading(
+            @PathVariable Long postmanForGradingId,
+            @RequestBody PostmanForGradingUpdateGetDTO updateDTO) {
+
+                PostmanForGradingGetDTO updatedPostman = postmanForGradingService.updatePostmanForGrading(postmanForGradingId, updateDTO);
+        return ResponseEntity.ok(updatedPostman);
+    }
+
+     @PostMapping
+    public ResponseEntity<PostmanForGradingGetDTO> createPostmanForGrading(@RequestBody PostmanForGradingCreateDTO createDTO) {
+        PostmanForGradingGetDTO newPostman = postmanForGradingService.createPostmanForGrading(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newPostman);
+    }
 }

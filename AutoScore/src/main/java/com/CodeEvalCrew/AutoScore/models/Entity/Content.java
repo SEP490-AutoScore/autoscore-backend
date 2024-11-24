@@ -29,7 +29,7 @@ public class Content {
     @NotNull
     @Lob
     @Column(columnDefinition = "LONGTEXT")
-    private String questionContent;
+    private String questionAskAiContent;
 
     private Long orderPriority;
 

@@ -362,11 +362,14 @@ VALUES
 INSERT INTO `account_selected_key`
 (`account_id`, `selected_ai_api_key_id`)
 VALUES
-(3, 1);
+(3, 1),
+(1, 1),
+(2, 1),
+(4, 1);
 
 
 INSERT INTO `content`
-(`question_content`, `order_priority`,`purpose`)
+(`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
 ('This is Database, Save to your memory, do not reply', 1,'Generate Gherkin Format'),
 ('Write Gherkin format scenarios for the given feature or API. 
@@ -382,18 +385,7 @@ Scenario: [Brief and clear description of the scenario]
   And [Optional additional outcomes or verifications]
 }}', 2,'Generate Gherkin Format'),
 ('This is Database, Save to your memory, do not reply', 1,'Generate Gherkin Format More'),
-('This is topic, Save to your memory, do not reply', 2,'Generate Gherkin Format More'),
-('Please generate additional Gherkin format scenarios that are different from those in gherkinDatas. Each scenario should be enclosed in {{ }} and use this structure:
-{{ 
-Scenario: [Brief and clear description of the scenario]
-  Given [Describe the initial condition or prerequisite]
-  And [Optional additional conditions or prerequisites]
-  When [Describe the key action or event that occurs]
-  And [Optional additional actions or events]
-  Then [Describe the primary outcome or result]
-  And [Optional additional outcomes or verifications]
-}}
-Avoid duplication with existing gherkinDatas. Generate new and unique scenarios.', 3,'Generate Gherkin Format More'),
+('Write Gherkin format scenarios for the given feature or API. Each scenario should be enclosed in {{ }} and use this structure.',2,'Generate Gherkin Format More'),
 
 ('This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection'),
 ('This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection'),
