@@ -390,21 +390,12 @@ Scenario: [Brief and clear description of the scenario]
 ('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
 ('Write Gherkin format scenarios for the given feature or API. Each scenario should be enclosed in {{ }} and use this structure.',2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
-('This is Database, Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION'),
-('This is topic, Save to your memory, do not reply', 2,'GENERATE_POSTMAN_COLLECTION'),
-('- Write json postman collection for 1 item.name gherkin format below, No Explanation
-- json postman collection have "info" and "item":
-- "info" needs "_postman_id", "name", "schema", _exporter_id
-- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
-- http://localhost:10000/...', 3,'GENERATE_POSTMAN_COLLECTION'),
+('Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION'),
+('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. The `event.script.exec` section in `item` must contain valid Postman test scripts (using pm.test). Write a JSON Postman collection that contains `info` and `item`. The `info` section should include `_postman_id`, `name`, `schema`, `_exporter_id`. The `item` section should include `name`, `event.listen` with the value `test`, and `event.script.exec` with the value `pm.test`. Do not explain the JSON structure, just provide the raw JSON.
+', 2,'GENERATE_POSTMAN_COLLECTION'),
 
-('-This is Database, Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION_MORE'),
-('-This is topic, Save to your memory, do not reply', 2,'GENERATE_POSTMAN_COLLECTION_MORE'),
-('-Write multiple test cases in a single endpoint for 1 item.name postman script below, No Explanation
-- json postman collection have "info" and "item":
-- "info" needs "_postman_id", "name", "schema", _exporter_id
-- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
-- http://localhost:10000/...', 3,'GENERATE_POSTMAN_COLLECTION_MORE');
+('This is Database, Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION_MORE'),
+('Given the JSON Postman collection below, please add multiple pm.test scripts within the same test case. Ensure that each test script is inside the same `event.script.exec` block, but each script checks a different condition or assertion. In the provided Postman JSON, within the `event.script.exec` section, please create multiple `pm.test` scripts under the same test case. Each `pm.test` should check a separate condition without creating additional test cases.', 2,'GENERATE_POSTMAN_COLLECTION_MORE');
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 

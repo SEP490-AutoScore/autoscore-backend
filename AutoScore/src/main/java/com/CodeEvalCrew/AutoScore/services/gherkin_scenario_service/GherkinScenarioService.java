@@ -456,7 +456,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         + "\n - Validation: " + examQuestion.getValidation()
                         + "\n - Success response: " + examQuestion.getSucessResponse()
                         + "\n - Error response: " + examQuestion.getErrorResponse()
-                        + "\n - Payload: " + examQuestion.getPayload()     
+                        + "\n - Payload: " + examQuestion.getPayload() 
                         + "\n\n\n - Gherkin Data:\n" + formattedGherkinData;
             }
 
