@@ -46,6 +46,7 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepo
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
+import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -321,14 +322,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                 }
             
                 String postmanFunctionName = runNewman(collectionJson);
-                // Path filePath = Paths.get("D:\\Desktop\\result.txt");
-                // try {
-                //     Files.write(filePath, collectionJson.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                // } catch (java.io.IOException e) {
-                //     e.printStackTrace();
-                //     return "Error: Failed to save collectionJson to file";
-                // }
-                if (postmanFunctionName == null) {
+                         if (postmanFunctionName == null) {
                     return "Error: Newman execution failed or postmanFunctionName not found.";
                 }
 
@@ -414,12 +408,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                         "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
                         "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
                         "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
-        //            try (FileWriter writer = new FileWriter("D:\\Desktop\\result.txt", true)) {
-        //     writer.write(question + "\n\n"); // Ghi từng câu hỏi cách nhau 2 dòng
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        //     System.out.println("Error writing to file: " + e.getMessage());
-        // }      
+     
             } else if (content.getOrderPriority() == 3) {
                 question += "\n " + fileCollectionPostmanText;
                 // "\n" + gherkinScenario.getGherkinData()
@@ -440,25 +429,12 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             // Khi xử lý câu hỏi cuối, lấy JSON từ phản hồi
             if (content.getOrderPriority() == 3) {
                 String collectionJson = extractJsonFromResponse(response);
-                // try (FileWriter writer = new FileWriter("D:\\Desktop\\result.txt", true)) {
-                //     writer.write(collectionJson + "\n\n"); // Ghi từng câu hỏi cách nhau 2 dòng
-                // } catch (java.io.IOException e) {
-                //     e.printStackTrace();
-                //     System.out.println("Error writing to file: " + e.getMessage());
-                // }
+              
                 if (collectionJson == null || collectionJson.isEmpty()) {
                     return "Error: JSON not found in the AI response for orderPriority 3.";
                 }
 
                 String postmanFunctionName = runNewman(collectionJson);
-
-        //            Path filePath = Paths.get("D:\\Desktop\\result.txt");
-        // try {
-        //     Files.write(filePath, collectionJson.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        // } catch (java.io.IOException e) {
-        //     e.printStackTrace();
-        //     return "Error: Failed to save collectionJson to file";
-        // }
 
                 if (postmanFunctionName == null) {
                     return "Error: Newman execution failed or postmanFunctionName not found.";
@@ -477,34 +453,6 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         return "Unknown error!";
     }
 
-    
-    // private String extractJsonFromResponse(String responseBody) {
-    //     try {
-    //         // Sử dụng regex để tìm chuỗi nằm trong dấu ```
-    //         String pattern = "```json\\n(.*?)```";
-    //         Pattern r = Pattern.compile(pattern, Pattern.DOTALL);  // DOTALL cho phép . khớp với dòng mới
-    //         Matcher m = r.matcher(responseBody);
-    
-    //         // Kiểm tra xem có chuỗi nào nằm trong ``` không
-    //         if (m.find()) {
-    //             String jsonString = m.group(1); // Lấy phần chuỗi tìm được trong ``` và ``` 
-    
-    //             // Bỏ dấu ```json và ``` ở đầu và cuối chuỗi
-    //             jsonString = jsonString.replace("json", "").trim();
-    
-    //             // Chuyển đổi jsonString thành JSONObject nếu cần thiết
-    //             JSONObject jsonResponse = new JSONObject(jsonString);
-    
-    //             // Trích xuất dữ liệu từ JSONObject (tùy vào cấu trúc của JSON)
-    //             return jsonResponse.toString();  // Hoặc trả về một phần của JSON nếu cần
-    //         } else {
-    //             return "No JSON block found in response body";
-    //         }
-    //     } catch (JSONException e) {
-    //         e.printStackTrace();
-    //         return null; // Trả về null nếu có lỗi
-    //     }
-    // }
     // Hàm trích xuất JSON từ response body
     private String extractJsonFromResponse(String responseBody) {
         try {
@@ -538,7 +486,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             Path tempFile = Files.createTempFile("collection", ".json");
             Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8));
 
-            String newmanPath = "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd"; // Đường dẫn tới Newman
+            String newmanPath = PathUtil.NEWMAN_CMD_PATH;
             String timeout = "1000"; // Đặt thời gian chờ
 
             // Tạo ProcessBuilder để chạy Newman

@@ -1,11 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.exam_paper_service;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -301,7 +297,7 @@ public class ExamPaperService implements IExamPaperService {
 
     private String runNewmanTest(java.io.File file) throws Exception {
         StringBuilder output = new StringBuilder();
-        File resultFile = new File("C:\\Project\\result.txt");
+        // File resultFile = new File("C:\\Project\\result.txt");
         try {
             // Tạo ProcessBuilder để chạy lệnh Newman
             // ProcessBuilder processBuilder = new ProcessBuilder(
@@ -320,12 +316,12 @@ public class ExamPaperService implements IExamPaperService {
                 }
             }
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile))) {
-                writer.write(output.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new Exception("Failed to write result to file: " + e.getMessage(), e);
-            }
+            // try (BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile))) {
+            //     writer.write(output.toString());
+            // } catch (IOException e) {
+            //     e.printStackTrace();
+            //     throw new Exception("Failed to write result to file: " + e.getMessage(), e);
+            // }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -358,11 +354,11 @@ public class ExamPaperService implements IExamPaperService {
                 if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
                     updateTotalPmTestInDatabase(functionName, newTotalPmTest);
                 }
-                System.out.println("Updated function in database: " + functionName);
+                // System.out.println("Updated function in database: " + functionName);
             } else {
                 // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
                 createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
-                System.out.println("Created new function in database: " + functionName);
+                // System.out.println("Created new function in database: " + functionName);
             }
         }
 
@@ -443,35 +439,6 @@ public class ExamPaperService implements IExamPaperService {
         return result;
     }
 
-    // private NewmanResult parseNewmanOutput(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo) {
-    //     NewmanResult result = new NewmanResult();
-    //     List<String> functionNames = new ArrayList<>();
-    //     List<Integer> totalPmTests = new ArrayList<>();
-    //     String[] lines = newmanOutput.split("\n");
-    //     String currentFunctionName = null;
-    //     int currentFunctionTestCount = 0;
-    //     for (String line : lines) {
-    //         if (line.startsWith("→")) {
-    //             if (currentFunctionName != null) {
-    //                 functionNames.add(currentFunctionName);
-    //                 totalPmTests.add(currentFunctionTestCount);
-    //             }
-    //             currentFunctionName = line.substring(2).trim();
-    //             currentFunctionTestCount = 0;
-    //         }
-    //         // if (line.trim().matches("^\\d+.*")) {
-    //         if (line.trim().matches("^\\d+.*") || line.trim().startsWith("√")) {
-    //             currentFunctionTestCount++;
-    //         }
-    //     }
-    //     if (currentFunctionName != null) {
-    //         functionNames.add(currentFunctionName);
-    //         totalPmTests.add(currentFunctionTestCount);
-    //     }
-    //     result.setFunctionNames(functionNames);
-    //     result.setTotalPmTests(totalPmTests);
-    //     return result;
-    // }
     private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
         return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
                 .stream()
@@ -482,14 +449,6 @@ public class ExamPaperService implements IExamPaperService {
                 .collect(Collectors.toList());
     }
 
-    // private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
-    //     return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
-    //             .stream()
-    //             .map(postmanForGrading -> new PostmanFunctionInfo(
-    //                     postmanForGrading.getPostmanFunctionName(),
-    //                     postmanForGrading.getTotalPmTest()))
-    //             .collect(Collectors.toList());
-    // }
     @Override
     public List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException {
         Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
@@ -546,11 +505,7 @@ public class ExamPaperService implements IExamPaperService {
 
             for (Exam_Paper examPaper : listExamPaper) {
                 ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
-
-                // Exam exam = examPaper.getExam();
-                // SubjectView subjectView = SubjectMapper.INSTANCE.subjectToView(exam.getSubject());
-                // SemesterView semesterView = SemesterMapper.INSTANCE.semesterToView(exam.getSemester());
-
+               
                 Set<ImportantView> set = new HashSet<>();
                 for (Important_Exam_Paper a : examPaper.getImportants()) {
                     Important important = checkEntityExistence(importantRepository.findById(a.getImportant().getImportantId()), "Improtant", a.getImportant().getImportantId());
@@ -558,9 +513,7 @@ public class ExamPaperService implements IExamPaperService {
                     set.add(view);
                 }
                 examPaperView.setImportants(set);
-                // examPaperView.setSemester(semesterView);
-                // examPaperView.setSubject(subjectView);
-
+            
                 result.add(examPaperView);
             }
 
