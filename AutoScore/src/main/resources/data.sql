@@ -214,9 +214,9 @@ VALUES
 INSERT INTO `exam_paper` 
 (`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`,`is_used`) 
 VALUES 
-('Trial_test', true, '2024-10-30 10:00:00', 1, null, null, null, null, 1,true),
-('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2,true),
-('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2,false);
+('009909', 'COMPLETE', '2024-10-30 10:00:00', 1, null, null, null, null, 1,true),
+('123456', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true),
+('456789', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,false);
 
 
 INSERT INTO `Exam_Question`
