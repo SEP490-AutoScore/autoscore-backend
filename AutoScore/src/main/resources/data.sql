@@ -357,7 +357,10 @@ INSERT INTO `ai_api_key`
 (`ai_api_key`, `ai_name`, `account_id`,`status`,`is_shared`)
 VALUES
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',1,true,true),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',1,true,true);
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',2,true,true),
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',3,true,true),
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',4,true,true),
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',5,true,true);
 
 INSERT INTO `account_selected_key`
 (`account_id`, `selected_ai_api_key_id`)
