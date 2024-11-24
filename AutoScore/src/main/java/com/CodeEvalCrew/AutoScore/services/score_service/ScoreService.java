@@ -61,6 +61,7 @@ public class ScoreService implements IScoreService {
         }
     }
 
+    @Override
     public void exportScoresToExcel(HttpServletResponse response, List<ScoreResponseDTO> scores) throws IOException {
         if (scores == null || scores.isEmpty()) {
             throw new IllegalArgumentException("No scores available to export.");
