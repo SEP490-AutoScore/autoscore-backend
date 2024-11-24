@@ -19,7 +19,9 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIApiKeyDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
+import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
 import com.CodeEvalCrew.AutoScore.repositories.ai_api_key_repository.AiApiKeyRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
@@ -34,6 +36,8 @@ public class AIApiKeyService implements IAIApiKeyService {
     private AccountSelectedKeyRepository accountSelectedKeyRepository;
     @Autowired
     private IAccountRepository accountRepository;
+    @Autowired
+    private IEmployeeRepository employeeRepository;
 
     @Override
     public List<AIApiKeyDTO> getAllAIApiKeys() {
@@ -54,17 +58,25 @@ public class AIApiKeyService implements IAIApiKeyService {
         return mapToDTOWithSelectionStatus(new ArrayList<>(uniqueApiKeys.values()), authenticatedUserId);
     }
 
-    private List<AIApiKeyDTO> mapToDTOWithSelectionStatus(List<AI_Api_Key> apiKeys, Long authenticatedUserId) {
-        // Lấy danh sách các API Key ID được chọn bởi authenticated user
-        Set<Long> selectedKeyIds = accountSelectedKeyRepository
-                .findByAccountAccountId(authenticatedUserId)
-                .stream()
-                .map(selectedKey -> selectedKey.getAiApiKey().getAiApiKeyId())
-                .collect(Collectors.toSet());
+private List<AIApiKeyDTO> mapToDTOWithSelectionStatus(List<AI_Api_Key> apiKeys, Long authenticatedUserId) {
+    // Lấy danh sách các API Key ID được chọn bởi authenticated user
+    Set<Long> selectedKeyIds = accountSelectedKeyRepository
+            .findByAccountAccountId(authenticatedUserId)
+            .stream()
+            .map(selectedKey -> selectedKey.getAiApiKey().getAiApiKeyId())
+            .collect(Collectors.toSet());
 
-        // Chuyển đổi danh sách AI_Api_Key sang AIApiKeyDTO
-        return apiKeys.stream()
-                .map(apiKey -> new AIApiKeyDTO(
+    // Chuyển đổi danh sách AI_Api_Key sang AIApiKeyDTO
+    return apiKeys.stream()
+            .map(apiKey -> {
+                // Lấy fullName từ Employee liên kết với Account
+                String fullName = Optional.ofNullable(apiKey.getAccount())
+                        .map(account -> Optional.ofNullable(employeeRepository.findByAccount_AccountId(account.getAccountId()))
+                                .map(Employee::getFullName)
+                                .orElse("Unknown")) // Xử lý trường hợp không tìm thấy Employee
+                        .orElse("Unknown");
+
+                return new AIApiKeyDTO(
                         apiKey.getAiApiKeyId(),
                         apiKey.getAiName(),
                         apiKey.getAiApiKey(),
@@ -72,11 +84,13 @@ public class AIApiKeyService implements IAIApiKeyService {
                         apiKey.isShared(),
                         apiKey.getCreatedAt(),
                         apiKey.getUpdatedAt(),
-                        apiKey.getAccount().getAccountId(),
+                        fullName, // Gán fullName thay vì accountId
                         selectedKeyIds.contains(apiKey.getAiApiKeyId()) // Kiểm tra xem API Key có được chọn không
-                ))
-                .collect(Collectors.toList());
-    }
+                );
+            })
+            .collect(Collectors.toList());
+}
+
 
     @Override
     public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
@@ -110,11 +124,16 @@ public class AIApiKeyService implements IAIApiKeyService {
     public AIApiKeyDTO createAIApiKey(CreateAIApiKeyDTO dto) {
         // Lấy ID người dùng được xác thực
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
-
+    
         // Tìm Account tương ứng
         Account account = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found"));
-
+    
+        // Lấy fullName từ Employee liên kết với Account
+        String fullName = Optional.ofNullable(employeeRepository.findByAccount_AccountId(authenticatedUserId))
+                .map(Employee::getFullName)
+                .orElse("Unknown"); // Gán giá trị mặc định nếu không tìm thấy
+    
         // Tạo mới AI_Api_Key
         AI_Api_Key newApiKey = new AI_Api_Key();
         newApiKey.setAiName(dto.getAiName());
@@ -124,10 +143,10 @@ public class AIApiKeyService implements IAIApiKeyService {
         newApiKey.setCreatedAt(LocalDateTime.now());
         newApiKey.setUpdatedAt(LocalDateTime.now());
         newApiKey.setAccount(account);
-
+    
         // Lưu vào cơ sở dữ liệu
         AI_Api_Key savedApiKey = aiApiKeyRepository.save(newApiKey);
-
+    
         // Chuyển đổi sang DTO để trả về
         return new AIApiKeyDTO(
                 savedApiKey.getAiApiKeyId(),
@@ -137,10 +156,11 @@ public class AIApiKeyService implements IAIApiKeyService {
                 savedApiKey.isShared(),
                 savedApiKey.getCreatedAt(),
                 savedApiKey.getUpdatedAt(),
-                savedApiKey.getAccount().getAccountId(),
+                fullName, // Trả về fullName thay vì accountId
                 false // Mặc định chưa được chọn
         );
     }
+    
 
     @Override
     public AI_Api_Key updateAiApiKey(Long aiApiKeyId, String aiApiKey) {
