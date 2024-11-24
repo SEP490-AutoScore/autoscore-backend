@@ -1,5 +1,6 @@
 package com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 public interface AccountSelectedKeyRepository extends JpaRepository<Account_Selected_Key, Long> {
 
     Optional<Account_Selected_Key> findByAccount_AccountId(Long accountId);
+
+    List<Account_Selected_Key> findByAccountAccountId(Long accountId);
+
 }

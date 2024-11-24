@@ -12,6 +12,8 @@ public interface IPostmanForGradingService {
 
       String generatePostmanCollection(Long gherkinScenarioId);
 
+      String generatePostmanCollectionMore(Long gherkinScenarioId);
+
       // Hàm merge các file Postman collection của cùng 1 examPaperId
       String mergePostmanCollections(Long examPaperId);
 
