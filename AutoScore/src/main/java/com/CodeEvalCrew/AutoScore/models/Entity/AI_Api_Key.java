@@ -3,8 +3,12 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.AIName_Enum;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
 
 @Entity
 @AllArgsConstructor
@@ -33,7 +38,8 @@ public class AI_Api_Key {
     private Long aiApiKeyId;
 
     @NotNull
-    private String aiName;
+    @Enumerated(EnumType.STRING)
+    private AIName_Enum aiName;
 
     @NotNull
     private String aiApiKey;

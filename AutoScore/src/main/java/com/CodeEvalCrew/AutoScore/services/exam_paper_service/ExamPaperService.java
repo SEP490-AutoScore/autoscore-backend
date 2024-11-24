@@ -301,7 +301,7 @@ public class ExamPaperService implements IExamPaperService {
 
     private String runNewmanTest(java.io.File file) throws Exception {
         StringBuilder output = new StringBuilder();
-        File resultFile = new File("D:\\Desktop\\result.txt");
+        File resultFile = new File("C:\\Project\\result.txt");
         try {
             // Tạo ProcessBuilder để chạy lệnh Newman
             // ProcessBuilder processBuilder = new ProcessBuilder(
@@ -490,6 +490,7 @@ public class ExamPaperService implements IExamPaperService {
     //                     postmanForGrading.getTotalPmTest()))
     //             .collect(Collectors.toList());
     // }
+    @Override
     public List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException {
         Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
                 examPaperId);
