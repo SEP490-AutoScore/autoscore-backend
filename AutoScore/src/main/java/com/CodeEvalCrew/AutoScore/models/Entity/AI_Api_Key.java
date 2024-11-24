@@ -1,4 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -37,8 +38,6 @@ public class AI_Api_Key {
     @NotNull
     private String aiApiKey;
 
-    private Long createdBy;
-
     private boolean status;
 
     private LocalDateTime createdAt;
@@ -47,16 +46,12 @@ public class AI_Api_Key {
 
     private boolean isShared;
 
-    // Relationships
-    @OneToOne(mappedBy = "aiApiKey", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "aiApiKey", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private Account_Selected_Key accountSelectedKey;
-    
+    private Set<Account_Selected_Key> accountSelectedKeys;
+
     @ManyToOne
     @JoinColumn(name = "accountId", nullable = false)
     private Account account;
 
-
-
-
-} 
+}

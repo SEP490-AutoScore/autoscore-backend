@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
@@ -48,10 +48,21 @@ public class PostmanForGradingController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/generate/{gherkinScenarioId}")
-    public ResponseEntity<String> generatePostmanCollection(@PathVariable Long gherkinScenarioId) {
+    @PostMapping("/generate")
+    public ResponseEntity<String> generatePostmanCollection(@RequestParam Long gherkinScenarioId) {
         try {
             String resultMessage = postmanForGradingService.generatePostmanCollection(gherkinScenarioId);
+            return new ResponseEntity<>(resultMessage, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+
+    @PostMapping("/generate-more")
+    public ResponseEntity<String> generatePostmanCollectionMore(@RequestParam Long gherkinScenarioId) {
+        try {
+            String resultMessage = postmanForGradingService.generatePostmanCollectionMore(gherkinScenarioId);
             return new ResponseEntity<>(resultMessage, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

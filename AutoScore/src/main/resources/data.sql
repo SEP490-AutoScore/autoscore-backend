@@ -354,29 +354,54 @@ VALUES
 INSERT INTO `account_selected_key`
 (`account_id`, `selected_ai_api_key_id`)
 VALUES
-(1, 1);
+(3, 1);
 
 
 INSERT INTO `content`
 (`question_content`, `order_priority`,`purpose`)
 VALUES
-('Save to your memory, do not reply', 1,'Generate GherkinFormat'),
+('This is Database, Save to your memory, do not reply', 1,'Generate Gherkin Format'),
 ('Write Gherkin format scenarios for the given feature or API. 
 Ensure each complete Gherkin scenario, including its title and all steps, is enclosed in double curly braces {{ }}. 
 Use this structure for all scenarios, for example:
 {{ 
-Scenario: [Scenario Title]
-  Given [initial state or context]
-  When [event or action]
-  Then [expected outcome or result]
-}}', 2,'Generate GherkinFormat'),
+Scenario: [Brief and clear description of the scenario]
+  Given [Describe the initial condition or prerequisite]
+  And [Optional additional conditions or prerequisites]
+  When [Describe the key action or event that occurs]
+  And [Optional additional actions or events]
+  Then [Describe the primary outcome or result]
+  And [Optional additional outcomes or verifications]
+}}', 2,'Generate Gherkin Format'),
+('This is Database, Save to your memory, do not reply', 1,'Generate Gherkin Format More'),
+('This is topic, Save to your memory, do not reply', 2,'Generate Gherkin Format More'),
+('Please generate additional Gherkin format scenarios that are different from those in gherkinDatas. Each scenario should be enclosed in {{ }} and use this structure:
+{{ 
+Scenario: [Brief and clear description of the scenario]
+  Given [Describe the initial condition or prerequisite]
+  And [Optional additional conditions or prerequisites]
+  When [Describe the key action or event that occurs]
+  And [Optional additional actions or events]
+  Then [Describe the primary outcome or result]
+  And [Optional additional outcomes or verifications]
+}}
+Avoid duplication with existing gherkinDatas. Generate new and unique scenarios.', 3,'Generate Gherkin Format More'),
+
 ('This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection'),
 ('This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection'),
 ('- Write json postman collection for 1 item.name gherkin format below, No Explanation
 - json postman collection have "info" and "item":
 - "info" needs "_postman_id", "name", "schema", _exporter_id
 - "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
-- http://localhost:10000/...', 3,'Generate Postman Collection');
+- http://localhost:10000/...', 3,'Generate Postman Collection'),
+
+('-This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection More'),
+('-This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection More'),
+('-Write multiple test cases in a single endpoint for 1 item.name postman script below, No Explanation
+- json postman collection have "info" and "item":
+- "info" needs "_postman_id", "name", "schema", _exporter_id
+- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
+- http://localhost:10000/...', 3,'Generate Postman Collection More');
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 
