@@ -9,7 +9,7 @@ public class PostmanForGradingDTO {
     private String postmanFunctionName;
     private Float scoreOfFunction;
     private Long totalPmTest;
-    private Long orderBy;
+    private Long orderPriority;
     private Long postmanForGradingParentId; 
     private Long examQuestionId;           
     private Long gherkinScenarioId;   
