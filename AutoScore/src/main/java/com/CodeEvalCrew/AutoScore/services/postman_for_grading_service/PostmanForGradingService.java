@@ -126,7 +126,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         }
 
         // Phần tử đầu tiên luôn là đối tượng đặc biệt. bỏ qua
-        int orderBy = 1; // Giá trị orderBy bắt đầu từ 1
+        int orderPriority = 1; // Giá trị orderBy bắt đầu từ 1
         for (int i = 1; i < updateDTOs.size(); i++) {
             PostmanForGradingUpdateDTO dto = updateDTOs.get(i);
 
@@ -152,10 +152,10 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                 postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
             }
 
-            postman.setOrderBy((long) orderBy); // Tự động set orderBy
+            postman.setOrderPriority((long) orderPriority); // Tự động set orderBy
 
             // Tăng giá trị orderBy cho lần tiếp theo
-            orderBy++;
+            orderPriority++;
 
             // Lưu lại đối tượng đã cập nhật
             postmanForGradingRepository.save(postman);
@@ -692,7 +692,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                     dto.setPostmanFunctionName(entry.getPostmanFunctionName());
                     dto.setScoreOfFunction(entry.getScoreOfFunction());
                     dto.setTotalPmTest(entry.getTotalPmTest());
-                    dto.setOrderBy(entry.getOrderBy());
+                    dto.setOrderPriority(entry.getOrderPriority());
                     dto.setStatus(entry.isStatus());
                     dto.setPostmanForGradingParentId(
                             entry.getPostmanForGradingParentId() != null
@@ -714,7 +714,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         newElement.setPostmanFunctionName("Hidden");
         newElement.setScoreOfFunction(0F);
         newElement.setTotalPmTest(null);
-        newElement.setOrderBy(null);
+        newElement.setOrderPriority(null);
         newElement.setStatus(true);
         newElement.setPostmanForGradingParentId(0L);
         newElement.setExamQuestionId(null);
@@ -752,7 +752,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
             // Cập nhật các trường từ DTO
             postmanForGrading.setScoreOfFunction(dto.getScoreOfFunction());
-            postmanForGrading.setOrderBy(dto.getOrderBy());
+            postmanForGrading.setOrderPriority(dto.getOrderPriority());
             postmanForGrading.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
 
             // Lưu lại thực thể đã cập nhật
@@ -800,7 +800,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         dto.setScoreOfFunction(postman.getScoreOfFunction());
         dto.setTotalPmTest(postman.getTotalPmTest());
         dto.setStatus(postman.isStatus());
-        dto.setOrderBy(postman.getOrderBy());
+        dto.setOrderPriority(postman.getOrderPriority());
         dto.setPostmanForGradingParentId(postman.getPostmanForGradingParentId());
 
         // Chuyển đổi dữ liệu JSON trong FileCollectionPostman (nếu không null)
@@ -860,7 +860,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         dto.setScoreOfFunction(postman.getScoreOfFunction());
         dto.setTotalPmTest(postman.getTotalPmTest());
         dto.setStatus(postman.isStatus());
-        dto.setOrderBy(postman.getOrderBy());
+        dto.setOrderPriority(postman.getOrderPriority());
         dto.setPostmanForGradingParentId(postman.getPostmanForGradingParentId());
 
         // Chuyển đổi FileCollectionPostman thành chuỗi JSON (nếu không null)
@@ -931,7 +931,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         dto.setScoreOfFunction(postman.getScoreOfFunction());
         dto.setTotalPmTest(postman.getTotalPmTest());
         dto.setStatus(postman.isStatus());
-        dto.setOrderBy(postman.getOrderBy());
+        dto.setOrderPriority(postman.getOrderPriority());
         dto.setPostmanForGradingParentId(postman.getPostmanForGradingParentId());
 
         // Chuyển đổi FileCollectionPostman thành chuỗi JSON (nếu không null)

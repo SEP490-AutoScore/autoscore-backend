@@ -13,7 +13,7 @@ public class PostmanForGradingGetDTO {
     private Float scoreOfFunction;
     private Long totalPmTest;
     private boolean status;
-    private Long orderBy;
+    private Long orderPriority;
     private Long postmanForGradingParentId;
     private String fileCollectionPostman; // JSON string
     private Long examQuestionId;

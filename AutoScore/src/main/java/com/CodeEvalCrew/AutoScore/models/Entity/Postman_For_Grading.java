@@ -38,7 +38,7 @@ public class Postman_For_Grading {
 
     private boolean status;
     
-    private Long orderBy;
+    private Long orderPriority;
 
     private Long postmanForGradingParentId;
 

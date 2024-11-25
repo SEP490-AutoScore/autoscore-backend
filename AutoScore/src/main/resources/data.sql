@@ -344,14 +344,14 @@ Request Body (JSON):
 
 
 
-INSERT INTO `postman_for_grading`
-(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
-VALUES
-(2, 1, 1, null, 2, 'login',1,true),
-(2, 2, 2, 1, 2, 'login fail',1,true),
-(2, 1, 3, 1, 4, 'get',1,true),
-(2, 3, 4, 1, 4, 'get id',1,true),
-(2, 2, 5, 1, 3, 'delete',1,true);
+-- INSERT INTO `postman_for_grading`
+-- (`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
+-- VALUES
+-- (2, 1, 1, null, 2, 'login',1,true),
+-- (2, 2, 2, 1, 2, 'login fail',1,true),
+-- (2, 1, 3, 1, 4, 'get',1,true),
+-- (2, 3, 4, 1, 4, 'get id',1,true),
+-- (2, 2, 5, 1, 3, 'delete',1,true);
 
 INSERT INTO `ai_api_key`
 (`ai_api_key`, `ai_name`, `account_id`,`status`,`is_shared`)
