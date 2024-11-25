@@ -77,7 +77,7 @@ public class StudentService implements IStudentService {
 
             Source source = optionalSource.get();
 
-            List<Source_Detail> sourceDetails = sourceDetailRepository.findBySource_ExamPaper_ExamPaperIdOrderByStudent_StudentId(source.getSourceId());
+            List<Source_Detail> sourceDetails = sourceDetailRepository.findBySource_ExamPaper_ExamPaperIdOrderByStudent_StudentId(examPaperId);
 
             if(sourceDetails.isEmpty()) throw new NoSuchElementException("No source found");
 
