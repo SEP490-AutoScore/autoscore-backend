@@ -212,11 +212,11 @@ VALUES
 -- ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
 INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`,`is_used`) 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`,`is_used`, `subject_id`) 
 VALUES 
-('009909', 'COMPLETE', '2024-10-30 10:00:00', 1, null, null, null, null, 1,true),
-('123456', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true),
-('456789', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,false);
+('009909', 'COMPLETE', '2024-10-30 10:00:00', 1, null, null, null, null, 1,true, 1),
+('123456', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true, 1),
+('456789', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,false, 1);
 
 
 INSERT INTO `Exam_Question`
