@@ -591,7 +591,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         // Cập nhật các trường theo yêu cầu
         gherkinScenario.setStatus(false);
         gherkinScenario.setPostmanForGrading(null);
-        gherkinScenario.setExamQuestion(null);
+      
 
         // Lưu thay đổi vào cơ sở dữ liệu
         Gherkin_Scenario updatedGherkinScenario = gherkinScenarioRepository.save(gherkinScenario);
