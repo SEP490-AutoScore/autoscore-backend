@@ -14,7 +14,7 @@ import lombok.Setter;
 public class ExamPaperCreateRequest {
     private String examPaperCode;
     private Long examId;
-    private Long sunjectId;
+    private Long subjectId;
     private String instruction;
     private int duration;
     private List<Long> importantIdList;//list important id

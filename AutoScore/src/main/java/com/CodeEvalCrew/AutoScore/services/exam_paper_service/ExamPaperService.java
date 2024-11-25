@@ -150,7 +150,7 @@ public class ExamPaperService implements IExamPaperService {
             // check Exam
             Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
 
-            Subject subject = checkEntityExistence(subjectRepository.findById(request.getSunjectId()), "Subject",request.getSunjectId() );
+            Subject subject = checkEntityExistence(subjectRepository.findById(request.getSubjectId()), "Subject",request.getSubjectId() );
 
             // set to add
             Set<Important_Exam_Paper> importants = new HashSet<>();
@@ -541,7 +541,7 @@ public class ExamPaperService implements IExamPaperService {
 
             // mapping
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
-            Subject subject = checkEntityExistence(subjectRepository.findById(request.getSunjectId()), "Subject",request.getSunjectId() );
+            Subject subject = checkEntityExistence(subjectRepository.findById(request.getSubjectId()), "Subject",request.getSubjectId() );
 
             // check important to add to exam paper
             Set<ImportantView> set = new HashSet<>();
