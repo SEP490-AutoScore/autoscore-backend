@@ -35,11 +35,13 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
+import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
+import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamPaperSpecification;
 import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
@@ -62,6 +64,8 @@ public class ExamPaperService implements IExamPaperService {
     private final ImportantExamPaperRepository importantExamPaperRepository;
     @Autowired
     private final ObjectMapper objectMapper;
+    @Autowired
+    private ISubjectRepository subjectRepository;
 
     public ExamPaperService(IExamPaperRepository examPaperRepository,
             IExamRepository examRepository,
@@ -146,6 +150,8 @@ public class ExamPaperService implements IExamPaperService {
             // check Exam
             Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
 
+            Subject subject = checkEntityExistence(subjectRepository.findById(request.getSunjectId()), "Subject",request.getSunjectId() );
+
             // set to add
             Set<Important_Exam_Paper> importants = new HashSet<>();
 
@@ -169,6 +175,7 @@ public class ExamPaperService implements IExamPaperService {
             // update side in4
             examPaper.setExam(exam);
             examPaper.setImportants(importants);
+            examPaper.setSubject(subject);
             examPaper.setStatus(Exam_Status_Enum.DRAFT);
             examPaper.setDuration(request.getDuration());
             examPaper.setCreatedAt(Util.getCurrentDateTime());
@@ -534,6 +541,7 @@ public class ExamPaperService implements IExamPaperService {
 
             // mapping
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
+            Subject subject = checkEntityExistence(subjectRepository.findById(request.getSunjectId()), "Subject",request.getSunjectId() );
 
             // check important to add to exam paper
             Set<ImportantView> set = new HashSet<>();
@@ -552,6 +560,7 @@ public class ExamPaperService implements IExamPaperService {
             // update side in4
             examPaper.setExam(null);
             examPaper.setImportants(importants);
+            examPaper.setSubject(subject);
             examPaper.setStatus(Exam_Status_Enum.DRAFT);
             examPaper.setIsUsed(false);
             examPaper.setDuration(request.getDuration());
