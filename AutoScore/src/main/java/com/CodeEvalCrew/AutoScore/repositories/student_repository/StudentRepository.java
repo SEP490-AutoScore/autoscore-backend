@@ -12,5 +12,6 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long>,JpaSpecificationExecutor<Student> {
     Optional<Student> findByStudentCode(String studentCode);
+    Optional<Student> findByStudentCodeAndExamExamId(String studentCode, Long examId);
     Optional<List<Student>> findAllByExamExamIdAndOrganizationName(Long examId, String organizationName);
 }
