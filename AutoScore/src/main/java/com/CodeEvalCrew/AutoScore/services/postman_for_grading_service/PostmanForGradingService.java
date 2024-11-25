@@ -86,9 +86,9 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         return firstElement != null
                 && firstElement.getPostmanForGradingId() == 0
-                && "Hidden".equals(firstElement.getPostmanFunctionName())
-                && firstElement.getScoreOfFunction() == 0
-                && firstElement.getPostmanForGradingParentId() == 0;
+                && "Hidden".equals(firstElement.getPostmanFunctionName());
+                // && firstElement.getScoreOfFunction() == 0
+                // && firstElement.getPostmanForGradingParentId() == 0;
     }
 
     // @Override
