@@ -290,15 +290,26 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                 question += "\nDatabase Script: " + examDatabase.getDatabaseScript();
             } else if (content.getOrderPriority() == 2) {
                 question += "\n" + gherkinScenario.getGherkinData()
-                       + "\n\n" +
-                        "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
-                        "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
-                        "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
-                        "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
-                        "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
-                        "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
-                        "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
-                        "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
+                       + "\n\n" 
+                        // "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
+                        // "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
+                        // "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
+                        // "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
+                        // "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
+                        // "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
+                        // "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
+                        // "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
+                        + "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent()
+                        // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        + "\n - Allowed Roles: " + gherkinScenario.getExamQuestion().getRoleAllow()
+                        + "\n - Description: " + gherkinScenario.getExamQuestion().getDescription()
+                        + "\n - End point: " + gherkinScenario.getExamQuestion().getEndPoint()
+                        + "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod()
+                        + "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType()
+                        + "\n - Validation: " + gherkinScenario.getExamQuestion().getValidation()
+                        + "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                        + "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse()
+                        + "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload(); 
             } 
 
             // Gửi từng câu hỏi độc lập tới AI
@@ -339,7 +350,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             }
         } 
 
-        return "Unknown error!";
+        return "Unknown error! May be AI not response.";
     }
 
     @Override
@@ -398,15 +409,27 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             if (content.getOrderPriority() == 1) {
                 question += "\nDatabase Script: " + examDatabase.getDatabaseScript();
             } else if (content.getOrderPriority() == 2) {
-                question += "\n\n\n" +
-                        "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
-                        "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
-                        "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
-                        "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
-                        "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
-                        "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
-                        "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
-                        "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                question += "\n\n\n"
+                + "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent()
+                // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                + "\n - Allowed Roles: " + gherkinScenario.getExamQuestion().getRoleAllow()
+                + "\n - Description: " + gherkinScenario.getExamQuestion().getDescription()
+                + "\n - End point: " + gherkinScenario.getExamQuestion().getEndPoint()
+                + "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod()
+                + "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType()
+                + "\n - Validation: " + gherkinScenario.getExamQuestion().getValidation()
+                + "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                + "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse()
+                + "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() 
+
+                        // "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
+                        // "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
+                        // "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
+                        // "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
+                        // "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
+                        // "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
+                        // "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
+                        // "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
                         + "\n " + fileCollectionPostmanText;
                
             }

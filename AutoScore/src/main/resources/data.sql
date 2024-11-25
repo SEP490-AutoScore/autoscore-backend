@@ -375,20 +375,18 @@ INSERT INTO `content`
 (`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
 ('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT'),
-('Write Gherkin format scenarios for the given feature or API. 
-Ensure each complete Gherkin scenario, including its title and all steps, is enclosed in double curly braces {{ }}. 
-Use this structure for all scenarios, for example:
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline:
 {{ 
 Scenario: [Brief and clear description of the scenario]
   Given [Describe the initial condition or prerequisite]
-  And [Optional additional conditions or prerequisites]
+  And [Optional additional conditions or prerequisites, if applicable]
   When [Describe the key action or event that occurs]
-  And [Optional additional actions or events]
+  And [Optional additional actions or events, if applicable]
   Then [Describe the primary outcome or result]
-  And [Optional additional outcomes or verifications]
+  And [Optional additional outcomes or verifications, if applicable]
 }}', 2,'GENERATE_GHERKIN_FORMAT'),
 ('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
-('Write Gherkin format scenarios for the given feature or API. Each scenario should be enclosed in {{ }} and use this structure.',2,'GENERATE_GHERKIN_FORMAT_MORE'),
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline: ',2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
 ('Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION'),
 ('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. The `event.script.exec` section in `item` must contain valid Postman test scripts (using pm.test). Write a JSON Postman collection that contains `info` and `item`. The `info` section should include `_postman_id`, `name`, `schema`, `_exporter_id`. The `item` section should include `name`, `event.listen` with the value `test`, and `event.script.exec` with the value `pm.test`. Do not explain the JSON structure, just provide the raw JSON.

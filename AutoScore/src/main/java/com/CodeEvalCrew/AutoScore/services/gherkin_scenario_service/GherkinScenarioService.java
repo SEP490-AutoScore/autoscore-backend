@@ -337,7 +337,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             } else if (content.getOrderPriority() == 2) {
                 question += ""
                         + "\n - Question Content: " + examQuestion.getQuestionContent()
-                        + "\n - Role: " + examQuestion.getRoleAllow()
+                        // + "\n - Role: " + examQuestion.getRoleAllow()
+                        + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
                         + "\n - Description: " + examQuestion.getDescription()
                         + "\n - End point: " + examQuestion.getEndPoint()
                         + "\n - Http method: " + examQuestion.getHttpMethod()
@@ -360,7 +361,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             }
             // });
         }
-        return "Unknown error!";
+        return "Unknown error! May be AI not response";
 
     }
 
@@ -446,9 +447,10 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
             else if (content.getOrderPriority() == 2) {
 
-                question += ""
+                question += "\n"  + formattedGherkinData
                         + "\n - Question Content: " + examQuestion.getQuestionContent()
-                        + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
                         + "\n - Description: " + examQuestion.getDescription()
                         + "\n - End point: " + examQuestion.getEndPoint()
                         + "\n - Http method: " + examQuestion.getHttpMethod()
@@ -456,8 +458,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         + "\n - Validation: " + examQuestion.getValidation()
                         + "\n - Success response: " + examQuestion.getSucessResponse()
                         + "\n - Error response: " + examQuestion.getErrorResponse()
-                        + "\n - Payload: " + examQuestion.getPayload() 
-                        + "\n\n\n - Gherkin Data:\n" + formattedGherkinData;
+                        + "\n - Payload: " + examQuestion.getPayload();
+                       
             }
 
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
