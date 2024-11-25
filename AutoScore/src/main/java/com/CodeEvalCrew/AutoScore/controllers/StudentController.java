@@ -16,7 +16,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentErrorResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
+import com.CodeEvalCrew.AutoScore.services.student_error_service.IStudentErrorService;
+import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
 import com.CodeEvalCrew.AutoScore.services.student_service.ExcelService;
 import com.CodeEvalCrew.AutoScore.services.student_service.IStudentService;
 import com.CodeEvalCrew.AutoScore.utils.UploadProgressListener;
@@ -32,11 +35,13 @@ public class StudentController {
     private final ExcelService excelService;
     private final IStudentService studentService;
     private final UploadProgressListener progressListener;
+    private final IStudentErrorService studentErrorService;
 
-    public StudentController(ExcelService excelService, IStudentService studentService, UploadProgressListener progressListener) {
+    public StudentController(ExcelService excelService, IStudentService studentService, UploadProgressListener progressListener, IStudentErrorService studentErrorService) {
         this.excelService = excelService;
         this.studentService = studentService;
         this.progressListener = progressListener;
+        this.studentErrorService = studentErrorService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER') or hasAuthority('IMPORT_STUDENT')")
@@ -65,6 +70,7 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to import file");
         }
     }
+
 
     // Tạo API SSE để gửi tiến trình
     @GetMapping("/upload-progress")
@@ -101,6 +107,17 @@ public class StudentController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @PostMapping("/student-error")
+    public ResponseEntity<List<StudentErrorResponseDTO>> getStudentError(@RequestParam Long sourceid) {
+        try {
+            List<StudentErrorResponseDTO> studentErrorResponseDTOs = studentErrorService.getStudentErrorBySourceId(sourceid);
+            return ResponseEntity.ok(studentErrorResponseDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }

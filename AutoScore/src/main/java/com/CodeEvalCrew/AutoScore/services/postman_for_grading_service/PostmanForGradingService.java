@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.postman_for_grading_service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +47,7 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepo
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
+import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -287,19 +289,28 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             if (content.getOrderPriority() == 1) {
                 question += "\nDatabase Script: " + examDatabase.getDatabaseScript();
             } else if (content.getOrderPriority() == 2) {
-                question += "\n\n\n" +
-                        "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
-                        "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
-                        "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
-                        "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
-                        "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
-                        "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
-                        "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
-                        "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
-            } else if (content.getOrderPriority() == 3) {
-                question += "\n" + gherkinScenario.getGherkinData();
-
-            }
+                question += "\n" + gherkinScenario.getGherkinData()
+                       + "\n\n" 
+                        // "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
+                        // "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
+                        // "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
+                        // "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
+                        // "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
+                        // "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
+                        // "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
+                        // "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
+                        + "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent()
+                        // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        + "\n - Allowed Roles: " + gherkinScenario.getExamQuestion().getRoleAllow()
+                        + "\n - Description: " + gherkinScenario.getExamQuestion().getDescription()
+                        + "\n - End point: " + gherkinScenario.getExamQuestion().getEndPoint()
+                        + "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod()
+                        + "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType()
+                        + "\n - Validation: " + gherkinScenario.getExamQuestion().getValidation()
+                        + "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                        + "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse()
+                        + "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload(); 
+            } 
 
             // Gửi từng câu hỏi độc lập tới AI
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
@@ -314,21 +325,14 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             fullResponseBuilder.append(response).append("\n");
 
             // Khi xử lý câu hỏi cuối, lấy JSON từ phản hồi
-            if (content.getOrderPriority() == 3) {
+            if (content.getOrderPriority() == 2) {
                 String collectionJson = extractJsonFromResponse(response);
                 if (collectionJson == null || collectionJson.isEmpty()) {
                     return "Error: JSON not found in the AI response for orderPriority 3.";
                 }
             
                 String postmanFunctionName = runNewman(collectionJson);
-                // Path filePath = Paths.get("D:\\Desktop\\result.txt");
-                // try {
-                //     Files.write(filePath, collectionJson.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                // } catch (java.io.IOException e) {
-                //     e.printStackTrace();
-                //     return "Error: Failed to save collectionJson to file";
-                // }
-                if (postmanFunctionName == null) {
+                         if (postmanFunctionName == null) {
                     return "Error: Newman execution failed or postmanFunctionName not found.";
                 }
 
@@ -346,7 +350,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             }
         } 
 
-        return "Unknown error!";
+        return "Unknown error! May be AI not response.";
     }
 
     @Override
@@ -405,26 +409,31 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             if (content.getOrderPriority() == 1) {
                 question += "\nDatabase Script: " + examDatabase.getDatabaseScript();
             } else if (content.getOrderPriority() == 2) {
-                question += "\n\n\n" +
-                        "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
-                        "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
-                        "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
-                        "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
-                        "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
-                        "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
-                        "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
-                        "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
-        //            try (FileWriter writer = new FileWriter("D:\\Desktop\\result.txt", true)) {
-        //     writer.write(question + "\n\n"); // Ghi từng câu hỏi cách nhau 2 dòng
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        //     System.out.println("Error writing to file: " + e.getMessage());
-        // }      
-            } else if (content.getOrderPriority() == 3) {
-                question += "\n " + fileCollectionPostmanText;
-                // "\n" + gherkinScenario.getGherkinData()
-              
+                question += "\n\n\n"
+                + "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent()
+                // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                + "\n - Allowed Roles: " + gherkinScenario.getExamQuestion().getRoleAllow()
+                + "\n - Description: " + gherkinScenario.getExamQuestion().getDescription()
+                + "\n - End point: " + gherkinScenario.getExamQuestion().getEndPoint()
+                + "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod()
+                + "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType()
+                + "\n - Validation: " + gherkinScenario.getExamQuestion().getValidation()
+                + "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                + "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse()
+                + "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() 
+
+                        // "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
+                        // "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
+                        // "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
+                        // "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
+                        // "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
+                        // "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
+                        // "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
+                        // "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                        + "\n " + fileCollectionPostmanText;
+               
             }
+            
 
             // Gửi từng câu hỏi độc lập tới AI
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
@@ -438,27 +447,21 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             fullResponseBuilder.append(response).append("\n");
 
             // Khi xử lý câu hỏi cuối, lấy JSON từ phản hồi
-            if (content.getOrderPriority() == 3) {
+            if (content.getOrderPriority() == 2) {
                 String collectionJson = extractJsonFromResponse(response);
-                // try (FileWriter writer = new FileWriter("D:\\Desktop\\result.txt", true)) {
-                //     writer.write(collectionJson + "\n\n"); // Ghi từng câu hỏi cách nhau 2 dòng
-                // } catch (java.io.IOException e) {
-                //     e.printStackTrace();
-                //     System.out.println("Error writing to file: " + e.getMessage());
-                // }
+                           
+        
                 if (collectionJson == null || collectionJson.isEmpty()) {
-                    return "Error: JSON not found in the AI response for orderPriority 3.";
+                    return "Error: JSON not found in the AI response for orderPriority 2.";
                 }
-
+//   try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("D:\\Desktop\\result.txt")))) {
+//         writer.write(collectionJson);
+//         writer.newLine();  // Thêm một dòng mới sau khi ghi
+//     } catch (IOException e) {
+//         e.printStackTrace();
+//         return "Error: Unable to write to file D:\\Desktop\\result.txt";
+//     }
                 String postmanFunctionName = runNewman(collectionJson);
-
-        //            Path filePath = Paths.get("D:\\Desktop\\result.txt");
-        // try {
-        //     Files.write(filePath, collectionJson.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        // } catch (java.io.IOException e) {
-        //     e.printStackTrace();
-        //     return "Error: Failed to save collectionJson to file";
-        // }
 
                 if (postmanFunctionName == null) {
                     return "Error: Newman execution failed or postmanFunctionName not found.";
@@ -476,41 +479,21 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         return "Unknown error!";
     }
+   
 
     
-    // private String extractJsonFromResponse(String responseBody) {
-    //     try {
-    //         // Sử dụng regex để tìm chuỗi nằm trong dấu ```
-    //         String pattern = "```json\\n(.*?)```";
-    //         Pattern r = Pattern.compile(pattern, Pattern.DOTALL);  // DOTALL cho phép . khớp với dòng mới
-    //         Matcher m = r.matcher(responseBody);
-    
-    //         // Kiểm tra xem có chuỗi nào nằm trong ``` không
-    //         if (m.find()) {
-    //             String jsonString = m.group(1); // Lấy phần chuỗi tìm được trong ``` và ``` 
-    
-    //             // Bỏ dấu ```json và ``` ở đầu và cuối chuỗi
-    //             jsonString = jsonString.replace("json", "").trim();
-    
-    //             // Chuyển đổi jsonString thành JSONObject nếu cần thiết
-    //             JSONObject jsonResponse = new JSONObject(jsonString);
-    
-    //             // Trích xuất dữ liệu từ JSONObject (tùy vào cấu trúc của JSON)
-    //             return jsonResponse.toString();  // Hoặc trả về một phần của JSON nếu cần
-    //         } else {
-    //             return "No JSON block found in response body";
-    //         }
-    //     } catch (JSONException e) {
-    //         e.printStackTrace();
-    //         return null; // Trả về null nếu có lỗi
-    //     }
-    // }
     // Hàm trích xuất JSON từ response body
     private String extractJsonFromResponse(String responseBody) {
         try {
             // Chuyển đổi responseBody thành JSONObject
             JSONObject jsonResponse = new JSONObject(responseBody);
-            // Lấy phần JSON cần thiết
+    
+            // Kiểm tra sự tồn tại của các phần tử cần thiết trong response
+            if (!jsonResponse.has("candidates")) {
+                throw new JSONException("Missing 'candidates' field in response.");
+            }
+    
+            // Lấy phần JSON cần thiết từ candidates -> content -> parts -> text
             String jsonString = jsonResponse
                     .getJSONArray("candidates")
                     .getJSONObject(0)
@@ -518,35 +501,59 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                     .getJSONArray("parts")
                     .getJSONObject(0)
                     .getString("text");
-
-            // Bỏ dấu ```json và ``` ở đầu và cuối chuỗi
-            jsonString = jsonString.replace("```json\n", "").replace("```", "").trim();
-
-            return jsonString; // Trả về JSON đã trích xuất
+    
+            // Bỏ dấu ```json và ``` ở đầu và cuối chuỗi (nếu có)
+            jsonString = jsonString.replaceAll("(?s)^```json\\n", "").replaceAll("(?s)```$", "").trim();
+    
+            // Loại bỏ bất kỳ phần giải thích nào sau chuỗi JSON
+            // Tìm phần JSON hợp lệ, bỏ qua tất cả văn bản sau nó
+            int startIndex = jsonString.indexOf("{");
+            int endIndex = jsonString.lastIndexOf("}");
+            
+            if (startIndex != -1 && endIndex != -1) {
+                jsonString = jsonString.substring(startIndex, endIndex + 1);
+            }
+    
+            // Kiểm tra nếu chuỗi có thể là JSON hợp lệ
+            try {
+                new JSONObject(jsonString);  // Kiểm tra nếu jsonString là JSON hợp lệ
+                return jsonString;  // Nếu là JSON hợp lệ, trả về
+            } catch (JSONException e) {
+                // Nếu không phải là JSON hợp lệ, thông báo lỗi
+                System.err.println("Invalid JSON format: " + e.getMessage());
+                return null;
+            }
+    
         } catch (JSONException e) {
+            // Thông báo lỗi nếu không tìm thấy các phần tử cần thiết trong response
+            System.err.println("Error extracting JSON from response: " + e.getMessage());
             e.printStackTrace();
-            return null; // Trả về null nếu có lỗi
+            return null;  // Trả về null nếu có lỗi
         }
     }
+    
+    
 
     private String runNewman(String collectionJson) {
         String postmanFunctionName = null;
         totalPmTest = 0L; // Khởi tạo biến đếm số lượng test case
+        Path tempFile = null;  // Declare tempFile outside the try block to make it accessible in the finally block
 
         try {
-            // Ghi collection JSON vào file tạm thời
-            Path tempFile = Files.createTempFile("collection", ".json");
-            Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8));
+            // Generate random 20-character string for temp file name
+            String randomFileName = generateRandomFileName();
+            tempFile = Files.createTempFile(randomFileName, ".json"); // Create temp file
+            Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8)); // Write JSON to file
 
-            String newmanPath = "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd"; // Đường dẫn tới Newman
-            String timeout = "1000"; // Đặt thời gian chờ
+            String newmanPath = PathUtil.NEWMAN_CMD_PATH;
+            // String timeout = "1000"; // Đặt thời gian chờ
 
             // Tạo ProcessBuilder để chạy Newman
             ProcessBuilder processBuilder = new ProcessBuilder(
                     newmanPath,
                     "run",
-                    tempFile.toAbsolutePath().toString(),
-                    "--timeout", timeout);
+                    tempFile.toAbsolutePath().toString());
+                    // "--timeout", timeout);
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
@@ -598,7 +605,27 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                // Delete the temp file after use if it exists
+                if (tempFile != null) {
+                    Files.deleteIfExists(tempFile);
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to delete temp file: " + e.getMessage());
+            }
         }
+    }
+
+    // Helper method to generate a random 20-character string
+    private String generateRandomFileName() {
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder randomName = new StringBuilder();
+        for (int i = 0; i < 20; i++) {
+            int index = (int) (Math.random() * characters.length());
+            randomName.append(characters.charAt(index));
+        }
+        return randomName.toString();
     }
 
     // Hàm hỗ trợ để đếm các test case theo định dạng cũ
