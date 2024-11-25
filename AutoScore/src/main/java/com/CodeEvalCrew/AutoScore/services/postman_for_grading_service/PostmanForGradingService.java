@@ -91,78 +91,159 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                 && firstElement.getPostmanForGradingParentId() == 0;
     }
 
+    // @Override
+    // public String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs) {
+    //     if (updateDTOs == null || updateDTOs.isEmpty()) {
+    //         throw new IllegalArgumentException("Danh sách updateDTOs không được để trống!");
+    //     }
+
+    //     // Kiểm tra danh sách có phần tử đầu tiên đúng yêu cầu
+    //     if (updateDTOs.isEmpty() || !isFirstElementValid(updateDTOs.get(0))) {
+    //         return "Phần tử đầu tiên của updateDTOs không hợp lệ.";
+
+    //     }
+
+    //     // Lấy danh sách các Postman_For_Grading
+    //     List<Postman_For_Grading> postmanList = postmanForGradingRepository
+    //             .findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+
+    //     if (postmanList.isEmpty()) {
+    //         throw new RuntimeException(
+    //                 "Không tìm thấy Postman_For_Grading nào có status = true với Exam Paper ID: " + examPaperId);
+    //     }
+
+    //     // Tập hợp các ID từ danh sách postmanList
+    //     Set<Long> validIds = postmanList.stream()
+    //             .map(Postman_For_Grading::getPostmanForGradingId)
+    //             .collect(Collectors.toSet());
+
+    //     // Kiểm tra xem tất cả các postmanForGradingId
+    //     for (PostmanForGradingUpdateDTO dto : updateDTOs) {
+    //         if (dto.getPostmanForGradingId() != 0 && !validIds.contains(dto.getPostmanForGradingId())) {
+    //             throw new RuntimeException(
+    //                     "Postman_For_Grading ID " + dto.getPostmanForGradingId() + " không tồn tại hoặc không hợp lệ.");
+    //         }
+    //     }
+
+    //     // Phần tử đầu tiên luôn là đối tượng đặc biệt. bỏ qua
+    //     int orderPriority = 1; // Giá trị orderBy bắt đầu từ 1
+    //     for (int i = 1; i < updateDTOs.size(); i++) {
+    //         PostmanForGradingUpdateDTO dto = updateDTOs.get(i);
+
+    //         if (dto.getPostmanForGradingId() == 0) {
+    //             throw new RuntimeException(
+    //                     "Phần tử trong danh sách không hợp lệ: postmanForGradingId không được là 0 ngoài phần tử đầu tiên.");
+    //         }
+
+    //         // Tìm đối tượng Postman_For_Grading tương ứng với ID
+    //         Postman_For_Grading postman = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
+    //                 .orElseThrow(() -> new RuntimeException(
+    //                         "Không tìm thấy Postman_For_Grading với ID: " + dto.getPostmanForGradingId()));
+
+    //         // Cập nhật các thông tin
+    //         postman.setPostmanFunctionName(dto.getPostmanFunctionName());
+    //         postman.setScoreOfFunction(dto.getScoreOfFunction());
+    //         postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
+
+    //         // Kiểm tra nếu PostmanForGradingParentId = 0 thì set thành null
+    //         if (dto.getPostmanForGradingParentId() == 0) {
+    //             postman.setPostmanForGradingParentId(null);
+    //         } else {
+    //             postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
+    //         }
+
+    //         postman.setOrderPriority((long) orderPriority); // Tự động set orderBy
+
+    //         // Tăng giá trị orderBy cho lần tiếp theo
+    //         orderPriority++;
+
+    //         // Lưu lại đối tượng đã cập nhật
+    //         postmanForGradingRepository.save(postman);
+    //     }
+
+    //     return "Successfully";
+    // }
+
     @Override
-    public String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs) {
-        if (updateDTOs == null || updateDTOs.isEmpty()) {
-            throw new IllegalArgumentException("Danh sách updateDTOs không được để trống!");
-        }
-
-        // Kiểm tra danh sách có phần tử đầu tiên đúng yêu cầu
-        if (updateDTOs.isEmpty() || !isFirstElementValid(updateDTOs.get(0))) {
-            return "Phần tử đầu tiên của updateDTOs không hợp lệ.";
-
-        }
-
-        // Lấy danh sách các Postman_For_Grading
-        List<Postman_For_Grading> postmanList = postmanForGradingRepository
-                .findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
-
-        if (postmanList.isEmpty()) {
-            throw new RuntimeException(
-                    "Không tìm thấy Postman_For_Grading nào có status = true với Exam Paper ID: " + examPaperId);
-        }
-
-        // Tập hợp các ID từ danh sách postmanList
-        Set<Long> validIds = postmanList.stream()
-                .map(Postman_For_Grading::getPostmanForGradingId)
-                .collect(Collectors.toSet());
-
-        // Kiểm tra xem tất cả các postmanForGradingId
-        for (PostmanForGradingUpdateDTO dto : updateDTOs) {
-            if (dto.getPostmanForGradingId() != 0 && !validIds.contains(dto.getPostmanForGradingId())) {
-                throw new RuntimeException(
-                        "Postman_For_Grading ID " + dto.getPostmanForGradingId() + " không tồn tại hoặc không hợp lệ.");
-            }
-        }
-
-        // Phần tử đầu tiên luôn là đối tượng đặc biệt. bỏ qua
-        int orderPriority = 1; // Giá trị orderBy bắt đầu từ 1
-        for (int i = 1; i < updateDTOs.size(); i++) {
-            PostmanForGradingUpdateDTO dto = updateDTOs.get(i);
-
-            if (dto.getPostmanForGradingId() == 0) {
-                throw new RuntimeException(
-                        "Phần tử trong danh sách không hợp lệ: postmanForGradingId không được là 0 ngoài phần tử đầu tiên.");
-            }
-
-            // Tìm đối tượng Postman_For_Grading tương ứng với ID
-            Postman_For_Grading postman = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Không tìm thấy Postman_For_Grading với ID: " + dto.getPostmanForGradingId()));
-
-            // Cập nhật các thông tin
-            postman.setPostmanFunctionName(dto.getPostmanFunctionName());
-            postman.setScoreOfFunction(dto.getScoreOfFunction());
-            postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
-
-            // Kiểm tra nếu PostmanForGradingParentId = 0 thì set thành null
-            if (dto.getPostmanForGradingParentId() == 0) {
-                postman.setPostmanForGradingParentId(null);
-            } else {
-                postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
-            }
-
-            postman.setOrderPriority((long) orderPriority); // Tự động set orderBy
-
-            // Tăng giá trị orderBy cho lần tiếp theo
-            orderPriority++;
-
-            // Lưu lại đối tượng đã cập nhật
-            postmanForGradingRepository.save(postman);
-        }
-
-        return "Successfully";
+public String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs) {
+    if (updateDTOs == null || updateDTOs.isEmpty()) {
+        throw new IllegalArgumentException("Danh sách updateDTOs không được để trống!");
     }
+
+    // Kiểm tra danh sách có phần tử đầu tiên đúng yêu cầu
+    if (updateDTOs.isEmpty() || !isFirstElementValid(updateDTOs.get(0))) {
+        return "Phần tử đầu tiên của updateDTOs không hợp lệ.";
+    }
+
+    // Lấy danh sách các Postman_For_Grading
+    List<Postman_For_Grading> postmanList = postmanForGradingRepository
+            .findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+
+    if (postmanList.isEmpty()) {
+        throw new RuntimeException(
+                "Không tìm thấy Postman_For_Grading nào có status = true với Exam Paper ID: " + examPaperId);
+    }
+
+    // Tập hợp các ID từ danh sách postmanList
+    Set<Long> validIds = postmanList.stream()
+            .map(Postman_For_Grading::getPostmanForGradingId)
+            .collect(Collectors.toSet());
+
+    // Kiểm tra xem tất cả các postmanForGradingId
+    for (PostmanForGradingUpdateDTO dto : updateDTOs) {
+        if (dto.getPostmanForGradingId() != 0 && !validIds.contains(dto.getPostmanForGradingId())) {
+            throw new RuntimeException(
+                    "Postman_For_Grading ID " + dto.getPostmanForGradingId() + " không tồn tại hoặc không hợp lệ.");
+        }
+    }
+
+    // Phần tử đầu tiên luôn là đối tượng đặc biệt. bỏ qua
+    int orderPriority = 1; // Giá trị orderBy bắt đầu từ 1
+    for (int i = 1; i < updateDTOs.size(); i++) {
+        PostmanForGradingUpdateDTO dto = updateDTOs.get(i);
+
+        if (dto.getPostmanForGradingId() == 0) {
+            throw new RuntimeException(
+                    "Phần tử trong danh sách không hợp lệ: postmanForGradingId không được là 0 ngoài phần tử đầu tiên.");
+        }
+
+        // Tìm đối tượng Postman_For_Grading tương ứng với ID
+        Postman_For_Grading postman = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Không tìm thấy Postman_For_Grading với ID: " + dto.getPostmanForGradingId()));
+
+        // Cập nhật các thông tin
+        postman.setPostmanFunctionName(dto.getPostmanFunctionName());
+        postman.setScoreOfFunction(dto.getScoreOfFunction());
+        postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
+
+        // Kiểm tra nếu PostmanForGradingParentId = 0 thì set thành null
+        if (dto.getPostmanForGradingParentId() == 0) {
+            postman.setPostmanForGradingParentId(null);
+        }
+
+        postman.setOrderPriority((long) orderPriority); // Tự động set orderBy
+
+        // Tăng giá trị orderBy cho lần tiếp theo
+        orderPriority++;
+
+        // Lưu lại đối tượng đã cập nhật
+        postmanForGradingRepository.save(postman);
+    }
+
+    // Cập nhật isComfirmFile của Exam_Paper (có thể thêm điều kiện kiểm tra)
+    Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy Exam_Paper với ID: " + examPaperId));
+
+    // Cập nhật giá trị isComfirmFile
+    examPaper.setIsComfirmFile(true);
+
+    // Lưu lại đối tượng Exam_Paper đã cập nhật
+    examPaperRepository.save(examPaper);
+
+    return "Successfully";
+}
+
 
     @Override
     public String mergePostmanCollections(Long examPaperId) {
