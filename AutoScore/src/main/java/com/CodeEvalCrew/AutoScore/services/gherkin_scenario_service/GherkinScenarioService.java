@@ -611,11 +611,13 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     public GherkinScenarioResponseDTO createGherkinScenario(CreateGherkinScenarioDTO dto) {
         // Tìm Exam_Question dựa trên examQuestionId
         Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(dto.getExamQuestionId());
+       
     
         if (optionalExamQuestion.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Exam Question not found with ID: " + dto.getExamQuestionId());
         }
-    
+      
+
         Exam_Question examQuestion = optionalExamQuestion.get();
     
         // Tạo mới Gherkin_Scenario

@@ -774,7 +774,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         postman.setStatus(false);
         postman.setExamQuestion(null); // Xóa liên kết ExamQuestion
         postman.setGherkinScenario(null); // Xóa liên kết GherkinScenario
-        postman.setExamPaper(null); // Xóa liên kết ExamPaper
+        // postman.setExamPaper(null); // Xóa liên kết ExamPaper
 
         // Lưu thay đổi
         postmanForGradingRepository.save(postman);
