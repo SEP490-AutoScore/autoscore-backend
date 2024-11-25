@@ -1,26 +1,31 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentErrorResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
+import com.CodeEvalCrew.AutoScore.services.student_error_service.IStudentErrorService;
+import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
 import com.CodeEvalCrew.AutoScore.services.student_service.ExcelService;
 import com.CodeEvalCrew.AutoScore.services.student_service.IStudentService;
 import com.CodeEvalCrew.AutoScore.utils.UploadProgressListener;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -30,11 +35,13 @@ public class StudentController {
     private final ExcelService excelService;
     private final IStudentService studentService;
     private final UploadProgressListener progressListener;
+    private final IStudentErrorService studentErrorService;
 
-    public StudentController(ExcelService excelService, IStudentService studentService, UploadProgressListener progressListener) {
+    public StudentController(ExcelService excelService, IStudentService studentService, UploadProgressListener progressListener, IStudentErrorService studentErrorService) {
         this.excelService = excelService;
         this.studentService = studentService;
         this.progressListener = progressListener;
+        this.studentErrorService = studentErrorService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER') or hasAuthority('IMPORT_STUDENT')")
@@ -64,6 +71,7 @@ public class StudentController {
         }
     }
 
+
     // Tạo API SSE để gửi tiến trình
     @GetMapping("/upload-progress")
     public SseEmitter getUploadProgress() {
@@ -92,13 +100,24 @@ public class StudentController {
         return ResponseEntity.ok(students);
     }
     @GetMapping("")
-    public ResponseEntity<?> getAllStudentOfSource(@RequestParam Long sourceId) {
+    public ResponseEntity<?> getAllStudentOfSource(@RequestParam Long examPaperId) {
         List<StudentDTO> result;
         try{
-            result = studentService.getAllStudentOfSource(sourceId);
+            result = studentService.getAllStudentOfSource(examPaperId);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @PostMapping("/student-error")
+    public ResponseEntity<List<StudentErrorResponseDTO>> getStudentError(@RequestParam Long sourceid) {
+        try {
+            List<StudentErrorResponseDTO> studentErrorResponseDTOs = studentErrorService.getStudentErrorBySourceId(sourceid);
+            return ResponseEntity.ok(studentErrorResponseDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }

@@ -16,7 +16,6 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseD
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
-import com.CodeEvalCrew.AutoScore.models.Entity.Code_Plagiarism;
 import com.CodeEvalCrew.AutoScore.services.score_service.IScoreService;
 
 import jakarta.servlet.http.HttpServletResponse;

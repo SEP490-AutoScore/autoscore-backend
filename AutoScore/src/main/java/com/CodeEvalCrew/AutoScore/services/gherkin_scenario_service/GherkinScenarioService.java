@@ -337,7 +337,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             } else if (content.getOrderPriority() == 2) {
                 question += ""
                         + "\n - Question Content: " + examQuestion.getQuestionContent()
-                        + "\n - Role: " + examQuestion.getRoleAllow()
+                        // + "\n - Role: " + examQuestion.getRoleAllow()
+                        + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
                         + "\n - Description: " + examQuestion.getDescription()
                         + "\n - End point: " + examQuestion.getEndPoint()
                         + "\n - Http method: " + examQuestion.getHttpMethod()
@@ -360,7 +361,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             }
             // });
         }
-        return "Unknown error!";
+        return "Unknown error! May be AI not response";
 
     }
 
@@ -446,9 +447,10 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
             else if (content.getOrderPriority() == 2) {
 
-                question += ""
+                question += "\n"  + formattedGherkinData
                         + "\n - Question Content: " + examQuestion.getQuestionContent()
-                        + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
                         + "\n - Description: " + examQuestion.getDescription()
                         + "\n - End point: " + examQuestion.getEndPoint()
                         + "\n - Http method: " + examQuestion.getHttpMethod()
@@ -456,8 +458,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         + "\n - Validation: " + examQuestion.getValidation()
                         + "\n - Success response: " + examQuestion.getSucessResponse()
                         + "\n - Error response: " + examQuestion.getErrorResponse()
-                        + "\n - Payload: " + examQuestion.getPayload()     
-                        + "\n\n\n - Gherkin Data:\n" + formattedGherkinData;
+                        + "\n - Payload: " + examQuestion.getPayload();
+                       
             }
 
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
@@ -589,7 +591,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         // Cập nhật các trường theo yêu cầu
         gherkinScenario.setStatus(false);
         gherkinScenario.setPostmanForGrading(null);
-        gherkinScenario.setExamQuestion(null);
+      
 
         // Lưu thay đổi vào cơ sở dữ liệu
         Gherkin_Scenario updatedGherkinScenario = gherkinScenarioRepository.save(gherkinScenario);
@@ -609,11 +611,13 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     public GherkinScenarioResponseDTO createGherkinScenario(CreateGherkinScenarioDTO dto) {
         // Tìm Exam_Question dựa trên examQuestionId
         Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(dto.getExamQuestionId());
+       
     
         if (optionalExamQuestion.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Exam Question not found with ID: " + dto.getExamQuestionId());
         }
-    
+      
+
         Exam_Question examQuestion = optionalExamQuestion.get();
     
         // Tạo mới Gherkin_Scenario
