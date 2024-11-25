@@ -36,9 +36,9 @@ public class StudentService implements IStudentService {
 
     @Override
     @Transactional
-    public void saveStudents(List<Student> students) {
+    public void saveStudents(List<Student> students, Long examId) {
         for (Student student : students) {
-            Optional<Student> existingStudent = studentRepository.findByStudentCode(student.getStudentCode());
+            Optional<Student> existingStudent = studentRepository.findByStudentCodeAndExamExamId(student.getStudentCode(), examId);
 
             if (existingStudent.isEmpty()) {
                 studentRepository.save(student);
