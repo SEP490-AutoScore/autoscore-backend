@@ -32,7 +32,7 @@ public interface PostmanForGradingRepository extends JpaRepository<Postman_For_G
     
     Optional<Postman_For_Grading> findByGherkinScenario_GherkinScenarioIdAndStatusTrue(Long gherkinScenarioId);
 
-    
-    
+    List<Postman_For_Grading> findByPostmanFunctionNameInAndStatusTrue(List<String> functionNames);
 
+   
 }

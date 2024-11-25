@@ -304,11 +304,9 @@ public class ExamPaperService implements IExamPaperService {
 
     private String runNewmanTest(java.io.File file) throws Exception {
         StringBuilder output = new StringBuilder();
-        // File resultFile = new File("C:\\Project\\result.txt");
+
         try {
-            // Tạo ProcessBuilder để chạy lệnh Newman
-            // ProcessBuilder processBuilder = new ProcessBuilder(
-            //         "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd", "run", "\"" + file.getAbsolutePath() + "\"");
+      
             ProcessBuilder processBuilder = new ProcessBuilder(PathUtil.NEWMAN_CMD_PATH, "run", "\"" + file.getAbsolutePath() + "\"");
             processBuilder.redirectErrorStream(true);
 
@@ -323,54 +321,112 @@ public class ExamPaperService implements IExamPaperService {
                 }
             }
 
-            // try (BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile))) {
-            //     writer.write(output.toString());
-            // } catch (IOException e) {
-            //     e.printStackTrace();
-            //     throw new Exception("Failed to write result to file: " + e.getMessage(), e);
-            // }
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("Failed to run Newman test: " + e.getMessage(), e);
         }
 
-        return output.toString(); // Trả về chuỗi kết quả đầu ra
+        return output.toString();
     }
 
     // Hàm xử lý kết quả từ Newman
+    // private NewmanResult handleNewmanResult(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo, Long examPaperId)
+    //         throws NotFoundException {
+    //     // Phân tích đầu ra của Newman và tạo kết quả
+    //     NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
+
+    //     // Duyệt qua các functionNames từ kết quả Newman
+    //     for (int i = 0; i < result.getFunctionNames().size(); i++) {
+    //         String functionName = result.getFunctionNames().get(i);
+    //         Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
+
+    //         // Tìm functionName trong expectedFunctionInfo (database)
+    //         Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
+    //                 .filter(info -> info.getFunctionName().equals(functionName))
+    //                 .findFirst();
+
+    //         if (expectedInfoOpt.isPresent()) {
+    //             PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
+
+    //             // Nếu totalPmTests khác, cập nhật database
+    //             if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
+    //                 updateTotalPmTestInDatabase(functionName, newTotalPmTest);
+    //             }
+            
+    //         } else {
+    //             // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
+    //             createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
+               
+    //         }
+    //     }
+
+    //     return result;
+    // }
+
     private NewmanResult handleNewmanResult(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo, Long examPaperId)
-            throws NotFoundException {
-        // Phân tích đầu ra của Newman và tạo kết quả
-        NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
+        throws NotFoundException {
+    // Phân tích đầu ra của Newman và tạo kết quả
+    NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
 
-        // Duyệt qua các functionNames từ kết quả Newman
-        for (int i = 0; i < result.getFunctionNames().size(); i++) {
-            String functionName = result.getFunctionNames().get(i);
-            Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
+    // Lấy danh sách functionNames từ kết quả Newman
+    List<String> functionNamesFromNewman = result.getFunctionNames();
 
-            // Tìm functionName trong expectedFunctionInfo (database)
-            Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
-                    .filter(info -> info.getFunctionName().equals(functionName))
-                    .findFirst();
+    // Lấy danh sách functionNames từ cơ sở dữ liệu
+    List<String> functionNamesInDb = expectedFunctionInfo.stream()
+            .map(PostmanFunctionInfo::getFunctionName)
+            .collect(Collectors.toList());
 
-            if (expectedInfoOpt.isPresent()) {
-                PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
+    // Duyệt qua các functionNames từ kết quả Newman
+    for (int i = 0; i < functionNamesFromNewman.size(); i++) {
+        String functionName = functionNamesFromNewman.get(i);
+        Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
 
-                // Nếu totalPmTests khác, cập nhật database
-                if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
-                    updateTotalPmTestInDatabase(functionName, newTotalPmTest);
-                }
-                // System.out.println("Updated function in database: " + functionName);
-            } else {
-                // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
-                createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
-                // System.out.println("Created new function in database: " + functionName);
+        // Tìm functionName trong expectedFunctionInfo (database)
+        Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
+                .filter(info -> info.getFunctionName().equals(functionName))
+                .findFirst();
+
+        if (expectedInfoOpt.isPresent()) {
+            PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
+
+            // Nếu totalPmTests khác, cập nhật database
+            if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
+                updateTotalPmTestInDatabase(functionName, newTotalPmTest);
+            }
+        } else {
+            // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
+            createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
+        }
+    }
+
+    // Cập nhật status = false cho các functionName không có trong kết quả Newman
+    List<String> functionNamesNotInNewman = functionNamesInDb.stream()
+            .filter(name -> !functionNamesFromNewman.contains(name))
+            .collect(Collectors.toList());
+
+    setStatusFalseForFunctionsNotInNewman(functionNamesNotInNewman);
+
+    return result;
+}
+
+private void setStatusFalseForFunctionsNotInNewman(List<String> functionNamesNotInNewman) {
+    if (!functionNamesNotInNewman.isEmpty()) {
+        // Chỉ lấy những Postman_For_Grading có status = true
+        List<Postman_For_Grading> postmenToUpdate = postmanForGradingRepository.findByPostmanFunctionNameInAndStatusTrue(functionNamesNotInNewman);
+        for (Postman_For_Grading postman : postmenToUpdate) {
+            postman.setStatus(false);
+            // Kiểm tra nếu gherkinScenario có dữ liệu thì đặt về null
+            if (postman.getGherkinScenario() != null) {
+                postman.setGherkinScenario(null);
             }
         }
-
-        return result;
+        postmanForGradingRepository.saveAll(postmenToUpdate);
     }
+}
+
+
+
+
 
     private void createNewPostmanForGrading(String functionName, Long totalPmTest, Long examPaperId) throws NotFoundException {
         // Lấy Exam_Paper từ database
@@ -410,13 +466,13 @@ public class ExamPaperService implements IExamPaperService {
         boolean isParsingFunctions = true; // Cờ để dừng khi gặp bảng
 
         for (String line : lines) {
-            // Nếu gặp bảng, dừng phân tích
+       
             if (line.trim().startsWith("┌") || line.trim().startsWith("│") || line.trim().startsWith("└")) {
                 isParsingFunctions = false;
             }
 
             if (!isParsingFunctions) {
-                break; // Ngừng xử lý nếu bảng đã xuất hiện
+                break;
             }
 
             // Nếu dòng bắt đầu bằng "→", đó là tên function mới
@@ -447,14 +503,15 @@ public class ExamPaperService implements IExamPaperService {
     }
 
     private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
-        return postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId)
+        return postmanForGradingRepository.findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId)
                 .stream()
-                .filter(postmanForGrading -> postmanForGrading.isStatus()) // Lọc theo status = true
                 .map(postmanForGrading -> new PostmanFunctionInfo(
-                postmanForGrading.getPostmanFunctionName(),
-                postmanForGrading.getTotalPmTest()))
+                    postmanForGrading.getPostmanFunctionName(),
+                    postmanForGrading.getTotalPmTest()))
                 .collect(Collectors.toList());
     }
+
+    
 
     @Override
     public List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException {
