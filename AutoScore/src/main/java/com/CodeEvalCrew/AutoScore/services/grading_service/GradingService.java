@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,12 +17,15 @@ import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.GradingProcessMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Grading.GradingRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GradingProcessView;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.GradingProcess;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.grading_process_repository.GradingProcessRepository;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceDetailRepository;
 import com.CodeEvalCrew.AutoScore.specification.GradingSpecification;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,6 +48,12 @@ public class GradingService implements IGradingService {
             if (examPaper == null) {
                 throw new NotFoundException("Exam Paper not found");
             }
+
+            Set<Organization> orgs = Util.getOrganizations();
+            for (Organization org : orgs) {
+                if(org.getType().equals(Organization_Enum.CAMPUS)) request.setOrganizationId(org.getOrganizationId());
+            }
+            
 
             // for (Long studentId : request.getListStudent()) {
             //     Source_Detail sourceDetail = sourceDetailRepository.;

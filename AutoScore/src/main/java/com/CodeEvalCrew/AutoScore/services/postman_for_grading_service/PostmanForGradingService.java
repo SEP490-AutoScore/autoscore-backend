@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.postman_for_grading_service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -85,83 +86,164 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         return firstElement != null
                 && firstElement.getPostmanForGradingId() == 0
-                && "Hidden".equals(firstElement.getPostmanFunctionName())
-                && firstElement.getScoreOfFunction() == 0
-                && firstElement.getPostmanForGradingParentId() == 0;
+                && "Hidden".equals(firstElement.getPostmanFunctionName());
+                // && firstElement.getScoreOfFunction() == 0
+                // && firstElement.getPostmanForGradingParentId() == 0;
     }
+
+    // @Override
+    // public String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs) {
+    //     if (updateDTOs == null || updateDTOs.isEmpty()) {
+    //         throw new IllegalArgumentException("Danh sách updateDTOs không được để trống!");
+    //     }
+
+    //     // Kiểm tra danh sách có phần tử đầu tiên đúng yêu cầu
+    //     if (updateDTOs.isEmpty() || !isFirstElementValid(updateDTOs.get(0))) {
+    //         return "Phần tử đầu tiên của updateDTOs không hợp lệ.";
+
+    //     }
+
+    //     // Lấy danh sách các Postman_For_Grading
+    //     List<Postman_For_Grading> postmanList = postmanForGradingRepository
+    //             .findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+
+    //     if (postmanList.isEmpty()) {
+    //         throw new RuntimeException(
+    //                 "Không tìm thấy Postman_For_Grading nào có status = true với Exam Paper ID: " + examPaperId);
+    //     }
+
+    //     // Tập hợp các ID từ danh sách postmanList
+    //     Set<Long> validIds = postmanList.stream()
+    //             .map(Postman_For_Grading::getPostmanForGradingId)
+    //             .collect(Collectors.toSet());
+
+    //     // Kiểm tra xem tất cả các postmanForGradingId
+    //     for (PostmanForGradingUpdateDTO dto : updateDTOs) {
+    //         if (dto.getPostmanForGradingId() != 0 && !validIds.contains(dto.getPostmanForGradingId())) {
+    //             throw new RuntimeException(
+    //                     "Postman_For_Grading ID " + dto.getPostmanForGradingId() + " không tồn tại hoặc không hợp lệ.");
+    //         }
+    //     }
+
+    //     // Phần tử đầu tiên luôn là đối tượng đặc biệt. bỏ qua
+    //     int orderPriority = 1; // Giá trị orderBy bắt đầu từ 1
+    //     for (int i = 1; i < updateDTOs.size(); i++) {
+    //         PostmanForGradingUpdateDTO dto = updateDTOs.get(i);
+
+    //         if (dto.getPostmanForGradingId() == 0) {
+    //             throw new RuntimeException(
+    //                     "Phần tử trong danh sách không hợp lệ: postmanForGradingId không được là 0 ngoài phần tử đầu tiên.");
+    //         }
+
+    //         // Tìm đối tượng Postman_For_Grading tương ứng với ID
+    //         Postman_For_Grading postman = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
+    //                 .orElseThrow(() -> new RuntimeException(
+    //                         "Không tìm thấy Postman_For_Grading với ID: " + dto.getPostmanForGradingId()));
+
+    //         // Cập nhật các thông tin
+    //         postman.setPostmanFunctionName(dto.getPostmanFunctionName());
+    //         postman.setScoreOfFunction(dto.getScoreOfFunction());
+    //         postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
+
+    //         // Kiểm tra nếu PostmanForGradingParentId = 0 thì set thành null
+    //         if (dto.getPostmanForGradingParentId() == 0) {
+    //             postman.setPostmanForGradingParentId(null);
+    //         } else {
+    //             postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
+    //         }
+
+    //         postman.setOrderPriority((long) orderPriority); // Tự động set orderBy
+
+    //         // Tăng giá trị orderBy cho lần tiếp theo
+    //         orderPriority++;
+
+    //         // Lưu lại đối tượng đã cập nhật
+    //         postmanForGradingRepository.save(postman);
+    //     }
+
+    //     return "Successfully";
+    // }
 
     @Override
-    public String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs) {
-        if (updateDTOs == null || updateDTOs.isEmpty()) {
-            throw new IllegalArgumentException("Danh sách updateDTOs không được để trống!");
-        }
-
-        // Kiểm tra danh sách có phần tử đầu tiên đúng yêu cầu
-        if (updateDTOs.isEmpty() || !isFirstElementValid(updateDTOs.get(0))) {
-            return "Phần tử đầu tiên của updateDTOs không hợp lệ.";
-
-        }
-
-        // Lấy danh sách các Postman_For_Grading
-        List<Postman_For_Grading> postmanList = postmanForGradingRepository
-                .findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
-
-        if (postmanList.isEmpty()) {
-            throw new RuntimeException(
-                    "Không tìm thấy Postman_For_Grading nào có status = true với Exam Paper ID: " + examPaperId);
-        }
-
-        // Tập hợp các ID từ danh sách postmanList
-        Set<Long> validIds = postmanList.stream()
-                .map(Postman_For_Grading::getPostmanForGradingId)
-                .collect(Collectors.toSet());
-
-        // Kiểm tra xem tất cả các postmanForGradingId
-        for (PostmanForGradingUpdateDTO dto : updateDTOs) {
-            if (dto.getPostmanForGradingId() != 0 && !validIds.contains(dto.getPostmanForGradingId())) {
-                throw new RuntimeException(
-                        "Postman_For_Grading ID " + dto.getPostmanForGradingId() + " không tồn tại hoặc không hợp lệ.");
-            }
-        }
-
-        // Phần tử đầu tiên luôn là đối tượng đặc biệt. bỏ qua
-        int orderBy = 1; // Giá trị orderBy bắt đầu từ 1
-        for (int i = 1; i < updateDTOs.size(); i++) {
-            PostmanForGradingUpdateDTO dto = updateDTOs.get(i);
-
-            if (dto.getPostmanForGradingId() == 0) {
-                throw new RuntimeException(
-                        "Phần tử trong danh sách không hợp lệ: postmanForGradingId không được là 0 ngoài phần tử đầu tiên.");
-            }
-
-            // Tìm đối tượng Postman_For_Grading tương ứng với ID
-            Postman_For_Grading postman = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Không tìm thấy Postman_For_Grading với ID: " + dto.getPostmanForGradingId()));
-
-            // Cập nhật các thông tin
-            postman.setPostmanFunctionName(dto.getPostmanFunctionName());
-            postman.setScoreOfFunction(dto.getScoreOfFunction());
-            postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
-
-            // Kiểm tra nếu PostmanForGradingParentId = 0 thì set thành null
-            if (dto.getPostmanForGradingParentId() == 0) {
-                postman.setPostmanForGradingParentId(null);
-            } else {
-                postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
-            }
-
-            postman.setOrderBy((long) orderBy); // Tự động set orderBy
-
-            // Tăng giá trị orderBy cho lần tiếp theo
-            orderBy++;
-
-            // Lưu lại đối tượng đã cập nhật
-            postmanForGradingRepository.save(postman);
-        }
-
-        return "Successfully";
+public String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs) {
+    if (updateDTOs == null || updateDTOs.isEmpty()) {
+        throw new IllegalArgumentException("Danh sách updateDTOs không được để trống!");
     }
+
+    // Kiểm tra danh sách có phần tử đầu tiên đúng yêu cầu
+    if (updateDTOs.isEmpty() || !isFirstElementValid(updateDTOs.get(0))) {
+        return "Phần tử đầu tiên của updateDTOs không hợp lệ.";
+    }
+
+    // Lấy danh sách các Postman_For_Grading
+    List<Postman_For_Grading> postmanList = postmanForGradingRepository
+            .findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+
+    if (postmanList.isEmpty()) {
+        throw new RuntimeException(
+                "Không tìm thấy Postman_For_Grading nào có status = true với Exam Paper ID: " + examPaperId);
+    }
+
+    // Tập hợp các ID từ danh sách postmanList
+    Set<Long> validIds = postmanList.stream()
+            .map(Postman_For_Grading::getPostmanForGradingId)
+            .collect(Collectors.toSet());
+
+    // Kiểm tra xem tất cả các postmanForGradingId
+    for (PostmanForGradingUpdateDTO dto : updateDTOs) {
+        if (dto.getPostmanForGradingId() != 0 && !validIds.contains(dto.getPostmanForGradingId())) {
+            throw new RuntimeException(
+                    "Postman_For_Grading ID " + dto.getPostmanForGradingId() + " không tồn tại hoặc không hợp lệ.");
+        }
+    }
+
+    // Phần tử đầu tiên luôn là đối tượng đặc biệt. bỏ qua
+    int orderPriority = 1; // Giá trị orderBy bắt đầu từ 1
+    for (int i = 1; i < updateDTOs.size(); i++) {
+        PostmanForGradingUpdateDTO dto = updateDTOs.get(i);
+
+        if (dto.getPostmanForGradingId() == 0) {
+            throw new RuntimeException(
+                    "Phần tử trong danh sách không hợp lệ: postmanForGradingId không được là 0 ngoài phần tử đầu tiên.");
+        }
+
+        // Tìm đối tượng Postman_For_Grading tương ứng với ID
+        Postman_For_Grading postman = postmanForGradingRepository.findById(dto.getPostmanForGradingId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Không tìm thấy Postman_For_Grading với ID: " + dto.getPostmanForGradingId()));
+
+        // Cập nhật các thông tin
+        postman.setPostmanFunctionName(dto.getPostmanFunctionName());
+        postman.setScoreOfFunction(dto.getScoreOfFunction());
+        postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
+
+        // Kiểm tra nếu PostmanForGradingParentId = 0 thì set thành null
+        if (dto.getPostmanForGradingParentId() == 0) {
+            postman.setPostmanForGradingParentId(null);
+        }
+
+        postman.setOrderPriority((long) orderPriority); // Tự động set orderBy
+
+        // Tăng giá trị orderBy cho lần tiếp theo
+        orderPriority++;
+
+        // Lưu lại đối tượng đã cập nhật
+        postmanForGradingRepository.save(postman);
+    }
+
+    // Cập nhật isComfirmFile của Exam_Paper (có thể thêm điều kiện kiểm tra)
+    Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy Exam_Paper với ID: " + examPaperId));
+
+    // Cập nhật giá trị isComfirmFile
+    examPaper.setIsComfirmFile(true);
+
+    // Lưu lại đối tượng Exam_Paper đã cập nhật
+    examPaperRepository.save(examPaper);
+
+    return "Successfully";
+}
+
 
     @Override
     public String mergePostmanCollections(Long examPaperId) {
@@ -288,19 +370,28 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             if (content.getOrderPriority() == 1) {
                 question += "\nDatabase Script: " + examDatabase.getDatabaseScript();
             } else if (content.getOrderPriority() == 2) {
-                question += "\n\n\n" +
-                        "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
-                        "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
-                        "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
-                        "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
-                        "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
-                        "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
-                        "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
-                        "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
-            } else if (content.getOrderPriority() == 3) {
-                question += "\n" + gherkinScenario.getGherkinData();
-
-            }
+                question += "\n" + gherkinScenario.getGherkinData()
+                       + "\n\n" 
+                        // "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
+                        // "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
+                        // "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
+                        // "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
+                        // "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
+                        // "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
+                        // "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
+                        // "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
+                        + "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent()
+                        // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                        + "\n - Allowed Roles: " + gherkinScenario.getExamQuestion().getRoleAllow()
+                        + "\n - Description: " + gherkinScenario.getExamQuestion().getDescription()
+                        + "\n - End point: " + gherkinScenario.getExamQuestion().getEndPoint()
+                        + "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod()
+                        + "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType()
+                        + "\n - Validation: " + gherkinScenario.getExamQuestion().getValidation()
+                        + "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                        + "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse()
+                        + "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload(); 
+            } 
 
             // Gửi từng câu hỏi độc lập tới AI
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
@@ -315,7 +406,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             fullResponseBuilder.append(response).append("\n");
 
             // Khi xử lý câu hỏi cuối, lấy JSON từ phản hồi
-            if (content.getOrderPriority() == 3) {
+            if (content.getOrderPriority() == 2) {
                 String collectionJson = extractJsonFromResponse(response);
                 if (collectionJson == null || collectionJson.isEmpty()) {
                     return "Error: JSON not found in the AI response for orderPriority 3.";
@@ -340,7 +431,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             }
         } 
 
-        return "Unknown error!";
+        return "Unknown error! May be AI not response.";
     }
 
     @Override
@@ -399,21 +490,31 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             if (content.getOrderPriority() == 1) {
                 question += "\nDatabase Script: " + examDatabase.getDatabaseScript();
             } else if (content.getOrderPriority() == 2) {
-                question += "\n\n\n" +
-                        "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
-                        "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
-                        "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
-                        "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
-                        "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
-                        "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
-                        "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
-                        "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse();
-     
-            } else if (content.getOrderPriority() == 3) {
-                question += "\n " + fileCollectionPostmanText;
-                // "\n" + gherkinScenario.getGherkinData()
-              
+                question += "\n\n\n"
+                + "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent()
+                // + "\n - Role alowed: " + examQuestion.getRoleAllow()
+                + "\n - Allowed Roles: " + gherkinScenario.getExamQuestion().getRoleAllow()
+                + "\n - Description: " + gherkinScenario.getExamQuestion().getDescription()
+                + "\n - End point: " + gherkinScenario.getExamQuestion().getEndPoint()
+                + "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod()
+                + "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType()
+                + "\n - Validation: " + gherkinScenario.getExamQuestion().getValidation()
+                + "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                + "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse()
+                + "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() 
+
+                        // "\n - Question Content: " + gherkinScenario.getExamQuestion().getQuestionContent() +
+                        // "\n - EndPoint: " + gherkinScenario.getExamQuestion().getEndPoint() +
+                        // "\n - Description: " + gherkinScenario.getExamQuestion().getDescription() +
+                        // "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload() +
+                        // "\n - Payload type: " + gherkinScenario.getExamQuestion().getPayloadType() +
+                        // "\n - Http method: " + gherkinScenario.getExamQuestion().getHttpMethod() +
+                        // "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse() +
+                        // "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
+                        + "\n " + fileCollectionPostmanText;
+               
             }
+            
 
             // Gửi từng câu hỏi độc lập tới AI
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
@@ -427,13 +528,20 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             fullResponseBuilder.append(response).append("\n");
 
             // Khi xử lý câu hỏi cuối, lấy JSON từ phản hồi
-            if (content.getOrderPriority() == 3) {
+            if (content.getOrderPriority() == 2) {
                 String collectionJson = extractJsonFromResponse(response);
-              
+                           
+        
                 if (collectionJson == null || collectionJson.isEmpty()) {
-                    return "Error: JSON not found in the AI response for orderPriority 3.";
+                    return "Error: JSON not found in the AI response for orderPriority 2.";
                 }
-
+//   try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("D:\\Desktop\\result.txt")))) {
+//         writer.write(collectionJson);
+//         writer.newLine();  // Thêm một dòng mới sau khi ghi
+//     } catch (IOException e) {
+//         e.printStackTrace();
+//         return "Error: Unable to write to file D:\\Desktop\\result.txt";
+//     }
                 String postmanFunctionName = runNewman(collectionJson);
 
                 if (postmanFunctionName == null) {
@@ -452,13 +560,21 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         return "Unknown error!";
     }
+   
 
+    
     // Hàm trích xuất JSON từ response body
     private String extractJsonFromResponse(String responseBody) {
         try {
             // Chuyển đổi responseBody thành JSONObject
             JSONObject jsonResponse = new JSONObject(responseBody);
-            // Lấy phần JSON cần thiết
+    
+            // Kiểm tra sự tồn tại của các phần tử cần thiết trong response
+            if (!jsonResponse.has("candidates")) {
+                throw new JSONException("Missing 'candidates' field in response.");
+            }
+    
+            // Lấy phần JSON cần thiết từ candidates -> content -> parts -> text
             String jsonString = jsonResponse
                     .getJSONArray("candidates")
                     .getJSONObject(0)
@@ -466,35 +582,59 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                     .getJSONArray("parts")
                     .getJSONObject(0)
                     .getString("text");
-
-            // Bỏ dấu ```json và ``` ở đầu và cuối chuỗi
-            jsonString = jsonString.replace("```json\n", "").replace("```", "").trim();
-
-            return jsonString; // Trả về JSON đã trích xuất
+    
+            // Bỏ dấu ```json và ``` ở đầu và cuối chuỗi (nếu có)
+            jsonString = jsonString.replaceAll("(?s)^```json\\n", "").replaceAll("(?s)```$", "").trim();
+    
+            // Loại bỏ bất kỳ phần giải thích nào sau chuỗi JSON
+            // Tìm phần JSON hợp lệ, bỏ qua tất cả văn bản sau nó
+            int startIndex = jsonString.indexOf("{");
+            int endIndex = jsonString.lastIndexOf("}");
+            
+            if (startIndex != -1 && endIndex != -1) {
+                jsonString = jsonString.substring(startIndex, endIndex + 1);
+            }
+    
+            // Kiểm tra nếu chuỗi có thể là JSON hợp lệ
+            try {
+                new JSONObject(jsonString);  // Kiểm tra nếu jsonString là JSON hợp lệ
+                return jsonString;  // Nếu là JSON hợp lệ, trả về
+            } catch (JSONException e) {
+                // Nếu không phải là JSON hợp lệ, thông báo lỗi
+                System.err.println("Invalid JSON format: " + e.getMessage());
+                return null;
+            }
+    
         } catch (JSONException e) {
+            // Thông báo lỗi nếu không tìm thấy các phần tử cần thiết trong response
+            System.err.println("Error extracting JSON from response: " + e.getMessage());
             e.printStackTrace();
-            return null; // Trả về null nếu có lỗi
+            return null;  // Trả về null nếu có lỗi
         }
     }
+    
+    
 
     private String runNewman(String collectionJson) {
         String postmanFunctionName = null;
         totalPmTest = 0L; // Khởi tạo biến đếm số lượng test case
+        Path tempFile = null;  // Declare tempFile outside the try block to make it accessible in the finally block
 
         try {
-            // Ghi collection JSON vào file tạm thời
-            Path tempFile = Files.createTempFile("collection", ".json");
-            Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8));
+            // Generate random 20-character string for temp file name
+            String randomFileName = generateRandomFileName();
+            tempFile = Files.createTempFile(randomFileName, ".json"); // Create temp file
+            Files.write(tempFile, collectionJson.getBytes(StandardCharsets.UTF_8)); // Write JSON to file
 
             String newmanPath = PathUtil.NEWMAN_CMD_PATH;
-            String timeout = "1000"; // Đặt thời gian chờ
+            // String timeout = "1000"; // Đặt thời gian chờ
 
             // Tạo ProcessBuilder để chạy Newman
             ProcessBuilder processBuilder = new ProcessBuilder(
                     newmanPath,
                     "run",
-                    tempFile.toAbsolutePath().toString(),
-                    "--timeout", timeout);
+                    tempFile.toAbsolutePath().toString());
+                    // "--timeout", timeout);
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
@@ -546,7 +686,27 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                // Delete the temp file after use if it exists
+                if (tempFile != null) {
+                    Files.deleteIfExists(tempFile);
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to delete temp file: " + e.getMessage());
+            }
         }
+    }
+
+    // Helper method to generate a random 20-character string
+    private String generateRandomFileName() {
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder randomName = new StringBuilder();
+        for (int i = 0; i < 20; i++) {
+            int index = (int) (Math.random() * characters.length());
+            randomName.append(characters.charAt(index));
+        }
+        return randomName.toString();
     }
 
     // Hàm hỗ trợ để đếm các test case theo định dạng cũ
@@ -613,7 +773,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                     dto.setPostmanFunctionName(entry.getPostmanFunctionName());
                     dto.setScoreOfFunction(entry.getScoreOfFunction());
                     dto.setTotalPmTest(entry.getTotalPmTest());
-                    dto.setOrderBy(entry.getOrderBy());
+                    dto.setOrderPriority(entry.getOrderPriority());
                     dto.setStatus(entry.isStatus());
                     dto.setPostmanForGradingParentId(
                             entry.getPostmanForGradingParentId() != null
@@ -635,7 +795,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         newElement.setPostmanFunctionName("Hidden");
         newElement.setScoreOfFunction(0F);
         newElement.setTotalPmTest(null);
-        newElement.setOrderBy(null);
+        newElement.setOrderPriority(null);
         newElement.setStatus(true);
         newElement.setPostmanForGradingParentId(0L);
         newElement.setExamQuestionId(null);
@@ -673,7 +833,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
             // Cập nhật các trường từ DTO
             postmanForGrading.setScoreOfFunction(dto.getScoreOfFunction());
-            postmanForGrading.setOrderBy(dto.getOrderBy());
+            postmanForGrading.setOrderPriority(dto.getOrderPriority());
             postmanForGrading.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
 
             // Lưu lại thực thể đã cập nhật
@@ -695,7 +855,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         postman.setStatus(false);
         postman.setExamQuestion(null); // Xóa liên kết ExamQuestion
         postman.setGherkinScenario(null); // Xóa liên kết GherkinScenario
-        postman.setExamPaper(null); // Xóa liên kết ExamPaper
+        // postman.setExamPaper(null); // Xóa liên kết ExamPaper
 
         // Lưu thay đổi
         postmanForGradingRepository.save(postman);
@@ -721,7 +881,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         dto.setScoreOfFunction(postman.getScoreOfFunction());
         dto.setTotalPmTest(postman.getTotalPmTest());
         dto.setStatus(postman.isStatus());
-        dto.setOrderBy(postman.getOrderBy());
+        dto.setOrderPriority(postman.getOrderPriority());
         dto.setPostmanForGradingParentId(postman.getPostmanForGradingParentId());
 
         // Chuyển đổi dữ liệu JSON trong FileCollectionPostman (nếu không null)
@@ -781,7 +941,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         dto.setScoreOfFunction(postman.getScoreOfFunction());
         dto.setTotalPmTest(postman.getTotalPmTest());
         dto.setStatus(postman.isStatus());
-        dto.setOrderBy(postman.getOrderBy());
+        dto.setOrderPriority(postman.getOrderPriority());
         dto.setPostmanForGradingParentId(postman.getPostmanForGradingParentId());
 
         // Chuyển đổi FileCollectionPostman thành chuỗi JSON (nếu không null)
@@ -852,7 +1012,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         dto.setScoreOfFunction(postman.getScoreOfFunction());
         dto.setTotalPmTest(postman.getTotalPmTest());
         dto.setStatus(postman.isStatus());
-        dto.setOrderBy(postman.getOrderBy());
+        dto.setOrderPriority(postman.getOrderPriority());
         dto.setPostmanForGradingParentId(postman.getPostmanForGradingParentId());
 
         // Chuyển đổi FileCollectionPostman thành chuỗi JSON (nếu không null)

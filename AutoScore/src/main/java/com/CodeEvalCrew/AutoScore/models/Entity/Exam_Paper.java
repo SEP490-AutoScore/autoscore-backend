@@ -75,4 +75,8 @@ public class Exam_Paper {
     @OneToMany(mappedBy = "examPaper", cascade = CascadeType.ALL)
     private Set<Postman_For_Grading> postmanForGradings;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "subjectId", referencedColumnName = "subjectId", nullable = false)
+    private Subject subject;
+
 }
