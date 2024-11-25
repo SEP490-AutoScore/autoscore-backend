@@ -39,11 +39,14 @@ public class GradingService implements IGradingService {
     @Override
     public void startingGradingProcess(GradingRequest request) throws Exception, NotFoundException {
         try {
+            request.setExamPaperId(1l);
             //valide rq
             Exam_Paper examPaper = examPaperRepository.findById(request.getExamPaperId()).get();
             if (examPaper == null) {
                 throw new NotFoundException("Exam Paper not found");
             }
+
+            request.setOrganizationId(1l);
 
             // for (Long studentId : request.getListStudent()) {
             //     Source_Detail sourceDetail = sourceDetailRepository.;
