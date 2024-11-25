@@ -50,4 +50,7 @@ public class Subject {
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
     private Set<Important> importants;
+
+    @OneToMany(mappedBy = "subject", cascade= CascadeType.ALL)
+    private Set<Exam_Paper> examPapers;
 }

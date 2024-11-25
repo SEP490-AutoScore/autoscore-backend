@@ -212,12 +212,11 @@ VALUES
 -- ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
 INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`,`is_used`, `subject_id`) 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`,`is_used`, `subject_id`, `instruction`) 
 VALUES 
-('009909', 'COMPLETE', '2024-10-30 10:00:00', 1, null, null, null, null, 1,true, 1),
-('123456', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true, 1),
-('456789', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,false, 1);
-
+('009909', 'COMPLETE', '2024-10-30 10:00:00', 1, null, null, null, null, 1,true,1,`Instruction`),
+('123456', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true,1, `Instruction`),
+('456789', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,false,1, `Instruction`);
 
 INSERT INTO `Exam_Question`
 (`question_content`, `exam_question_score`, `end_point`, `role_allow`, `http_method`, `description`, `payload_type`, `payload`, `validation`, `sucess_response`, `error_response`, `status`, `order_by`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
@@ -344,14 +343,14 @@ Request Body (JSON):
 
 
 
-INSERT INTO `postman_for_grading`
-(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
-VALUES
-(2, 1, 1, null, 2, 'login',1,true),
-(2, 2, 2, 1, 2, 'login fail',1,true),
-(2, 1, 3, 1, 4, 'get',1,true),
-(2, 3, 4, 1, 4, 'get id',1,true),
-(2, 2, 5, 1, 3, 'delete',1,true);
+-- INSERT INTO `postman_for_grading`
+-- (`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
+-- VALUES
+-- (2, 1, 1, null, 2, 'login',1,true),
+-- (2, 2, 2, 1, 2, 'login fail',1,true),
+-- (2, 1, 3, 1, 4, 'get',1,true),
+-- (2, 3, 4, 1, 4, 'get id',1,true),
+-- (2, 2, 5, 1, 3, 'delete',1,true);
 
 INSERT INTO `ai_api_key`
 (`ai_api_key`, `ai_name`, `account_id`,`status`,`is_shared`)
