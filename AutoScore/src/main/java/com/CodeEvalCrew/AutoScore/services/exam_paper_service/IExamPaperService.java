@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
 
@@ -29,11 +30,14 @@ public interface IExamPaperService {
 
     List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException;
 
-    // Method to export Postman collection from the Exam_Paper
     byte[] exportPostmanCollection(Long examPaperId) throws Exception;
 
     List<ExamPaperView> getAllExamNotUsed() throws NotFoundException, Exception;
 
     ExamPaperView createNewExamPaperNotUsed(ExamPaperCreateRequest request) throws NotFoundException;
+
+    ExamPaperFilePostmanResponseDTO getInfoFilePostman(Long examPaperId) throws NotFoundException;
+
+    String confirmFilePostman(Long examPaperId);
 
 }
