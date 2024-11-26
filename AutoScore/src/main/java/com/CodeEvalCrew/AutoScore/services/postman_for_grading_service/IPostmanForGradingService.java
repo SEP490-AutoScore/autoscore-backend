@@ -11,7 +11,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetDTO
 public interface IPostmanForGradingService {
       List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId);
 
-      void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs);
+      // void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs);
 
       String generatePostmanCollection(Long gherkinScenarioId);
 
@@ -26,7 +26,7 @@ public interface IPostmanForGradingService {
 
       PostmanForGradingGetDTO getPostmanForGradingById(Long postmanForGradingId);
 
-      PostmanForGradingGetDTO updatePostmanForGrading(Long postmanForGradingId, PostmanForGradingUpdateGetDTO updateDTO);
+      // PostmanForGradingGetDTO updatePostmanForGrading(Long postmanForGradingId, PostmanForGradingUpdateGetDTO updateDTO);
       
       PostmanForGradingGetDTO createPostmanForGrading(PostmanForGradingCreateDTO createDTO);
      

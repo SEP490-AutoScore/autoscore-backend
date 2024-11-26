@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
@@ -34,5 +36,9 @@ public interface PostmanForGradingRepository extends JpaRepository<Postman_For_G
 
     List<Postman_For_Grading> findByPostmanFunctionNameInAndStatusTrue(List<String> functionNames);
 
-   
+       @Query("SELECT p.postmanFunctionName FROM Postman_For_Grading p WHERE p.status = true")
+    List<String> findFunctionNamesByStatusTrue();
+
+      @Query("SELECT p FROM Postman_For_Grading p WHERE p.examPaper.examPaperId = :examPaperId AND p.status = true ORDER BY p.orderPriority ASC")
+    List<Postman_For_Grading> findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriority(@Param("examPaperId") Long examPaperId);
 }
