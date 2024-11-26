@@ -354,7 +354,7 @@ Request Body (JSON):
 -- (2, 2, 5, 1, 3, 'delete',1,true);
 
 INSERT INTO `ai_api_key`
-(`ai_api_key`, `ai_name`, `account_id`,`status`,`is_shared`)
+(`ai_api_key`, `ai_name`, `account_id`,`status`,`shared`)
 VALUES
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',1,true,true),
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',2,true,true),

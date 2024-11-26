@@ -47,7 +47,7 @@ public class AIApiKeyService implements IAIApiKeyService {
         List<AI_Api_Key> userApiKeys = aiApiKeyRepository.findByAccountAccountIdAndStatusTrue(authenticatedUserId);
 
         // Lấy API keys từ các tài khoản khác nhưng được chia sẻ
-        List<AI_Api_Key> sharedApiKeys = aiApiKeyRepository.findByStatusTrueAndIsSharedTrue();
+        List<AI_Api_Key> sharedApiKeys = aiApiKeyRepository.findByStatusTrueAndSharedTrue();
 
         // Sử dụng Map để loại bỏ trùng lặp dựa trên aiApiKeyId
         Map<Long, AI_Api_Key> uniqueApiKeys = new HashMap<>();
@@ -58,39 +58,39 @@ public class AIApiKeyService implements IAIApiKeyService {
         return mapToDTOWithSelectionStatus(new ArrayList<>(uniqueApiKeys.values()), authenticatedUserId);
     }
 
-private List<AIApiKeyDTO> mapToDTOWithSelectionStatus(List<AI_Api_Key> apiKeys, Long authenticatedUserId) {
-    // Lấy danh sách các API Key ID được chọn bởi authenticated user
-    Set<Long> selectedKeyIds = accountSelectedKeyRepository
-            .findByAccountAccountId(authenticatedUserId)
-            .stream()
-            .map(selectedKey -> selectedKey.getAiApiKey().getAiApiKeyId())
-            .collect(Collectors.toSet());
+    private List<AIApiKeyDTO> mapToDTOWithSelectionStatus(List<AI_Api_Key> apiKeys, Long authenticatedUserId) {
+        // Lấy danh sách các API Key ID được chọn bởi authenticated user
+        Set<Long> selectedKeyIds = accountSelectedKeyRepository
+                .findByAccountAccountId(authenticatedUserId)
+                .stream()
+                .map(selectedKey -> selectedKey.getAiApiKey().getAiApiKeyId())
+                .collect(Collectors.toSet());
 
-    // Chuyển đổi danh sách AI_Api_Key sang AIApiKeyDTO
-    return apiKeys.stream()
-            .map(apiKey -> {
-                // Lấy fullName từ Employee liên kết với Account
-                String fullName = Optional.ofNullable(apiKey.getAccount())
-                        .map(account -> Optional.ofNullable(employeeRepository.findByAccount_AccountId(account.getAccountId()))
-                                .map(Employee::getFullName)
-                                .orElse("Unknown")) // Xử lý trường hợp không tìm thấy Employee
-                        .orElse("Unknown");
+        // Chuyển đổi danh sách AI_Api_Key sang AIApiKeyDTO
+        return apiKeys.stream()
+                .map(apiKey -> {
+                    // Lấy fullName từ Employee liên kết với Account
+                    String fullName = Optional.ofNullable(apiKey.getAccount())
+                            .map(account -> Optional
+                                    .ofNullable(employeeRepository.findByAccount_AccountId(account.getAccountId()))
+                                    .map(Employee::getFullName)
+                                    .orElse("Unknown")) // Xử lý trường hợp không tìm thấy Employee
+                            .orElse("Unknown");
 
-                return new AIApiKeyDTO(
-                        apiKey.getAiApiKeyId(),
-                        apiKey.getAiName(),
-                        apiKey.getAiApiKey(),
-                        apiKey.isStatus(),
-                        apiKey.isShared(),
-                        apiKey.getCreatedAt(),
-                        apiKey.getUpdatedAt(),
-                        fullName, // Gán fullName thay vì accountId
-                        selectedKeyIds.contains(apiKey.getAiApiKeyId()) // Kiểm tra xem API Key có được chọn không
-                );
-            })
-            .collect(Collectors.toList());
-}
-
+                    return new AIApiKeyDTO(
+                            apiKey.getAiApiKeyId(),
+                            apiKey.getAiName(),
+                            apiKey.getAiApiKey(),
+                            apiKey.isStatus(),
+                            apiKey.isShared(),
+                            apiKey.getCreatedAt(),
+                            apiKey.getUpdatedAt(),
+                            fullName, // Gán fullName thay vì accountId
+                            selectedKeyIds.contains(apiKey.getAiApiKeyId()) // Kiểm tra xem API Key có được chọn không
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 
     @Override
     public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
@@ -124,29 +124,29 @@ private List<AIApiKeyDTO> mapToDTOWithSelectionStatus(List<AI_Api_Key> apiKeys, 
     public AIApiKeyDTO createAIApiKey(CreateAIApiKeyDTO dto) {
         // Lấy ID người dùng được xác thực
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
-    
+
         // Tìm Account tương ứng
         Account account = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found"));
-    
+
         // Lấy fullName từ Employee liên kết với Account
         String fullName = Optional.ofNullable(employeeRepository.findByAccount_AccountId(authenticatedUserId))
                 .map(Employee::getFullName)
-                .orElse("Unknown"); // Gán giá trị mặc định nếu không tìm thấy
-    
+                .orElse("Unknown");
+
         // Tạo mới AI_Api_Key
         AI_Api_Key newApiKey = new AI_Api_Key();
         newApiKey.setAiName(dto.getAiName());
         newApiKey.setAiApiKey(dto.getAiApiKey());
         newApiKey.setStatus(true); // Mặc định là active
-        newApiKey.setShared(dto.isShared());
+        newApiKey.setShared(dto.isShared()); // Đảm bảo rằng giá trị isShared được gán đúng
         newApiKey.setCreatedAt(LocalDateTime.now());
-        newApiKey.setUpdatedAt(LocalDateTime.now());
+     
         newApiKey.setAccount(account);
-    
+
         // Lưu vào cơ sở dữ liệu
         AI_Api_Key savedApiKey = aiApiKeyRepository.save(newApiKey);
-    
+
         // Chuyển đổi sang DTO để trả về
         return new AIApiKeyDTO(
                 savedApiKey.getAiApiKeyId(),
@@ -156,29 +156,40 @@ private List<AIApiKeyDTO> mapToDTOWithSelectionStatus(List<AI_Api_Key> apiKeys, 
                 savedApiKey.isShared(),
                 savedApiKey.getCreatedAt(),
                 savedApiKey.getUpdatedAt(),
-                fullName, // Trả về fullName thay vì accountId
+                fullName,
                 false // Mặc định chưa được chọn
         );
     }
-    
 
     @Override
-    public AI_Api_Key updateAiApiKey(Long aiApiKeyId, String aiApiKey) {
-        // Tìm kiếm AI_Api_Key theo ID
-        Optional<AI_Api_Key> optionalApiKey = aiApiKeyRepository.findById(aiApiKeyId);
+public void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey) {
+    // Lấy AI_Api_Key từ repository dựa trên aiApiKeyId
+    Optional<AI_Api_Key> existingApiKeyOpt = aiApiKeyRepository.findById(aiApiKeyId);
 
-        if (optionalApiKey.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "API Key not found with ID: " + aiApiKeyId);
-        }
-
-        AI_Api_Key apiKey = optionalApiKey.get();
-
-        // Cập nhật aiApiKey
-        apiKey.setAiApiKey(aiApiKey);
-
-        // Lưu thay đổi vào cơ sở dữ liệu
-        return aiApiKeyRepository.save(apiKey);
+    if (existingApiKeyOpt.isEmpty()) {
+        // Ném ngoại lệ nếu không tìm thấy API Key
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "API Key không tồn tại");
     }
+
+    AI_Api_Key existingApiKey = existingApiKeyOpt.get();
+
+    // Kiểm tra quyền sở hữu API Key (nếu cần)
+    Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    if (!existingApiKey.getAccount().getAccountId().equals(authenticatedUserId)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Không có quyền cập nhật API Key này");
+    }
+
+    // Cập nhật giá trị API Key và thời gian cập nhật
+    existingApiKey.setAiApiKey(aiApiKey);
+    existingApiKey.setUpdatedAt(LocalDateTime.now());
+
+    // Lưu thay đổi vào repository
+    aiApiKeyRepository.save(existingApiKey);
+}
+
+
+
+    
 
     @Override
     public void deleteAiApiKey(Long aiApiKeyId) {

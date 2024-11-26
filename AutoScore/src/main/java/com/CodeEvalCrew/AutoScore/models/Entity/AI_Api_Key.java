@@ -41,7 +41,7 @@ public class AI_Api_Key {
     @Enumerated(EnumType.STRING)
     private AIName_Enum aiName;
 
-    @NotNull
+    // @NotNull
     private String aiApiKey;
 
     private boolean status;
@@ -50,7 +50,7 @@ public class AI_Api_Key {
 
     private LocalDateTime updatedAt;
 
-    private boolean isShared;
+    private boolean shared;
 
     @OneToMany(mappedBy = "aiApiKey", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
