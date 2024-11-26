@@ -13,10 +13,18 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import com.CodeEvalCrew.AutoScore.mappers.CodePlagiarismMapper;
+import com.CodeEvalCrew.AutoScore.mappers.ScoreDetailMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ScoreMapper;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.Entity.Code_Plagiarism;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score;
+import com.CodeEvalCrew.AutoScore.models.Entity.Score_Detail;
+import com.CodeEvalCrew.AutoScore.repositories.code_plagiarism_repository.CodePlagiarismRepository;
+import com.CodeEvalCrew.AutoScore.repositories.score_detail_repository.ScoreDetailRepository;
 import com.CodeEvalCrew.AutoScore.repositories.score_repository.ScoreRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,11 +33,19 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ScoreService implements IScoreService {
 
     private final ScoreRepository scoreRepository;
+    private final ScoreDetailRepository scoreDetailRepository;
+    private final CodePlagiarismRepository codePlagiarismRepository;
     private final ScoreMapper scoreMapper;
+    private final ScoreDetailMapper scoreDetailMapper;
+    private final CodePlagiarismMapper codePlagiarismMapper;
 
-    public ScoreService(ScoreRepository scoreRepository, ScoreMapper scoreMapper) {
+    public ScoreService(ScoreRepository scoreRepository, ScoreDetailRepository scoreDetailRepository, CodePlagiarismRepository codePlagiarismRepository, ScoreMapper scoreMapper, ScoreDetailMapper scoreDetailMapper, CodePlagiarismMapper codePlagiarismMapper) {
         this.scoreRepository = scoreRepository;
+        this.scoreDetailRepository = scoreDetailRepository;
+        this.codePlagiarismRepository = codePlagiarismRepository;
         this.scoreMapper = scoreMapper;
+        this.scoreDetailMapper = scoreDetailMapper;
+        this.codePlagiarismMapper = codePlagiarismMapper;
     }
 
     @Override
@@ -45,6 +61,7 @@ public class ScoreService implements IScoreService {
         }
     }
 
+    @Override
     public void exportScoresToExcel(HttpServletResponse response, List<ScoreResponseDTO> scores) throws IOException {
         if (scores == null || scores.isEmpty()) {
             throw new IllegalArgumentException("No scores available to export.");
@@ -118,7 +135,7 @@ public class ScoreService implements IScoreService {
             Row row = plagiarismSheet.createRow(rowNum2++);
 
             Cell studentCodeCell2 = row.createCell(0);
-            studentCodeCell2.setCellValue(scoreDTO.getStudentCode());
+            studentCodeCell2.setCellValue(scoreDTO.getPlagiarismReason());
 
             Cell plagiarismReasonCell2 = row.createCell(1);
             plagiarismReasonCell2.setCellValue(scoreDTO.getPlagiarismReason());
@@ -143,24 +160,19 @@ public class ScoreService implements IScoreService {
     @SuppressWarnings("CallToPrintStackTrace")
     public List<ScoreOverViewResponseDTO> getScoreOverView() {
         try {
-            // Lấy danh sách các examPaperId duy nhất
             List<Long> examPaperIdList = scoreRepository.findDistinctExamPaperIds();
             if (examPaperIdList == null || examPaperIdList.isEmpty()) {
                 return new ArrayList<>();
             }
 
-            // Danh sách response DTOs
             List<ScoreOverViewResponseDTO> responseDTOs = new ArrayList<>();
 
-            // Duyệt qua từng examPaperId
             for (Long examPaperId : examPaperIdList) {
-                // Lấy danh sách các scores theo examPaperId
                 List<Score> scores = scoreRepository.findByExamPaperExamPaperId(examPaperId);
                 if (scores == null || scores.isEmpty()) {
-                    continue; // Bỏ qua nếu không có scores
+                    continue;
                 }
 
-                // Tạo DTO và gán giá trị
                 ScoreOverViewResponseDTO scoreOverViewResponseDTO = new ScoreOverViewResponseDTO();
                 scoreOverViewResponseDTO.setExamPaperId(examPaperId);
                 scoreOverViewResponseDTO.setExamCode(scores.get(0).getExamPaper().getExam().getExamCode());
@@ -168,7 +180,6 @@ public class ScoreService implements IScoreService {
                 scoreOverViewResponseDTO.setSemesterName(scores.get(0).getExamPaper().getExam().getSemester().getSemesterName());
                 scoreOverViewResponseDTO.setTotalStudents(scores.size());
 
-                // Thêm vào danh sách
                 responseDTOs.add(scoreOverViewResponseDTO);
             }
 
@@ -179,25 +190,29 @@ public class ScoreService implements IScoreService {
         }
     }
 
-    // private int calculateRowHeight(ScoreResponseDTO scoreDTO) {
-    //     // Hàm để tính toán chiều cao của hàng dựa trên nội dung 
-    //     // Ví dụ đơn giản: trả về 2 nếu có nhiều hơn một dòng text trong bất kỳ field nào 
-    //     int lines = 1;
-    //     if (scoreDTO.getStudentCode() != null && scoreDTO.getStudentCode().contains("\n")) {
-    //         lines++;
-    //     }
-    //     if (scoreDTO.getTotalScore() != null && String.valueOf(scoreDTO.getTotalScore()).contains("\n")) {
-    //         lines++;
-    //     }
-    //     if (scoreDTO.getLevelOfPlagiarism() != null && scoreDTO.getLevelOfPlagiarism().contains("\n")) {
-    //         lines++;
-    //     }
-    //     if (scoreDTO.getPlagiarismReason() != null && scoreDTO.getPlagiarismReason().contains("\n")) {
-    //         lines++;
-    //     }
-    //     if (scoreDTO.getCodePlagiarism() != null && scoreDTO.getCodePlagiarism().contains("\n")) {
-    //         lines++;
-    //     }
-    //     return lines;
-    // }
+    @Override
+    public List<ScoreDetailsResponseDTO> getScoreDetailsByScoreId(Long scoreId) {
+        try {
+            List<Score_Detail> scoreDetails = scoreDetailRepository.findByScore_ScoreId(scoreId);
+
+            if (scoreDetails != null) {
+                return scoreDetailMapper.scoreDetailEntitiesToDTOs(scoreDetails);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<CodePlagiarismResponseDTO> getCodePlagiarismByScoreId(Long scoreId) {
+        try {
+            List<Code_Plagiarism> entities = codePlagiarismRepository.findByScoreScoreId(scoreId);
+            return codePlagiarismMapper.toCodePlagiarismResponseDTOList(entities);
+            // return codePlagiarismRepository.findByScoreScoreId(scoreId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving plagiarism data for scoreId " + scoreId, e);
+        }
+    }
 }

@@ -9,7 +9,7 @@ VALUES
 (true, 6, 'Department Management'),
 (true, 7, 'Exam Management'),
 (true, 8, 'Score Management'),
-(true, 11, 'Other');
+(true, 9, 'Other');
 
 INSERT INTO `permission`
 (`action`, `permission_id`, `permission_name`, `permission_category_id`, `status`, `description`)
@@ -73,8 +73,11 @@ VALUES
 ('EXPORT_SCORE', 38, 'Export score', 8, 1, 'Allows exporting score reports'),
 
 -- Dashboard
-('DASHBOARD', 39, 'Dashboard access', 11, 1, 'Allows access to the dashboard');
+('DASHBOARD', 39, 'Dashboard access', 9, 1, 'Allows access to the dashboard'),
 
+-- Student
+('VIEW_STUDENT', 40, 'View student', 7, 1, 'Allows viewing student details'),
+('IMPORT_STUDENT', 41, 'Import student', 7, 1, 'Allows importing student data');
 INSERT INTO `role`
 (`status`, `role_id`, `role_code`, `role_name`, `description`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
 VALUES
@@ -90,17 +93,22 @@ VALUES
 (true, 1, 1), (true, 1, 2), (true, 1, 3), (true, 1, 4), (true, 1, 5), (true, 1, 6), (true, 1, 7), (true, 1, 8), (true, 1, 9), (true, 1, 10),
 (true, 1, 11), (true, 1, 12), (true, 1, 13), (true, 1, 14), (true, 1, 15), (true, 1, 16), (true, 1, 17), (true, 1, 18), (true, 1, 19), (true, 1, 20),
 (true, 1, 21), (true, 1, 22), (true, 1, 23), (true, 1, 24), (true, 1, 25), (true, 1, 26), (true, 1, 27), (true, 1, 28), (true, 1, 29), (true, 1, 30),
-(true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39),
+(true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39), (true, 1, 40), (true, 1, 41),
 -- Examiner
 (false, 2, 2), (false, 2, 3), (false, 2, 10), (false, 2, 11), (false, 2, 17), (false, 2, 18), (false, 2, 23), (false, 2, 24), (false, 2, 25), (false, 2, 39),
 (true, 2, 1), (true, 2, 4), (true, 2, 5), (true, 2, 6), (true, 2, 7), (true, 2, 8), (true, 2, 9), (true, 2, 12), (true, 2, 13), (true, 2, 14),
 (true, 2, 15), (true, 2, 16), (true, 2, 19), (true, 2, 20), (true, 2, 21), (true, 2, 22), (true, 2, 26), (true, 2, 27), (true, 2, 28), (true, 2, 29),
-(true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39),
+(true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40), (true, 2, 41),
 -- Head of Department
 (false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26), 
 (false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30), 
 (false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
-(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14);
+(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40), (true, 3, 41),
+-- Lecturer
+(false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26), 
+(false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30), 
+(false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
+(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40), (true, 3, 41);
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
@@ -204,12 +212,11 @@ VALUES
 -- ('Introduction 3', 'Important 3', '2024-09-30 10:10:00', 1, null, null, null, null, 1);
 
 INSERT INTO `exam_paper` 
-(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`,`is_used`) 
+(`exam_paper_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_id`,`is_used`, `subject_id`, `instruction`) 
 VALUES 
-('Trial_test', true, '2024-10-30 10:00:00', 1, null, null, null, null, 1,true),
-('PRN234_PE_FA24', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2,true),
-('PRN234_PE_SP25', true, '2024-09-30 10:00:00', 1, null, null, null, null, 2,false);
-
+('009909', 'COMPLETE', '2024-10-30 10:00:00', 1, null, null, null, null, 1,true,1,`Instruction`),
+('123456', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true,1, `Instruction`),
+('456789', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,false,1, `Instruction`);
 
 INSERT INTO `Exam_Question`
 (`question_content`, `exam_question_score`, `end_point`, `role_allow`, `http_method`, `description`, `payload_type`, `payload`, `validation`, `sucess_response`, `error_response`, `status`, `order_by`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
@@ -336,47 +343,56 @@ Request Body (JSON):
 
 
 
-INSERT INTO `postman_for_grading`
-(`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
-VALUES
-(2, 1, 1, null, 2, 'login',1,true),
-(2, 2, 2, 1, 2, 'login fail',1,true),
-(2, 1, 3, 1, 4, 'get',1,true),
-(2, 3, 4, 1, 4, 'get id',1,true),
-(2, 2, 5, 1, 3, 'delete',1,true);
+-- INSERT INTO `postman_for_grading`
+-- (`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
+-- VALUES
+-- (2, 1, 1, null, 2, 'login',1,true),
+-- (2, 2, 2, 1, 2, 'login fail',1,true),
+-- (2, 1, 3, 1, 4, 'get',1,true),
+-- (2, 3, 4, 1, 4, 'get id',1,true),
+-- (2, 2, 5, 1, 3, 'delete',1,true);
 
 INSERT INTO `ai_api_key`
 (`ai_api_key`, `ai_name`, `account_id`,`status`,`is_shared`)
 VALUES
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',1,true,true),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',1,true,true);
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',2,true,true),
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',3,true,true),
+('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',4,true,true),
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',5,true,true);
 
 INSERT INTO `account_selected_key`
 (`account_id`, `selected_ai_api_key_id`)
 VALUES
-(1, 1);
+(3, 1),
+(1, 1),
+(2, 1),
+(4, 1);
 
 
 INSERT INTO `content`
-(`question_content`, `order_priority`,`purpose`)
+(`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
-('Save to your memory, do not reply', 1,'Generate GherkinFormat'),
-('Write Gherkin format scenarios for the given feature or API. 
-Ensure each complete Gherkin scenario, including its title and all steps, is enclosed in double curly braces {{ }}. 
-Use this structure for all scenarios, for example:
+('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT'),
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline:
 {{ 
-Scenario: [Scenario Title]
-  Given [initial state or context]
-  When [event or action]
-  Then [expected outcome or result]
-}}', 2,'Generate GherkinFormat'),
-('This is Database, Save to your memory, do not reply', 1,'Generate Postman Collection'),
-('This is topic, Save to your memory, do not reply', 2,'Generate Postman Collection'),
-('- Write json postman collection for 1 item.name gherkin format below, No Explanation
-- json postman collection have "info" and "item":
-- "info" needs "_postman_id", "name", "schema", _exporter_id
-- "item" needs "name", "event"."listen": "test", "event"."script"."exec":pm.test
-- http://localhost:10000/...', 3,'Generate Postman Collection');
+Scenario: [Brief and clear description of the scenario]
+  Given [Describe the initial condition or prerequisite]
+  And [Optional additional conditions or prerequisites, if applicable]
+  When [Describe the key action or event that occurs]
+  And [Optional additional actions or events, if applicable]
+  Then [Describe the primary outcome or result]
+  And [Optional additional outcomes or verifications, if applicable]
+}}', 2,'GENERATE_GHERKIN_FORMAT'),
+('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline: ',2,'GENERATE_GHERKIN_FORMAT_MORE'),
+
+('Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION'),
+('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. The `event.script.exec` section in `item` must contain valid Postman test scripts (using pm.test). Write a JSON Postman collection that contains `info` and `item`. The `info` section should include `_postman_id`, `name`, `schema`, `_exporter_id`. The `item` section should include `name`, `event.listen` with the value `test`, and `event.script.exec` with the value `pm.test`. Do not explain the JSON structure, just provide the raw JSON.
+', 2,'GENERATE_POSTMAN_COLLECTION'),
+
+('This is Database, Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION_MORE'),
+('Given the JSON Postman collection below, please add multiple pm.test scripts within the same test case. Ensure that each test script is inside the same `event.script.exec` block, but each script checks a different condition or assertion. In the provided Postman JSON, within the `event.script.exec` section, please create multiple `pm.test` scripts under the same test case. Each `pm.test` should check a separate condition without creating additional test cases.', 2,'GENERATE_POSTMAN_COLLECTION_MORE');
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 

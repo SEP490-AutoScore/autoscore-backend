@@ -17,9 +17,10 @@ public interface PostmanForGradingRepository extends JpaRepository<Postman_For_G
 
     // Truy vấn danh sách Postman_For_Grading theo examPaperId và sắp xếp theo
     // orderBy
-    @Query("SELECT p FROM Postman_For_Grading p WHERE p.examPaper.examPaperId = :examPaperId ORDER BY p.orderBy")
-    List<Postman_For_Grading> findByExamPaperIdOrderByOrderBy(@Param("examPaperId") Long examPaperId);
-
+    // @Query("SELECT p FROM Postman_For_Grading p WHERE p.examPaper.examPaperId = :examPaperId ORDER BY p.orderBy")
+    // List<Postman_For_Grading> findByExamPaperIdOrderByOrderBy(@Param("examPaperId") Long examPaperId);
+    List<Postman_For_Grading> findByExamPaper_ExamPaperIdOrderByOrderPriorityAsc(Long examPaperId);
+    
     List<Postman_For_Grading> findByExamPaper_ExamPaperId(Long examPaperId);
 
     Optional<Postman_For_Grading> findByPostmanFunctionName(String functionName);
@@ -28,4 +29,16 @@ public interface PostmanForGradingRepository extends JpaRepository<Postman_For_G
 
     List<Postman_For_Grading> findByExamQuestionAndStatusTrue(Exam_Question examQuestion);
 
+    // Optional<Postman_For_Grading> findByGherkinScenario_GherkinScenarioId(Long gherkinScenarioId);
+
+    
+    Optional<Postman_For_Grading> findByGherkinScenario_GherkinScenarioIdAndStatusTrue(Long gherkinScenarioId);
+
+    List<Postman_For_Grading> findByPostmanFunctionNameInAndStatusTrue(List<String> functionNames);
+
+       @Query("SELECT p.postmanFunctionName FROM Postman_For_Grading p WHERE p.status = true")
+    List<String> findFunctionNamesByStatusTrue();
+
+      @Query("SELECT p FROM Postman_For_Grading p WHERE p.examPaper.examPaperId = :examPaperId AND p.status = true ORDER BY p.orderPriority ASC")
+    List<Postman_For_Grading> findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriority(@Param("examPaperId") Long examPaperId);
 }

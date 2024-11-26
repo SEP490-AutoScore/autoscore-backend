@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +24,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentRepository;
 import com.CodeEvalCrew.AutoScore.services.file_service.FileExtractionService;
 import com.CodeEvalCrew.AutoScore.services.source_service.SourceDetailService;
@@ -38,9 +43,6 @@ public class StudentSubmissionService {
     @Value("${upload.folder}")
     private String uploadDir;
 
-    @Value("${main.source.name}")
-    private String mainSourceName;
-
     @Value("${student.code.regex}")
     private String studentCodeRegex;
 
@@ -49,67 +51,111 @@ public class StudentSubmissionService {
     private final SourceService sourceService;
     private final SourceDetailService sourceDetailService;
     private final StudentErrorService studentErrorService;
+    private final IExamPaperRepository examPaperRepository;
+    private final FileProcessingProgressService progressService;
+    private static final int MAX_THREADS = 4;
 
     public StudentSubmissionService(FileExtractionService fileExtractionService,
             StudentRepository studentRepository, SourceService sourceService,
-            SourceDetailService sourceDetailService, StudentErrorService studentErrorService) {
+            SourceDetailService sourceDetailService, StudentErrorService studentErrorService,
+            IExamPaperRepository examPaperRepository, FileProcessingProgressService progressService) {
         this.fileExtractionService = fileExtractionService;
         this.studentRepository = studentRepository;
         this.sourceService = sourceService;
         this.sourceDetailService = sourceDetailService;
         this.studentErrorService = studentErrorService;
+        this.examPaperRepository = examPaperRepository;
+        this.progressService = progressService;
     }
 
-    // Số lượng luồng tối đa để xử lý submissions
-    private static final int MAX_THREADS = 4;
-
     // Phương thức chính để xử lý file submission
-    public List<String> processFileSubmission(MultipartFile file, Long examPaperId, String examType) throws IOException {
+    public List<String> processFileSubmission(MultipartFile file, Long examId) throws IOException {
         List<String> unmatchedStudents = Collections.synchronizedList(new ArrayList<>());
-
-        // Giải nén tệp đã upload và lấy thư mục gốc
-        String rootFolder = fileExtractionService.extract7zWithApacheCommons(file, uploadDir);
-        String mainSourcePath = rootFolder + File.separator + mainSourceName;
-        File studentSolutionFolder = new File(mainSourcePath);
-
-        Source source = sourceService.saveMainSource(mainSourcePath, examPaperId);
-
-        if (!studentSolutionFolder.exists() || !studentSolutionFolder.isDirectory()) {
-            throw new IOException("StudentSolution folder is missing or invalid");
-        }
-
-        File[] studentFolders = studentSolutionFolder.listFiles(File::isDirectory);
-        if (studentFolders == null || studentFolders.length == 0) {
-            throw new IOException("No subfolders found inside StudentSolution");
-        }
-
+        List<String> errors = Collections.synchronizedList(new ArrayList<>()); // Danh sách lưu lỗi
         ExecutorService executorService = Executors.newFixedThreadPool(MAX_THREADS);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
 
-        for (File studentFolder : studentFolders) {
-            completionService.submit(new SubmissionTask(studentFolder, source, unmatchedStudents, examType));
-        }
+        AtomicInteger totalTasks = new AtomicInteger(0);
+        AtomicInteger completedTasks = new AtomicInteger(0);
 
-        for (int i = 0; i < studentFolders.length; i++) {
-            try {
-                Future<Void> future = completionService.poll(10, TimeUnit.SECONDS);
-                if (future != null) {
-                    future.get();
-                } else {
-                    unmatchedStudents.add("Task timed out");
-                }
-            } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
-                unmatchedStudents.add("Task failed");
-                logger.error("Task execution failed", e);
+        try {
+            // Giải nén file
+            String rootFolder = fileExtractionService.extract7zWithApacheCommons(file, uploadDir);
+            File rootDirectory = new File(rootFolder);
+
+            if (!rootDirectory.exists() || !rootDirectory.isDirectory()) {
+                throw new IOException("Root folder is missing or invalid");
             }
+
+            // Lấy danh sách folder tầng 2
+            File[] examFolders = rootDirectory.listFiles(File::isDirectory);
+            if (examFolders == null || examFolders.length == 0) {
+                throw new IOException("No folders found in the root directory");
+            }
+
+            for (File examFolder : examFolders) {
+                Optional<Exam_Paper> examPaper = examPaperRepository.findByExamPaperCode(examFolder.getName());
+                if (!examPaper.isPresent() || !examPaper.get().getExam().getExamId().equals(examId) || !examPaper.get().getIsUsed() || !examPaper.get().getStatus().equals(Exam_Status_Enum.COMPLETE)) {
+                    unmatchedStudents.add("No matching exam paper found for folder: " + examFolder.getName());
+                    continue;
+                }
+
+                Source source = sourceService.saveMainSource(examFolder.getAbsolutePath(), examPaper.get().getExamPaperId());
+
+                File[] studentFolders = examFolder.listFiles(File::isDirectory);
+                if (studentFolders == null || studentFolders.length == 0) {
+                    unmatchedStudents.add("No subfolders found inside " + examFolder.getName());
+                    continue;
+                }
+
+                for (File studentFolder : studentFolders) {
+                    totalTasks.incrementAndGet();
+                    completionService.submit(() -> {
+                        try {
+                            completionService.submit(new SubmissionTask(studentFolder, source, unmatchedStudents, examPaper.get().getExam().getType().toString()));
+                        } catch (Exception e) {
+                            errors.add("Error processing folder " + studentFolder.getName() + ": " + e.getMessage());
+                            logger.error("Error processing folder: " + studentFolder.getName(), e);
+                        } finally {
+                            int progress = (completedTasks.incrementAndGet() * 100) / totalTasks.get();
+                            progressService.sendProgress(progress);
+                        }
+                        return null;
+                    });
+                }
+            }
+
+            // Chờ tất cả các tác vụ hoàn thành
+            while (completedTasks.get() < totalTasks.get()) {
+                try {
+                    Future<Void> future = completionService.poll(10, TimeUnit.SECONDS);
+                    if (future != null) {
+                        future.get(); // Bắt lỗi nếu Callable thất bại
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    errors.add("Task execution error: " + e.getMessage());
+                    logger.error("Error while processing tasks", e);
+                }
+            }
+
+            executorService.shutdown();
+            executorService.awaitTermination(5, TimeUnit.MINUTES);
+            progressService.sendProgress(100); // Tiến trình hoàn tất
+        } catch (IOException | InterruptedException e) {
+            errors.add("Critical error: " + e.getMessage());
+            logger.error("Critical error while processing submission", e);
+        } finally {
+            executorService.shutdownNow();
         }
 
-        executorService.shutdown();
+        // Kết hợp danh sách lỗi và unmatchedStudents để trả về
+        unmatchedStudents.addAll(errors);
         return unmatchedStudents;
     }
 
     // Lớp tác vụ để xử lý từng submission
     private class SubmissionTask implements Callable<Void> {
+
         private final File studentFolder;
         private final Source source;
         private final List<String> unmatchedStudents;
