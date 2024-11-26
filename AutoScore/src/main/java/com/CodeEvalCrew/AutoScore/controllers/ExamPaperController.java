@@ -21,9 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_paper_service.IExamPaperService;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 @RequestMapping("api/exam-paper")
@@ -155,21 +157,21 @@ public class ExamPaperController {
     @GetMapping("/{examPaperId}/gherkin-scenarios")
     public ResponseEntity<List<GherkinScenarioInfoDTO>> getGherkinScenariosByExamPaperId(
             @PathVariable Long examPaperId) throws NotFoundException {
-        List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService.getGherkinScenariosByExamPaperId(examPaperId);
+        List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService
+                .getGherkinScenariosByExamPaperId(examPaperId);
         return new ResponseEntity<>(gherkinScenarioInfoList, HttpStatus.OK);
     }
 
-    
     @GetMapping("/export-postman/{examPaperId}")
     public ResponseEntity<byte[]> exportPostmanCollection(@PathVariable Long examPaperId) {
         try {
             byte[] fileContent = examPaperService.exportPostmanCollection(examPaperId);
-    
+
             // Set the response headers for file download
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Disposition", "attachment; filename=postman_collection.json");
             headers.add("Content-Type", "application/json");
-    
+
             return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
         } catch (Exception e) {
             // Return error message as a byte array
@@ -177,7 +179,7 @@ public class ExamPaperController {
             return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
     }
-    
+
     @GetMapping("/all")
     public ResponseEntity<?> getAllExamPaper() {
         List<ExamPaperView> result;
@@ -193,6 +195,28 @@ public class ExamPaperController {
         }
     }
 
-    
+    @GetMapping("/infoFilePostman")
+    public ResponseEntity<?> getExamPaper(@RequestParam Long examPaperId) {
+        try {
+            ExamPaperFilePostmanResponseDTO response = examPaperService.getInfoFilePostman(examPaperId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
+    @PutMapping("/confirmFilePostman/{examPaperId}")
+    public ResponseEntity<?> confirmFilePostman(@PathVariable Long examPaperId) {
+        try {
+            String result = examPaperService.confirmFilePostman(examPaperId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+         } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 }

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingCreateDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateGetDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetDTO;
@@ -43,13 +42,6 @@ public class PostmanForGradingController {
         List<PostmanForGradingDTO> postmanForGradingList = postmanForGradingService
                 .getPostmanForGradingByExamPaperId(examPaperId);
         return new ResponseEntity<>(postmanForGradingList, HttpStatus.OK);
-    }
-
-    @PutMapping("/update")
-    public ResponseEntity<Void> updatePostmanForGradingList(
-            @RequestBody List<PostmanForGradingDTO> postmanForGradingDTOs) {
-        postmanForGradingService.updatePostmanForGradingList(postmanForGradingDTOs);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/generate")
@@ -95,14 +87,7 @@ public class PostmanForGradingController {
         return ResponseEntity.ok(dto);
     }
     
-      @PutMapping("/{postmanForGradingId}")
-    public ResponseEntity<PostmanForGradingGetDTO> updatePostmanForGrading(
-            @PathVariable Long postmanForGradingId,
-            @RequestBody PostmanForGradingUpdateGetDTO updateDTO) {
-
-                PostmanForGradingGetDTO updatedPostman = postmanForGradingService.updatePostmanForGrading(postmanForGradingId, updateDTO);
-        return ResponseEntity.ok(updatedPostman);
-    }
+   
 
      @PostMapping
     public ResponseEntity<PostmanForGradingGetDTO> createPostmanForGrading(@RequestBody PostmanForGradingCreateDTO createDTO) {
