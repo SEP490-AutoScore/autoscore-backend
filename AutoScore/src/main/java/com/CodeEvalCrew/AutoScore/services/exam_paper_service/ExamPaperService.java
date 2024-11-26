@@ -46,7 +46,9 @@ import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectReposi
 import com.CodeEvalCrew.AutoScore.specification.ExamPaperSpecification;
 import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
+
 import com.fasterxml.jackson.core.JsonGenerator;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -317,7 +319,12 @@ public class ExamPaperService implements IExamPaperService {
     
             for (MultipartFile file : files) {
                 byte[] fileData = file.getBytes();
-                java.io.File tempFile = convertBytesToFile(fileData, file.getOriginalFilename());
+
+                // java.io.File tempFile = convertBytesToFile(fileData, file.getOriginalFilename());
+                 String fileContent = new String(fileData, StandardCharsets.UTF_8);
+            java.io.File tempFile = convertBytesToFile(fileData, file.getOriginalFilename());
+
+
     
                 // Check if the file contains valid JSON
                 if (!isValidJson(tempFile)) {
@@ -330,10 +337,12 @@ public class ExamPaperService implements IExamPaperService {
     
                 
                 // Cập nhật fileCollectionPostman trong Postman_For_Grading
-                updateFileCollectionPostmanForGrading(fileData, examPaperId);
+
+                updateFileCollectionPostmanForGrading(fileContent.getBytes(StandardCharsets.UTF_8), examPaperId);
+
     
                 // Lưu thông tin vào examPaper bất kể kết quả Newman
-                examPaper.setFileCollectionPostman(fileData);
+                examPaper.setFileCollectionPostman(fileContent.getBytes(StandardCharsets.UTF_8));
                 examPaper.setIsComfirmFile(false);
                 examPaperRepository.save(examPaper);
     
@@ -357,51 +366,51 @@ public class ExamPaperService implements IExamPaperService {
                 .collect(Collectors.toList());
     }
   
-
-
+    
     private void updateFileCollectionPostmanForGrading(byte[] fileData, Long examPaperId) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-       
-        JsonNode collectionJson = objectMapper.readTree(fileData);
-       
-    
+        // JsonNode collectionJson = objectMapper.readTree(fileData);
+        JsonNode collectionJson = objectMapper.readTree(new String(fileData, StandardCharsets.UTF_8)); // Đảm bảo UTF-8
 
     
-        if (collectionJson.has("item")) {
-            ArrayNode items = (ArrayNode) collectionJson.get("item");
-    
-            // Lấy danh sách tất cả các Postman_For_Grading liên quan đến Exam_Paper
-            List<Postman_For_Grading> postmanForGradingList = postmanForGradingRepository.findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
-    
-            // Lặp qua từng Postman_For_Grading
-            for (Postman_For_Grading postman : postmanForGradingList) {
-                String functionName = postman.getPostmanFunctionName();
-    
-                // Tạo một mảng mới chứa các item trùng tên
-                ArrayNode matchingItems = objectMapper.createArrayNode();
-    
-                for (JsonNode item : items) {
-                    if (item.has("name") && functionName.equals(item.get("name").asText())) {
-                        matchingItems.add(item);
-                    }
-                }
-    
-                // Nếu tìm thấy item khớp, cập nhật fileCollectionPostman
-                if (matchingItems.size() > 0) {
-                    ObjectNode updatedCollection = objectMapper.createObjectNode();
-                    updatedCollection.set("item", matchingItems);
-    
-                    // Gán nội dung đã lọc vào Postman_For_Grading
-                    postman.setFileCollectionPostman(objectMapper.writeValueAsBytes(updatedCollection));
-                }
-            }
-    
-            // Lưu toàn bộ các thay đổi vào cơ sở dữ liệu
-            postmanForGradingRepository.saveAll(postmanForGradingList);
+        if (!collectionJson.has("item")) {
+            throw new IllegalArgumentException("Invalid Postman collection format: Missing 'item' field.");
         }
+    
+        ArrayNode items = (ArrayNode) collectionJson.get("item");
+    
+        List<Postman_For_Grading> postmanForGradingList = postmanForGradingRepository.findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+    
+        for (Postman_For_Grading postman : postmanForGradingList) {
+            String functionName = postman.getPostmanFunctionName();
+    
+            ArrayNode matchingItems = findMatchingItems(items, functionName, objectMapper);
+    
+            if (matchingItems.size() > 0) {
+                ObjectNode updatedCollection = objectMapper.createObjectNode();
+                updatedCollection.set("info", collectionJson.get("info")); // Copy thông tin từ info
+                updatedCollection.set("item", matchingItems);
+    
+                postman.setFileCollectionPostman(objectMapper.writeValueAsBytes(updatedCollection));
+            } else {
+                System.out.println("No matching items found for function: " + functionName);
+            }
+        }
+    
+        postmanForGradingRepository.saveAll(postmanForGradingList);
     }
     
-   
+    private ArrayNode findMatchingItems(ArrayNode items, String functionName, ObjectMapper objectMapper) {
+        ArrayNode matchingItems = objectMapper.createArrayNode();
+        for (JsonNode item : items) {
+            if (item.has("name") && functionName.equals(item.get("name").asText())) {
+                matchingItems.add(item);
+            }
+        }
+        return matchingItems;
+    }
+    
+
   
 
     private String runNewmanTest(java.io.File file) throws Exception {
@@ -449,10 +458,6 @@ public class ExamPaperService implements IExamPaperService {
     // Lấy danh sách functionNames từ kết quả Newman
     List<String> functionNamesFromNewman = result.getFunctionNames();
 
-    // Lấy danh sách functionNames từ cơ sở dữ liệu
-    // List<String> functionNamesInDb = expectedFunctionInfo.stream()
-    //         .map(PostmanFunctionInfo::getFunctionName)
-    //         .collect(Collectors.toList());
     List<String> functionNamesInDb = postmanForGradingRepository.findFunctionNamesByStatusTrue();
 
 
