@@ -53,6 +53,11 @@ public class Exam_Paper {
     @Basic(fetch = FetchType.EAGER) // Buộc tải ngay lập tức
     private byte[] fileCollectionPostman;
     private Boolean isComfirmFile = false;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String logRunPostman;
+    
     private Boolean isUsed = false;
 
     //Relationship

@@ -1,8 +1,6 @@
 package com.CodeEvalCrew.AutoScore.services.postman_for_grading_service;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -192,10 +190,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             throw new RuntimeException("Không thể cập nhật fileCollectionPostman", e);
         }
 
-        // Cập nhật isComfirmFile và lưu Exam_Paper
-
-        examPaper.setIsComfirmFile(true);
-
+        examPaper.setIsComfirmFile(false);
         // Lưu lại đối tượng Exam_Paper đã cập nhật
         examPaperRepository.save(examPaper);
 
@@ -209,7 +204,6 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             List<Postman_For_Grading> postmanList = postmanForGradingRepository
 
                     .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriority(examPaperId);
-
 
             if (postmanList.isEmpty()) {
                 return "Không tìm thấy file Postman Collection nào cho Exam Paper ID: " + examPaperId;
@@ -268,9 +262,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             examPaper.setIsComfirmFile(false);
             examPaperRepository.save(examPaper);
 
-
             return "Successfully merged Postman Collections for examPaperId " + examPaperId;
-
 
         } catch (org.json.JSONException e) {
             e.printStackTrace();
@@ -459,7 +451,6 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                         + "\n - Success response: " + gherkinScenario.getExamQuestion().getSucessResponse()
                         + "\n - Error response: " + gherkinScenario.getExamQuestion().getErrorResponse()
                         + "\n - Payload: " + gherkinScenario.getExamQuestion().getPayload()
-
 
                         + "\n " + fileCollectionPostmanText;
 
@@ -705,8 +696,6 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         return responseBody;
     }
 
-
-
     @Override
     public List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId) {
         // Lấy danh sách các thực thể từ repository
@@ -823,6 +812,13 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         }
 
         Postman_For_Grading postman = optionalPostman.get();
+        // Lấy Exam_Paper từ Postman_For_Grading
+        Exam_Paper examPaper = postman.getExamPaper();
+        if (examPaper != null) {
+            // Cập nhật isComfirmFile thành false
+            examPaper.setIsComfirmFile(false);
+            examPaperRepository.save(examPaper); // Lưu thay đổi vào cơ sở dữ liệu
+        }
 
         // Cập nhật các trường cần thiết
         postman.setStatus(false);
@@ -876,64 +872,6 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         return dto;
     }
-
-    // @Override
-    // public PostmanForGradingGetDTO updatePostmanForGrading(Long postmanForGradingId,
-    //         PostmanForGradingUpdateGetDTO updateDTO) {
-    //     // Tìm Postman_For_Grading từ database
-    //     Optional<Postman_For_Grading> optionalPostman = postmanForGradingRepository.findById(postmanForGradingId);
-    //     if (optionalPostman.isEmpty()) {
-    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-    //                 "Postman_For_Grading not found with ID: " + postmanForGradingId);
-    //     }
-
-    //     Postman_For_Grading postman = optionalPostman.get();
-
-    //     // Cập nhật các thuộc tính từ DTO
-    //     if (updateDTO.getPostmanFunctionName() != null) {
-    //         postman.setPostmanFunctionName(updateDTO.getPostmanFunctionName());
-    //     }
-
-    //     if (updateDTO.getScoreOfFunction() != null) {
-    //         postman.setScoreOfFunction(updateDTO.getScoreOfFunction());
-    //     }
-
-    //     if (updateDTO.getFileCollectionPostman() != null) {
-    //         // Chuyển đổi JSON thành mảng byte
-    //         try {
-    //             byte[] fileCollectionBytes = updateDTO.getFileCollectionPostman().getBytes(StandardCharsets.UTF_8);
-    //             postman.setFileCollectionPostman(fileCollectionBytes);
-    //         } catch (Exception e) {
-    //             throw new RuntimeException("Error while parsing JSON for FileCollectionPostman", e);
-    //         }
-    //     }
-
-    //     // Lưu thay đổi vào database
-    //     postman = postmanForGradingRepository.save(postman);
-
-    //     // Chuyển đổi thành DTO để trả về
-    //     PostmanForGradingGetDTO dto = new PostmanForGradingGetDTO();
-    //     dto.setPostmanForGradingId(postman.getPostmanForGradingId());
-    //     dto.setPostmanFunctionName(postman.getPostmanFunctionName());
-    //     dto.setScoreOfFunction(postman.getScoreOfFunction());
-    //     dto.setTotalPmTest(postman.getTotalPmTest());
-    //     dto.setStatus(postman.isStatus());
-    //     dto.setOrderPriority(postman.getOrderPriority());
-    //     dto.setPostmanForGradingParentId(postman.getPostmanForGradingParentId());
-
-    //     // Chuyển đổi FileCollectionPostman thành chuỗi JSON (nếu không null)
-    //     if (postman.getFileCollectionPostman() != null) {
-    //         dto.setFileCollectionPostman(new String(postman.getFileCollectionPostman(), StandardCharsets.UTF_8));
-    //     }
-
-    //     // Gắn ID của các thực thể liên kết
-    //     dto.setExamQuestionId(postman.getExamQuestion() != null ? postman.getExamQuestion().getExamQuestionId() : null);
-    //     dto.setGherkinScenarioId(
-    //             postman.getGherkinScenario() != null ? postman.getGherkinScenario().getGherkinScenarioId() : null);
-    //     dto.setExamPaperId(postman.getExamPaper() != null ? postman.getExamPaper().getExamPaperId() : null);
-
-    //     return dto;
-    // }
 
     @Override
     public PostmanForGradingGetDTO createPostmanForGrading(PostmanForGradingCreateDTO createDTO) {
