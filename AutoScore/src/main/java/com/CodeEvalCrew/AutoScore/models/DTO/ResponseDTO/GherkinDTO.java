@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 public class GherkinDTO {
     private Long gherkinScenarioId;
     private String gherkinData;
-    // private Long orderPriority;
-    // private Boolean isUpdateCreate;
     private Boolean status;
     private Long examQuestionId;
     private Long postmanForGradingId;

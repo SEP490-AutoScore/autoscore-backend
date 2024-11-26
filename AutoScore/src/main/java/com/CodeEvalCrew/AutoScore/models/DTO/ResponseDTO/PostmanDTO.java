@@ -15,7 +15,8 @@ public class PostmanDTO {
     private boolean status;
     private Long orderBy;
     private Long postmanForGradingParentId;
-    private byte[] fileCollectionPostman;
+    // private byte[] fileCollectionPostman;
+    private String fileCollectionPostman;
     private Long examQuestionId;
     private Long gherkinScenarioId;
     private Long examPaperId;
