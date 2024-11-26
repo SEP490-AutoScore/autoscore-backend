@@ -29,7 +29,6 @@ public class Postman_For_Grading {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postmanForGradingId;
 
-    @Column(nullable = false)
     private String postmanFunctionName;
 
     private Float scoreOfFunction;

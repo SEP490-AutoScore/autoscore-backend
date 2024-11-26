@@ -45,12 +45,21 @@ public class PostmanForGradingController {
         return new ResponseEntity<>(postmanForGradingList, HttpStatus.OK);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<Void> updatePostmanForGradingList(
-            @RequestBody List<PostmanForGradingDTO> postmanForGradingDTOs) {
-        postmanForGradingService.updatePostmanForGradingList(postmanForGradingDTOs);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    // @PutMapping("/update")
+    // public ResponseEntity<Void> updatePostmanForGradingList(
+    //         @RequestBody List<PostmanForGradingDTO> postmanForGradingDTOs) {
+    //     postmanForGradingService.updatePostmanForGradingList(postmanForGradingDTOs);
+    //     return new ResponseEntity<>(HttpStatus.OK);
+    // }
+
+    // @PutMapping("/{postmanForGradingId}")
+    // public ResponseEntity<PostmanForGradingGetDTO> updatePostmanForGrading(
+    //         @PathVariable Long postmanForGradingId,
+    //         @RequestBody PostmanForGradingUpdateGetDTO updateDTO) {
+
+    //             PostmanForGradingGetDTO updatedPostman = postmanForGradingService.updatePostmanForGrading(postmanForGradingId, updateDTO);
+    //     return ResponseEntity.ok(updatedPostman);
+    // }
 
     @PostMapping("/generate")
     public ResponseEntity<String> generatePostmanCollection(@RequestParam Long gherkinScenarioId) {
@@ -95,14 +104,7 @@ public class PostmanForGradingController {
         return ResponseEntity.ok(dto);
     }
     
-      @PutMapping("/{postmanForGradingId}")
-    public ResponseEntity<PostmanForGradingGetDTO> updatePostmanForGrading(
-            @PathVariable Long postmanForGradingId,
-            @RequestBody PostmanForGradingUpdateGetDTO updateDTO) {
-
-                PostmanForGradingGetDTO updatedPostman = postmanForGradingService.updatePostmanForGrading(postmanForGradingId, updateDTO);
-        return ResponseEntity.ok(updatedPostman);
-    }
+   
 
      @PostMapping
     public ResponseEntity<PostmanForGradingGetDTO> createPostmanForGrading(@RequestBody PostmanForGradingCreateDTO createDTO) {

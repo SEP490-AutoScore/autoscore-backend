@@ -54,7 +54,7 @@ public class Source_Detail {
     private Student student;
 
     //n-1 source
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sourceId", nullable = false)
     private Source source;
 }

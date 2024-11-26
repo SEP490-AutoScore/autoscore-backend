@@ -15,11 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentErrorResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.services.student_error_service.IStudentErrorService;
-import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
 import com.CodeEvalCrew.AutoScore.services.student_service.ExcelService;
 import com.CodeEvalCrew.AutoScore.services.student_service.IStudentService;
 import com.CodeEvalCrew.AutoScore.utils.UploadProgressListener;
@@ -64,7 +63,7 @@ public class StudentController {
             // Cập nhật tiến trình
             progressListener.updateProgress(0, file.getSize());
             List<Student> students = excelService.importExcelFile(file, examId, progressListener);
-            studentService.saveStudents(students);
+            studentService.saveStudents(students, examId);
             return ResponseEntity.status(HttpStatus.OK).body("File imported and students saved successfully!");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to import file");
