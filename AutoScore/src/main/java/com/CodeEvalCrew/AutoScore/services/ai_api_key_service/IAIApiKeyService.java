@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAIApiKeyDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIApiKeyDTO;
-import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
+
 
 public interface IAIApiKeyService {
     List<AIApiKeyDTO> getAllAIApiKeys();
@@ -13,7 +13,9 @@ public interface IAIApiKeyService {
 
     AIApiKeyDTO createAIApiKey(CreateAIApiKeyDTO dto);
 
-      AI_Api_Key updateAiApiKey(Long aiApiKeyId, String aiApiKey);
+    // String  updateAiApiKey(Long aiApiKeyId, String aiApiKey);
 
+    void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey);
+    
      void deleteAiApiKey(Long aiApiKeyId);
 }

@@ -89,8 +89,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             GherkinDTO gherkinDTO = new GherkinDTO(
                     gherkin.getGherkinScenarioId(),
                     gherkin.getGherkinData(),
-                    // gherkin.getOrderPriority(),
-                    // gherkin.getIsUpdateCreate(),
                     gherkin.isStatus(),
                     examQuestion.getExamQuestionId(),
                     matchedPostman != null ? matchedPostman.getPostmanForGradingId() : null);
@@ -104,14 +102,16 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                             matchedPostman.isStatus(),
                             matchedPostman.getOrderPriority(),
                             matchedPostman.getPostmanForGradingParentId(),
-                            matchedPostman.getFileCollectionPostman(),
+                            decodeFileCollectionPostman(matchedPostman.getFileCollectionPostman()), // Decode byte[] to
+                                                                                                    // String
                             matchedPostman.getExamQuestion() != null
                                     ? matchedPostman.getExamQuestion().getExamQuestionId()
                                     : null,
                             matchedPostman.getGherkinScenario() != null
                                     ? matchedPostman.getGherkinScenario().getGherkinScenarioId()
                                     : null,
-                            matchedPostman.getExamPaper() != null ? matchedPostman.getExamPaper().getExamPaperId()
+                            matchedPostman.getExamPaper() != null
+                                    ? matchedPostman.getExamPaper().getExamPaperId()
                                     : null)
                     : null;
 
@@ -129,7 +129,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         postman.isStatus(),
                         postman.getOrderPriority(),
                         postman.getPostmanForGradingParentId(),
-                        postman.getFileCollectionPostman(),
+                        decodeFileCollectionPostman(postman.getFileCollectionPostman()), // Decode byte[] to String
                         postman.getExamQuestion() != null ? postman.getExamQuestion().getExamQuestionId() : null,
                         postman.getGherkinScenario().getGherkinScenarioId(), // Trỏ tới Gherkin với status = false
                         postman.getExamPaper() != null ? postman.getExamPaper().getExamPaperId() : null);
@@ -149,7 +149,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         postman.isStatus(),
                         postman.getOrderPriority(),
                         postman.getPostmanForGradingParentId(),
-                        postman.getFileCollectionPostman(),
+                        decodeFileCollectionPostman(postman.getFileCollectionPostman()), // Decode byte[] to String
                         postman.getExamQuestion() != null ? postman.getExamQuestion().getExamQuestionId() : null,
                         null, // Không có Gherkin Scenario
                         postman.getExamPaper() != null ? postman.getExamPaper().getExamPaperId() : null);
@@ -159,6 +159,13 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         }
 
         return pairs;
+    }
+
+    private String decodeFileCollectionPostman(byte[] fileCollectionPostman) {
+        if (fileCollectionPostman != null) {
+            return new String(fileCollectionPostman, StandardCharsets.UTF_8); // Chuyển đổi từ byte[] sang String
+        }
+        return null;
     }
 
     @Override
@@ -172,8 +179,9 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
         List<GherkinPostmanPairDTO> pairs = new ArrayList<>();
 
+        // Duyệt qua các câu hỏi
         for (Exam_Question examQuestion : examQuestions) {
-            // Lấy tất cả Gherkin_Scenario liên quan và có status = true
+            // Lấy tất cả Gherkin_Scenario liên quan
             List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository
                     .findByExamQuestionAndStatusTrue(examQuestion);
 
@@ -189,8 +197,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 GherkinDTO gherkinDTO = new GherkinDTO(
                         gherkin.getGherkinScenarioId(),
                         gherkin.getGherkinData(),
-                        // gherkin.getOrderPriority(),
-                        // gherkin.getIsUpdateCreate(),
                         gherkin.isStatus(),
                         examQuestion.getExamQuestionId(),
                         matchedPostman != null ? matchedPostman.getPostmanForGradingId() : null);
@@ -204,14 +210,15 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                 matchedPostman.isStatus(),
                                 matchedPostman.getOrderPriority(),
                                 matchedPostman.getPostmanForGradingParentId(),
-                                matchedPostman.getFileCollectionPostman(),
+                                decodeFileCollectionPostman(matchedPostman.getFileCollectionPostman()), // Decode
                                 matchedPostman.getExamQuestion() != null
                                         ? matchedPostman.getExamQuestion().getExamQuestionId()
                                         : null,
                                 matchedPostman.getGherkinScenario() != null
                                         ? matchedPostman.getGherkinScenario().getGherkinScenarioId()
                                         : null,
-                                matchedPostman.getExamPaper() != null ? matchedPostman.getExamPaper().getExamPaperId()
+                                matchedPostman.getExamPaper() != null
+                                        ? matchedPostman.getExamPaper().getExamPaperId()
                                         : null)
                         : null;
 
@@ -219,9 +226,9 @@ public class GherkinScenarioService implements IGherkinScenarioService {
             }
         }
 
-        // Xử lý trường hợp Postman trỏ tới Gherkin nhưng Gherkin có status = false
+        // Xử lý các Postman không liên kết với Gherkin
         for (Postman_For_Grading postman : postmanForGradings) {
-            if (postman.getGherkinScenario() != null && !postman.getGherkinScenario().isStatus()) {
+            if (postman.getGherkinScenario() == null || !postman.getGherkinScenario().isStatus()) {
                 PostmanDTO postmanDTO = new PostmanDTO(
                         postman.getPostmanForGradingId(),
                         postman.getPostmanFunctionName(),
@@ -230,29 +237,10 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         postman.isStatus(),
                         postman.getOrderPriority(),
                         postman.getPostmanForGradingParentId(),
-                        postman.getFileCollectionPostman(),
+                        decodeFileCollectionPostman(postman.getFileCollectionPostman()), // Decode
                         postman.getExamQuestion() != null ? postman.getExamQuestion().getExamQuestionId() : null,
-                        postman.getGherkinScenario().getGherkinScenarioId(), // Trỏ tới Gherkin với status = false
-                        postman.getExamPaper() != null ? postman.getExamPaper().getExamPaperId() : null);
-
-                pairs.add(new GherkinPostmanPairDTO(null, postmanDTO));
-            }
-        }
-
-        // Xử lý trường hợp chỉ có Postman mà không có Gherkin
-        for (Postman_For_Grading postman : postmanForGradings) {
-            if (postman.getGherkinScenario() == null) {
-                PostmanDTO postmanDTO = new PostmanDTO(
-                        postman.getPostmanForGradingId(),
-                        postman.getPostmanFunctionName(),
-                        postman.getScoreOfFunction(),
-                        postman.getTotalPmTest(),
-                        postman.isStatus(),
-                        postman.getOrderPriority(),
-                        postman.getPostmanForGradingParentId(),
-                        postman.getFileCollectionPostman(),
-                        postman.getExamQuestion() != null ? postman.getExamQuestion().getExamQuestionId() : null,
-                        null, // Không có Gherkin Scenario
+                        postman.getGherkinScenario() != null ? postman.getGherkinScenario().getGherkinScenarioId()
+                                : null,
                         postman.getExamPaper() != null ? postman.getExamPaper().getExamPaperId() : null);
 
                 pairs.add(new GherkinPostmanPairDTO(null, postmanDTO));
@@ -327,7 +315,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         StringBuilder responseBuilder = new StringBuilder();
 
         // Lấy nội dung sắp xếp theo thứ tự ưu tiên
-        List<Content> orderedContents = contentRepository.findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT);
+        List<Content> orderedContents = contentRepository
+                .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT);
 
         // orderedContents.forEach(content -> {
         for (Content content : orderedContents) {
@@ -364,8 +353,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         return "Unknown error! May be AI not response";
 
     }
-
-
 
     public List<String> getGherkinDatasByExamQuestionId(Long examQuestionId) {
         // Kiểm tra xem examQuestionId có tồn tại hay không
@@ -425,12 +412,10 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         if (gherkinDatas == null || gherkinDatas.isEmpty()) {
             return "No Gherkin data found for Exam Question ID: " + examQuestionId;
         }
-         // Định dạng các gherkin data với {{ }}
-    String formattedGherkinData = gherkinDatas.stream()
-    .map(data -> "{{ " + data + " }}")
-    .collect(Collectors.joining("\n"));
-
-
+        // Định dạng các gherkin data với {{ }}
+        String formattedGherkinData = gherkinDatas.stream()
+                .map(data -> "{{ " + data + " }}")
+                .collect(Collectors.joining("\n"));
 
         // Lấy nội dung sắp xếp theo thứ tự ưu tiên
         List<Content> orderedContents = contentRepository
@@ -447,7 +432,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
             else if (content.getOrderPriority() == 2) {
 
-                question += "\n"  + formattedGherkinData
+                question += "\n" + formattedGherkinData
                         + "\n - Question Content: " + examQuestion.getQuestionContent()
                         // + "\n - Role alowed: " + examQuestion.getRoleAllow()
                         + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
@@ -459,7 +444,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         + "\n - Success response: " + examQuestion.getSucessResponse()
                         + "\n - Error response: " + examQuestion.getErrorResponse()
                         + "\n - Payload: " + examQuestion.getPayload();
-                       
+
             }
 
             String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
@@ -552,30 +537,34 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     public GherkinScenarioResponseDTO updateGherkinScenarios(Long gherkinScenarioId, String gherkinData) {
         // Tìm Gherkin_Scenario theo ID
         Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId);
-    
+
         if (optionalGherkinScenario.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gherkin Scenario not found with ID: " + gherkinScenarioId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Gherkin Scenario not found with ID: " + gherkinScenarioId);
         }
-    
+
         Gherkin_Scenario gherkinScenario = optionalGherkinScenario.get();
-    
+
         // Cập nhật gherkinData
         gherkinScenario.setGherkinData(gherkinData);
-    
+
         // Lưu thay đổi vào cơ sở dữ liệu
         Gherkin_Scenario updatedGherkinScenario = gherkinScenarioRepository.save(gherkinScenario);
-    
+
         // Chuyển đổi thông tin thành DTO để trả về
         GherkinScenarioResponseDTO responseDTO = new GherkinScenarioResponseDTO();
         responseDTO.setGherkinScenarioId(updatedGherkinScenario.getGherkinScenarioId());
         responseDTO.setGherkinData(updatedGherkinScenario.getGherkinData());
         responseDTO.setStatus(updatedGherkinScenario.isStatus());
-        responseDTO.setExamQuestionId(updatedGherkinScenario.getExamQuestion() != null ? updatedGherkinScenario.getExamQuestion().getExamQuestionId() : null);
-        responseDTO.setPostmanForGradingId(updatedGherkinScenario.getPostmanForGrading() != null ? updatedGherkinScenario.getPostmanForGrading().getPostmanForGradingId() : null);
-    
+        responseDTO.setExamQuestionId(updatedGherkinScenario.getExamQuestion() != null
+                ? updatedGherkinScenario.getExamQuestion().getExamQuestionId()
+                : null);
+        responseDTO.setPostmanForGradingId(updatedGherkinScenario.getPostmanForGrading() != null
+                ? updatedGherkinScenario.getPostmanForGrading().getPostmanForGradingId()
+                : null);
+
         return responseDTO;
     }
-    
 
     @Override
     public GherkinScenarioResponseDTO deleteGherkinScenario(Long gherkinScenarioId) {
@@ -583,7 +572,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId);
 
         if (optionalGherkinScenario.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gherkin Scenario not found with ID: " + gherkinScenarioId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Gherkin Scenario not found with ID: " + gherkinScenarioId);
         }
 
         Gherkin_Scenario gherkinScenario = optionalGherkinScenario.get();
@@ -591,7 +581,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         // Cập nhật các trường theo yêu cầu
         gherkinScenario.setStatus(false);
         gherkinScenario.setPostmanForGrading(null);
-      
 
         // Lưu thay đổi vào cơ sở dữ liệu
         Gherkin_Scenario updatedGherkinScenario = gherkinScenarioRepository.save(gherkinScenario);
@@ -601,8 +590,12 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         responseDTO.setGherkinScenarioId(updatedGherkinScenario.getGherkinScenarioId());
         responseDTO.setGherkinData(updatedGherkinScenario.getGherkinData());
         responseDTO.setStatus(updatedGherkinScenario.isStatus());
-        responseDTO.setExamQuestionId(updatedGherkinScenario.getExamQuestion() != null ? updatedGherkinScenario.getExamQuestion().getExamQuestionId() : null);
-        responseDTO.setPostmanForGradingId(updatedGherkinScenario.getPostmanForGrading() != null ? updatedGherkinScenario.getPostmanForGrading().getPostmanForGradingId() : null);
+        responseDTO.setExamQuestionId(updatedGherkinScenario.getExamQuestion() != null
+                ? updatedGherkinScenario.getExamQuestion().getExamQuestionId()
+                : null);
+        responseDTO.setPostmanForGradingId(updatedGherkinScenario.getPostmanForGrading() != null
+                ? updatedGherkinScenario.getPostmanForGrading().getPostmanForGradingId()
+                : null);
 
         return responseDTO;
     }
@@ -611,58 +604,64 @@ public class GherkinScenarioService implements IGherkinScenarioService {
     public GherkinScenarioResponseDTO createGherkinScenario(CreateGherkinScenarioDTO dto) {
         // Tìm Exam_Question dựa trên examQuestionId
         Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(dto.getExamQuestionId());
-       
-    
+
         if (optionalExamQuestion.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Exam Question not found with ID: " + dto.getExamQuestionId());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Exam Question not found with ID: " + dto.getExamQuestionId());
         }
-      
 
         Exam_Question examQuestion = optionalExamQuestion.get();
-    
+
         // Tạo mới Gherkin_Scenario
         Gherkin_Scenario gherkinScenario = new Gherkin_Scenario();
         gherkinScenario.setGherkinData(dto.getGherkinData());
         gherkinScenario.setStatus(true);
         gherkinScenario.setExamQuestion(examQuestion);
         gherkinScenario.setPostmanForGrading(null); // Đặt null vì không yêu cầu dữ liệu này
-    
+
         // Lưu vào cơ sở dữ liệu
         Gherkin_Scenario savedGherkinScenario = gherkinScenarioRepository.save(gherkinScenario);
-    
+
         // Chuyển đổi Gherkin_Scenario thành DTO
         GherkinScenarioResponseDTO responseDTO = new GherkinScenarioResponseDTO();
         responseDTO.setGherkinScenarioId(savedGherkinScenario.getGherkinScenarioId());
         responseDTO.setGherkinData(savedGherkinScenario.getGherkinData());
         responseDTO.setStatus(savedGherkinScenario.isStatus());
         responseDTO.setExamQuestionId(savedGherkinScenario.getExamQuestion().getExamQuestionId());
-        responseDTO.setPostmanForGradingId(savedGherkinScenario.getPostmanForGrading() != null ? savedGherkinScenario.getPostmanForGrading().getPostmanForGradingId() : null);
-    
+        responseDTO.setPostmanForGradingId(savedGherkinScenario.getPostmanForGrading() != null
+                ? savedGherkinScenario.getPostmanForGrading().getPostmanForGradingId()
+                : null);
+
         return responseDTO;
     }
 
-@Override
-public GherkinScenarioDTO getById(Long gherkinScenarioId) {
-    // Tìm Gherkin_Scenario theo ID
-    Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId);
-    if (optionalGherkinScenario.isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gherkin_Scenario not found with ID: " + gherkinScenarioId);
+    @Override
+    public GherkinScenarioDTO getById(Long gherkinScenarioId) {
+        // Tìm Gherkin_Scenario theo ID
+        Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository.findById(gherkinScenarioId);
+        if (optionalGherkinScenario.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Gherkin_Scenario not found with ID: " + gherkinScenarioId);
+        }
+
+        Gherkin_Scenario gherkinScenario = optionalGherkinScenario.get();
+
+        // Chuyển đổi sang DTO
+        GherkinScenarioDTO dto = new GherkinScenarioDTO();
+        dto.setGherkinScenarioId(gherkinScenario.getGherkinScenarioId());
+        dto.setGherkinData(gherkinScenario.getGherkinData());
+        dto.setStatus(gherkinScenario.isStatus());
+
+        // Gán examQuestionId từ Exam_Question
+        dto.setExamQuestionId(
+                gherkinScenario.getExamQuestion() != null ? gherkinScenario.getExamQuestion().getExamQuestionId()
+                        : null);
+
+        // Gán postmanForGradingId từ Postman_For_Grading
+        dto.setPostmanForGradingId(gherkinScenario.getPostmanForGrading() != null
+                ? gherkinScenario.getPostmanForGrading().getPostmanForGradingId()
+                : null);
+
+        return dto;
     }
-
-    Gherkin_Scenario gherkinScenario = optionalGherkinScenario.get();
-
-    // Chuyển đổi sang DTO
-    GherkinScenarioDTO dto = new GherkinScenarioDTO();
-    dto.setGherkinScenarioId(gherkinScenario.getGherkinScenarioId());
-    dto.setGherkinData(gherkinScenario.getGherkinData());
-    dto.setStatus(gherkinScenario.isStatus());
-
-    // Gán examQuestionId từ Exam_Question
-    dto.setExamQuestionId(gherkinScenario.getExamQuestion() != null ? gherkinScenario.getExamQuestion().getExamQuestionId() : null);
-
-    // Gán postmanForGradingId từ Postman_For_Grading
-    dto.setPostmanForGradingId(gherkinScenario.getPostmanForGrading() != null ? gherkinScenario.getPostmanForGrading().getPostmanForGradingId() : null);
-
-    return dto;
-}
 }

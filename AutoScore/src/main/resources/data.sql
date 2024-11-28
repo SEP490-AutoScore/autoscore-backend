@@ -353,7 +353,7 @@ Request Body (JSON):
 -- (2, 2, 5, 1, 3, 'delete',1,true);
 
 INSERT INTO `ai_api_key`
-(`ai_api_key`, `ai_name`, `account_id`,`status`,`is_shared`)
+(`ai_api_key`, `ai_name`, `account_id`,`status`,`shared`)
 VALUES
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',1,true,true),
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',2,true,true),
@@ -373,7 +373,8 @@ VALUES
 INSERT INTO `content`
 (`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
-('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT'),
+('This is Database, Save to your memory, do not reply
+', 1,'GENERATE_GHERKIN_FORMAT'),
 ('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline:
 {{ 
 Scenario: [Brief and clear description of the scenario]
@@ -383,11 +384,15 @@ Scenario: [Brief and clear description of the scenario]
   And [Optional additional actions or events, if applicable]
   Then [Describe the primary outcome or result]
   And [Optional additional outcomes or verifications, if applicable]
-}}', 2,'GENERATE_GHERKIN_FORMAT'),
-('This is Database, Save to your memory, do not reply', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
-('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline: ',2,'GENERATE_GHERKIN_FORMAT_MORE'),
+}}
+', 2,'GENERATE_GHERKIN_FORMAT'),
+('Save to your memory, do not reply
+', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline: '
+,2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
-('Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION'),
+('Save to your memory, do not reply
+', 1,'GENERATE_POSTMAN_COLLECTION'),
 ('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. The `event.script.exec` section in `item` must contain valid Postman test scripts (using pm.test). Write a JSON Postman collection that contains `info` and `item`. The `info` section should include `_postman_id`, `name`, `schema`, `_exporter_id`. The `item` section should include `name`, `event.listen` with the value `test`, and `event.script.exec` with the value `pm.test`. Do not explain the JSON structure, just provide the raw JSON.
 ', 2,'GENERATE_POSTMAN_COLLECTION'),
 
