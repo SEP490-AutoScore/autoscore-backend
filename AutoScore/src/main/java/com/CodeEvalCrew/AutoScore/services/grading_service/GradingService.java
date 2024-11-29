@@ -152,7 +152,6 @@ public class GradingService implements IGradingService {
         gradingProcessRepository.save(process);
 
         List<GradingStatusEnum> statuses = Arrays.asList(
-                GradingStatusEnum.PENDING,
                 GradingStatusEnum.IMPORTANT,
                 GradingStatusEnum.GRADING,
                 GradingStatusEnum.PLAGIARISM
