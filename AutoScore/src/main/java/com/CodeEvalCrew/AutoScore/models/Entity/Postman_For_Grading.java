@@ -1,5 +1,7 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,24 +35,27 @@ public class Postman_For_Grading {
 
     private Float scoreOfFunction;
 
+    private Float scorePercentage;
+
     private Long totalPmTest;
 
     private boolean status;
-    
+
     private Long orderPriority;
 
     private Long postmanForGradingParentId;
 
+
+
     @Lob
     @Column(columnDefinition = "LONGBLOB")
-    @Basic(fetch = FetchType.EAGER) // Buộc tải ngay lập tức
+    @Basic(fetch = FetchType.EAGER)
     private byte[] fileCollectionPostman;
 
     @ManyToOne
     @JoinColumn(name = "examQuestionId", nullable = true)
     private Exam_Question examQuestion;
 
-   
     @OneToOne
     @JoinColumn(name = "gherkinScenarioId", referencedColumnName = "gherkinScenarioId", nullable = true)
     private Gherkin_Scenario gherkinScenario;

@@ -108,7 +108,8 @@ public class SecurityConfig {
                     if (email != null && picture != null) {
                     // Redirect đến trang login frontend với thông tin email và hình ảnh
                     String redirectUrl = String.format(
-                        "http://autoscore.io.vn/?email=%s&picture=%s", 
+                        // "http://autoscore.io.vn/?email=%s&picture=%s", 
+                        "http://localhost:5173/?email=%s&picture=%s", 
                         email, 
                         URLEncoder.encode(picture, StandardCharsets.UTF_8.toString())
                     );

@@ -2,6 +2,8 @@ package com.CodeEvalCrew.AutoScore.services.gherkin_scenario_service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateGherkinScenarioDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinPostmanPairDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
@@ -9,9 +11,10 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioResponse
 
 public interface IGherkinScenarioService {
 
-    String generateGherkinFormat(Long examQuestionId);
+    ResponseEntity<?> generateGherkinFormat(Long examQuestionId);
 
-    String generateGherkinFormatMore(Long examQuestionId);
+    ResponseEntity<String> generateGherkinFormatMore(List<Long> gherkinIds);
+  
 
     List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId);
 
@@ -19,7 +22,7 @@ public interface IGherkinScenarioService {
 
     List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairsByQuestionId(Long questionId);
    
-    GherkinScenarioResponseDTO deleteGherkinScenario(Long gherkinScenarioId);
+    String deleteGherkinScenario(List<Long> gherkinScenarioIds);
 
     GherkinScenarioResponseDTO createGherkinScenario(CreateGherkinScenarioDTO dto);
 

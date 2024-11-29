@@ -449,7 +449,7 @@ public class AutoscorePostmanService implements IAutoscorePostmanService {
         // Fetch all Postman_For_Grading for the given examPaperId, sorted by order
         // (e.g., sequence)
         List<Postman_For_Grading> postmanFunctions = postmanForGradingRepository
-                .findByExamPaper_ExamPaperIdOrderByOrderPriorityAsc(examPaperId);
+                .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
 
         for (Postman_For_Grading postmanFunction : postmanFunctions) {
             // Assuming there is no need to get the Exam_Question here directly,
