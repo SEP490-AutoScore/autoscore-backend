@@ -29,14 +29,11 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Content;
-import com.CodeEvalCrew.AutoScore.models.Entity.Enum.LogStatus_Enum;
-import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Log_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Purpose_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
-import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
@@ -368,26 +365,26 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                 List<String> gherkinDataList = extractGherkinData(response);
                                 saveGherkinData(gherkinDataList, examQuestion);
                                 
-                                Log log = new Log();
-                                log.setExamPaper(examPaper);
-                                log.setAccount(accountRepository.findById(authenticatedUserId).get());
-                                log.setAction(Log_Enum.GENERATE_GHERKIN);
-                                log.setStatus(LogStatus_Enum.SUCCESS);
-                                log.setAtTime(time);
-                                logRepository.save(log);
+                                // Log log = new Log();
+                                // log.setExamPaper(examPaper);
+                                // log.setAccount(accountRepository.findById(authenticatedUserId).get());
+                                // log.setAction(Log_Enum.GENERATE_GHERKIN);
+                                // log.setStatus(LogStatus_Enum.SUCCESS);
+                                // log.setAtTime(time);
+                                // logRepository.save(log);
                                 return ResponseEntity
                                                 .status(HttpStatus.OK)
                                                 .body("Generate gherkin successfully!");
                         }
                        
                 }
-                Log log = new Log();
-                log.setExamPaper(examPaper);
-                log.setAccount(accountRepository.findById(authenticatedUserId).get());
-                log.setAction(Log_Enum.GENERATE_GHERKIN);
-                log.setStatus(LogStatus_Enum.FAILURE);
-                log.setAtTime(time);
-                logRepository.save(log);
+                // Log log = new Log();
+                // log.setExamPaper(examPaper);
+                // log.setAccount(accountRepository.findById(authenticatedUserId).get());
+                // log.setAction(Log_Enum.GENERATE_GHERKIN);
+                // log.setStatus(LogStatus_Enum.FAILURE);
+                // log.setAtTime(time);
+                // logRepository.save(log);
                 return ResponseEntity
                                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body("Unknown error! Maybe AI did not respond");
