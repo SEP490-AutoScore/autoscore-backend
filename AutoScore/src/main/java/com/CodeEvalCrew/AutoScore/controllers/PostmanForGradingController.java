@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingCreateDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GradingRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetDTO;
 import com.CodeEvalCrew.AutoScore.services.postman_for_grading_service.IPostmanForGradingService;
-
 
 @RestController
 @RequestMapping("/api/postman-grading")
@@ -31,10 +29,10 @@ public class PostmanForGradingController {
 
     @PutMapping("")
     public ResponseEntity<String> updatePostmanForGrading(@RequestBody PostmanForGradingUpdateRequest request) {
-        String result = postmanForGradingService.updatePostmanForGrading(request.getExamPaperId(), request.getUpdateDTOs());
+        String result = postmanForGradingService.updatePostmanForGrading(request.getExamPaperId(),
+                request.getUpdateDTOs());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-
 
     @GetMapping("")
     public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading_forFunctionTree(
@@ -45,23 +43,22 @@ public class PostmanForGradingController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<String> generatePostmanCollection(@RequestParam Long gherkinScenarioId) {
+    public ResponseEntity<?> generatePostmanCollection(@RequestParam Long gherkinScenarioId) {
         try {
-            String resultMessage = postmanForGradingService.generatePostmanCollection(gherkinScenarioId);
-            return new ResponseEntity<>(resultMessage, HttpStatus.OK);
+            return postmanForGradingService.generatePostmanCollection(gherkinScenarioId);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
         }
     }
-    
 
     @PostMapping("/generate-more")
-    public ResponseEntity<String> generatePostmanCollectionMore(@RequestParam Long gherkinScenarioId) {
+    public ResponseEntity<?> generatePostmanCollectionMore(@RequestParam Long gherkinScenarioId) {
         try {
-            String resultMessage = postmanForGradingService.generatePostmanCollectionMore(gherkinScenarioId);
-            return new ResponseEntity<>(resultMessage, HttpStatus.OK);
+            return postmanForGradingService.generatePostmanCollectionMore(gherkinScenarioId);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
         }
     }
 
@@ -75,23 +72,45 @@ public class PostmanForGradingController {
         }
     }
 
-     @DeleteMapping("")
-    public ResponseEntity<String> deletePostmanForGrading(@RequestParam Long postmanForGradingId) {
-        String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingId);
+    @DeleteMapping("")
+    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examQuestionId) {
+        String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examQuestionId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{postmanForGradingId}")
-    public ResponseEntity<PostmanForGradingGetDTO> getPostmanForGradingById(@PathVariable Long postmanForGradingId) {
-        PostmanForGradingGetDTO dto = postmanForGradingService.getPostmanForGradingById(postmanForGradingId);
-        return ResponseEntity.ok(dto);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> PostmanForGradingGetbyIdDTO(@PathVariable Long id) {
+        try {
+            return postmanForGradingService.getPostmanForGradingById(id);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
+        }
     }
-    
-   
 
-     @PostMapping
-    public ResponseEntity<PostmanForGradingGetDTO> createPostmanForGrading(@RequestBody PostmanForGradingCreateDTO createDTO) {
-        PostmanForGradingGetDTO newPostman = postmanForGradingService.createPostmanForGrading(createDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newPostman);
+    @PutMapping("/update-exam-question/{postmanForGradingId}/{examQuestionId}")
+    public ResponseEntity<String> updateExamQuestionId(
+            @PathVariable Long postmanForGradingId,
+            @PathVariable Long examQuestionId) {
+
+        String result = postmanForGradingService.updateExamQuestionId(postmanForGradingId, examQuestionId);
+        return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/calculate-scores")
+    public ResponseEntity<?> calculateScores(
+            @RequestParam("examPaperId") Long examPaperId,
+            @RequestParam("examQuestionId") Long examQuestionId,
+            @RequestBody List<GradingRequestDTO> requests) {
+        try {
+         
+            return postmanForGradingService.calculateScores(requests, examPaperId, examQuestionId);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body("Invalid input: " + ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + ex.getMessage());
+        }
+    }
+
 }

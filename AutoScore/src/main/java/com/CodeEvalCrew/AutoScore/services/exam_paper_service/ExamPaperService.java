@@ -4,16 +4,22 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -37,12 +43,15 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
+import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamPaperSpecification;
@@ -67,11 +76,15 @@ public class ExamPaperService implements IExamPaperService {
     @Autowired
     private PostmanForGradingRepository postmanForGradingRepository;
     @Autowired
+    private IExamQuestionRepository examQuestionRepository;
+    @Autowired
     private final ImportantExamPaperRepository importantExamPaperRepository;
     @Autowired
     private final ObjectMapper objectMapper;
     @Autowired
     private ISubjectRepository subjectRepository;
+    @Autowired
+    private LogRepository logRepository;
 
     public ExamPaperService(IExamPaperRepository examPaperRepository,
             IExamRepository examRepository,
@@ -83,6 +96,29 @@ public class ExamPaperService implements IExamPaperService {
         this.objectMapper = objectMapper;
         this.importantRepository = importantRepository;
         this.importantExamPaperRepository = importantExamPaperRepository;
+    }
+
+    private void saveLog(Long examPaperId, String actionDetail) {
+
+        Optional<Exam_Paper> optionalExamPaper = examPaperRepository.findById(examPaperId);
+        if (optionalExamPaper.isEmpty()) {
+            throw new IllegalArgumentException("Exam Paper with ID " + examPaperId + " does not exist.");
+        }
+
+        Exam_Paper examPaper = optionalExamPaper.get();
+        Log log = examPaper.getLog();
+
+        if (log == null) {
+            log = new Log();
+            log.setExamPaper(examPaper);
+            log.setAllData(actionDetail);
+        } else {
+
+            String updatedData = log.getAllData() == null ? "" : log.getAllData() + ", ";
+            log.setAllData(updatedData + actionDetail);
+        }
+
+        logRepository.save(log);
     }
 
     @Override
@@ -278,15 +314,17 @@ public class ExamPaperService implements IExamPaperService {
 
     @Override
     public void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception {
+
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
+
         try {
             Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                     .orElseThrow(() -> new NotFoundException("Exam Paper not found for ID: " + examPaperId));
 
-            // Lấy danh sách các PostmanFunctionInfo từ examPaperId
             List<PostmanFunctionInfo> functionInfoList = getPostmanFunctionInfoByExamPaperId(examPaperId);
 
-            List<String> allNewmanFunctionNames = new ArrayList<>(); // Lưu tất cả function từ Newman
-            StringBuilder combinedNewmanLogs = new StringBuilder(); 
+            List<String> allNewmanFunctionNames = new ArrayList<>();
 
             for (MultipartFile file : files) {
                 byte[] fileData = file.getBytes();
@@ -294,53 +332,106 @@ public class ExamPaperService implements IExamPaperService {
                 String fileContent = new String(fileData, StandardCharsets.UTF_8);
                 java.io.File tempFile = convertBytesToFile(fileData, file.getOriginalFilename());
 
-                // Check if the file contains valid JSON
                 if (!isValidJson(tempFile)) {
                     throw new Exception("File " + file.getOriginalFilename() + " contains invalid JSON.");
                 }
 
-                // Chạy Newman và xử lý kết quả
                 String newmanOutput = runNewmanTest(tempFile);
-                // combinedNewmanLogs.append("Output for file: ").append(file.getOriginalFilename()).append("\n")
-                // .append(newmanOutput).append("\n"); // Ghi kết quả đầu ra
-                   // Lưu log của Newman cho file hiện tại
-            if (examPaper.getLogRunPostman() == null) {
-                examPaper.setLogRunPostman(newmanOutput);
-            } else {
-                examPaper.setLogRunPostman(examPaper.getLogRunPostman() + "\n\n" + newmanOutput);
-            }
-
 
                 NewmanResult newmanResult = handleNewmanResult(newmanOutput, functionInfoList, examPaperId);
 
-                // Ghi nhận tất cả functionNames từ Newman
                 allNewmanFunctionNames.addAll(newmanResult.getFunctionNames());
-
-                // Cập nhật fileCollectionPostman trong Postman_For_Grading
 
                 updateFileCollectionPostmanForGrading(fileContent.getBytes(StandardCharsets.UTF_8), examPaperId);
 
-                // Lưu thông tin vào examPaper bất kể kết quả Newman
+                List<String> functionNamesInDb = postmanForGradingRepository.findFunctionNamesByStatusTrue();
+                List<String> functionNamesNotInNewman = functionNamesInDb.stream()
+                        .filter(name -> !allNewmanFunctionNames.contains(name))
+                        .collect(Collectors.toList());
+
+                setStatusFalseForFunctionsNotInNewman(functionNamesNotInNewman);
+
+                updateExamQuestionInPostman(fileContent.getBytes(StandardCharsets.UTF_8), examPaperId);
+
                 examPaper.setFileCollectionPostman(fileContent.getBytes(StandardCharsets.UTF_8));
                 examPaper.setIsComfirmFile(false);
-                // examPaper.setLogRunPostman(combinedNewmanLogs.toString());
+                examPaper.setLogRunPostman(null);
+                examPaper.setLogRunPostman(newmanOutput);
+
                 examPaperRepository.save(examPaper);
 
-                // Dọn dẹp file tạm
                 Files.deleteIfExists(tempFile.toPath());
+                saveLog(examPaper.getExamPaperId(),
+                        "Account [" + authenticatedUserId + "] [Import file postman successfully] at [" + time + "]");
             }
-            List<String> functionNamesInDb = postmanForGradingRepository.findFunctionNamesByStatusTrue();
-            List<String> functionNamesNotInNewman = functionNamesInDb.stream()
-                    .filter(name -> !allNewmanFunctionNames.contains(name))
-                    .collect(Collectors.toList());
 
-            // Gọi hàm setStatusFalseForFunctionsNotInNewman
-            setStatusFalseForFunctionsNotInNewman(functionNamesNotInNewman);
         } catch (NotFoundException e) {
             throw new Exception("Exam Paper with ID " + examPaperId + " not found.", e);
         } catch (Exception e) {
             throw new Exception("Failed to import files: " + e.getMessage(), e);
         }
+    }
+
+    public void updateExamQuestionInPostman(byte[] fileContent, Long examPaperId) throws Exception {
+        try {
+
+            String jsonContent = new String(fileContent, StandardCharsets.UTF_8);
+            JSONObject collectionJson = new JSONObject(jsonContent);
+
+            JSONArray items = collectionJson.getJSONArray("item");
+
+            List<Postman_For_Grading> postmanForGradingList = postmanForGradingRepository
+                    .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
+
+            List<Exam_Question> examQuestions = examQuestionRepository.findByExamPaperId(examPaperId);
+
+            for (Postman_For_Grading postmanFunction : postmanForGradingList) {
+                String functionName = postmanFunction.getPostmanFunctionName();
+
+                for (int i = 0; i < items.length(); i++) {
+                    JSONObject item = items.getJSONObject(i);
+                    String itemName = item.getString("name");
+
+                    if (itemName.equals(functionName)) {
+
+                        JSONObject request = item.getJSONObject("request");
+                        String httpMethod = request.getString("method").toUpperCase();
+                        String rawUrl = request.getJSONObject("url").getString("raw");
+
+                        String pathFromRawUrl = extractPathFromRawUrl(rawUrl);
+
+                        Exam_Question matchingQuestion = examQuestions.stream()
+                                .filter(question -> question.getHttpMethod().equals(httpMethod)
+                                        && isPathMatching(question.getEndPoint(), pathFromRawUrl))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (matchingQuestion != null) {
+
+                            postmanFunction.setExamQuestion(matchingQuestion);
+                            postmanForGradingRepository.save(postmanFunction);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("Failed to update Postman functions: " + e.getMessage(), e);
+        }
+    }
+
+    private String extractPathFromRawUrl(String rawUrl) {
+        try {
+            URL url = new URL(rawUrl);
+            return url.getPath();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid URL format: " + rawUrl, e);
+        }
+    }
+
+    private boolean isPathMatching(String template, String path) {
+
+        String regex = template.replaceAll("\\{[^/]+\\}", "[^/]+");
+        return path.matches(regex);
     }
 
     private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
@@ -353,9 +444,10 @@ public class ExamPaperService implements IExamPaperService {
     }
 
     private void updateFileCollectionPostmanForGrading(byte[] fileData, Long examPaperId) throws Exception {
+
         ObjectMapper objectMapper = new ObjectMapper();
-        // JsonNode collectionJson = objectMapper.readTree(fileData);
-        JsonNode collectionJson = objectMapper.readTree(new String(fileData, StandardCharsets.UTF_8)); // Đảm bảo UTF-8
+
+        JsonNode collectionJson = objectMapper.readTree(new String(fileData, StandardCharsets.UTF_8));
 
         if (!collectionJson.has("item")) {
             throw new IllegalArgumentException("Invalid Postman collection format: Missing 'item' field.");
@@ -373,7 +465,7 @@ public class ExamPaperService implements IExamPaperService {
 
             if (matchingItems.size() > 0) {
                 ObjectNode updatedCollection = objectMapper.createObjectNode();
-                updatedCollection.set("info", collectionJson.get("info")); // Copy thông tin từ info
+                updatedCollection.set("info", collectionJson.get("info"));
                 updatedCollection.set("item", matchingItems);
 
                 postman.setFileCollectionPostman(objectMapper.writeValueAsBytes(updatedCollection));
@@ -383,6 +475,7 @@ public class ExamPaperService implements IExamPaperService {
         }
 
         postmanForGradingRepository.saveAll(postmanForGradingList);
+
     }
 
     private ArrayNode findMatchingItems(ArrayNode items, String functionName, ObjectMapper objectMapper) {
@@ -397,22 +490,21 @@ public class ExamPaperService implements IExamPaperService {
 
     private String runNewmanTest(java.io.File file) throws Exception {
         StringBuilder output = new StringBuilder();
-
+        String newmanCmdPath = PathUtil.getNewmanCmdPath();
         try {
 
-            ProcessBuilder processBuilder = new ProcessBuilder(PathUtil.NEWMAN_CMD_PATH, "run",
+            ProcessBuilder processBuilder = new ProcessBuilder(newmanCmdPath, "run",
                     "\"" + file.getAbsolutePath() + "\"");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
 
-            // Đọc kết quả từ luồng đầu ra của Newman
-            // try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     output.append(line).append(System.lineSeparator());
-                 
+
                 }
             }
 
@@ -421,26 +513,21 @@ public class ExamPaperService implements IExamPaperService {
             throw new Exception("Failed to run Newman test: " + e.getMessage(), e);
         }
 
-        return output.toString(); // Trả về chuỗi kết quả đầu ra
+        return output.toString();
     }
 
     private NewmanResult handleNewmanResult(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo,
             Long examPaperId)
             throws NotFoundException {
-        // Phân tích đầu ra của Newman và tạo kết quả
+
         NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
 
-        // Lấy danh sách functionNames từ kết quả Newman
         List<String> functionNamesFromNewman = result.getFunctionNames();
 
-        List<String> functionNamesInDb = postmanForGradingRepository.findFunctionNamesByStatusTrue();
-
-        // Duyệt qua các functionNames từ kết quả Newman
         for (int i = 0; i < functionNamesFromNewman.size(); i++) {
             String functionName = functionNamesFromNewman.get(i);
-            Long newTotalPmTest = (long) result.getTotalPmTests().get(i); // Chuyển đổi sang Long
+            Long newTotalPmTest = (long) result.getTotalPmTests().get(i);
 
-            // Tìm functionName trong expectedFunctionInfo (database)
             Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
                     .filter(info -> info.getFunctionName().equals(functionName))
                     .findFirst();
@@ -448,15 +535,14 @@ public class ExamPaperService implements IExamPaperService {
             if (expectedInfoOpt.isPresent()) {
                 PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
 
-                // Nếu totalPmTests khác, cập nhật database
                 if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
                     updateTotalPmTestInDatabase(functionName, newTotalPmTest);
                 }
 
             } else {
-                // Nếu không tìm thấy functionName trong database, tạo mới Postman_For_Grading
+
                 createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
-                // System.out.println("Created new function in database: " + functionName);
+
             }
         }
 
@@ -465,13 +551,13 @@ public class ExamPaperService implements IExamPaperService {
 
     private void setStatusFalseForFunctionsNotInNewman(List<String> functionNamesNotInNewman) {
         if (!functionNamesNotInNewman.isEmpty()) {
-            // Chỉ lấy những Postman_For_Grading có status = true
+
             List<Postman_For_Grading> postmenToUpdate = postmanForGradingRepository
                     .findByPostmanFunctionNameInAndStatusTrue(functionNamesNotInNewman);
             for (Postman_For_Grading postman : postmenToUpdate) {
                 postman.setStatus(false);
                 postman.setPostmanFunctionName(null);
-                // Kiểm tra nếu gherkinScenario có dữ liệu thì đặt về null
+
                 if (postman.getGherkinScenario() != null) {
                     postman.setGherkinScenario(null);
                 }
@@ -482,18 +568,16 @@ public class ExamPaperService implements IExamPaperService {
 
     private void createNewPostmanForGrading(String functionName, Long totalPmTest, Long examPaperId)
             throws NotFoundException {
-        // Lấy Exam_Paper từ database
+
         Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                 .orElseThrow(() -> new NotFoundException("Exam Paper not found for ID: " + examPaperId));
 
-        // Tạo mới Postman_For_Grading
         Postman_For_Grading newPostmanForGrading = new Postman_For_Grading();
         newPostmanForGrading.setPostmanFunctionName(functionName);
         newPostmanForGrading.setTotalPmTest(totalPmTest);
         newPostmanForGrading.setExamPaper(examPaper);
         newPostmanForGrading.setStatus(true);
 
-        // Lưu vào database
         postmanForGradingRepository.save(newPostmanForGrading);
     }
 
@@ -516,35 +600,32 @@ public class ExamPaperService implements IExamPaperService {
         String currentFunctionName = null;
         int currentFunctionTestCount = 0;
 
-        boolean isParsingFunctions = true; // Cờ để dừng khi gặp bảng
+        boolean isParsingFunctions = true;
 
         for (String line : lines) {
-            // Nếu gặp bảng, dừng phân tích
+
             if (line.trim().startsWith("┌") || line.trim().startsWith("│") || line.trim().startsWith("└")) {
                 isParsingFunctions = false;
             }
 
             if (!isParsingFunctions) {
-                break; // Ngừng xử lý nếu bảng đã xuất hiện
+                break;
             }
 
-            // Nếu dòng bắt đầu bằng "→", đó là tên function mới
             if (line.startsWith("→")) {
-                if (currentFunctionName != null) { // Lưu function trước đó nếu có
+                if (currentFunctionName != null) {
                     functionNames.add(currentFunctionName);
                     totalPmTests.add(currentFunctionTestCount);
                 }
-                currentFunctionName = line.substring(2).trim(); // Bỏ "→" và lấy tên function
-                currentFunctionTestCount = 0; // Reset bộ đếm
+                currentFunctionName = line.substring(2).trim();
+                currentFunctionTestCount = 0;
             }
 
-            // Nếu dòng là test (bắt đầu bằng số hoặc dấu "√"), tăng bộ đếm
             if (line.trim().matches("^\\d+.*") || line.trim().startsWith("√")) {
                 currentFunctionTestCount++;
             }
         }
 
-        // Thêm function cuối cùng vào danh sách kết quả nếu còn function chưa lưu
         if (currentFunctionName != null) {
             functionNames.add(currentFunctionName);
             totalPmTests.add(currentFunctionTestCount);
@@ -560,7 +641,6 @@ public class ExamPaperService implements IExamPaperService {
         Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
                 examPaperId);
 
-        // Extract question IDs from the associated Exam_Question set
         List<Long> questionIds = examPaper.getExamQuestions().stream()
                 .map(Exam_Question::getExamQuestionId)
                 .collect(Collectors.toList());
@@ -589,12 +669,18 @@ public class ExamPaperService implements IExamPaperService {
 
     @Override
     public byte[] exportPostmanCollection(Long examPaperId) throws Exception {
-        // Lấy Exam_Paper từ ID
+
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
+
         Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                 .orElseThrow(() -> new Exception("Exam Paper not found with ID: " + examPaperId));
 
-        // Trả về nội dung fileCollectionPostman dưới dạng byte[]
+        saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                + "] [Export file postman collection successfully] at [" + time + "]");
+
         return examPaper.getFileCollectionPostman();
+
     }
 
     @Override
@@ -686,29 +772,27 @@ public class ExamPaperService implements IExamPaperService {
     @Override
     public ExamPaperFilePostmanResponseDTO getInfoFilePostman(Long examPaperId) {
         try {
-            // Tìm Exam_Paper bằng ID
+
             Exam_Paper examPaper = checkEntityExistence(
                     examPaperRepository.findById(examPaperId),
                     "Exam Paper",
                     examPaperId);
 
-            // Chuyển fileCollectionPostman từ byte[] sang chuỗi JSON UTF-8
             String fileCollectionPostman = null;
-            Long totalItem = 0L; // Initialize total item counter
+            Long totalItem = 0L;
             if (examPaper.getFileCollectionPostman() != null) {
                 fileCollectionPostman = new String(examPaper.getFileCollectionPostman(), StandardCharsets.UTF_8);
 
-                // Parse JSON and count items
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode root = objectMapper.readTree(fileCollectionPostman);
                 JsonNode items = root.get("item");
                 if (items != null && items.isArray()) {
-                    totalItem = (long) items.size(); // Count number of items
+                    totalItem = (long) items.size();
                 }
             }
 
-            // Trả về DTO
-            return new ExamPaperFilePostmanResponseDTO(fileCollectionPostman, examPaper.getIsComfirmFile(), totalItem,  examPaper.getLogRunPostman() );
+            return new ExamPaperFilePostmanResponseDTO(fileCollectionPostman, examPaper.getIsComfirmFile(), totalItem,
+                    examPaper.getLogRunPostman());
         } catch (NotFoundException e) {
             throw new RuntimeException("Exam Paper not found for ID: " + examPaperId, e);
         } catch (IOException e) {
@@ -718,7 +802,10 @@ public class ExamPaperService implements IExamPaperService {
 
     @Override
     public String confirmFilePostman(Long examPaperId) {
-        // Lấy Exam_Paper từ examPaperId
+
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
+
         Exam_Paper examPaper;
         try {
             examPaper = examPaperRepository.findById(examPaperId)
@@ -727,21 +814,18 @@ public class ExamPaperService implements IExamPaperService {
             throw new IllegalArgumentException("Exam Paper with the provided ID does not exist.", e);
         }
 
-        // Kiểm tra fileCollectionPostman có tồn tại và không rỗng
         if (examPaper.getFileCollectionPostman() == null || examPaper.getFileCollectionPostman().length == 0) {
             throw new IllegalArgumentException("fileCollectionPostman is empty for this Exam Paper.");
         }
 
         try {
-            // Chuyển đổi fileCollectionPostman từ byte[] thành JsonNode
+
             JsonNode fileCollectionJson = objectMapper.readTree(examPaper.getFileCollectionPostman());
 
-            // Kiểm tra cấu trúc "item" có tồn tại và là mảng
             if (!fileCollectionJson.has("item") || !fileCollectionJson.get("item").isArray()) {
                 throw new IllegalArgumentException("Invalid fileCollectionPostman format: 'item' array is required.");
             }
 
-            // Lấy danh sách tên từ "item" trong fileCollectionPostman
             List<String> fileItemNames = new ArrayList<>();
             fileCollectionJson.get("item").forEach(node -> {
                 if (node.has("name")) {
@@ -749,17 +833,22 @@ public class ExamPaperService implements IExamPaperService {
                 }
             });
 
-            // Lấy danh sách Postman_For_Grading theo Exam_Paper, sắp xếp theo orderPriority
             List<Postman_For_Grading> gradingItems = postmanForGradingRepository
-                    .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriority(examPaperId);
+                    .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
 
-            // Kiểm tra kích thước danh sách
+            for (Postman_For_Grading gradingItem : gradingItems) {
+                if (gradingItem.getExamQuestion() == null) {
+                    throw new IllegalArgumentException(String.format(
+                            "Grading item '%s' does not have a valid examQuestionId.",
+                            gradingItem.getPostmanFunctionName()));
+                }
+            }
+
             if (fileItemNames.size() != gradingItems.size()) {
                 throw new IllegalArgumentException(
                         "Mismatch in number of items between fileCollectionPostman and Postman functions.");
             }
 
-            // So sánh từng phần tử theo thứ tự
             for (int i = 0; i < gradingItems.size(); i++) {
                 String expectedName = gradingItems.get(i).getPostmanFunctionName();
                 String actualName = fileItemNames.get(i);
@@ -771,11 +860,50 @@ public class ExamPaperService implements IExamPaperService {
                 }
             }
 
-            // Nếu tất cả khớp, cập nhật trạng thái isConfirmFile của Exam_Paper
+            for (int i = 0; i < gradingItems.size() - 1; i++) {
+                Long currentOrderPriority = gradingItems.get(i).getOrderPriority();
+                Long nextOrderPriority = gradingItems.get(i + 1).getOrderPriority();
+
+                if (currentOrderPriority >= nextOrderPriority) {
+                    throw new IllegalArgumentException(
+                            String.format("orderPriority mismatch at index %d: '%d' should be less than '%d'.", i,
+                                    currentOrderPriority, nextOrderPriority));
+                }
+            }
+
+            float tolerance = 0.05f;
+
+            Map<Long, Float> examQuestionScores = new HashMap<>();
+            for (Postman_For_Grading gradingItem : gradingItems) {
+                Exam_Question examQuestion = gradingItem.getExamQuestion();
+                if (examQuestion != null) {
+                    examQuestionScores.put(examQuestion.getExamQuestionId(),
+                            examQuestionScores.getOrDefault(examQuestion.getExamQuestionId(), 0f)
+                                    + gradingItem.getScoreOfFunction());
+                }
+            }
+
+            for (Postman_For_Grading gradingItem : gradingItems) {
+                Exam_Question examQuestion = gradingItem.getExamQuestion();
+                if (examQuestion != null) {
+                    Float totalScoreForQuestion = examQuestionScores.get(examQuestion.getExamQuestionId());
+                    if (totalScoreForQuestion == null
+                            || Math.abs(totalScoreForQuestion - examQuestion.getExamQuestionScore()) > tolerance) {
+                        throw new IllegalArgumentException(String.format(
+                                "Score mismatch for Exam Question ID %d: expected %.2f, but found %.2f (within tolerance %.2f)",
+                                examQuestion.getExamQuestionId(),
+                                examQuestion.getExamQuestionScore(),
+                                totalScoreForQuestion,
+                                tolerance));
+                    }
+                }
+            }
+
             examPaper.setIsComfirmFile(true);
             examPaperRepository.save(examPaper);
 
-            // Trả về thành công
+            saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                    + "] [Confirm all before grading successfully] at [" + time + "]");
             return "Successfully";
 
         } catch (IOException e) {

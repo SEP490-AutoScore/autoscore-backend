@@ -38,6 +38,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
@@ -155,6 +156,7 @@ public class ExamService implements IExamService {
             exam.setSubject(subject);
             exam.setCreatedAt(LocalDateTime.now());
             exam.setStatus(true);
+            exam.setType(Exam_Type_Enum.EXAM);
             exam.setCreatedBy(account.getAccountId());
             exam.setSemester(semester);
 

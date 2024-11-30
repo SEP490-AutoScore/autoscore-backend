@@ -1,5 +1,6 @@
 package com.CodeEvalCrew.AutoScore.services.source_service;
 
+import java.time.LocalDateTime;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -17,10 +18,13 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SourceDetailsResponseDT
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SourcesResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentErrorResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source_Detail;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
+import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceRepository;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
 
 import jakarta.transaction.Transactional;
@@ -45,7 +49,39 @@ public class SourceService {
         this.studentErrorService = studentErrorService;
     }
 
+    @Autowired
+    private LogRepository logRepository;
+
+    @Autowired
+    private IExamPaperRepository examPaperRepository;
+
+    private void saveLog(Long examPaperId, String actionDetail) {
+
+        Optional<Exam_Paper> optionalExamPaper = examPaperRepository.findById(examPaperId);
+        if (optionalExamPaper.isEmpty()) {
+            throw new IllegalArgumentException("Exam Paper with ID " + examPaperId + " does not exist.");
+        }
+
+        Exam_Paper examPaper = optionalExamPaper.get();
+        Log log = examPaper.getLog();
+
+        if (log == null) {
+            log = new Log();
+            log.setExamPaper(examPaper);
+            log.setAllData(actionDetail);
+        } else {
+
+            String updatedData = log.getAllData() == null ? "" : log.getAllData() + ", ";
+            log.setAllData(updatedData + actionDetail);
+        }
+
+        logRepository.save(log);
+    }
+
+    @Transactional
     public Source saveMainSource(String path, Exam_Paper examPaper) {
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
         try {
             // Kiểm tra nếu nguồn đã tồn tại
             Optional<Source> existingSource = sourceRepo.findByOriginSourcePath(path);
@@ -55,7 +91,6 @@ public class SourceService {
                 // Xóa chi tiết nguồn và lỗi sinh viên
                 sourceDetailService.deleteSourceDetailBySourceId(sourceId);
                 studentErrorService.deleteStudentErrorBySourceId(sourceId);
-
                 // Xóa bản ghi source
                 deleteSourceById(sourceId);
 
@@ -77,6 +112,10 @@ public class SourceService {
             source.setExamPaper(examPaper);
             source.setImportTime(new Timestamp(System.currentTimeMillis()));
             Source savedSource = sourceRepo.save(source);
+          
+            Exam_Paper examPaper2 = examPaper.get();
+            saveLog(examPaper2.getExamPaperId(), "Account [" + authenticatedUserId
+                    + "] [Import source code student successfully] at [" + time + "]");
 
             logger.info("Successfully saved MAIN SOURCE for path: {}", path);
             return savedSource;

@@ -51,15 +51,14 @@ public class GherkinScenarioController {
     }
 
     @PostMapping("/generate_gherkin_format")
-    public ResponseEntity<String> generateGherkinFormat(@RequestParam Long examQuestionId) {
-        String result = gherkinScenarioService.generateGherkinFormat(examQuestionId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<?> generateGherkinFormat(@RequestParam Long examQuestionId) {
+        return gherkinScenarioService.generateGherkinFormat(examQuestionId);
     }
 
     @PostMapping("/generate_gherkin_format_more")
-    public ResponseEntity<String> generateGherkinFormatMore(@RequestParam Long examQuestionId) {
-        String result = gherkinScenarioService.generateGherkinFormatMore(examQuestionId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<String> generateGherkinFormatMore(
+            @RequestBody List<Long> gherkinIds, @RequestParam Long examQuestionId) {
+        return gherkinScenarioService.generateGherkinFormatMore(gherkinIds, examQuestionId);
     }
 
     @PutMapping(value = "/{gherkinScenarioId}", consumes = "multipart/form-data")
@@ -67,30 +66,29 @@ public class GherkinScenarioController {
             @PathVariable Long gherkinScenarioId,
             @RequestParam("gherkinData") String gherkinData) {
         try {
-            GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.updateGherkinScenarios(gherkinScenarioId, gherkinData);
+            GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.updateGherkinScenarios(gherkinScenarioId,
+                    gherkinData);
             return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity<>(null, e.getStatusCode());
         }
     }
-    
-    
 
-    @DeleteMapping("/{gherkinScenarioId}")
-    public ResponseEntity<GherkinScenarioResponseDTO> deleteGherkinScenario(@PathVariable Long gherkinScenarioId) {
+    @DeleteMapping("/gherkinScenarioIds")
+    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds, @RequestParam Long examQuestionId) {
         try {
-            // Gọi service để xóa (cập nhật trạng thái) Gherkin Scenario và trả về DTO
-            GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioId);
-            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+
+            String result = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioIds, examQuestionId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Error deleting Gherkin Scenarios.", HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("")
     public ResponseEntity<GherkinScenarioResponseDTO> createGherkinScenario(@RequestBody CreateGherkinScenarioDTO dto) {
         try {
-            // Gọi service để tạo mới Gherkin Scenario và trả về DTO
+
             GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.createGherkinScenario(dto);
             return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
         } catch (Exception e) {
