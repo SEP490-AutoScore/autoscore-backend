@@ -146,29 +146,12 @@ public class StudentSubmissionService {
                     progressService.sendProgress((completedExamFolders.get() * 100) / totalExamFolders); // Tiến độ theo folder
                     continue;
                 }
-              
+
                 Exam_Paper foundExamPaper = examPaper.get();
                 Source source = sourceService.saveMainSource(examFolder.getAbsolutePath(), examPaper.get());
-
+                
                 // Xử lý các studentFolders bên trong examFolder
                 processStudentFolders(examFolder, examPaper.get(), unmatchedStudents, errors, completionService, source);
-
-                for (File studentFolder : studentFolders) {
-                    totalTasks.incrementAndGet();
-                    completionService.submit(() -> {
-                        try {
-                            completionService.submit(new SubmissionTask(studentFolder, source, unmatchedStudents,
-                                    examPaper.get().getExam().getType().toString()));
-                        } catch (Exception e) {
-                            errors.add("Error processing folder " + studentFolder.getName() + ": " + e.getMessage());
-                            logger.error("Error processing folder: " + studentFolder.getName(), e);
-                        } finally {
-                            int progress = (completedTasks.incrementAndGet() * 100) / totalTasks.get();
-                            progressService.sendProgress(progress);
-                        }
-                        return null;
-                    });
-                }
 
                 saveLog(foundExamPaper.getExamPaperId(),
                         "Account [" + authenticatedUserId + "] [Import list student successfully] at [" + time + "]");
@@ -180,7 +163,7 @@ public class StudentSubmissionService {
             // Chờ tất cả các tác vụ hoàn thành
             while (completedTasks.get() + failedTasks.get() < totalTasks.get()) {
                 try {
-                    Future<Void> future = completionService.poll(10, TimeUnit.SECONDS); // Chờ tối đa 10 giây
+                    Future<Void> future = completionService.poll(5, TimeUnit.SECONDS); // Chờ tối đa 5 giây
                     if (future != null) {
                         try {
                             future.get(); // Lấy kết quả nếu không có lỗi

@@ -37,23 +37,21 @@ public class SourceService {
     private final IExamPaperRepository examPaperRepo;
     private final SourceDetailService sourceDetailService;
     private final StudentErrorService studentErrorService;
+    private final LogRepository logRepository;
+    private final IExamPaperRepository examPaperRepository;
 
     @Value("${upload.folder}")
     private String uploadFolder;
 
     public SourceService(SourceRepository sourceRepo, IExamPaperRepository examPaperRepo, SourceDetailService sourceDetailService,
-            StudentErrorService studentErrorService) {
+            StudentErrorService studentErrorService, LogRepository logRepository, IExamPaperRepository examPaperRepository) {
         this.sourceRepo = sourceRepo;
         this.examPaperRepo = examPaperRepo;
         this.sourceDetailService = sourceDetailService;
         this.studentErrorService = studentErrorService;
+        this.logRepository = logRepository;
+        this.examPaperRepository = examPaperRepository;
     }
-
-    @Autowired
-    private LogRepository logRepository;
-
-    @Autowired
-    private IExamPaperRepository examPaperRepository;
 
     private void saveLog(Long examPaperId, String actionDetail) {
 
@@ -112,9 +110,8 @@ public class SourceService {
             source.setExamPaper(examPaper);
             source.setImportTime(new Timestamp(System.currentTimeMillis()));
             Source savedSource = sourceRepo.save(source);
-          
-            Exam_Paper examPaper2 = examPaper.get();
-            saveLog(examPaper2.getExamPaperId(), "Account [" + authenticatedUserId
+
+            saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
                     + "] [Import source code student successfully] at [" + time + "]");
 
             logger.info("Successfully saved MAIN SOURCE for path: {}", path);
