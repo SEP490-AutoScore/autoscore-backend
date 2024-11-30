@@ -34,7 +34,7 @@ public class AIApiKeyController {
         return ResponseEntity.ok(apiKeys);
     }
 
-     @PostMapping("/update-selected-key")
+    @PostMapping("/update-selected-key")
     public ResponseEntity<String> updateSelectedKey(@RequestParam Long aiApiKeyId) {
         try {
             aiApiKeyService.updateOrCreateAccountSelectedKey(aiApiKeyId);
@@ -55,21 +55,41 @@ public class AIApiKeyController {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
-   @PutMapping("/{aiApiKeyId}")
-    public ResponseEntity<AI_Api_Key> updateAiApiKey(
-            @PathVariable Long aiApiKeyId, 
-            @RequestParam String aiApiKey) {
-        
-        try {
-            // Cập nhật API Key qua Service
-            AI_Api_Key updatedApiKey = aiApiKeyService.updateAiApiKey(aiApiKeyId, aiApiKey);
 
-            // Trả về thông tin API Key đã cập nhật
-            return new ResponseEntity<>(updatedApiKey, HttpStatus.OK);
-        } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(null, e.getStatusCode());
-        }
+//     @PutMapping("/updateKey")
+// public ResponseEntity<String> updateAiApiKey(
+//         @RequestParam Long aiApiKeyId,
+//         @RequestParam String aiApiKey) {
+
+//     try {
+//         // Cập nhật API Key qua Service và nhận thông điệp từ service
+//         String responseMessage = aiApiKeyService.updateAiApiKey(aiApiKeyId, aiApiKey);
+
+//         // Trả về thông điệp thành công
+//         return new ResponseEntity<>(responseMessage, HttpStatus.OK);
+//     } catch (ResponseStatusException e) {
+//         // Trả về thông điệp lỗi nếu không thể cập nhật
+//         return new ResponseEntity<>(e.getReason(), e.getStatusCode());
+//     }
+// }
+
+@PutMapping("/{aiApiKeyId}")
+public ResponseEntity<Void> updateAIApiKey(
+        @PathVariable Long aiApiKeyId,
+        @RequestParam String aiApiKey) {
+    try {
+        aiApiKeyService.updateAI_Api_Key(aiApiKeyId, aiApiKey);
+        return ResponseEntity.noContent().build(); // Trả về 204 nếu cập nhật thành công
+    } catch (ResponseStatusException ex) {
+        // Ném lại ResponseStatusException để trả mã lỗi chính xác
+        throw ex;
+    } catch (Exception ex) {
+        // Xử lý các lỗi không mong muốn
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi cập nhật API Key", ex);
     }
+}
+
+    
 
     @DeleteMapping("/{aiApiKeyId}")
     public ResponseEntity<String> deleteAiApiKey(@PathVariable Long aiApiKeyId) {
