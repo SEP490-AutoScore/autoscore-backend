@@ -33,15 +33,10 @@ public class FileUploadController {
     private FileProcessingProgressService progressService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXAMINER') or hasAuthority('UPLOAD_FILE')")
-    @PostMapping(value = "/import", consumes = {"multipart/form-data"})
-    @Operation(
-            summary = "Tải lên file source code của sinh viên",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = {
-                        @Content(mediaType = "multipart/form-data")
-                    }
-            )
-    )
+    @PostMapping(value = "/import", consumes = { "multipart/form-data" })
+    @Operation(summary = "Tải lên file source code của sinh viên", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(mediaType = "multipart/form-data")
+    }))
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
             @RequestParam("examId") Long examId) {
         List<String> unmatchedStudents;

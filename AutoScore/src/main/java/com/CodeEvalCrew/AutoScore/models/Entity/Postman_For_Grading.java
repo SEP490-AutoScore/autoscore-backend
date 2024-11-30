@@ -1,7 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,7 +24,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Postman_For_Grading {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postmanForGradingId;
@@ -44,8 +41,6 @@ public class Postman_For_Grading {
     private Long orderPriority;
 
     private Long postmanForGradingParentId;
-
-
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")

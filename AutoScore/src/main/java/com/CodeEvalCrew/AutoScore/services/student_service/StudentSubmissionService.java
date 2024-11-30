@@ -2,6 +2,7 @@ package com.CodeEvalCrew.AutoScore.services.student_service;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,23 +21,53 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
+import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentRepository;
 import com.CodeEvalCrew.AutoScore.services.file_service.FileExtractionService;
 import com.CodeEvalCrew.AutoScore.services.source_service.SourceDetailService;
 import com.CodeEvalCrew.AutoScore.services.source_service.SourceService;
 import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
 public class StudentSubmissionService {
+
+    @Autowired
+    private LogRepository logRepository;
+
+    private void saveLog(Long examPaperId, String actionDetail) {
+
+        Optional<Exam_Paper> optionalExamPaper = examPaperRepository.findById(examPaperId);
+        if (optionalExamPaper.isEmpty()) {
+            throw new IllegalArgumentException("Exam Paper with ID " + examPaperId + " does not exist.");
+        }
+
+        Exam_Paper examPaper = optionalExamPaper.get();
+        Log log = examPaper.getLog();
+
+        if (log == null) {
+            log = new Log();
+            log.setExamPaper(examPaper);
+            log.setAllData(actionDetail);
+        } else {
+
+            String updatedData = log.getAllData() == null ? "" : log.getAllData() + ", ";
+            log.setAllData(updatedData + actionDetail);
+        }
+
+        logRepository.save(log);
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(StudentSubmissionService.class);
 
@@ -70,6 +101,10 @@ public class StudentSubmissionService {
 
     // Phương thức chính để xử lý file submission
     public List<String> processFileSubmission(MultipartFile file, Long examId) throws IOException {
+
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
+
         List<String> unmatchedStudents = Collections.synchronizedList(new ArrayList<>());
         List<String> errors = Collections.synchronizedList(new ArrayList<>()); // Danh sách lưu lỗi
         ExecutorService executorService = Executors.newFixedThreadPool(MAX_THREADS);
@@ -95,12 +130,17 @@ public class StudentSubmissionService {
 
             for (File examFolder : examFolders) {
                 Optional<Exam_Paper> examPaper = examPaperRepository.findByExamPaperCode(examFolder.getName());
-                if (!examPaper.isPresent() || !examPaper.get().getExam().getExamId().equals(examId) || !examPaper.get().getIsUsed() || !examPaper.get().getStatus().equals(Exam_Status_Enum.COMPLETE)) {
+                if (!examPaper.isPresent() || !examPaper.get().getExam().getExamId().equals(examId)
+                        || !examPaper.get().getIsUsed()
+                        || !examPaper.get().getStatus().equals(Exam_Status_Enum.COMPLETE)) {
                     unmatchedStudents.add("No matching exam paper found for folder: " + examFolder.getName());
                     continue;
                 }
 
-                Source source = sourceService.saveMainSource(examFolder.getAbsolutePath(), examPaper.get().getExamPaperId());
+                Exam_Paper foundExamPaper = examPaper.get();
+
+                Source source = sourceService.saveMainSource(examFolder.getAbsolutePath(),
+                        examPaper.get().getExamPaperId());
 
                 File[] studentFolders = examFolder.listFiles(File::isDirectory);
                 if (studentFolders == null || studentFolders.length == 0) {
@@ -112,7 +152,8 @@ public class StudentSubmissionService {
                     totalTasks.incrementAndGet();
                     completionService.submit(() -> {
                         try {
-                            completionService.submit(new SubmissionTask(studentFolder, source, unmatchedStudents, examPaper.get().getExam().getType().toString()));
+                            completionService.submit(new SubmissionTask(studentFolder, source, unmatchedStudents,
+                                    examPaper.get().getExam().getType().toString()));
                         } catch (Exception e) {
                             errors.add("Error processing folder " + studentFolder.getName() + ": " + e.getMessage());
                             logger.error("Error processing folder: " + studentFolder.getName(), e);
@@ -123,6 +164,10 @@ public class StudentSubmissionService {
                         return null;
                     });
                 }
+
+                saveLog(foundExamPaper.getExamPaperId(),
+                        "Account [" + authenticatedUserId + "] [Import list student successfully] at [" + time + "]");
+
             }
 
             // Chờ tất cả các tác vụ hoàn thành
@@ -141,6 +186,7 @@ public class StudentSubmissionService {
             executorService.shutdown();
             executorService.awaitTermination(5, TimeUnit.MINUTES);
             progressService.sendProgress(100); // Tiến trình hoàn tất
+
         } catch (IOException | InterruptedException e) {
             errors.add("Critical error: " + e.getMessage());
             logger.error("Critical error while processing submission", e);
@@ -178,13 +224,15 @@ public class StudentSubmissionService {
 
             Optional<Student> studentOpt = studentRepository.findByStudentCode(studentCode);
             if (!studentOpt.isPresent()) {
-                studentErrorService.saveStudentError(source, null, "Student not found with student code: " + studentCode);
+                studentErrorService.saveStudentError(source, null,
+                        "Student not found with student code: " + studentCode);
                 return null;
             }
 
             try {
                 // Giải nén đệ quy và tìm thư mục chứa .sln
-                File slnFileFolder = fileExtractionService.processExtractedFolder(studentFolder, source, studentOpt.get());
+                File slnFileFolder = fileExtractionService.processExtractedFolder(studentFolder, source,
+                        studentOpt.get());
 
                 if (slnFileFolder != null) {
                     sourceDetailService.saveStudentSubmission(slnFileFolder, studentOpt.get(), source, examType);

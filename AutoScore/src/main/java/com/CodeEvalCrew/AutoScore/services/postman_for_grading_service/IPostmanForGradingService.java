@@ -24,7 +24,7 @@ public interface IPostmanForGradingService {
 
       String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs);
 
-      String deletePostmanForGrading(List<Long> postmanForGradingIds);
+      String deletePostmanForGrading(List<Long> postmanForGradingIds, Long examQuestionId);
 
       ResponseEntity<PostmanForGradingGetbyIdDTO> getPostmanForGradingById(Long id);
 

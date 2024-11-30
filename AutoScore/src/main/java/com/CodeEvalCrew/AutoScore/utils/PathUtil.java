@@ -7,11 +7,7 @@ import java.io.InputStreamReader;
 public class PathUtil {
 
     //postman 
-
-    // public static final String NEWMAN_CMD_PATH = "C:\\Users\\nhatt\\AppData\\Roaming\\npm\\newman.cmd";
-    // public static final String NEWMAN_CMD_PATH = "C:\\Users\\Admin\\AppData\\Roaming\\npm\\newman.cmd";
     public static final String NEWMAN_CMD_PATH = "AUTOMATIC";
-
 
     //sql server
     public static final String DATABASE_URL = "jdbc:sqlserver://MSI\\SQLSERVER;databaseName=master;user=sa;password=123456;encrypt=false;trustServerCertificate=true;";
@@ -24,7 +20,6 @@ public class PathUtil {
         }
 
         try {
-            // Execute the 'where newman' command to find the path
             Process process = new ProcessBuilder("where", "newman").start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -37,7 +32,6 @@ public class PathUtil {
             System.err.println("Error while trying to locate newman: " + e.getMessage());
         }
 
-        // Default to existing NEWMAN_CMD_PATH if 'where' command fails
         return NEWMAN_CMD_PATH;
     }
 }

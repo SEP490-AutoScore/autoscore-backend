@@ -57,8 +57,8 @@ public class GherkinScenarioController {
 
     @PostMapping("/generate_gherkin_format_more")
     public ResponseEntity<String> generateGherkinFormatMore(
-            @RequestBody List<Long> gherkinIds) {
-        return gherkinScenarioService.generateGherkinFormatMore(gherkinIds);
+            @RequestBody List<Long> gherkinIds, @RequestParam Long examQuestionId) {
+        return gherkinScenarioService.generateGherkinFormatMore(gherkinIds, examQuestionId);
     }
 
     @PutMapping(value = "/{gherkinScenarioId}", consumes = "multipart/form-data")
@@ -75,10 +75,10 @@ public class GherkinScenarioController {
     }
 
     @DeleteMapping("/gherkinScenarioIds")
-    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds) {
+    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds, @RequestParam Long examQuestionId) {
         try {
 
-            String result = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioIds);
+            String result = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioIds, examQuestionId);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error deleting Gherkin Scenarios.", HttpStatus.NOT_FOUND);

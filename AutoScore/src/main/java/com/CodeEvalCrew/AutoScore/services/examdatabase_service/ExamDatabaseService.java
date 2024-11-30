@@ -19,8 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamDatabaseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
@@ -29,25 +31,50 @@ public class ExamDatabaseService implements IExamDatabaseService {
 
     @Autowired
     private IExamDatabaseRepository examDatabaseRepository;
-
     @Autowired
     private IExamPaperRepository examPaperRepository;
+    @Autowired
+    private LogRepository logRepository;
 
-    // private final String url = "jdbc:sqlserver://ADMIN-PC\\SQLEXPRESS;databaseName=master;user=sa;password=1234567890;encrypt=false;trustServerCertificate=true;";
-    // private final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    private void saveLog(Long examPaperId, String actionDetail) {
 
+        Optional<Exam_Paper> optionalExamPaper = examPaperRepository.findById(examPaperId);
+        if (optionalExamPaper.isEmpty()) {
+            throw new IllegalArgumentException("Exam Paper with ID " + examPaperId + " does not exist.");
+        }
 
+        Exam_Paper examPaper = optionalExamPaper.get();
+        Log log = examPaper.getLog();
 
-      public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId, String databaseNote, String databaseDescription) throws Exception {
+        if (log == null) {
+            log = new Log();
+            log.setExamPaper(examPaper);
+            log.setAllData(actionDetail);
+        } else {
+
+            String updatedData = log.getAllData() == null ? "" : log.getAllData() + ", ";
+            log.setAllData(updatedData + actionDetail);
+        }
+
+        logRepository.save(log);
+    }
+
+    @Override
+    public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId, String databaseNote,
+            String databaseDescription) throws Exception {
+
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
+
         try {
             Class.forName(PathUtil.DATABASE_DRIVER);
         } catch (ClassNotFoundException e) {
             throw new Exception("SQL Server driver not found: " + e.getMessage());
         }
 
-        // Chuyển đổi nội dung file .sql thành chuỗi và lưu vào `databaseScript`
         String databaseScript;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             StringBuilder scriptBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -82,7 +109,8 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 }
 
                 String contentType = imageFile.getContentType();
-                if (!"image/png".equals(contentType) && !"image/jpeg".equals(contentType) && !"image/jpg".equals(contentType)) {
+                if (!"image/png".equals(contentType) && !"image/jpeg".equals(contentType)
+                        && !"image/jpg".equals(contentType)) {
                     throw new Exception("Only PNG, JPEG, JPG files are accepted");
                 }
 
@@ -91,22 +119,20 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                         .orElseThrow(() -> new Exception("Exam paper not found with id: " + examPaperId));
 
-                Long authenticatedUserId = Util.getAuthenticatedAccountId();
-                LocalDateTime now = Util.getCurrentDateTime();
-
                 Exam_Database examDatabase = new Exam_Database();
-                examDatabase.setDatabaseScript(databaseScript); // Lưu chuỗi SQL vào `databaseScript`
+                examDatabase.setDatabaseScript(databaseScript);
                 examDatabase.setDatabaseName(dbName);
                 examDatabase.setDatabaseImage(imageData);
-                // examDatabase.setStatus(true);
-                examDatabase.setCreatedAt(now);
+                examDatabase.setCreatedAt(time);
                 examDatabase.setCreatedBy(authenticatedUserId);
                 examDatabase.setExamPaper(examPaper);
-                examDatabase.setDatabaseNote(databaseNote); 
-                examDatabase.setDatabaseDescription(databaseDescription); 
+                examDatabase.setDatabaseNote(databaseNote);
+                examDatabase.setDatabaseDescription(databaseDescription);
 
                 examDatabaseRepository.save(examDatabase);
 
+                saveLog(examPaper.getExamPaperId(),
+                        "Account [" + authenticatedUserId + "] [Import database successfully] at [" + time + "]");
                 return "Database " + dbName + " has been created and data has been imported.";
 
             } catch (SQLException e) {
@@ -146,16 +172,22 @@ public class ExamDatabaseService implements IExamDatabaseService {
         }
     }
 
-    public String updateSqlFile(MultipartFile sqlFile, MultipartFile imageFile, Long examPaperId, String databaseNote, String databaseDescription ) throws Exception {
+    @Override
+    public String updateSqlFile(MultipartFile sqlFile, MultipartFile imageFile, Long examPaperId, String databaseNote,
+            String databaseDescription) throws Exception {
+
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
+
         try {
             Class.forName(PathUtil.DATABASE_DRIVER);
         } catch (ClassNotFoundException e) {
             throw new Exception("SQL Server driver not found: " + e.getMessage());
         }
-    
-        // Chuyển đổi nội dung file .sql thành chuỗi và lưu vào `databaseScript`
+
         String databaseScript;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(sqlFile.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(sqlFile.getInputStream(), StandardCharsets.UTF_8))) {
             StringBuilder scriptBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -163,13 +195,12 @@ public class ExamDatabaseService implements IExamDatabaseService {
             }
             databaseScript = scriptBuilder.toString();
         }
-    
+
         String dbName = extractDatabaseName(databaseScript);
         if (dbName == null) {
             throw new Exception("Database name not found in .sql file");
         }
-    
-        // Kiểm tra và xóa các thông tin databaseImage, databaseName, và databaseScript nếu có
+
         Exam_Database existingDatabase = examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId).orElse(null);
         if (existingDatabase != null) {
             existingDatabase.setDatabaseImage(null);
@@ -177,88 +208,64 @@ public class ExamDatabaseService implements IExamDatabaseService {
             existingDatabase.setDatabaseScript(null);
             examDatabaseRepository.save(existingDatabase);
         }
-    
+
         try (Connection conn = DriverManager.getConnection(PathUtil.DATABASE_URL)) {
             conn.setAutoCommit(false);
             Statement stmt = conn.createStatement();
-    
+
             try {
                 dropDatabaseIfExists(stmt, dbName);
-    
+
                 stmt.execute("CREATE DATABASE " + dbName);
                 stmt.execute("USE " + dbName);
-    
+
                 executeSqlStatements(stmt, databaseScript.replaceFirst("(?i)CREATE DATABASE\\s+[a-zA-Z0-9_]+\\s*GO", "")
                         .replaceFirst("(?i)USE\\s+[a-zA-Z0-9_]+\\s*GO", ""), dbName);
-    
+
                 conn.commit();
-    
-                // Xử lý tệp ảnh
+
                 if (imageFile == null || imageFile.isEmpty()) {
                     throw new Exception("Invalid or missing image file.");
                 }
-    
+
                 String contentType = imageFile.getContentType();
-                if (!"image/png".equals(contentType) && !"image/jpeg".equals(contentType) && !"image/jpg".equals(contentType)) {
+                if (!"image/png".equals(contentType) && !"image/jpeg".equals(contentType)
+                        && !"image/jpg".equals(contentType)) {
                     throw new Exception("Only PNG, JPEG, JPG files are accepted");
                 }
-    
+
                 byte[] imageData = imageFile.getBytes();
-    
-                // Lấy thông tin về bài thi
+
                 Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                         .orElseThrow(() -> new Exception("Exam paper not found with id: " + examPaperId));
-    
-                Long authenticatedUserId = Util.getAuthenticatedAccountId();
-                LocalDateTime now = Util.getCurrentDateTime();
-    
+
                 Exam_Database updatedDatabase = existingDatabase != null ? existingDatabase : new Exam_Database();
                 updatedDatabase.setDatabaseScript(databaseScript);
                 updatedDatabase.setDatabaseName(dbName);
                 updatedDatabase.setDatabaseImage(imageData);
-                // updatedDatabase.setStatus(true);
-                updatedDatabase.setUpdatedAt(now);
+                updatedDatabase.setUpdatedAt(time);
                 updatedDatabase.setUpdatedBy(authenticatedUserId);
                 updatedDatabase.setExamPaper(examPaper);
-                updatedDatabase.setDatabaseNote(databaseNote); 
-                updatedDatabase.setDatabaseDescription(databaseDescription); 
-    
+                updatedDatabase.setDatabaseNote(databaseNote);
+                updatedDatabase.setDatabaseDescription(databaseDescription);
+
                 examDatabaseRepository.save(updatedDatabase);
-    
+
+                saveLog(examPaper.getExamPaperId(),
+                        "Account [" + authenticatedUserId + "] [Update database successfully] at [" + time + "]");
+
                 return "Database " + dbName + " has been updated successfully.";
-    
+
             } catch (SQLException e) {
                 conn.rollback();
                 throw new Exception("Transaction failed and rolled back: " + e.getMessage());
             }
-    
+
         } catch (SQLException e) {
             throw new Exception("SQL connection or execution error: " + e.getMessage());
         }
     }
-    // @Override
-    // public ExamDatabaseDTO getExamDatabaseByExamPaperId(Long examPaperId) {
-    //     Exam_Database examDatabase = examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId)
-    //             .orElseThrow(() -> new IllegalArgumentException("Exam database not found for examPaperId: " + examPaperId));
-    
-    //     return new ExamDatabaseDTO(
-    //             examDatabase.getExamDatabaseId(),
-    //             examDatabase.getDatabaseScript(),
-    //             examDatabase.getDatabaseDescription(),
-    //             examDatabase.getDatabaseName(),
-    //             examDatabase.getDatabaseImage(),
-    //             examDatabase.getDatabaseNote(),
-    //             examDatabase.getStatus(),
-    //             examDatabase.getCreatedAt(),
-    //             examDatabase.getCreatedBy(),
-    //             examDatabase.getUpdatedAt(),
-    //             examDatabase.getUpdatedBy(),
-    //             examDatabase.getDeletedAt(),
-    //             examDatabase.getDeletedBy(),
-    //             examDatabase.getExamPaper().getExamPaperId()
-    //     );
-    // }
-    
+
     @Override
     public Optional<ExamDatabaseDTO> getExamDatabaseByExamPaperId(Long examPaperId) {
         return examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId)
@@ -276,9 +283,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
                         examDatabase.getUpdatedBy(),
                         examDatabase.getDeletedAt(),
                         examDatabase.getDeletedBy(),
-                        examDatabase.getExamPaper().getExamPaperId()
-                ));
+                        examDatabase.getExamPaper().getExamPaperId()));
     }
-    
 
 }

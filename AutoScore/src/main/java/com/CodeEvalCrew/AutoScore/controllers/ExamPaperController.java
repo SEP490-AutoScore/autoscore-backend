@@ -25,7 +25,6 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanRes
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_paper_service.IExamPaperService;
-import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 @RequestMapping("api/exam-paper")
@@ -167,14 +166,13 @@ public class ExamPaperController {
         try {
             byte[] fileContent = examPaperService.exportPostmanCollection(examPaperId);
 
-            // Set the response headers for file download
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Disposition", "attachment; filename=postman_collection.json");
             headers.add("Content-Type", "application/json");
 
             return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
         } catch (Exception e) {
-            // Return error message as a byte array
+
             byte[] errorMessage = ("Failed to export Postman Collection: " + e.getMessage()).getBytes();
             return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }

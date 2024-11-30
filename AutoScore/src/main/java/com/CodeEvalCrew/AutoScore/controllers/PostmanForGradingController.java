@@ -73,8 +73,8 @@ public class PostmanForGradingController {
     }
 
     @DeleteMapping("")
-    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds) {
-        String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds);
+    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examQuestionId) {
+        String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examQuestionId);
         return ResponseEntity.ok(response);
     }
 
@@ -92,7 +92,7 @@ public class PostmanForGradingController {
     public ResponseEntity<String> updateExamQuestionId(
             @PathVariable Long postmanForGradingId,
             @PathVariable Long examQuestionId) {
-        // Call your service to update the exam question
+
         String result = postmanForGradingService.updateExamQuestionId(postmanForGradingId, examQuestionId);
         return ResponseEntity.ok(result);
     }
@@ -103,7 +103,7 @@ public class PostmanForGradingController {
             @RequestParam("examQuestionId") Long examQuestionId,
             @RequestBody List<GradingRequestDTO> requests) {
         try {
-            // Pass examPaperId along with the requests to the service
+         
             return postmanForGradingService.calculateScores(requests, examPaperId, examQuestionId);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body("Invalid input: " + ex.getMessage());
