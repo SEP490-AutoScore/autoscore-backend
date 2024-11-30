@@ -27,7 +27,7 @@ public class StudentService implements IStudentService {
     private final SourceRepository sourceRepository;
     private final StudentMapper studentMapper;
 
-    public StudentService(StudentRepository studentRepository, SourceDetailRepository sourceDetailRepository, StudentMapper studentMapper,SourceRepository sourceRepository) {
+    public StudentService(StudentRepository studentRepository, SourceDetailRepository sourceDetailRepository, StudentMapper studentMapper, SourceRepository sourceRepository) {
         this.studentRepository = studentRepository;
         this.sourceDetailRepository = sourceDetailRepository;
         this.studentMapper = studentMapper;
@@ -37,12 +37,13 @@ public class StudentService implements IStudentService {
     @Override
     @Transactional
     public void saveStudents(List<Student> students, Long examId) {
-        for (Student student : students) {
-            Optional<Student> existingStudent = studentRepository.findByStudentCodeAndExamExamId(student.getStudentCode(), examId);
+        Optional<List<Student>> existingStudents = studentRepository.findAllByExamExamId(examId);
+        if (existingStudents.isPresent()) {
+            studentRepository.deleteAll(existingStudents.get());
+        }
 
-            if (existingStudent.isEmpty()) {
-                studentRepository.save(student);
-            }
+        for (Student student : students) {
+            studentRepository.save(student);
         }
     }
 
@@ -50,7 +51,7 @@ public class StudentService implements IStudentService {
     public List<StudentResponseDTO> getAllStudents(Long examId) {
         try {
             String campusName = Util.getCampus();
-             List<StudentResponseDTO> studentResponseDTOs = new ArrayList<>();
+            List<StudentResponseDTO> studentResponseDTOs = new ArrayList<>();
             if (campusName != null) {
                 List<Student> students = studentRepository.findAllByExamExamIdAndOrganizationName(examId, campusName).get();
                 for (Student student : students) {
@@ -73,22 +74,26 @@ public class StudentService implements IStudentService {
         List<StudentDTO> result = new ArrayList<>();
         try {
             Optional<Source> optionalSource = sourceRepository.findByExamPaper_ExamPaperId(examPaperId);
-            if(!optionalSource.isPresent()) throw new NoSuchElementException("No source found");
+            if (!optionalSource.isPresent()) {
+                throw new NoSuchElementException("No source found");
+            }
 
             Source source = optionalSource.get();
 
             List<Source_Detail> sourceDetails = sourceDetailRepository.findBySource_ExamPaper_ExamPaperIdOrderByStudent_StudentId(examPaperId);
 
-            if(sourceDetails.isEmpty()) throw new NoSuchElementException("No source found");
+            if (sourceDetails.isEmpty()) {
+                throw new NoSuchElementException("No source found");
+            }
 
             for (Source_Detail sourceDetail : sourceDetails) {
                 result.add(studentMapper.toDTO(sourceDetail.getStudent()));
-            }   
+            }
 
             return result;
         } catch (NoSuchElementException e) {
             throw e;
         }
     }
-    
+
 }

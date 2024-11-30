@@ -4,5 +4,8 @@
     "java.debug.settings.onBuildFailureProceed": true,
     "java.debug.settings.showStaticVariables": true,
     "java.debug.settings.showHex": false,
-    "java.debug.settings.showQualifiedNames": true
+    "java.debug.settings.showQualifiedNames": true,
+    "java.project.referencedLibraries": [
+        "/autoscore-backend/AutoScore/lombok.jar"
+    ],
 }

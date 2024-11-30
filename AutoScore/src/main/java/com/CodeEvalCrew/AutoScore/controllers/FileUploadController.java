@@ -32,7 +32,7 @@ public class FileUploadController {
     @Autowired
     private FileProcessingProgressService progressService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXAMINER') or hasAuthority('UPLOAD_FILE')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPLOAD_FILE')")
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     @Operation(
             summary = "Tải lên file source code của sinh viên",
@@ -67,7 +67,10 @@ public class FileUploadController {
     public SseEmitter streamProgress() {
         // Tăng timeout lên 10 phút (600_000 ms)
         SseEmitter emitter = new SseEmitter(600_000L);
-        progressService.registerEmitter(emitter);
+        progressService.registerEmitter(emitter,
+                studentSubmissionService.getTotalTasks(),
+                studentSubmissionService.getCompletedTasks(),
+                studentSubmissionService.getFailedTasks());
         return emitter;
     }
 }
