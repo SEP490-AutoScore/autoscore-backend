@@ -636,36 +636,36 @@ public class ExamPaperService implements IExamPaperService {
         return result;
     }
 
-    @Override
-    public List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException {
-        Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
-                examPaperId);
+    // @Override
+    // public List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException {
+    //     Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
+    //             examPaperId);
 
-        List<Long> questionIds = examPaper.getExamQuestions().stream()
-                .map(Exam_Question::getExamQuestionId)
-                .collect(Collectors.toList());
+    //     List<Long> questionIds = examPaper.getExamQuestions().stream()
+    //             .map(Exam_Question::getExamQuestionId)
+    //             .collect(Collectors.toList());
 
-        return questionIds;
-    }
+    //     return questionIds;
+    // }
 
-    @Override
-    public List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException {
-        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
-                .orElseThrow(() -> new NotFoundException("Exam Paper không tồn tại"));
+    // @Override
+    // public List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException {
+    //     Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+    //             .orElseThrow(() -> new NotFoundException("Exam Paper not exits"));
 
-        List<GherkinScenarioInfoDTO> result = new ArrayList<>();
-        examPaper.getExamQuestions().forEach(examQuestion -> {
-            Set<Gherkin_Scenario> gherkinScenarios = examQuestion.getGherkinScenarios();
-            gherkinScenarios.forEach(gherkinScenario -> {
-                result.add(new GherkinScenarioInfoDTO(
-                        examPaperId,
-                        examQuestion.getExamQuestionId(),
-                        gherkinScenario.getGherkinScenarioId()));
-            });
-        });
+    //     List<GherkinScenarioInfoDTO> result = new ArrayList<>();
+    //     examPaper.getExamQuestions().forEach(examQuestion -> {
+    //         Set<Gherkin_Scenario> gherkinScenarios = examQuestion.getGherkinScenarios();
+    //         gherkinScenarios.forEach(gherkinScenario -> {
+    //             result.add(new GherkinScenarioInfoDTO(
+    //                     examPaperId,
+    //                     examQuestion.getExamQuestionId(),
+    //                     gherkinScenario.getGherkinScenarioId()));
+    //         });
+    //     });
 
-        return result;
-    }
+    //     return result;
+    // }
 
     @Override
     public byte[] exportPostmanCollection(Long examPaperId) throws Exception {

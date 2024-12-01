@@ -284,22 +284,22 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 return pairs;
         }
 
-        @Override
-        public List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId) {
+        // @Override
+        // public List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId) {
 
-                List<Gherkin_Scenario> scenarios = gherkinScenarioRepository
-                                .findByExamQuestion_ExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+        //         List<Gherkin_Scenario> scenarios = gherkinScenarioRepository
+        //                         .findByExamQuestion_ExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
 
-                return scenarios.stream().map(scenario -> new GherkinScenarioDTO(
-                                scenario.getGherkinScenarioId(),
-                                scenario.getGherkinData(),
-                                scenario.isStatus(),
-                                scenario.getExamQuestion().getExamQuestionId(),
-                                scenario.getPostmanForGrading() != null
-                                                ? scenario.getPostmanForGrading().getPostmanForGradingId()
-                                                : null))
-                                .collect(Collectors.toList());
-        }
+        //         return scenarios.stream().map(scenario -> new GherkinScenarioDTO(
+        //                         scenario.getGherkinScenarioId(),
+        //                         scenario.getGherkinData(),
+        //                         scenario.isStatus(),
+        //                         scenario.getExamQuestion().getExamQuestionId(),
+        //                         scenario.getPostmanForGrading() != null
+        //                                         ? scenario.getPostmanForGrading().getPostmanForGradingId()
+        //                                         : null))
+        //                         .collect(Collectors.toList());
+        // }
 
         @Override
         public ResponseEntity<String> generateGherkinFormat(Long examQuestionId) {
