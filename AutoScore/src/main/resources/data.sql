@@ -63,10 +63,28 @@ VALUES
 ('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 7, 1, 'Allows deleting exam database entries'),
 
 -- Gherkin Scenario
-('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 7, 1, 'Allows viewing Gherkin scenario details'),
-('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 7, 1, 'Allows creating new Gherkin scenarios'),
-('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 7, 1, 'Allows updating Gherkin scenarios'),
-('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 7, 1, 'Allows deleting Gherkin scenarios'),
+('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 7, 1, 'Allows viewing Gherkin scenario'),
+('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 7, 1, 'Allows creating new Gherkin scenario'),
+('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 7, 1, 'Allows updating Gherkin scenario'),
+('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 7, 1, 'Allows deleting Gherkin scenario'),
+('VIEW_GHERKIN_POSTMAN', 42, 'View gherkin scenario', 7, 1, 'Allows viewing Gherkin scenario and Postman script'),
+('GENERATE_GHERKIN_SCENARIO', 43, 'Generate gherkin scenario', 7, 1, 'Allows generating Gherkin scenario'),
+
+-- Postman script
+('UPDATE_POSTMAN', 44, 'Update postman', 7, 1, 'Allows updating tree of function postman'),
+('VIEW_POSTMAN_TREE', 45, 'View postman tree', 7, 1, 'Allows viewing tree of function postman'),
+('GENERATE_POSTMAN', 46, 'Generate postman', 7, 1, 'Allows generating postman script'),
+('MERGE_POSTMAN', 47, 'Merge postman', 7, 1, 'Allows merging postman script to main file collection postman'),
+('DELETE_POSTMAN', 48, 'Delete postman', 7, 1, 'Allows deleting postman script'),
+('VIEW_POSTMAN', 49, 'View postman', 7, 1, 'Allows viewing postman script'),
+('UPDATE_QUESTION_POSTMAN', 50, 'Update question of postman', 7, 1, 'Allows updating question of postman script'),
+('CALCULATE_SCORE_QUESTION_POSTMAN', 51, 'Calculate score question of postman', 7, 1, 'Allows using calculate score function for postman script'),
+
+-- Exam paper
+('IMPORT_POSTMAN', 52, 'Import postman', 7, 1, 'Allows importing file collection postman'),
+('EXPORT_POSTMAN', 53, 'Export postman', 7, 1, 'Allows exporting file collection postman'),
+('VIEW_INFO_POSTMAN', 54, 'View info postman', 7, 1, 'Allows viewing info file collection postman'),
+('CONFIRM_BEFORE_GRADING', 55, 'Confirm before grading', 7, 1, 'Allows confirming before grading'),
 
 -- Score Management
 ('VIEW_SCORE', 8, 'View score', 8, 1, 'Allows viewing scores'),
@@ -116,6 +134,9 @@ VALUES
 (1, 'tuyenvtse160607@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (2, 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (3, 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(6, 'vtrvuongdt510@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(7, 'vtrvuongdt694@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(8, 'vtrvuongdt758@gmail.com', 4, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (4, 'minhtpvse160611@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (5, 'thanhtuyen66202@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true);
 
@@ -150,10 +171,12 @@ VALUES
 (true, 1, 1),
 (true, 2, 1),
 (true, 3, 1),
+(true, 6, 2),
+(true, 7, 2),
+(true, 8, 2),
 (true, 4, 1),
 (true, 1, 2),
 (true, 2, 2),
-(true, 3, 2),
 (true, 4, 2),
 (true, 5, 2),
 (true, 5, 11);
@@ -167,13 +190,16 @@ VALUES
 (4, 'Software Engineering ', true);
 
 INSERT INTO `employee`
-(`employee_id`, `full_name`, `employee_code`, `account_id`, `position_id`, `organization_id`, `ai_prompt_id`, `status`)
+(`employee_id`, `full_name`, `employee_code`, `account_id`, `position_id`, `organization_id`, `status`)
 VALUES
-(1, 'Võ Thanh Tuyền', 'AD0001', 1, 4, 1, null, true),
-(2, 'Hà Nhật Trường', 'AD0002', 2, 4, 1, null, true),
-(3, 'Võ Trọng Vương', 'AD0003', 3, 4, 1, null, true),
-(4, 'Thiều Phan Văn Minh', 'AD0004', 4, 4, 1, null, true),
-(5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 2, null, true);
+(1, 'Võ Thanh Tuyền', 'AD0001', 1, 4, 1, true),
+(2, 'Hà Nhật Trường', 'AD0002', 2, 4, 1, true),
+(3, 'Võ Trọng Vương Admin', 'AD0003', 3, 4, 1, true),
+(6, 'Võ Trọng Vương Examiner', 'AD0006', 6, 2, 2, true),
+(7, 'Võ Trọng Vương Head of department', 'AD0007', 7, 1, 2, true),
+(8, 'Võ Trọng Vương Lecturer', 'AD0008', 8, 3, 2, true),
+(4, 'Thiều Phan Văn Minh', 'AD0004', 4, 4, 1, true),
+(5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 2, true);
 
 INSERT INTO `subject` 
 (`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) 
@@ -343,23 +369,11 @@ Request Body (JSON):
 
 
 
--- INSERT INTO `postman_for_grading`
--- (`score_of_function`, `exam_question_id`, `order_by`, `postman_for_grading_parent_id`, `total_pm_test`, `postman_function_name`, `exam_paper_id`, `status`)
--- VALUES
--- (2, 1, 1, null, 2, 'login',1,true),
--- (2, 2, 2, 1, 2, 'login fail',1,true),
--- (2, 1, 3, 1, 4, 'get',1,true),
--- (2, 3, 4, 1, 4, 'get id',1,true),
--- (2, 2, 5, 1, 3, 'delete',1,true);
-
 INSERT INTO `ai_api_key`
 (`ai_api_key`, `ai_name`, `account_id`,`status`,`shared`)
 VALUES
-('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',1,true,true),
-('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',2,true,true),
 ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',3,true,true),
-('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',4,true,true),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',5,true,true);
+('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',7,true,true);
 
 INSERT INTO `account_selected_key`
 (`account_id`, `selected_ai_api_key_id`)
@@ -367,6 +381,7 @@ VALUES
 (3, 1),
 (1, 1),
 (2, 1),
+(7, 2),
 (4, 1);
 
 

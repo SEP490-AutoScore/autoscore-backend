@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ public class PostmanForGradingController {
     @Autowired
     private IPostmanForGradingService postmanForGradingService;
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPDATE_POSTMAN')")
     @PutMapping("")
     public ResponseEntity<String> updatePostmanForGrading(@RequestBody PostmanForGradingUpdateRequest request) {
         String result = postmanForGradingService.updatePostmanForGrading(request.getExamPaperId(),
@@ -34,6 +36,7 @@ public class PostmanForGradingController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_POSTMAN_TREE')")
     @GetMapping("")
     public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading_forFunctionTree(
             @RequestParam Long examPaperId) {
@@ -42,6 +45,7 @@ public class PostmanForGradingController {
         return new ResponseEntity<>(postmanForGradingList, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('GENERATE_POSTMAN')")
     @PostMapping("/generate")
     public ResponseEntity<?> generatePostmanCollection(@RequestParam Long gherkinScenarioId) {
         try {
@@ -52,6 +56,7 @@ public class PostmanForGradingController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('GENERATE_POSTMAN')")
     @PostMapping("/generate-more")
     public ResponseEntity<?> generatePostmanCollectionMore(@RequestParam Long gherkinScenarioId) {
         try {
@@ -62,6 +67,7 @@ public class PostmanForGradingController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('MERGE_POSTMAN')")
     @PostMapping("/merge/{examPaperId}")
     public ResponseEntity<String> mergePostmanCollections(@PathVariable Long examPaperId) {
         try {
@@ -72,12 +78,14 @@ public class PostmanForGradingController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('DELETE_POSTMAN')")
     @DeleteMapping("")
     public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examQuestionId) {
         String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examQuestionId);
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_POSTMAN')")
     @GetMapping("/{id}")
     public ResponseEntity<?> PostmanForGradingGetbyIdDTO(@PathVariable Long id) {
         try {
@@ -88,6 +96,7 @@ public class PostmanForGradingController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPDATE_QUESTION_POSTMAN')")
     @PutMapping("/update-exam-question/{postmanForGradingId}/{examQuestionId}")
     public ResponseEntity<String> updateExamQuestionId(
             @PathVariable Long postmanForGradingId,
@@ -97,6 +106,7 @@ public class PostmanForGradingController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('CALCULATE_SCORE_QUESTION_POSTMAN')")
     @PostMapping("/calculate-scores")
     public ResponseEntity<?> calculateScores(
             @RequestParam("examPaperId") Long examPaperId,

@@ -16,7 +16,7 @@ public interface IGherkinScenarioService {
     ResponseEntity<String> generateGherkinFormatMore(List<Long> gherkinIds, Long examQuestionId);
   
 
-    List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId);
+    // List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId);
 
     List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairs(Long examPaperId);
 

@@ -12,5 +12,4 @@ public class EmployeeResponseDTO {
     private PositionResponseDTO position;
     private OrganizationResponseDTO organization;
     private AccountResponseDTOReview account;
-    private AIPromptView aiPrompt;
 }
