@@ -9,10 +9,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
@@ -23,11 +26,13 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamQuestionMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionExport;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
@@ -40,6 +45,7 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
 public class DocumentService implements IDocumentService {
@@ -355,4 +361,414 @@ public class DocumentService implements IDocumentService {
 
         }
     }
+
+    @Override
+    public void importExamPaper(Long examPaperId, MultipartFile multipartFile) throws Exception, NotFoundException{
+        try {
+            //check exam Paper
+            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "ExamPaper", examPaperId);
+
+            Long createBy = Util.getAuthenticatedAccountId();
+
+            File file = convertToFile(multipartFile);
+            Long index = 1l;
+            List<String> questions = extractQuestions2(file);
+            for (String question : questions) {
+                Exam_Question examQuestion = parseExamQuestion(question);
+                examQuestion.setExamPaper(examPaper);
+                examQuestion.setStatus(Exam_Status_Enum.ACTIVE);
+                examQuestion.setOrderBy(index);
+                examQuestion.setCreatedAt(Util.getCurrentDateTime());
+                examQuestion.setCreatedBy(createBy);
+                index ++;
+
+                examQuestionRepository.save(examQuestion);
+
+            }
+
+        } catch (IOException | NotFoundException e) {
+            throw e;
+        }
+    }
+
+    public static File convertToFile(MultipartFile multipartFile) throws IOException {
+        // Tạo một file tạm
+        File tempFile = File.createTempFile("upload-", multipartFile.getOriginalFilename());
+        // Chuyển dữ liệu từ MultipartFile vào file tạm
+        multipartFile.transferTo(tempFile);
+        // Trả về file
+        return tempFile;
+    }
+
+
+    private static List<Exam_Question> extractQuestions(File wordFile) throws IOException {
+        List<Exam_Question> questions = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(wordFile); XWPFDocument document = new XWPFDocument(fis)) {
+            List<XWPFParagraph> paragraphs = document.getParagraphs();
+            Exam_Question currentQuestion = null;
+
+            for (XWPFParagraph paragraph : paragraphs) {
+                String text = paragraph.getText().trim();
+
+                if (text.isEmpty()) {
+                    continue; // Bỏ qua đoạn trống
+                }
+
+                // Bắt đầu một câu hỏi mới
+                if (text.startsWith("Endpoint:")) {
+                    if (currentQuestion != null) {
+                        questions.add(currentQuestion); // Lưu câu hỏi trước đó
+                    }
+                    currentQuestion = new Exam_Question();
+                    currentQuestion.setEndPoint(text.substring(9).trim());
+                    continue;
+                }
+
+                // Ánh xạ các trường thông tin
+                if (text.startsWith("HTTP Method:")) {
+                    if (currentQuestion != null) {
+                        currentQuestion.setHttpMethod(text.substring(13).trim());
+                    }
+                } else if (text.startsWith("Role Allowed:")) {
+                    if (currentQuestion != null) {
+                        currentQuestion.setRoleAllow(text.substring(13).trim());
+                    }
+                } else if (text.startsWith("Function:")) {
+                    if (currentQuestion != null) {
+                        currentQuestion.setDescription(text.substring(9).trim());
+                    }
+                } else if (text.startsWith("Validations:")) {
+                    if (currentQuestion != null) {
+                        currentQuestion.setValidation(text.substring(12).trim());
+                    }
+                } else if (text.startsWith("Success Response:")) {
+                    if (currentQuestion != null) {
+                        currentQuestion.setSucessResponse(text.substring(17).trim());
+                    }
+                } else if (text.startsWith("Error Response:")) {
+                    if (currentQuestion != null) {
+                        currentQuestion.setErrorResponse(text.substring(15).trim());
+                    }
+                } else if (text.startsWith("Request Body:")) {
+                    if (currentQuestion != null) {
+                        currentQuestion.setPayload(text.substring(13).trim());
+                    }
+                }
+
+                // Nếu đoạn văn không bắt đầu bằng trường nào, kiểm tra nội dung câu hỏi
+                if (currentQuestion != null && currentQuestion.getQuestionContent() == null) {
+                    currentQuestion.setQuestionContent(text); // Lưu nội dung câu hỏi
+                }
+            }
+
+            // Lưu câu hỏi cuối cùng (nếu có)
+            if (currentQuestion != null) {
+                questions.add(currentQuestion);
+            }
+        }
+
+        return questions;
+    }
+
+    public static void main(String[] args) {
+        try {
+            String file = "C:\\Project\\SEP490\\autoscore-backend\\AutoScore\\src\\main\\resources\\AutoScoreExamPapperTemplate.docx";
+            // Đường dẫn tới file Word
+            File wordFile = new File("C:\\Project\\SEP490\\autoscore-backend\\AutoScore\\src\\main\\resources\\AutoScoreExamPapperTemplate.docx");
+
+            List<String> questions = extractQuestions2(wordFile);
+
+            System.out.println("Questions:");
+            for (String question : questions) {
+                // System.out.println(question);
+                System.out.println("====================================");
+
+                Exam_Question examQuestion = parseExamQuestion(question);
+
+                System.out.println("Question Content: " + examQuestion.getQuestionContent());
+                System.out.println("Endpoint: " + examQuestion.getEndPoint());
+                System.out.println("HTTP Method: " + examQuestion.getHttpMethod());
+                System.out.println("Role Allowed: " + examQuestion.getRoleAllow());
+                System.out.println("Description: " + examQuestion.getDescription());
+                System.out.println("Request Body: " + examQuestion.getPayload());
+                System.out.println("Success Response: " + examQuestion.getSucessResponse());
+                System.out.println("Error Response: " + examQuestion.getErrorResponse());
+                System.out.println("Question Score: " + examQuestion.getExamQuestionScore());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> extractQuestions(String filePath) {
+        List<String> questions = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(new File(filePath)); XWPFDocument document = new XWPFDocument(fis)) {
+
+            // Duyệt qua từng đoạn văn bản
+            for (XWPFParagraph paragraph : document.getParagraphs()) {
+                String text = paragraph.getText().trim();
+
+                // Kiểm tra nếu đoạn bắt đầu bằng "Question"
+                if (text.startsWith("Question ")) {
+                    questions.add(text);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return questions;
+    }
+
+    public static Map<String, String> extractQuestionsWithContent(String filePath) {
+        Map<String, String> questionsWithContent = new LinkedHashMap<>(); // Đảm bảo thứ tự
+        try (FileInputStream fis = new FileInputStream(new File(filePath)); XWPFDocument document = new XWPFDocument(fis)) {
+
+            List<XWPFParagraph> paragraphs = document.getParagraphs();
+            String currentQuestion = null;
+            StringBuilder currentContent = new StringBuilder();
+
+            for (XWPFParagraph paragraph : paragraphs) {
+                String text = paragraph.getText().trim();
+
+                // Nếu đoạn bắt đầu bằng "Question", lưu câu hỏi hiện tại
+                if (text.startsWith("Question ")) {
+                    // Lưu nội dung của câu hỏi trước đó (nếu có)
+                    if (currentQuestion != null) {
+                        questionsWithContent.put(currentQuestion, currentContent.toString().trim());
+                    }
+                    currentQuestion = text;
+                    currentContent.setLength(0); // Xóa nội dung cũ
+                } else if (currentQuestion != null) {
+                    // Thêm đoạn văn bản vào nội dung hiện tại
+                    currentContent.append(text).append("\n");
+                }
+            }
+
+            // Lưu nội dung của câu hỏi cuối cùng
+            if (currentQuestion != null) {
+                questionsWithContent.put(currentQuestion, currentContent.toString().trim());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return questionsWithContent;
+    }
+
+    public static Map<String, String> parseQuestion(String question) {
+        Map<String, String> fields = new HashMap<>();
+        String[] lines = question.split("\n");
+
+        String currentField = null;
+        StringBuilder fieldContent = new StringBuilder();
+
+        for (String line : lines) {
+            line = line.trim();
+
+            // Kiểm tra xem dòng có phải là một tiêu đề trường không
+            if (line.matches("^(Question|Endpoint|HTTP Method|Role Allowed|Function|Request Body|Validations|Success Response|Error Response):.*")) {
+                // Lưu nội dung của trường trước đó (nếu có)
+                if (currentField != null) {
+                    fields.put(currentField, fieldContent.toString().trim());
+                }
+
+                // Bắt đầu một trường mới
+                int colonIndex = line.indexOf(":");
+                currentField = line.substring(0, colonIndex);
+                fieldContent = new StringBuilder(line.substring(colonIndex + 1).trim());
+            } else if (currentField != null) {
+                // Tiếp tục nối nội dung vào trường hiện tại
+                fieldContent.append(" ").append(line);
+            }
+        }
+
+        // Lưu nội dung của trường cuối cùng
+        if (currentField != null) {
+            fields.put(currentField, fieldContent.toString().trim());
+        }
+
+        return fields;
+    }
+
+    public static Exam_Question mapToEntity(Map<String, String> fields) {
+        Exam_Question entity = new Exam_Question();
+
+        entity.setQuestionContent(fields.getOrDefault("Question", ""));
+        entity.setEndPoint(fields.getOrDefault("Endpoint", ""));
+        entity.setHttpMethod(fields.getOrDefault("HTTP Method", ""));
+        entity.setRoleAllow(fields.getOrDefault("Role Allowed", ""));
+        entity.setDescription(fields.getOrDefault("Function", ""));
+        entity.setPayload(fields.getOrDefault("Request Body", ""));
+        entity.setValidation(fields.getOrDefault("Validations", ""));
+        entity.setSucessResponse(fields.getOrDefault("Success Response", ""));
+        entity.setErrorResponse(fields.getOrDefault("Error Response", ""));
+
+        return entity;
+    }
+
+    public static Exam_Question parseQuestionToEntity(String question) {
+        Exam_Question entity = new Exam_Question();
+        String[] lines = question.split("\n");
+
+        String currentField = null;
+        StringBuilder fieldContent = new StringBuilder();
+
+        for (String line : lines) {
+            line = line.trim();
+
+            // Xử lý tiêu đề câu hỏi
+            if (line.startsWith("Question ")) {
+                // Lấy tên câu hỏi
+                int scoreIndex = line.indexOf("(");
+                if (scoreIndex != -1) {
+                    String name = line.substring(0, scoreIndex).trim();
+                    String scoreStr = line.substring(scoreIndex + 1, line.indexOf(")")).replace("Score", "").trim();
+                    entity.setQuestionContent(name);
+                    entity.setExamQuestionScore(Float.valueOf(scoreStr));
+                } else {
+                    entity.setQuestionContent(line);
+                }
+            } else if (line.matches("^(Content|Endpoint|HTTP Method|Role Allowed|Function|Request Body|Validations|Response):.*")) {
+                // Lưu nội dung trường trước đó
+                if (currentField != null) {
+                    setFieldToEntity(entity, currentField, fieldContent.toString().trim());
+                }
+
+                // Xác định trường mới
+                int colonIndex = line.indexOf(":");
+                currentField = line.substring(0, colonIndex);
+                fieldContent = new StringBuilder(line.substring(colonIndex + 1).trim());
+            } else if (currentField != null) {
+                // Nối nội dung vào trường hiện tại
+                fieldContent.append(" ").append(line);
+            }
+        }
+
+        // Lưu trường cuối cùng
+        if (currentField != null) {
+            setFieldToEntity(entity, currentField, fieldContent.toString().trim());
+        }
+
+        return entity;
+    }
+
+    private static void setFieldToEntity(Exam_Question entity, String field, String value) {
+        switch (field) {
+            case "Content" ->
+                entity.setQuestionContent(value);
+            case "Endpoint" ->
+                entity.setEndPoint(value);
+            case "HTTP Method" ->
+                entity.setHttpMethod(value);
+            case "Role Allowed" ->
+                entity.setRoleAllow(value);
+            case "Function" ->
+                entity.setDescription(value);
+            case "Request Body" ->
+                entity.setPayload(value);
+            case "Validations" ->
+                entity.setValidation(value);
+            case "Success Response" ->
+                entity.setSucessResponse(value);
+            case "Error Response" ->
+                entity.setErrorResponse(value);
+        }
+    }
+
+    public static Exam_Question parseExamQuestion(String input) {
+        // Khởi tạo đối tượng Exam_Question mới
+        Exam_Question examQuestion = new Exam_Question();
+    
+        // Cấu trúc Regex để tìm các phần trong câu hỏi
+        String questionContentPattern = "Question: (.*?)\\n"; // Tìm nội dung câu hỏi
+        String endPointPattern = "Endpoint: (.*?)\\n"; // Tìm endpoint
+        String httpMethodPattern = "HTTP Method: (.*?)\\n"; // Tìm phương thức HTTP
+        String roleAllowPattern = "Role Allowed: (.*?)\\n"; // Tìm vai trò được phép
+        String descriptionPattern = "Function: (.*?)\\n"; // Tìm mô tả chức năng
+        String payloadTypePattern = "Request Type: \\s*:\\s*(.*?)\\n"; // Tìm loại payload (Payload Type)
+        String requestBodyPattern = "Request Body\\s*\\{(.*?)\\}"; // Tìm request body
+        String validationsPattern = "Validations:\\s*(.*?)\\n(\\s*•.*?\\n)*"; // Tìm validation
+        String successResponsePattern = "Success Response:(.*?)Error Response:"; // Tìm phản hồi thành công
+        String errorResponsePattern = "Error Response:(.*?)$"; // Tìm phản hồi lỗi
+        String questionScorePattern = "Score: (\\d+\\.\\d+)"; // Tìm điểm câu hỏi (ví dụ: Score: 2.0)
+    
+        // Sử dụng Pattern và Matcher để tìm kiếm các phần trong chuỗi
+        examQuestion.setQuestionContent(getPatternMatch(input, questionContentPattern));
+        examQuestion.setEndPoint(getPatternMatch(input, endPointPattern));
+        examQuestion.setHttpMethod(getPatternMatch(input, httpMethodPattern));
+        examQuestion.setRoleAllow(getPatternMatch(input, roleAllowPattern));
+        examQuestion.setDescription(getPatternMatch(input, descriptionPattern));
+        examQuestion.setPayloadType(getPatternMatch(input, payloadTypePattern)); // Gán Payload Type
+        examQuestion.setPayload(getPatternMatch(input, requestBodyPattern));
+        examQuestion.setValidation(getPatternMatch(input, validationsPattern)); // Gán Validation
+        examQuestion.setSucessResponse(getPatternMatch(input, successResponsePattern));
+        examQuestion.setErrorResponse(getPatternMatch(input, errorResponsePattern));
+    
+        // Lấy điểm câu hỏi từ cuối cùng của nội dung câu hỏi
+        String scoreString = getPatternMatch(input, questionScorePattern);
+        if (!scoreString.isEmpty()) {
+            examQuestion.setExamQuestionScore(Float.valueOf(scoreString)); // Gán điểm cho câu hỏi
+        } else {
+            examQuestion.setExamQuestionScore(2.0f); // Điểm mặc định nếu không tìm thấy
+        }
+    
+        return examQuestion;
+    }
+
+    // Hàm phụ trợ để tìm kiếm và lấy giá trị của mẫu regex
+    private static String getPatternMatch(String input, String pattern) {
+        Pattern p = Pattern.compile(pattern, Pattern.DOTALL); // Sử dụng DOTALL để bao quát cả dòng mới
+        Matcher m = p.matcher(input);
+        if (m.find()) {
+            return m.group(1).trim(); // Trả về phần được tìm thấy trong nhóm đầu tiên
+        }
+        return ""; // Trả về chuỗi rỗng nếu không tìm thấy
+    }
+
+    public static List<String> extractQuestions2(File file) {
+        List<String> questions = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(file);
+             XWPFDocument document = new XWPFDocument(fis)) {
+
+            List<XWPFParagraph> paragraphs = document.getParagraphs();
+            StringBuilder currentQuestion = new StringBuilder();
+            boolean isQuestionSection = false;
+
+            for (XWPFParagraph paragraph : paragraphs) {
+                String text = paragraph.getText().trim();
+
+                // Bắt đầu câu hỏi mới
+                if (text.startsWith("Question:")) {
+                    // Nếu có câu hỏi hiện tại đang được thu thập, lưu lại
+                    if (currentQuestion.length() > 0) {
+                        questions.add(currentQuestion.toString().trim());
+                        currentQuestion.setLength(0); // Reset buffer
+                    }
+                    isQuestionSection = true; // Bắt đầu thu thập câu hỏi
+                }
+
+                // Nếu đang thu thập câu hỏi, tiếp tục thêm nội dung
+                if (isQuestionSection) {
+                    if (!text.isEmpty()) { // Bỏ qua dòng trống
+                        currentQuestion.append(text).append("\n");
+                    }
+                }
+            }
+
+            // Thêm câu hỏi cuối cùng nếu có
+            if (currentQuestion.length() > 0) {
+                questions.add(currentQuestion.toString().trim());
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
+
+        return questions;
+    }
+
 }

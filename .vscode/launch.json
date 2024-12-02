@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "DocumentService",
+            "request": "launch",
+            "mainClass": "com.CodeEvalCrew.AutoScore.services.document_service.DocumentService",
+            "projectName": "AutoScore"
+        },
+        {
+            "type": "java",
             "name": "SourceCheckUtil",
             "request": "launch",
             "mainClass": "com.CodeEvalCrew.AutoScore.utils.SourceCheckUtil",
