@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperToExamRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
@@ -39,5 +40,7 @@ public interface IExamPaperService {
     ExamPaperFilePostmanResponseDTO getInfoFilePostman(Long examPaperId) throws NotFoundException;
 
     String confirmFilePostman(Long examPaperId);
+
+    void updateExamPaperToAnExam(ExamPaperToExamRequest examPaperId) throws NotFoundException, Exception;
 
 }

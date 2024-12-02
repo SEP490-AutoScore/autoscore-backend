@@ -26,6 +26,7 @@ import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.mappers.ExamPaperMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ImportantMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperToExamRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
@@ -34,6 +35,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ImportantView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.NewmanResult;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanFunctionInfo;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
@@ -758,9 +760,6 @@ public class ExamPaperService implements IExamPaperService {
             return result;
         } catch (NoSuchElementException | NotFoundException e) {
             throw e;
-        } catch (Exception e) {
-            System.out.println(e.getCause());
-            throw e;
         }
     }
 
@@ -919,6 +918,28 @@ public class ExamPaperService implements IExamPaperService {
 
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to parse fileCollectionPostman JSON.", e);
+        }
+    }
+
+    @Override
+    public void updateExamPaperToAnExam(ExamPaperToExamRequest request) throws NotFoundException, Exception {
+        try {
+            // check exam
+            Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
+            // Exam_
+
+            // check exam paper
+            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
+
+            if(exam.getType().equals(Exam_Type_Enum.EXAM)){
+                examPaper.setExam(exam);
+                examPaper.setIsUsed(true);
+                examPaperRepository.save(examPaper);
+            } else {
+                throw new NotFoundException("exam type is not EXAM");
+            }
+        } catch (NotFoundException | Exception e) {
+            throw e;
         }
     }
 
