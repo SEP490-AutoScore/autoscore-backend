@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -18,19 +17,19 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
-import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
+import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
 public class RoleService implements IRoleService {
 
-    private final IRoleRepositoty roleRepositoty;
+    private final IRoleRepository roleRepositoty;
     private final IAccountRepository accountRepository;
     private final IEmployeeRepository employeeRepository;
     private final RolePermissionService rolePermissionService;
     private final Util util;
 
-    public RoleService(IRoleRepositoty roleRepositoty, IEmployeeRepository employeeRepository,
+    public RoleService(IRoleRepository roleRepositoty, IEmployeeRepository employeeRepository,
              RolePermissionService rolePermissionService, IAccountRepository accountRepository) {
         this.roleRepositoty = roleRepositoty;
         this.rolePermissionService = rolePermissionService;

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +23,7 @@ import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountReposi
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRolePermissionRepository;
-import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepositoty;
+import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepository;
 import com.CodeEvalCrew.AutoScore.services.permission_service.PermissionService;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 
@@ -30,15 +31,15 @@ import com.CodeEvalCrew.AutoScore.utils.Util;
 public class RolePermissionService implements IRolePermissionService {
 
     private final IRolePermissionRepository rolePermissionRepository;
-    private final IRoleRepositoty roleRepositoty;
+    private final IRoleRepository roleRepository;
     private final IPermissionRepository permissionRepository;
     private final PermissionService permissionService;
 
-    public RolePermissionService(IRolePermissionRepository rolePermissionRepository, IRoleRepositoty roleRepositoty,
+    public RolePermissionService(IRolePermissionRepository rolePermissionRepository, IRoleRepository roleRepository,
             IPermissionRepository permissionRepository, IAccountRepository accountRepository, IEmployeeRepository employeeRepository,
-            PermissionService permissionService) {
+            @Lazy PermissionService permissionService) {
         this.rolePermissionRepository = rolePermissionRepository;
-        this.roleRepositoty = roleRepositoty;
+        this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.permissionService = permissionService;
     }
@@ -49,7 +50,7 @@ public class RolePermissionService implements IRolePermissionService {
             if (id == null) {
                 throw new IllegalArgumentException("Id cannot be null");
             }
-            Role role = roleRepositoty.findById(id).get();
+            Role role = roleRepository.findById(id).get();
             List<Role_Permission> rolePermissions = rolePermissionRepository.findAllByRole_RoleId(id);
             if (rolePermissions == null || rolePermissions.isEmpty()) {
                 return null;
@@ -85,33 +86,19 @@ public class RolePermissionService implements IRolePermissionService {
 
     @Override
     @Transactional
-    public OperationStatus createRolePermission(RolePermissionRequestDTO rolePermissionRequestDTO) {
+    public OperationStatus createRolePermission(Permission permission, Role role) {
         try {
-            Long roleId = rolePermissionRequestDTO.getRoleId();
-            List<Long> permissionIds = rolePermissionRequestDTO.getPermissionIds();
-            if (roleId == null || permissionIds == null) {
-                return OperationStatus.INVALID_INPUT;
-            }
+            Role_Permission rolePermission = new Role_Permission();
 
-            Role role = getRoleById(roleId);
-            if (role == null) {
-                return OperationStatus.NOT_FOUND;
-            }
+            rolePermission.setRole(role);
+            rolePermission.setPermission(permission);
+            rolePermission.setStatus(false);
+            rolePermission.setCreatedAt(LocalDateTime.now());
+            rolePermission.setCreatedBy(Util.getAuthenticatedAccountId());
 
-            for (Long permissionId : permissionIds) {
-                Role_Permission rolePermission = new Role_Permission();
-
-                rolePermission.setRole(role);
-                Permission permission = getPermissionById(permissionId);
-                rolePermission.setPermission(permission);
-                rolePermission.setStatus(true);
-                rolePermission.setCreatedAt(LocalDateTime.now());
-                rolePermission.setCreatedBy(Util.getAuthenticatedAccountId());
-
-                Role_Permission savedRolePermission = rolePermissionRepository.save(rolePermission);
-                if (savedRolePermission == null || savedRolePermission.getRolePermissionId() == null) {
-                    return OperationStatus.FAILURE;
-                }
+            Role_Permission savedRolePermission = rolePermissionRepository.save(rolePermission);
+            if (savedRolePermission == null || savedRolePermission.getRolePermissionId() == null) {
+                return OperationStatus.FAILURE;
             }
 
             return OperationStatus.SUCCESS;
@@ -224,7 +211,7 @@ public class RolePermissionService implements IRolePermissionService {
             if (roleId == null) {
                 throw new Exception("Id cannot be null");
             }
-            Role role = roleRepositoty.findById(roleId).get();
+            Role role = roleRepository.findById(roleId).get();
             if (role == null) {
                 throw new Exception("Role not found with id: " + roleId);
             }

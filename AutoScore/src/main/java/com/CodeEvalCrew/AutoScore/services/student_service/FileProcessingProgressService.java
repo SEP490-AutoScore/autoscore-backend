@@ -1,11 +1,11 @@
 package com.CodeEvalCrew.AutoScore.services.student_service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 public class FileProcessingProgressService {
@@ -37,7 +37,7 @@ public class FileProcessingProgressService {
         new Thread(() -> {
             while (emitters.contains(emitter)) {
                 try {
-                    Thread.sleep(5_000L); // Gửi heartbeat mỗi 5 giây
+                    Thread.sleep(1_000L); // Gửi heartbeat mỗi 5 giây
                     emitter.send(SseEmitter.event().data("keep-alive"));
                 } catch (IOException | InterruptedException e) {
                     emitters.remove(emitter);
