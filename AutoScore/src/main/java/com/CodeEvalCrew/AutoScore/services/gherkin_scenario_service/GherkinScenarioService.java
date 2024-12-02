@@ -34,10 +34,11 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
+import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
 import com.CodeEvalCrew.AutoScore.repositories.content_repository.ContentRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
@@ -67,30 +68,49 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         @Autowired
         private LogRepository logRepository;
         @Autowired
-        private IAccountRepository accountRepository;
+        private IExamPaperRepository examPaperRepository;
+
+        private void saveLog(Long examPaperId, String actionDetail) {
+
+                Optional<Exam_Paper> optionalExamPaper = examPaperRepository.findById(examPaperId);
+                if (optionalExamPaper.isEmpty()) {
+                        throw new IllegalArgumentException("Exam Paper with ID " + examPaperId + " does not exist.");
+                }
+
+                Exam_Paper examPaper = optionalExamPaper.get();
+                Log log = examPaper.getLog();
+
+                if (log == null) {
+                        log = new Log();
+                        log.setExamPaper(examPaper);
+                        log.setAllData(actionDetail);
+                } else {
+
+                        String updatedData = log.getAllData() == null ? "" : log.getAllData() + ", ";
+                        log.setAllData(updatedData + actionDetail);
+                }
+
+                logRepository.save(log);
+        }
 
         @Override
         public List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairsByQuestionId(Long questionId) {
-                // Tìm Exam_Question theo questionId
+
                 Exam_Question examQuestion = examQuestionRepository.findById(questionId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Exam question not found"));
 
-                // Lấy tất cả Gherkin_Scenario liên quan và có status = true
                 List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository
                                 .findByExamQuestionAndStatusTrue(examQuestion);
 
-                // Lấy tất cả Postman_For_Grading liên quan đến questionId và có status = true
                 List<Postman_For_Grading> postmanForGradings = postmanForGradingRepository
                                 .findByExamQuestionAndStatusTrueOrderByOrderPriorityAsc(examQuestion);
 
                 List<GherkinPostmanPairDTO> pairs = new ArrayList<>();
 
-                // Duyệt qua danh sách Postman_For_Grading
                 for (Postman_For_Grading postman : postmanForGradings) {
                         Gherkin_Scenario matchedGherkin = postman.getGherkinScenario();
 
-                        // Nếu Postman liên kết với một Gherkin hợp lệ
                         if (matchedGherkin != null && matchedGherkin.isStatus()) {
                                 GherkinDTO gherkinDTO = new GherkinDTO(
                                                 matchedGherkin.getGherkinScenarioId(),
@@ -121,7 +141,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
                                 pairs.add(new GherkinPostmanPairDTO(gherkinDTO, postmanDTO));
                         } else {
-                                // Xử lý Postman không liên kết với Gherkin hoặc Gherkin không hợp lệ
+
                                 PostmanDTO postmanDTO = new PostmanDTO(
                                                 postman.getPostmanForGradingId(),
                                                 postman.getPostmanFunctionName(),
@@ -130,11 +150,11 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                                 postman.isStatus(),
                                                 postman.getOrderPriority(),
                                                 postman.getPostmanForGradingParentId(),
-                                                decodeFileCollectionPostman(postman.getFileCollectionPostman()), // Decode
+                                                decodeFileCollectionPostman(postman.getFileCollectionPostman()),
                                                 postman.getExamQuestion() != null
                                                                 ? postman.getExamQuestion().getExamQuestionId()
                                                                 : null,
-                                                null, // Không có Gherkin hợp lệ
+                                                null,
                                                 postman.getExamPaper() != null ? postman.getExamPaper().getExamPaperId()
                                                                 : null);
 
@@ -142,8 +162,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         }
                 }
 
-                // Duyệt qua danh sách Gherkin_Scenario để thêm các Gherkin chưa ghép cặp với
-                // Postman
                 for (Gherkin_Scenario gherkin : gherkinScenarios) {
                         boolean isPaired = postmanForGradings.stream()
                                         .anyMatch(postman -> postman.getGherkinScenario() != null
@@ -176,20 +194,17 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
         @Override
         public List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairs(Long examPaperId) {
-                // Lấy tất cả Exam_Question theo examPaperId
+
                 List<Exam_Question> examQuestions = examQuestionRepository.findByExamPaper_ExamPaperId(examPaperId);
 
-                // Lấy tất cả Postman_For_Grading theo examPaperId và status = true
                 List<Postman_For_Grading> postmanForGradings = postmanForGradingRepository
                                 .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
 
                 List<GherkinPostmanPairDTO> pairs = new ArrayList<>();
 
-                // Duyệt qua các Postman_For_Grading
                 for (Postman_For_Grading postman : postmanForGradings) {
                         Gherkin_Scenario matchedGherkin = postman.getGherkinScenario();
 
-                        // Nếu Postman liên kết với Gherkin và Gherkin có trạng thái hợp lệ
                         if (matchedGherkin != null && matchedGherkin.isStatus()) {
                                 GherkinDTO gherkinDTO = new GherkinDTO(
                                                 matchedGherkin.getGherkinScenarioId(),
@@ -220,7 +235,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
                                 pairs.add(new GherkinPostmanPairDTO(gherkinDTO, postmanDTO));
                         } else {
-                                // Xử lý Postman không liên kết với Gherkin hoặc Gherkin không hợp lệ
+
                                 PostmanDTO postmanDTO = new PostmanDTO(
                                                 postman.getPostmanForGradingId(),
                                                 postman.getPostmanFunctionName(),
@@ -229,7 +244,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                                 postman.isStatus(),
                                                 postman.getOrderPriority(),
                                                 postman.getPostmanForGradingParentId(),
-                                                decodeFileCollectionPostman(postman.getFileCollectionPostman()), // Decode
+                                                decodeFileCollectionPostman(postman.getFileCollectionPostman()),
                                                 postman.getExamQuestion() != null
                                                                 ? postman.getExamQuestion().getExamQuestionId()
                                                                 : null,
@@ -243,7 +258,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         }
                 }
 
-                // Xử lý các Gherkin không liên kết với Postman
                 for (Exam_Question examQuestion : examQuestions) {
                         List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository
                                         .findByExamQuestionAndStatusTrue(examQuestion);
@@ -270,30 +284,29 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 return pairs;
         }
 
-        @Override
-        public List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId) {
-                // Lấy danh sách các Gherkin_Scenario từ repository
-                List<Gherkin_Scenario> scenarios = gherkinScenarioRepository
-                                .findByExamQuestion_ExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+        // @Override
+        // public List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId) {
 
-                // Chuyển đổi từ Entity sang DTO
-                return scenarios.stream().map(scenario -> new GherkinScenarioDTO(
-                                scenario.getGherkinScenarioId(),
-                                scenario.getGherkinData(),
-                                // scenario.getOrderPriority(),
-                                // scenario.getIsUpdateCreate(),
-                                scenario.isStatus(),
-                                scenario.getExamQuestion().getExamQuestionId(),
-                                scenario.getPostmanForGrading() != null
-                                                ? scenario.getPostmanForGrading().getPostmanForGradingId()
-                                                : null))
-                                .collect(Collectors.toList());
-        }
+        //         List<Gherkin_Scenario> scenarios = gherkinScenarioRepository
+        //                         .findByExamQuestion_ExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
+
+        //         return scenarios.stream().map(scenario -> new GherkinScenarioDTO(
+        //                         scenario.getGherkinScenarioId(),
+        //                         scenario.getGherkinData(),
+        //                         scenario.isStatus(),
+        //                         scenario.getExamQuestion().getExamQuestionId(),
+        //                         scenario.getPostmanForGrading() != null
+        //                                         ? scenario.getPostmanForGrading().getPostmanForGradingId()
+        //                                         : null))
+        //                         .collect(Collectors.toList());
+        // }
 
         @Override
         public ResponseEntity<String> generateGherkinFormat(Long examQuestionId) {
+
                 Long authenticatedUserId = Util.getAuthenticatedAccountId();
                 LocalDateTime time = Util.getCurrentDateTime();
+
                 Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
                                 .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
                 Exam_Paper examPaper = examQuestion.getExamPaper();
@@ -364,27 +377,18 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         if (content.getOrderPriority() == 2) {
                                 List<String> gherkinDataList = extractGherkinData(response);
                                 saveGherkinData(gherkinDataList, examQuestion);
-                                
-                                // Log log = new Log();
-                                // log.setExamPaper(examPaper);
-                                // log.setAccount(accountRepository.findById(authenticatedUserId).get());
-                                // log.setAction(Log_Enum.GENERATE_GHERKIN);
-                                // log.setStatus(LogStatus_Enum.SUCCESS);
-                                // log.setAtTime(time);
-                                // logRepository.save(log);
+
+                                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                                + "] [Generate gherkin successfully] at [" + time + "]");
                                 return ResponseEntity
                                                 .status(HttpStatus.OK)
                                                 .body("Generate gherkin successfully!");
                         }
-                       
+
                 }
-                // Log log = new Log();
-                // log.setExamPaper(examPaper);
-                // log.setAccount(accountRepository.findById(authenticatedUserId).get());
-                // log.setAction(Log_Enum.GENERATE_GHERKIN);
-                // log.setStatus(LogStatus_Enum.FAILURE);
-                // log.setAtTime(time);
-                // logRepository.save(log);
+                saveLog(examPaper.getExamPaperId(),
+                                "Account [" + authenticatedUserId + "] [Generate gherkin failure] at [" + time + "]");
+
                 return ResponseEntity
                                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body("Unknown error! Maybe AI did not respond");
@@ -407,10 +411,14 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         }
 
         @Override
-        public ResponseEntity<String> generateGherkinFormatMore(List<Long> gherkinIds) {
+        public ResponseEntity<String> generateGherkinFormatMore(List<Long> gherkinIds, Long examQuestionId) {
                 Long authenticatedUserId = Util.getAuthenticatedAccountId();
+                LocalDateTime time = Util.getCurrentDateTime();
 
-                // Validate AI Key
+                Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
+                                .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
+                Exam_Paper examPaper = examQuestion.getExamPaper();
+
                 Optional<Account_Selected_Key> optionalAccountSelectedKey = accountSelectedKeyRepository
                                 .findByAccount_AccountId(authenticatedUserId);
                 if (optionalAccountSelectedKey.isEmpty()) {
@@ -423,7 +431,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("AI API Key does not exist");
                 }
 
-                // Fetch specific Gherkin data based on gherkinIds
                 List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository.findAllById(gherkinIds);
 
                 if (gherkinScenarios.isEmpty()) {
@@ -431,8 +438,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                         .body("No Gherkin data found for the provided Gherkin IDs");
                 }
 
-                // Ensure all gherkinScenarios belong to the same Exam_Question
-                Long examQuestionId = gherkinScenarios.get(0).getExamQuestion().getExamQuestionId();
+                // Long examQuestionId =
+                // gherkinScenarios.get(0).getExamQuestion().getExamQuestionId();
                 boolean allBelongToSameQuestion = gherkinScenarios.stream()
                                 .allMatch(gherkin -> gherkin.getExamQuestion().getExamQuestionId()
                                                 .equals(examQuestionId));
@@ -442,7 +449,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                         .body("All Gherkin IDs must belong to the same Exam Question");
                 }
 
-                // Validate Exam_Database
                 Optional<Exam_Database> optionalExamDatabase = examDatabaseRepository
                                 .findByExamQuestionId(examQuestionId);
                 if (optionalExamDatabase.isEmpty()) {
@@ -453,22 +459,19 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 Exam_Database examDatabase = optionalExamDatabase.get();
                 String databaseScript = examDatabase.getDatabaseScript();
 
-                // Validate Exam_Question
                 Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(examQuestionId);
                 if (optionalExamQuestion.isEmpty()) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                         .body("Exam Question does not exist for ID: " + examQuestionId);
                 }
 
-                Exam_Question examQuestion = optionalExamQuestion.get();
+                // Exam_Question examQuestion = optionalExamQuestion.get();
 
-                // Format Gherkin data
                 String formattedGherkinData = gherkinScenarios.stream()
                                 .map(Gherkin_Scenario::getGherkinData)
                                 .map(data -> "{{ " + data + " }}")
                                 .collect(Collectors.joining("\n"));
 
-                // Process Content for AI prompt
                 List<Content> orderedContents = contentRepository
                                 .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT_MORE);
 
@@ -496,12 +499,17 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
 
                         if (content.getOrderPriority() == 2) {
+
                                 List<String> gherkinDataList = extractGherkinData(response);
                                 saveGherkinData(gherkinDataList, examQuestion);
-                                return ResponseEntity.status(HttpStatus.OK).body("Generate Gherkin successfully!");
+
+                                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                                + "] [Generate gherkin more successfully] at [" + time + "]");
+                                return ResponseEntity.status(HttpStatus.OK).body("Generate gherkin more successfully!");
                         }
                 }
-
+                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                + "] [Generate gherkin more failure] at [" + time + "]");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body("Unknown error! AI may not have responded.");
         }
@@ -578,7 +586,10 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
         @Override
         public GherkinScenarioResponseDTO updateGherkinScenarios(Long gherkinScenarioId, String gherkinData) {
-                // Tìm Gherkin_Scenario theo ID
+
+                Long authenticatedUserId = Util.getAuthenticatedAccountId();
+                LocalDateTime time = Util.getCurrentDateTime();
+
                 Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository
                                 .findById(gherkinScenarioId);
 
@@ -589,13 +600,21 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
                 Gherkin_Scenario gherkinScenario = optionalGherkinScenario.get();
 
-                // Cập nhật gherkinData
+                Exam_Question examQuestion = gherkinScenario.getExamQuestion();
+
+                Exam_Paper examPaper = examQuestion.getExamPaper();
+
+                if (examPaper == null) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                        "Exam Paper not found for the Gherkin Scenario");
+                }
+
                 gherkinScenario.setGherkinData(gherkinData);
 
-                // Lưu thay đổi vào cơ sở dữ liệu
                 Gherkin_Scenario updatedGherkinScenario = gherkinScenarioRepository.save(gherkinScenario);
+                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                + "] [Update Generate gherkin successfully] at [" + time + "]");
 
-                // Chuyển đổi thông tin thành DTO để trả về
                 GherkinScenarioResponseDTO responseDTO = new GherkinScenarioResponseDTO();
                 responseDTO.setGherkinScenarioId(updatedGherkinScenario.getGherkinScenarioId());
                 responseDTO.setGherkinData(updatedGherkinScenario.getGherkinData());
@@ -611,7 +630,14 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         }
 
         @Override
-        public String deleteGherkinScenario(List<Long> gherkinScenarioIds) {
+        public String deleteGherkinScenario(List<Long> gherkinScenarioIds, Long examquestionId) {
+
+                Long authenticatedUserId = Util.getAuthenticatedAccountId();
+                LocalDateTime time = Util.getCurrentDateTime();
+
+                Exam_Question examQuestion = examQuestionRepository.findById(examquestionId)
+                                .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
+                Exam_Paper examPaper = examQuestion.getExamPaper();
 
                 for (Long gherkinScenarioId : gherkinScenarioIds) {
                         Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository
@@ -630,6 +656,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                         gherkinScenarioRepository.save(gherkinScenario);
                 }
 
+                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                + "] [Delete gherkin successfully] at [" + time + "]");
                 return "Successfully deleted Gherkin Scenarios with IDs: "
                                 + String.join(", ", gherkinScenarioIds.stream().map(String::valueOf)
                                                 .collect(Collectors.toList()));
@@ -638,6 +666,13 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         @Override
         public GherkinScenarioResponseDTO createGherkinScenario(CreateGherkinScenarioDTO dto) {
 
+                Long authenticatedUserId = Util.getAuthenticatedAccountId();
+                LocalDateTime time = Util.getCurrentDateTime();
+
+                Exam_Question examQuestion = examQuestionRepository.findById(dto.getExamQuestionId())
+                                .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
+                Exam_Paper examPaper = examQuestion.getExamPaper();
+
                 Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(dto.getExamQuestionId());
 
                 if (optionalExamQuestion.isEmpty()) {
@@ -645,7 +680,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                         "Exam Question not found with ID: " + dto.getExamQuestionId());
                 }
 
-                Exam_Question examQuestion = optionalExamQuestion.get();
+                // Exam_Question examQuestion = optionalExamQuestion.get();
 
                 Gherkin_Scenario gherkinScenario = new Gherkin_Scenario();
                 gherkinScenario.setGherkinData(dto.getGherkinData());
@@ -654,6 +689,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 gherkinScenario.setPostmanForGrading(null);
 
                 Gherkin_Scenario savedGherkinScenario = gherkinScenarioRepository.save(gherkinScenario);
+                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                + "] [Create gherkin successfully] at [" + time + "]");
 
                 GherkinScenarioResponseDTO responseDTO = new GherkinScenarioResponseDTO();
                 responseDTO.setGherkinScenarioId(savedGherkinScenario.getGherkinScenarioId());

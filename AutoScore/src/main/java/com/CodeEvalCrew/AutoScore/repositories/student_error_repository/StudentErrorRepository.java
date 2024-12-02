@@ -9,6 +9,6 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Student_Error;
 
 @Repository
 public interface StudentErrorRepository extends JpaRepository<Student_Error, Long> {
-
     List<Student_Error> findBySourceSourceId(Long sourceId);
+    void deleteAllBySourceSourceId(Long sourceId);
 }

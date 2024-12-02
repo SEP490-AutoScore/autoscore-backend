@@ -30,7 +30,7 @@ public class SubjectService implements ISubjectService{
                 result.add(new SubjectView(subject.getSubjectId(), subject.getSubjectCode(), subject.getSubjectName()));
             }
 
-            return result;    
+            return result;
         } catch (NoSuchElementException e) {
             throw e;
         } catch (Exception e) {

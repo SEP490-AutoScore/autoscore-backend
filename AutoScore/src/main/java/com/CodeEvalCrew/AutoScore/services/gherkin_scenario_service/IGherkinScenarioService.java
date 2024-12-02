@@ -13,16 +13,16 @@ public interface IGherkinScenarioService {
 
     ResponseEntity<?> generateGherkinFormat(Long examQuestionId);
 
-    ResponseEntity<String> generateGherkinFormatMore(List<Long> gherkinIds);
+    ResponseEntity<String> generateGherkinFormatMore(List<Long> gherkinIds, Long examQuestionId);
   
 
-    List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId);
+    // List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId);
 
     List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairs(Long examPaperId);
 
     List<GherkinPostmanPairDTO> getAllGherkinAndPostmanPairsByQuestionId(Long questionId);
    
-    String deleteGherkinScenario(List<Long> gherkinScenarioIds);
+    String deleteGherkinScenario(List<Long> gherkinScenarioIds, Long examquestionId);
 
     GherkinScenarioResponseDTO createGherkinScenario(CreateGherkinScenarioDTO dto);
 

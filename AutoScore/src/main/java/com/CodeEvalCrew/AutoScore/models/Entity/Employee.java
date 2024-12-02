@@ -39,11 +39,6 @@ public class Employee {
     @JoinColumn(name = "positionId", nullable = false)
     private Position position;
 
-    //1-1 prompt
-    @OneToOne
-    @JoinColumn(name = "aiPromptId", nullable = true)
-    private AI_Prompt aiPrompt;
-
     //1-1 acc
     @OneToOne
     @JoinColumn(name = "accountId", nullable = false)

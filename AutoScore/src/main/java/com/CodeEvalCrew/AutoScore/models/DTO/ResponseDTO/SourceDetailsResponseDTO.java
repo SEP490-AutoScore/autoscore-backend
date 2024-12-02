@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentErrorResponseDTO {
-    private String studentEmail;
-    private String errorContent;
+public class SourceDetailsResponseDTO {
     private String studentCode;
+    private String studentEmail;
+    private String sourcePath;
+    private String type;
 }
