@@ -247,104 +247,95 @@ VALUES
 INSERT INTO `Exam_Question`
 (`question_content`, `exam_question_score`, `end_point`, `role_allow`, `http_method`, `description`, `payload_type`, `payload`, `validation`, `sucess_response`, `error_response`, `status`, `order_by`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('Login', 2, '/api/login', 'Administrator, Doctor, Patient', 'POST', 'This function allows the user to access the system', 'JSON', '{
+('Login', 2, '/api/login', 'Administrator, Doctor, Patient', 'POST', 'This function allows the user to access the system', 'JSON',
+'{
   "email": "user@example.com",
   "password": "securepassword123"
-}', 'Check validation of email and password cannot be null', '
-        Response Code: 200 OK
-		Response Body (JSON):
-{ 
-"message": "Login successful", 
-"token": "example token", 
-"user": { 
-"id": 1, 
-"email": "user@example.com", 
-"role": "admin" 
-} 
-}
-', 'Response Code: 401 Unauthorized (for incorrect email/password)
-		Response Body (JSON):
-		{ "error": "Invalid email or password" }
-', true, 1, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+}', 'Check validation of email and password cannot be null',
+'Response Code: 200 OK
+Response Body (JSON):
+ { 
+ 	"message": "Login successful", 
+ 	"token": "example token", 
+ 	"user": { 
+ 		"id": 1, 
+ 		"email": "user@example.com", 
+ 		"role": "admin" 
+ 		} 
+ }', 'Response Code: 401 Unauthorized (for incorrect email/password)
+Response Body (JSON): {"error": "Invalid email or password"}', true, 1, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
 ('Create (Add a person and the viruses they are infected with)', 2, '/api/person', 'Administrator, Doctor, Patient', 'POST', 'Retrieves details of a person, including any viruses they are infected with.', 'JSON',
 '{ 
-  "personID": 1,
-  "fullName": "John Doe",
-  "birthDay": "1990-05-15",
-  "phone": "1234567890",
-  "viruses": [
-    { 
-      "virusName": "COVID-19",
-      "resistanceRate": 0.2 
-    }, 
-    { 
-      "virusName": "Influenza",
-      "resistanceRate": 0.0 
-    } 
-  ] 
+  	"personID": 1,
+  	"fullName": "John Doe",
+  	"birthDay": "1990-05-15",
+  	"phone": "1234567890",
+  	"viruses": [
+    		{ 
+      		"virusName": "COVID-19",
+      		"resistanceRate": 0.2 
+    		}, 
+    		{ 
+      		"virusName": "Influenza",
+      		"resistanceRate": 0.0 
+   		 } 
+  	] 
 }', 
 '',
-'
-Response: 201 Created
+'Response: 201 Created
 { 
-"personId": 1, 
-"message": "Person and viruses added successfully"
- }',
+ 	"personId": 1, 
+ 	"message": "Person and viruses added successfully"
+}',
  'Response Code: 500 (for incorrect phone/viruses)
-		Response Body (JSON):
-		{ "error": "Invalid viruses or phone" }
-', true, 2, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+Response Body (JSON): {"error": "Invalid viruses or phone"}', true, 2, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
 ('Read (Retrieve person details and associated viruses)', 2, '/api/person/{id}', 'Administrator, Doctor, Patient', 'GET', 'Retrieves details of a person, including any viruses they are infected with.', 'URL Parameters',
 'id (ID of the person to retrieve)
 ',
 '',
-'
-Response: 200 OK
+'Response: 200 OK
 { 
-"personId": 1,
- "fullName": "John Doe", 
-"birthDay": "1990-05-15",
-"phone": "1234567890", 
-"viruses":
- [
-    { 
-      "virusName": "COVID-19", 
-      "resistanceRate": 0.2 
-    }, 
-    { 
-      "virusName": "Influenza", 
-      "resistanceRate": 0.0 
-    }
- ] 
-}
-',
+ 	"personId": 1,
+ 	 "fullName": "John Doe", 
+ 	"birthDay": "1990-05-15",
+ 	"phone": "1234567890", 
+ 	"viruses": [
+    		{ 
+      		"virusName": "COVID-19", 
+      		"resistanceRate": 0.2 
+   		 }, 
+    		{ 
+      		"virusName": "Influenza", 
+      		"resistanceRate": 0.0 
+   		 }
+ 	] 
+}',
  '', true, 3, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
 ('Retrieve all persons and their viruses', 2, '/api/persons', 'Administrator, Doctor, Patient', 'GET', 'Retrieve all persons and their viruses', NULL, NULL, NULL,
 '[ 
-    { 
-      "personId": 1, 
-      "fullName": "John Doe", 
-      "birthDay": "1990-05-15", 
-      "phone": "1234567890", 
-      "viruses": 
-      [ 
-        { 
-          "virusName": "COVID-19", 
-          "resistanceRate": 0.2 
-        }
-      ]
-    },
-    { 
-      "personId": 2,
-      "fullName": "Jane Smith", 
-      "birthDay": "1985-10-22", 
-      "phone": "0987654321", 
-      "viruses": [] 
-    }
+ 	{ 
+      	"personId": 1, 
+      	"fullName": "John Doe", 
+      	"birthDay": "1990-05-15", 
+      	"phone": "1234567890", 
+      	"viruses": [ 
+       		 { 
+          		"virusName": "COVID-19", 
+          		"resistanceRate": 0.2 
+        		}
+      	]
+    	},
+    	{ 
+      	"personId": 2,
+      	"fullName": "Jane Smith", 
+     	 "birthDay": "1985-10-22", 
+     	 "phone": "0987654321", 
+      	"viruses": [] 
+   	 }
  ]', 
  'Response Code: 500', true, 4, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
-('Update (Update person details and their viruses)', 2, '/api/person/{id}', 'Doctor', 'PUT', 'Updates the details of a person, including their associated viruses.', 'URL Parameters', '
-id (ID of the person to update)
+('Update (Update person details and their viruses)', 2, '/api/person/{id}', 'Doctor', 'PUT', 'Updates the details of a person, including their associated viruses.', 'URL Parameters',
+'id (ID of the person to update)
 Request Body (JSON):
 { 
   "fullName": "Jonathan Doe", 
@@ -361,8 +352,7 @@ Request Body (JSON):
     } 
   ] 
 }', NULL, 'Response: 200 OK
-{ "message": "Person and viruses updated successfully" }
-', NULL, true, 5, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
+{ "message": "Person and viruses updated successfully"}', NULL, true, 5, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
 ('Delete (Delete a person and their associated viruses)', 2, '/api/person/{id}', 'Doctor', 'DELETE', 'Deletes a person and their relationship with any viruses they are infected with.', 'URL Parameters', 'id (ID of the person to delete)', NULL, 'Response: 200 OK
 { "message": "Person and related viruses deleted successfully" }
 ', NULL, true, 6, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1);
