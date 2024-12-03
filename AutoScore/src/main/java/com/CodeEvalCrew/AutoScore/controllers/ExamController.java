@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamWithPapersDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_service.IExamService;
 
 @RestController
@@ -89,6 +91,19 @@ public class ExamController {
         }
 
     }
+
+    // @PreAuthorize("hasAuthority('VIEW_EXAM')")
+    @GetMapping("list-exam-exampaper")
+    public ResponseEntity<List<ExamWithPapersDTO>> getExamsWithUsedPapers() {
+        try {
+            List<ExamWithPapersDTO> result = examService.getExamWithUsedPapers();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+
 
     // @PostMapping("/merge")
     // public ResponseEntity<byte[]> mergeData(@RequestBody Map<String, Object> data) {

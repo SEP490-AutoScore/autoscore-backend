@@ -16,6 +16,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseD
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
 import com.CodeEvalCrew.AutoScore.services.score_service.IScoreService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -81,4 +82,45 @@ public class ScoreController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/total-students")
+    public ResponseEntity<Integer> getTotalStudents(@RequestParam Long examPaperId) {
+        try {
+            int totalStudents = scoreService.getTotalStudentsByExamPaperId(examPaperId);
+            return ResponseEntity.ok(totalStudents);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/students-with-zero-score")
+    public ResponseEntity<Integer> getTotalStudentsWithZeroScore(@RequestParam Long examPaperId) {
+        try {
+            int totalStudents = scoreService.getTotalStudentsWithZeroScore(examPaperId);
+            return ResponseEntity.ok(totalStudents);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/students-with-score-greater-than-zero")
+    public ResponseEntity<Integer> getTotalStudentsWithScoreGreaterThanZero(@RequestParam Long examPaperId) {
+        try {
+            int totalStudents = scoreService.getTotalStudentsWithScoreGreaterThanZero(examPaperId);
+            return ResponseEntity.ok(totalStudents);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/student-scores")
+    public ResponseEntity<List<StudentScoreDTO>> getStudentScoresByExamPaperId(@RequestParam Long examPaperId) {
+        try {
+            List<StudentScoreDTO> studentScores = scoreService.getStudentScoresByExamPaperId(examPaperId);
+            return ResponseEntity.ok(studentScores);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
