@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 
 @Repository
-public interface IRoleRepositoty extends JpaRepository<Role, Long>{
+public interface IRoleRepository extends JpaRepository<Role, Long>{
     Optional<Role> findByRoleName(String name);
+    Optional<Role> findByRoleCode(String code);
 }

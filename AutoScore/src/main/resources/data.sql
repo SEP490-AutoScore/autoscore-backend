@@ -31,6 +31,7 @@ VALUES
 ('CREATE_PERMISSION', 11, 'Create permission', 3, 1, 'Allows creating new permissions'),
 ('UPDATE_PERMISSION', 18, 'Update permission', 3, 1, 'Allows updating existing permissions'),
 ('DELETE_PERMISSION', 25, 'Delete permission', 3, 1, 'Allows deleting permissions'),
+('UPDATE_ROLE_PERMISSION', 57, 'Update role permission', 3, 1, 'Allows updating role permissions'),
 
 -- Organization Management
 ('VIEW_CAMPUS', 4, 'View campus', 4, 1, 'Allows viewing campus details'),
@@ -92,6 +93,7 @@ VALUES
 
 -- Dashboard
 ('DASHBOARD', 39, 'Dashboard access', 9, 1, 'Allows access to the dashboard'),
+('All_ACCESS', 56, 'All access', 9, 1, 'Allows access to all features'),
 
 -- Student
 ('VIEW_STUDENT', 40, 'View student', 7, 1, 'Allows viewing student details'),
@@ -111,22 +113,30 @@ VALUES
 (true, 1, 1), (true, 1, 2), (true, 1, 3), (true, 1, 4), (true, 1, 5), (true, 1, 6), (true, 1, 7), (true, 1, 8), (true, 1, 9), (true, 1, 10),
 (true, 1, 11), (true, 1, 12), (true, 1, 13), (true, 1, 14), (true, 1, 15), (true, 1, 16), (true, 1, 17), (true, 1, 18), (true, 1, 19), (true, 1, 20),
 (true, 1, 21), (true, 1, 22), (true, 1, 23), (true, 1, 24), (true, 1, 25), (true, 1, 26), (true, 1, 27), (true, 1, 28), (true, 1, 29), (true, 1, 30),
-(true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39), (true, 1, 40), (true, 1, 41),
+(true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39), (true, 1, 40),
+(true, 1, 41), (true, 1, 42), (true, 1, 43), (true, 1, 44), (true, 1, 45), (true, 1, 46), (true, 1, 47), (true, 1, 48), (true, 1, 49), (true, 1, 50),
+(true, 1, 51), (true, 1, 52), (true, 1, 53), (true, 1, 54), (true, 1, 55), (true, 1, 56), (true, 1, 57),
 -- Examiner
 (false, 2, 2), (false, 2, 3), (false, 2, 10), (false, 2, 11), (false, 2, 17), (false, 2, 18), (false, 2, 23), (false, 2, 24), (false, 2, 25), (false, 2, 39),
 (true, 2, 1), (true, 2, 4), (true, 2, 5), (true, 2, 6), (true, 2, 7), (true, 2, 8), (true, 2, 9), (true, 2, 12), (true, 2, 13), (true, 2, 14),
 (true, 2, 15), (true, 2, 16), (true, 2, 19), (true, 2, 20), (true, 2, 21), (true, 2, 22), (true, 2, 26), (true, 2, 27), (true, 2, 28), (true, 2, 29),
-(true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40), (true, 2, 41),
+(true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40),
+(true, 2, 41), (true, 2, 42), (true, 2, 43), (true, 2, 44), (true, 2, 45), (true, 2, 46), (true, 2, 47), (true, 2, 48), (true, 2, 49), (true, 2, 50),
+(true, 2, 51), (true, 2, 52), (true, 2, 53), (true, 2, 54), (true, 2, 55), (false, 2, 56), (true, 2, 57),
 -- Head of Department
-(false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26), 
-(false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30), 
+(false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
+(false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30),
 (false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
-(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40), (true, 3, 41),
+(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
+(true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 46), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
+(true, 3, 51), (true, 3, 52), (true, 3, 53), (true, 3, 54), (true, 3, 55), (false, 3, 56), (true, 3, 57),
 -- Lecturer
-(false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26), 
-(false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30), 
+(false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
+(false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30),
 (false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
-(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40), (true, 3, 41);
+(true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
+(true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 46), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
+(true, 3, 51), (true, 3, 52), (true, 3, 53), (true, 3, 54), (true, 3, 55), (false, 3, 56), (true, 3, 57);
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)

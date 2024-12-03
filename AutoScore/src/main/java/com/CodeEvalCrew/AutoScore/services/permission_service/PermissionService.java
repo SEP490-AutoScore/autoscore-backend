@@ -18,23 +18,30 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCat
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission_Category;
+import com.CodeEvalCrew.AutoScore.models.Entity.Role;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role_Permission;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionCategoryRepository;
 import com.CodeEvalCrew.AutoScore.repositories.permission_repository.IPermissionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRolePermissionRepository;
+import com.CodeEvalCrew.AutoScore.repositories.role_repository.IRoleRepository;
+import com.CodeEvalCrew.AutoScore.services.role_service.IRolePermissionService;
 
 @Service
 public class PermissionService implements IPermissionService {
 
     private final IPermissionRepository permissionRepository;
-    private final IPermissionCategoryRepository permissionCatergoryRepository;
+    private final IPermissionCategoryRepository permissionCategoryRepository;
     private final IRolePermissionRepository rolePermissionRepository;
+    private final IRoleRepository roleRepository;
+    private final IRolePermissionService rolePermissionService;
 
-    public PermissionService(IPermissionRepository permissionRepository, IPermissionCategoryRepository permissionCatergoryRepository,
-            IRolePermissionRepository rolePermissionRepository) {
+    public PermissionService(IPermissionRepository permissionRepository, IPermissionCategoryRepository permissionCategoryRepository,
+            IRolePermissionRepository rolePermissionRepository, IRolePermissionService rolePermissionService, IRoleRepository roleRepository) {
         this.permissionRepository = permissionRepository;
-        this.permissionCatergoryRepository = permissionCatergoryRepository;
+        this.permissionCategoryRepository = permissionCategoryRepository;
         this.rolePermissionRepository = rolePermissionRepository;
+        this.rolePermissionService = rolePermissionService;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -64,7 +71,7 @@ public class PermissionService implements IPermissionService {
     public OperationStatus createPermission(PermissionRequestDTO permissionRequestDTO) {
         try {
             String permissionName = permissionRequestDTO.getPermissionName();
-            String action = permissionRequestDTO.getAction();
+            String action = permissionRequestDTO.getAction().toUpperCase().trim();
             Long permissionCategoryId = permissionRequestDTO.getPermissionCategoryId();
 
             if (permissionName == null || action == null || permissionCategoryId == null) {
@@ -81,7 +88,7 @@ public class PermissionService implements IPermissionService {
                 return OperationStatus.ALREADY_ACTION_EXISTS;
             }
 
-            Optional<Permission_Category> permissionCategory = permissionCatergoryRepository.findById(permissionCategoryId);
+            Optional<Permission_Category> permissionCategory = permissionCategoryRepository.findById(permissionCategoryId);
             if (permissionCategory.isEmpty()) {
                 return OperationStatus.NOT_FOUND;
             }
@@ -89,12 +96,18 @@ public class PermissionService implements IPermissionService {
             Permission permissionEntity = new Permission();
             permissionEntity.setPermissionName(permissionName);
             permissionEntity.setAction(action);
+            permissionEntity.setDescription(permissionRequestDTO.getDescription());
             permissionEntity.setPermissionCategory(permissionCategory.get());
             permissionEntity.setStatus(true);
 
             Permission savedPermission = permissionRepository.save(permissionEntity);
             if (savedPermission == null || savedPermission.getPermissionId() == null) {
                 return OperationStatus.FAILURE;
+            }
+
+            List<Role> roles = roleRepository.findAll();
+            for (Role role : roles) {
+                rolePermissionService.createRolePermission(savedPermission, role);
             }
 
             return OperationStatus.SUCCESS;
@@ -131,7 +144,7 @@ public class PermissionService implements IPermissionService {
                 }
             }
 
-            Optional<Permission_Category> permissionCategory = permissionCatergoryRepository.findById(permissionCategoryId);
+            Optional<Permission_Category> permissionCategory = permissionCategoryRepository.findById(permissionCategoryId);
             if (permissionCategory.isEmpty()) {
                 return OperationStatus.NOT_FOUND;
             }
@@ -140,6 +153,7 @@ public class PermissionService implements IPermissionService {
             permissionEntity.setPermissionName(permissionName);
             permissionEntity.setAction(action);
             permissionEntity.setPermissionCategory(permissionCategory.get());
+            permissionEntity.setDescription(permissionRequestDTO.getDescription());
 
             Permission savedPermission = permissionRepository.save(permissionEntity);
             if (savedPermission == null || savedPermission.getPermissionId() == null) {
@@ -155,23 +169,34 @@ public class PermissionService implements IPermissionService {
     @Override
     public OperationStatus deletePermission(Long permissionId) {
         try {
-            Permission permission = permissionRepository.findById(permissionId).get();
-            if (permission == null) {
+            Optional<Permission> permission = permissionRepository.findById(permissionId);
+            if (permission.isEmpty()) {
                 return OperationStatus.NOT_FOUND;
             }
 
             List<Role_Permission> rolePermissions = getRolePermissionById(permissionId);
-            if (!rolePermissions.isEmpty()) {
-                return OperationStatus.CANNOT_DELETE;
+            if (rolePermissions.isEmpty()) {
+                return OperationStatus.NOT_FOUND;
             }
 
-            permission.setStatus(false);
-            Permission savedPermission = permissionRepository.save(permission);
-            if (savedPermission == null || savedPermission.getPermissionId() == null) {
-                return OperationStatus.FAILURE;
+            for (Role_Permission rolePermission : rolePermissions) {
+                if (rolePermission.isStatus()) {
+                    return OperationStatus.CANNOT_DELETE;
+                }
             }
 
-            return OperationStatus.SUCCESS;
+            for (Role_Permission rolePermission : rolePermissions) {
+                rolePermissionRepository.delete(rolePermission);
+            }
+
+            permissionRepository.deleteById(permissionId);
+
+            Optional<Permission> savedPermission = permissionRepository.findById(permissionId);
+            if (savedPermission.isEmpty()) {
+                return OperationStatus.SUCCESS;
+            }
+
+            return OperationStatus.FAILURE;
         } catch (Exception e) {
             return OperationStatus.ERROR;
         }
@@ -196,7 +221,7 @@ public class PermissionService implements IPermissionService {
     @Override
     public List<PermissionPermissionCategoryResponseDTO> getAllPermissionByPermissionCategory() {
         try {
-            List<Permission_Category> permissionCategories = permissionCatergoryRepository.findAll()
+            List<Permission_Category> permissionCategories = permissionCategoryRepository.findAll()
                     .stream().filter(permissionCategory -> permissionCategory.isStatus()).collect(Collectors.toList());
             if (permissionCategories == null || permissionCategories.isEmpty()) {
                 return null;

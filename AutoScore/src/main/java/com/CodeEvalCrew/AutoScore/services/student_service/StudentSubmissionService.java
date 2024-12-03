@@ -163,35 +163,33 @@ public class StudentSubmissionService {
             // Chờ tất cả các tác vụ hoàn thành
             while (completedTasks.get() + failedTasks.get() < totalTasks.get()) {
                 try {
-                    Future<Void> future = completionService.poll(5, TimeUnit.SECONDS); // Chờ tối đa 5 giây
+                    Future<Void> future = completionService.poll(5, TimeUnit.SECONDS);
                     if (future != null) {
                         try {
                             future.get(); // Lấy kết quả nếu không có lỗi
                             completedTasks.incrementAndGet(); // Đánh dấu tác vụ thành công
                         } catch (ExecutionException | InterruptedException e) {
                             errors.add("Task execution error: " + e.getMessage());
-                            logger.error("Error while processing tasks", e);
                             failedTasks.incrementAndGet(); // Đánh dấu tác vụ thất bại
                         }
                     } else {
-                        logger.warn("No task completed in the last 5 seconds. Retrying...");
+                        Thread.currentThread().interrupt();
+                        break;
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     errors.add("Interrupted while waiting for task completion");
-                    logger.error("Interrupted exception", e);
                     break; // Thoát vòng lặp nếu bị ngắt
                 }
             }
 
             executorService.shutdown();
-            executorService.awaitTermination(10, TimeUnit.SECONDS);
+            executorService.awaitTermination(5, TimeUnit.SECONDS);
             if (completedTasks.get() + failedTasks.get() >= totalTasks.get()) {
                 progressService.sendProgress(100);
             }
         } catch (IOException | InterruptedException e) {
             errors.add("Critical error: " + e.getMessage());
-            logger.error("Critical error while processing submission", e);
         } finally {
             executorService.shutdownNow();
         }

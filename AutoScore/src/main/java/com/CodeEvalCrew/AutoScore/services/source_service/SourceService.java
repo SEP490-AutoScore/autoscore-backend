@@ -1,9 +1,9 @@
 package com.CodeEvalCrew.AutoScore.services.source_service;
 
-import java.time.LocalDateTime;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +24,8 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Source_Detail;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.repositories.source_repository.SourceRepository;
-import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import jakarta.transaction.Transactional;
 
@@ -76,7 +76,6 @@ public class SourceService {
         logRepository.save(log);
     }
 
-    @Transactional
     public Source saveMainSource(String path, Exam_Paper examPaper) {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
