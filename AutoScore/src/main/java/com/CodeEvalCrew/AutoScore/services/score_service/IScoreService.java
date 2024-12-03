@@ -7,6 +7,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseD
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -21,4 +22,12 @@ public interface IScoreService {
     List<ScoreDetailsResponseDTO> getScoreDetailsByScoreId(Long scoreId);
 
     List<CodePlagiarismResponseDTO> getCodePlagiarismByScoreId(Long scoreId);
+
+    int getTotalStudentsByExamPaperId (Long examPaperId);
+
+    int getTotalStudentsWithZeroScore(Long examPaperId);
+
+    int getTotalStudentsWithScoreGreaterThanZero(Long examPaperId);
+
+    List<StudentScoreDTO> getStudentScoresByExamPaperId(Long examPaperId);
 }

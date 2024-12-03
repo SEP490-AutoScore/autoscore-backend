@@ -13,4 +13,5 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 public interface IExamPaperRepository extends JpaRepository<Exam_Paper, Long>, JpaSpecificationExecutor<Exam_Paper> {
     Optional<Exam_Paper> findByExamPaperCode(String examPaperCode);
     Optional<List<Exam_Paper>> findAllByExamExamId(Long examId);
+    List<Exam_Paper> findByIsUsedTrueOrderByCreatedAtDesc();
 }
