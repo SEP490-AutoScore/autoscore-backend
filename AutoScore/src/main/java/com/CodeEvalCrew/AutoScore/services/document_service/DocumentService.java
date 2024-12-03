@@ -46,6 +46,9 @@ import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamData
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Service
 public class DocumentService implements IDocumentService {
@@ -85,7 +88,7 @@ public class DocumentService implements IDocumentService {
         data.put("examPaperCode", exam.getExamPaperCode());
         data.put("subjectCode", exam.getSubjectCode());
         data.put("duration", duration);
-        data.put("instructions", exam.getInstructions());
+        // data.put("instructions", exam.getInstructions());
         data.put("semester", exam.getSemester());
         data.put("databaseDescription", exam.getDatabaseDescpription());
         data.put("databaseName", exam.getDatabaseName());
@@ -93,19 +96,15 @@ public class DocumentService implements IDocumentService {
 
         // Step 3: Load the Word template and replace placeholders
         try (FileInputStream fis = new FileInputStream(templatePath); XWPFDocument document = new XWPFDocument(fis)) {
-
+            addInstruction(document, exam.getInstructions());
             // Replace placeholders in paragraphs
             replacePlaceholdersInDocument(document, data);
-
             //add important to the word
             fillImportantField(document, exam);
-
             // Add image in to the exam paper
             addDatabaseImage(document, exam);
-
             // Add exam questions and their corresponding barems
             addExamQuestions(document, exam);
-
             // Step 4: Save the updated document
             try (FileOutputStream fos = new FileOutputStream(outputPath)) {
                 document.write(fos);
@@ -151,7 +150,6 @@ public class DocumentService implements IDocumentService {
         }
     }
 
-    //fortest
     private String getImportantText(Long importantId) {
         // Logic to retrieve the information for the important ID
         Optional<Important> important = importantRepository.findById(importantId);
@@ -257,6 +255,28 @@ public class DocumentService implements IDocumentService {
         }
     }
 
+    private void addInstruction(XWPFDocument document, String value) {
+// Locate {important} placeholder
+        for (XWPFParagraph paragraph : document.getParagraphs()) {
+            for (XWPFRun run : paragraph.getRuns()) {
+                String text = run.getText(0);
+                if (text != null && text.contains("{instructions}")) {
+                    XWPFParagraph valueParagraph = document.createParagraph();
+                    valueParagraph.setIndentationLeft(720); // Thụt vào 720 (đơn vị là twips, tương đương 0.5 inch)
+                    XWPFRun valueRun = valueParagraph.createRun();
+                    // Thêm giá trị với cách xuống dòng nếu có nhiều dòng
+                    String[] lines = value.split("\n");
+                    for (int i = 0; i < lines.length; i++) {
+                        valueRun.setText(lines[i]);
+                        if (i < lines.length - 1) {
+                            valueRun.addBreak();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private String addDatabaseImage(XWPFDocument document, ExamExport exportExam) throws IOException {
         String message = "Image added successfully.";
         String placeholder = "${imagePlaceholder}";
@@ -322,11 +342,23 @@ public class DocumentService implements IDocumentService {
             run.addBreak();
 
             run.setText("Description: " + question.getDescription());
+            run.addBreak();
 
-            addFieldToDocument(document, "Request body (" + question.getPayloadType() + ")", question.getPayload());
-            addFieldToDocument(document, "Validation: ", question.getValidation());
-            addFieldToDocument(document, "Success Response: ", question.getSucessResponse());
-            addFieldToDocument(document, "Error Response: ", question.getErrorResponse());
+            if (question.getPayloadType() != null) {
+                run.setText("Request type: " + question.getPayloadType());
+            }
+            if (question.getPayload() != null) {
+                addFieldToDocument(document, "Request:", question.getPayload());
+            }
+            if (question.getValidation() != null) {
+                addFieldToDocument(document, "Validation: ", question.getValidation());
+            }
+            if (question.getSucessResponse() != null) {
+                addFieldToDocument(document, "Success Response: ", question.getSucessResponse());
+            }
+            if (question.getErrorResponse() != null) {
+                addFieldToDocument(document, "Error Response: ", question.getErrorResponse());
+            }
 
             // Add a separator between items
             XWPFParagraph separator = document.createParagraph();
@@ -335,35 +367,122 @@ public class DocumentService implements IDocumentService {
         }
     }
 
+    public static void writeDynamicJsonToWord(XWPFDocument document, String jsonString, String title) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            // Chuyển chuỗi JSON thành đối tượng tổng quát (Map hoặc List)
+            Object jsonData = objectMapper.readValue(jsonString, new TypeReference<>() {
+            });
+
+            // Ghi nội dung JSON vào tài liệu Word
+            // writeJsonObject(document, jsonData, 0);
+            writeJsonToWord(document, jsonString);
+
+        } catch (IOException e) {
+            addFieldToDocument(document, title, jsonString);
+        }
+    }
+
+    // Hàm ghi nội dung JSON vào tài liệu Word
+    // private static void writeJsonObject(XWPFDocument document, Object jsonObject, int indentLevel) {
+    //     switch (jsonObject) {
+    //         case Map<?, ?> map -> {
+    //             for (Map.Entry<?, ?> entry : map.entrySet()) {
+    //                 // Ghi key
+    //                 addIndentedText(document, entry.getKey() + ":", indentLevel, true); // In đậm cho key
+    //                 // Đệ quy ghi value
+    //                 writeJsonObject(document, entry.getValue(), indentLevel + 1);
+    //             }
+    //         }
+    //         case List<?> list -> {
+    //             for (Object item : list) {
+    //                 // Ghi từng phần tử của List với dấu gạch đầu dòng
+    //                 addIndentedText(document, "- ", indentLevel, false);
+    //                 writeJsonObject(document, item, indentLevel + 1);
+    //             }
+    //         }
+    //         default -> // Ghi giá trị đơn giản (String, Number, Boolean, v.v.)
+    //             addIndentedText(document, jsonObject.toString(), indentLevel, false);
+    //     }
+    // }
+    public static void writeJsonToWord(XWPFDocument document, String jsonString) {
+        try {
+            // Chuyển chuỗi JSON thành dạng pretty JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // Bật thụt lề
+            Object jsonObject = objectMapper.readValue(jsonString, Object.class); // Đọc JSON
+            String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject); // Tạo chuỗi JSON định dạng đẹp
+
+            // Ghi JSON vào tài liệu
+            addJsonToDocument(document, prettyJson);
+
+        } catch (IOException e) {
+            // Xử lý lỗi nếu chuỗi JSON không hợp lệ
+            addJsonToDocument(document, jsonString);
+        }
+    }
+
+    // Ghi chuỗi JSON vào tài liệu Word
+    private static void addJsonToDocument(XWPFDocument document, String json) {
+        XWPFParagraph paragraph = document.createParagraph();
+        XWPFRun run = paragraph.createRun();
+        run.setFontFamily("Courier New"); // Sử dụng font monospace để giữ định dạng JSON
+        run.setFontSize(12); // Kích thước chữ
+        run.setText(json);
+    }
+
+    // Ghi chuỗi JSON vào tài liệu Word
+    // private static void addJsonStringToDocument(XWPFDocument document, String jsonString) {
+    //     XWPFParagraph paragraph = document.createParagraph();
+    //     XWPFRun run = paragraph.createRun();
+    //     run.setFontFamily("Courier New"); // Dùng font monospace để giữ nguyên định dạng JSON
+    //     run.setFontSize(12); // Kích thước chữ
+    //     run.setText(jsonString);
+    // }
+// Hàm hỗ trợ ghi văn bản với mức thụt lề và định dạng
+    // private static void addIndentedText(XWPFDocument document, String text, int indentLevel, boolean isBold) {
+    //     XWPFParagraph paragraph = document.createParagraph();
+    //     XWPFRun run = paragraph.createRun();
+    //     run.setText(text);
+    //     run.setBold(isBold);
+    //     run.setFontFamily("Courier New"); // Dùng font monospace cho dữ liệu JSON
+    //     run.setFontSize(12); // Kích thước chữ cố định
+    //     paragraph.setIndentationLeft(indentLevel * 300); // 300 = 0.3 inch mỗi cấp
+    // }
     public static byte[] getImageAsByteArray(String pathToImage) throws IOException {
         String imgPath = "C:\\Project\\SEP490\\database-img-test.png";
         return Files.readAllBytes(Paths.get(imgPath));
     }
 
     private static void addFieldToDocument(XWPFDocument document, String fieldName, String fieldValue) {
-        XWPFParagraph paragraph = document.createParagraph();
-        XWPFRun run = paragraph.createRun();
-
-        XWPFRun valueRun = paragraph.createRun();
-
-        if (fieldValue != null) {
-            run.setBold(true);
-            run.setText(fieldName);
-            run.addBreak();
-            String[] lines = fieldValue.split("\n");
-            for (int i = 0; i < lines.length; i++) {
-                valueRun.setText(lines[i]);
-                if (i < lines.length - 1) { // Add a break after each line except the last one
-                    valueRun.addBreak();
-                }
-            }
-        } else {
-
+        if (fieldValue.isBlank() || fieldValue.isBlank()) {
+            return;
         }
+
+        // Tạo một đoạn mới cho tên trường
+        XWPFParagraph fieldParagraph = document.createParagraph();
+        XWPFRun fieldRun = fieldParagraph.createRun();
+        // Định dạng tên trường
+        fieldRun.setBold(true);
+        fieldRun.setText(fieldName);
+        // Tạo một đoạn mới cho giá trị
+        XWPFParagraph valueParagraph = document.createParagraph();
+        valueParagraph.setIndentationLeft(720); // Thụt vào 720 (đơn vị là twips, tương đương 0.5 inch)
+        XWPFRun valueRun = valueParagraph.createRun();
+        // Thêm giá trị với cách xuống dòng nếu có nhiều dòng
+        String[] lines = fieldValue.split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            valueRun.setText(lines[i]);
+            if (i < lines.length - 1) {
+                valueRun.addBreak();
+            }
+        }
+
     }
 
     @Override
-    public void importExamPaper(Long examPaperId, MultipartFile multipartFile) throws Exception, NotFoundException{
+    public void importExamPaper(Long examPaperId, MultipartFile multipartFile) throws Exception, NotFoundException {
         try {
             //check exam Paper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "ExamPaper", examPaperId);
@@ -380,7 +499,7 @@ public class DocumentService implements IDocumentService {
                 examQuestion.setOrderBy(index);
                 examQuestion.setCreatedAt(Util.getCurrentDateTime());
                 examQuestion.setCreatedBy(createBy);
-                index ++;
+                index++;
 
                 examQuestionRepository.save(examQuestion);
 
@@ -400,108 +519,92 @@ public class DocumentService implements IDocumentService {
         return tempFile;
     }
 
-
-    private static List<Exam_Question> extractQuestions(File wordFile) throws IOException {
-        List<Exam_Question> questions = new ArrayList<>();
-
-        try (FileInputStream fis = new FileInputStream(wordFile); XWPFDocument document = new XWPFDocument(fis)) {
-            List<XWPFParagraph> paragraphs = document.getParagraphs();
-            Exam_Question currentQuestion = null;
-
-            for (XWPFParagraph paragraph : paragraphs) {
-                String text = paragraph.getText().trim();
-
-                if (text.isEmpty()) {
-                    continue; // Bỏ qua đoạn trống
-                }
-
-                // Bắt đầu một câu hỏi mới
-                if (text.startsWith("Endpoint:")) {
-                    if (currentQuestion != null) {
-                        questions.add(currentQuestion); // Lưu câu hỏi trước đó
-                    }
-                    currentQuestion = new Exam_Question();
-                    currentQuestion.setEndPoint(text.substring(9).trim());
-                    continue;
-                }
-
-                // Ánh xạ các trường thông tin
-                if (text.startsWith("HTTP Method:")) {
-                    if (currentQuestion != null) {
-                        currentQuestion.setHttpMethod(text.substring(13).trim());
-                    }
-                } else if (text.startsWith("Role Allowed:")) {
-                    if (currentQuestion != null) {
-                        currentQuestion.setRoleAllow(text.substring(13).trim());
-                    }
-                } else if (text.startsWith("Function:")) {
-                    if (currentQuestion != null) {
-                        currentQuestion.setDescription(text.substring(9).trim());
-                    }
-                } else if (text.startsWith("Validations:")) {
-                    if (currentQuestion != null) {
-                        currentQuestion.setValidation(text.substring(12).trim());
-                    }
-                } else if (text.startsWith("Success Response:")) {
-                    if (currentQuestion != null) {
-                        currentQuestion.setSucessResponse(text.substring(17).trim());
-                    }
-                } else if (text.startsWith("Error Response:")) {
-                    if (currentQuestion != null) {
-                        currentQuestion.setErrorResponse(text.substring(15).trim());
-                    }
-                } else if (text.startsWith("Request Body:")) {
-                    if (currentQuestion != null) {
-                        currentQuestion.setPayload(text.substring(13).trim());
-                    }
-                }
-
-                // Nếu đoạn văn không bắt đầu bằng trường nào, kiểm tra nội dung câu hỏi
-                if (currentQuestion != null && currentQuestion.getQuestionContent() == null) {
-                    currentQuestion.setQuestionContent(text); // Lưu nội dung câu hỏi
-                }
-            }
-
-            // Lưu câu hỏi cuối cùng (nếu có)
-            if (currentQuestion != null) {
-                questions.add(currentQuestion);
-            }
-        }
-
-        return questions;
-    }
-
-    public static void main(String[] args) {
-        try {
-            String file = "C:\\Project\\SEP490\\autoscore-backend\\AutoScore\\src\\main\\resources\\AutoScoreExamPapperTemplate.docx";
-            // Đường dẫn tới file Word
-            File wordFile = new File("C:\\Project\\SEP490\\autoscore-backend\\AutoScore\\src\\main\\resources\\AutoScoreExamPapperTemplate.docx");
-
-            List<String> questions = extractQuestions2(wordFile);
-
-            System.out.println("Questions:");
-            for (String question : questions) {
-                // System.out.println(question);
-                System.out.println("====================================");
-
-                Exam_Question examQuestion = parseExamQuestion(question);
-
-                System.out.println("Question Content: " + examQuestion.getQuestionContent());
-                System.out.println("Endpoint: " + examQuestion.getEndPoint());
-                System.out.println("HTTP Method: " + examQuestion.getHttpMethod());
-                System.out.println("Role Allowed: " + examQuestion.getRoleAllow());
-                System.out.println("Description: " + examQuestion.getDescription());
-                System.out.println("Request Body: " + examQuestion.getPayload());
-                System.out.println("Success Response: " + examQuestion.getSucessResponse());
-                System.out.println("Error Response: " + examQuestion.getErrorResponse());
-                System.out.println("Question Score: " + examQuestion.getExamQuestionScore());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    // private static List<Exam_Question> extractQuestions(File wordFile) throws IOException {
+    //     List<Exam_Question> questions = new ArrayList<>();
+    //     try (FileInputStream fis = new FileInputStream(wordFile); XWPFDocument document = new XWPFDocument(fis)) {
+    //         List<XWPFParagraph> paragraphs = document.getParagraphs();
+    //         Exam_Question currentQuestion = null;
+    //         for (XWPFParagraph paragraph : paragraphs) {
+    //             String text = paragraph.getText().trim();
+    //             if (text.isEmpty()) {
+    //                 continue; // Bỏ qua đoạn trống
+    //             }
+    //             // Bắt đầu một câu hỏi mới
+    //             if (text.startsWith("Endpoint:")) {
+    //                 if (currentQuestion != null) {
+    //                     questions.add(currentQuestion); // Lưu câu hỏi trước đó
+    //                 }
+    //                 currentQuestion = new Exam_Question();
+    //                 currentQuestion.setEndPoint(text.substring(9).trim());
+    //                 continue;
+    //             }
+    //             // Ánh xạ các trường thông tin
+    //             if (text.startsWith("HTTP Method:")) {
+    //                 if (currentQuestion != null) {
+    //                     currentQuestion.setHttpMethod(text.substring(13).trim());
+    //                 }
+    //             } else if (text.startsWith("Role Allowed:")) {
+    //                 if (currentQuestion != null) {
+    //                     currentQuestion.setRoleAllow(text.substring(13).trim());
+    //                 }
+    //             } else if (text.startsWith("Function:")) {
+    //                 if (currentQuestion != null) {
+    //                     currentQuestion.setDescription(text.substring(9).trim());
+    //                 }
+    //             } else if (text.startsWith("Validations:")) {
+    //                 if (currentQuestion != null) {
+    //                     currentQuestion.setValidation(text.substring(12).trim());
+    //                 }
+    //             } else if (text.startsWith("Success Response:")) {
+    //                 if (currentQuestion != null) {
+    //                     currentQuestion.setSucessResponse(text.substring(17).trim());
+    //                 }
+    //             } else if (text.startsWith("Error Response:")) {
+    //                 if (currentQuestion != null) {
+    //                     currentQuestion.setErrorResponse(text.substring(15).trim());
+    //                 }
+    //             } else if (text.startsWith("Request Body:")) {
+    //                 if (currentQuestion != null) {
+    //                     currentQuestion.setPayload(text.substring(13).trim());
+    //                 }
+    //             }
+    //             // Nếu đoạn văn không bắt đầu bằng trường nào, kiểm tra nội dung câu hỏi
+    //             if (currentQuestion != null && currentQuestion.getQuestionContent() == null) {
+    //                 currentQuestion.setQuestionContent(text); // Lưu nội dung câu hỏi
+    //             }
+    //         }
+    //         // Lưu câu hỏi cuối cùng (nếu có)
+    //         if (currentQuestion != null) {
+    //             questions.add(currentQuestion);
+    //         }
+    //     }
+    //     return questions;
+    // }
+    // public static void main(String[] args) {
+    //     try {
+    //         String file = "C:\\Project\\SEP490\\autoscore-backend\\AutoScore\\src\\main\\resources\\AutoScoreExamPapperTemplate.docx";
+    //         // Đường dẫn tới file Word
+    //         File wordFile = new File("C:\\Project\\SEP490\\autoscore-backend\\AutoScore\\src\\main\\resources\\AutoScoreExamPapperTemplate.docx");
+    //         List<String> questions = extractQuestions2(wordFile);
+    //         System.out.println("Questions:");
+    //         for (String question : questions) {
+    //             // System.out.println(question);
+    //             System.out.println("====================================");
+    //             Exam_Question examQuestion = parseExamQuestion(question);
+    //             System.out.println("Question Content: " + examQuestion.getQuestionContent());
+    //             System.out.println("Endpoint: " + examQuestion.getEndPoint());
+    //             System.out.println("HTTP Method: " + examQuestion.getHttpMethod());
+    //             System.out.println("Role Allowed: " + examQuestion.getRoleAllow());
+    //             System.out.println("Description: " + examQuestion.getDescription());
+    //             System.out.println("Request Body: " + examQuestion.getPayload());
+    //             System.out.println("Success Response: " + examQuestion.getSucessResponse());
+    //             System.out.println("Error Response: " + examQuestion.getErrorResponse());
+    //             System.out.println("Question Score: " + examQuestion.getExamQuestionScore());
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
     public static List<String> extractQuestions(String filePath) {
         List<String> questions = new ArrayList<>();
 
@@ -682,7 +785,7 @@ public class DocumentService implements IDocumentService {
     public static Exam_Question parseExamQuestion(String input) {
         // Khởi tạo đối tượng Exam_Question mới
         Exam_Question examQuestion = new Exam_Question();
-    
+
         // Cấu trúc Regex để tìm các phần trong câu hỏi
         String questionContentPattern = "Question: (.*?)\\n"; // Tìm nội dung câu hỏi
         String endPointPattern = "Endpoint: (.*?)\\n"; // Tìm endpoint
@@ -695,7 +798,7 @@ public class DocumentService implements IDocumentService {
         String successResponsePattern = "Success Response:(.*?)Error Response:"; // Tìm phản hồi thành công
         String errorResponsePattern = "Error Response:(.*?)$"; // Tìm phản hồi lỗi
         String questionScorePattern = "Score: (\\d+\\.\\d+)"; // Tìm điểm câu hỏi (ví dụ: Score: 2.0)
-    
+
         // Sử dụng Pattern và Matcher để tìm kiếm các phần trong chuỗi
         examQuestion.setQuestionContent(getPatternMatch(input, questionContentPattern));
         examQuestion.setEndPoint(getPatternMatch(input, endPointPattern));
@@ -707,7 +810,7 @@ public class DocumentService implements IDocumentService {
         examQuestion.setValidation(getPatternMatch(input, validationsPattern)); // Gán Validation
         examQuestion.setSucessResponse(getPatternMatch(input, successResponsePattern));
         examQuestion.setErrorResponse(getPatternMatch(input, errorResponsePattern));
-    
+
         // Lấy điểm câu hỏi từ cuối cùng của nội dung câu hỏi
         String scoreString = getPatternMatch(input, questionScorePattern);
         if (!scoreString.isEmpty()) {
@@ -715,7 +818,7 @@ public class DocumentService implements IDocumentService {
         } else {
             examQuestion.setExamQuestionScore(2.0f); // Điểm mặc định nếu không tìm thấy
         }
-    
+
         return examQuestion;
     }
 
@@ -731,8 +834,7 @@ public class DocumentService implements IDocumentService {
 
     public static List<String> extractQuestions2(File file) {
         List<String> questions = new ArrayList<>();
-        try (FileInputStream fis = new FileInputStream(file);
-             XWPFDocument document = new XWPFDocument(fis)) {
+        try (FileInputStream fis = new FileInputStream(file); XWPFDocument document = new XWPFDocument(fis)) {
 
             List<XWPFParagraph> paragraphs = document.getParagraphs();
             StringBuilder currentQuestion = new StringBuilder();
