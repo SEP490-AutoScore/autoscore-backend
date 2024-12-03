@@ -71,7 +71,7 @@ public class PermissionService implements IPermissionService {
     public OperationStatus createPermission(PermissionRequestDTO permissionRequestDTO) {
         try {
             String permissionName = permissionRequestDTO.getPermissionName();
-            String action = permissionRequestDTO.getAction();
+            String action = permissionRequestDTO.getAction().toUpperCase().trim();
             Long permissionCategoryId = permissionRequestDTO.getPermissionCategoryId();
 
             if (permissionName == null || action == null || permissionCategoryId == null) {

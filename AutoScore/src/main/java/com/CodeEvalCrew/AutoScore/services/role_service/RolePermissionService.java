@@ -3,6 +3,7 @@ package com.CodeEvalCrew.AutoScore.services.role_service;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,73 +111,23 @@ public class RolePermissionService implements IRolePermissionService {
     @Override
     @Transactional
     public OperationStatus updateRolePermission(RolePermissionRequestDTO rolePermissionRequestDTO) {
-        Long roleId = rolePermissionRequestDTO.getRoleId();
-        List<Long> newPermissionIds = rolePermissionRequestDTO.getPermissionIds();
-
-        if (roleId == null || newPermissionIds == null) {
-            return OperationStatus.INVALID_INPUT;
-        }
-
-        Role role = getRoleById(roleId);
-        if (role == null) {
-            return OperationStatus.NOT_FOUND;
-        }
-
         try {
-            // Lấy danh sách các role_permission hiện tại
-            List<Role_Permission> currentRolePermissions = rolePermissionRepository.findAllByRole_RoleId(roleId);
-            Set<Long> currentPermissionIds = currentRolePermissions.stream()
-                    .map(rp -> rp.getPermission().getPermissionId())
-                    .collect(Collectors.toSet());
-
-            // So sánh với danh sách mới
-            Set<Long> newPermissionIdSet = new HashSet<>(newPermissionIds);
-
-            // 1. Các quyền cần xóa (có trong current nhưng không có trong new)
-            List<Role_Permission> permissionsToDeactivate = currentRolePermissions.stream()
-                    .filter(rp -> !newPermissionIdSet.contains(rp.getPermission().getPermissionId()))
-                    .collect(Collectors.toList());
-
-            permissionsToDeactivate.forEach(rp -> {
-                rp.setStatus(false); // Deactivate quyền
-                rp.setUpdatedAt(LocalDateTime.now());
-                rp.setUpdatedBy(Util.getAuthenticatedAccountId());
-            });
-
-            // 2. Các quyền cần thêm mới (có trong new nhưng không có trong current)
-            List<Long> permissionsToAdd = newPermissionIds.stream()
-                    .filter(permissionId -> !currentPermissionIds.contains(permissionId))
-                    .collect(Collectors.toList());
-
-            List<Role_Permission> newRolePermissions = permissionsToAdd.stream().map(permissionId -> {
-                Role_Permission rolePermission = new Role_Permission();
-                rolePermission.setRole(role);
-                Permission permission = getPermissionById(permissionId);
-                rolePermission.setPermission(permission);
-                rolePermission.setStatus(true);
-                rolePermission.setCreatedAt(LocalDateTime.now());
-                rolePermission.setCreatedBy(Util.getAuthenticatedAccountId());
-                rolePermission.setUpdatedAt(LocalDateTime.now());
-                rolePermission.setUpdatedBy(Util.getAuthenticatedAccountId());
-                return rolePermission;
-            }).collect(Collectors.toList());
-
-            // 3. Giữ nguyên các quyền không thay đổi (có trong cả current và new)
-            List<Role_Permission> permissionsToKeep = currentRolePermissions.stream()
-                    .filter(rp -> newPermissionIdSet.contains(rp.getPermission().getPermissionId()) && rp.isStatus() == false)
-                    .collect(Collectors.toList());
-
-            permissionsToKeep.forEach(rp -> {
-                rp.setStatus(true); // Kích hoạt lại quyền
-                rp.setUpdatedAt(LocalDateTime.now());
-                rp.setUpdatedBy(Util.getAuthenticatedAccountId());
-            });
-
-            // Lưu tất cả thay đổi
-            rolePermissionRepository.saveAll(permissionsToDeactivate);
-            rolePermissionRepository.saveAll(newRolePermissions);
-            rolePermissionRepository.saveAll(permissionsToKeep);
-
+            Optional<Role> role = roleRepository.findById(rolePermissionRequestDTO.getRoleId());
+            if (role.isEmpty()) {
+                return OperationStatus.NOT_FOUND;
+            }
+            Optional<Permission> permission = permissionRepository.findById(rolePermissionRequestDTO.getPermissionId());
+            if (permission.isEmpty()) {
+                return OperationStatus.NOT_FOUND;
+            }
+            Optional<Role_Permission> rolePermission
+                    = rolePermissionRepository.findByRole_RoleIdAndPermission_PermissionId(
+                            rolePermissionRequestDTO.getRoleId(), rolePermissionRequestDTO.getPermissionId());
+            if (rolePermission.isEmpty()) {
+                return OperationStatus.NOT_FOUND;
+            }
+            rolePermission.get().setStatus(rolePermissionRequestDTO.isStatus());
+            rolePermissionRepository.save(rolePermission.get());
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
             return OperationStatus.ERROR;
