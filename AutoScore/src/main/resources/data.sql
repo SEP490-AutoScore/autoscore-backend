@@ -93,7 +93,7 @@ VALUES
 
 -- Dashboard
 ('DASHBOARD', 39, 'Dashboard access', 9, 1, 'Allows access to the dashboard'),
-('All_ACCESS', 56, 'All access', 9, 1, 'Allows access to all features'),
+('ALL_ACCESS', 56, 'All access', 9, 1, 'Allows access to all features'),
 
 -- Student
 ('VIEW_STUDENT', 40, 'View student', 7, 1, 'Allows viewing student details'),

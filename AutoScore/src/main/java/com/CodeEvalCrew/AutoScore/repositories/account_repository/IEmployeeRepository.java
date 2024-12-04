@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 
 @Repository
-public interface  IEmployeeRepository extends JpaRepository<Employee, Long>{
+public interface IEmployeeRepository extends JpaRepository<Employee, Long>{
     Employee findByAccount_AccountId(Long accountId);
     List<Employee> findAllByOrganization_OrganizationId(Long organizationId);
+    boolean existsByOrganizationOrganizationId(Long organizationId);
 }
