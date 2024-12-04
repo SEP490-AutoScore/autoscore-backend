@@ -31,9 +31,9 @@ public class Employee {
     //Relationship
     //n-1 org
     @ManyToOne
-    @JoinColumn(name = "organizationId", nullable = false)
+    @JoinColumn(name = "organizationId", nullable = true)
     private Organization organization;
-
+    
     //n-1 posi
     @ManyToOne
     @JoinColumn(name = "positionId", nullable = false)

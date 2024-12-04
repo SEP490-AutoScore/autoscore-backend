@@ -21,7 +21,7 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT') or hasAuthority('VIEW_ACCOUNT')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ACCOUNT', 'ALL_ACCESS')")
     @GetMapping
     public ResponseEntity<List<AccountResponseDTO>> getAllAccounts() {
         try {
