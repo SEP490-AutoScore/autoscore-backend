@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Grading.GradingRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Grading.GradingRequestForExam;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GradingProcessView;
 import com.CodeEvalCrew.AutoScore.services.grading_service.IGradingService;
 
@@ -37,6 +38,18 @@ public class GradingController {
         }
     }
 
+    @PostMapping("exam")
+    public ResponseEntity<?> startGradingProcessForExamPaper(@RequestBody GradingRequestForExam request) {
+        try {
+            gradingService.startingGradingProcessForExamPaper(request);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/ws/progress")
     public ResponseEntity<?> loadingProcess(@RequestParam Long examPaperId) {
         GradingProcessView result;
@@ -44,7 +57,7 @@ public class GradingController {
             result = gradingService.loadingGradingProgress(examPaperId);
             return new ResponseEntity<>(result ,HttpStatus.OK);
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

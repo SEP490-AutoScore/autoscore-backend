@@ -3,6 +3,7 @@ package com.CodeEvalCrew.AutoScore.mappers;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SourceDTO;
@@ -21,6 +22,8 @@ public interface StudentErrorMapper {
 
     Source toSource(SourceDTO dto);
 
+    @Mapping(source = "student.studentCode", target = "studentCode")
+    @Mapping(source = "student.studentEmail", target = "studentEmail")
     StudentErrorResponseDTO toStudentErrorResponseDTO(Student_Error studentError);
 
     List<StudentErrorResponseDTO> studentErrorEntityToStudentErrorResponseDTO(List<Student_Error> studentErrors);

@@ -26,41 +26,45 @@ public class ExamDatabaseController {
     @Autowired
     private IExamDatabaseService examDatabaseService;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') or hasAuthority('CREATE_EXAM_DATABASE')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('CREATE_EXAM_DATABASE')")
     @PostMapping(value = "/import", consumes = { "multipart/form-data" })
-@Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
-        @Content(mediaType = "multipart/form-data")
-}))
-public ResponseEntity<String> importSqlFile(
-        @RequestParam("file.sql") MultipartFile sqlFile,
-        @RequestParam("fileimage") MultipartFile imageFile,
-        @RequestParam("examPaperId") Long examPaperId,
-        @RequestParam("databaseNote") String databaseNote,
-        @RequestParam("databaseDescription") String databaseDescription) {
-    try {
-        String result = examDatabaseService.importSqlFile(sqlFile, imageFile, examPaperId, databaseNote, databaseDescription);
-        return ResponseEntity.ok(result);
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body("Error: " + e.getMessage());
+    @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(mediaType = "multipart/form-data")
+    }))
+    public ResponseEntity<String> importSqlFile(
+            @RequestParam("file.sql") MultipartFile sqlFile,
+            @RequestParam("fileimage") MultipartFile imageFile,
+            @RequestParam("examPaperId") Long examPaperId,
+            @RequestParam("databaseNote") String databaseNote,
+            @RequestParam("databaseDescription") String databaseDescription) {
+        try {
+            String result = examDatabaseService.importSqlFile(sqlFile, imageFile, examPaperId, databaseNote,
+                    databaseDescription);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
     }
-}
 
     // @PostMapping(value = "/import", consumes = { "multipart/form-data" })
-    // @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
-    //         @Content(mediaType = "multipart/form-data")
+    // @Operation(requestBody =
+    // @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+    // @Content(mediaType = "multipart/form-data")
     // }))
-    // public ResponseEntity<String> importSqlFile(@RequestParam("file.sql") MultipartFile sqlFile,
-    //         @RequestParam("fileimage") MultipartFile imageFile,
-    //         @RequestParam("examPaperId") Long examPaperId) {
-    //     try {
-    //         String result = examDatabaseService.importSqlFile(sqlFile, imageFile, examPaperId);
-    //         return ResponseEntity.ok(result);
-    //     } catch (Exception e) {
-    //         return ResponseEntity.status(500).body("Error: " + e.getMessage());
-    //     }
+    // public ResponseEntity<String> importSqlFile(@RequestParam("file.sql")
+    // MultipartFile sqlFile,
+    // @RequestParam("fileimage") MultipartFile imageFile,
+    // @RequestParam("examPaperId") Long examPaperId) {
+    // try {
+    // String result = examDatabaseService.importSqlFile(sqlFile, imageFile,
+    // examPaperId);
+    // return ResponseEntity.ok(result);
+    // } catch (Exception e) {
+    // return ResponseEntity.status(500).body("Error: " + e.getMessage());
+    // }
     // }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER') or hasAuthority('UPDATE_EXAM_DATABASE')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPDATE_EXAM_DATABASE')")
     @PutMapping(value = "/update", consumes = { "multipart/form-data" })
     @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(mediaType = "multipart/form-data") }))
@@ -70,7 +74,8 @@ public ResponseEntity<String> importSqlFile(
             @RequestParam("databaseNote") String databaseNote,
             @RequestParam("databaseDescription") String databaseDescription) {
         try {
-            String result = examDatabaseService.updateSqlFile(sqlFile, imageFile, examPaperId, databaseNote, databaseDescription);
+            String result = examDatabaseService.updateSqlFile(sqlFile, imageFile, examPaperId, databaseNote,
+                    databaseDescription);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
@@ -84,6 +89,8 @@ public ResponseEntity<String> importSqlFile(
     // examDatabaseService.getExamDatabaseByExamPaperId(examPaperId);
     // return ResponseEntity.ok(result);
     // }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_EXAM_DATABASE')")
     @GetMapping("/getbyExamPaperId")
     public ResponseEntity<ExamDatabaseDTO> getExamDatabaseByExamPaperId(@RequestParam Long examPaperId) {
         Optional<ExamDatabaseDTO> result = examDatabaseService.getExamDatabaseByExamPaperId(examPaperId);

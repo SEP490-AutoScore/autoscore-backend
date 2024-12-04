@@ -12,6 +12,7 @@ import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamWithPapersDTO;
 
 public interface IExamService{
     ExamViewResponseDTO getExamById(long id)throws Exception,NotFoundException;
@@ -27,4 +28,6 @@ public interface IExamService{
     void mergeDataIntoWord(String templatePath, String outputPath, Map<DataFieldName, String> data) throws Exception;
 
     public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException, Exception;
+
+    List<ExamWithPapersDTO> getExamWithUsedPapers();
 }

@@ -16,4 +16,3 @@ public class UploadProgressListener {
         return contentLength > 0 ? (int) ((bytesRead * 100) / contentLength) : 0;
     }
 }
-

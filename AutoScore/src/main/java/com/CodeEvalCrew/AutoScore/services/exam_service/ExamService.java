@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
@@ -37,7 +38,9 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionExport;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamWithPapersDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
@@ -155,6 +158,7 @@ public class ExamService implements IExamService {
             exam.setSubject(subject);
             exam.setCreatedAt(LocalDateTime.now());
             exam.setStatus(true);
+            exam.setType(Exam_Type_Enum.EXAM);
             exam.setCreatedBy(account.getAccountId());
             exam.setSemester(semester);
 
@@ -469,5 +473,20 @@ public class ExamService implements IExamService {
 
         return result;
     }
+
+    @Override
+    public List<ExamWithPapersDTO> getExamWithUsedPapers() {
+        return examPaperRepository.findByIsUsedTrueOrderByCreatedAtDesc()
+                .stream()
+                .map(examPaper -> new ExamWithPapersDTO(
+                        examPaper.getExam().getExamCode(),
+                        examPaper.getExamPaperCode(),
+                        examPaper.getExamPaperId()
+                ))
+                .collect(Collectors.toList());
+    }
+    
+    
+    
 
 }

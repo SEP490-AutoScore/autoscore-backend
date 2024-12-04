@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Semester.CreateSemesterRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Semester.SemesterView;
 import com.CodeEvalCrew.AutoScore.services.semesterService.ISemesterService;
 
@@ -25,6 +28,19 @@ public class SemesterController {
         List<SemesterView> result;
         try {
             result = semesterService.getAllSemester();
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> createNewSemester(@RequestBody CreateSemesterRequest request) {
+        SemesterView result;
+        try {
+            result = semesterService.createNewSemester(request);
             return new ResponseEntity<>(result,HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

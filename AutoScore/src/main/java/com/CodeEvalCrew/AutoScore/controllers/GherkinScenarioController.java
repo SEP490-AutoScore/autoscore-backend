@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,12 +30,14 @@ public class GherkinScenarioController {
     @Autowired
     private IGherkinScenarioService gherkinScenarioService;
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_GHERKIN_POSTMAN')")
     @GetMapping("/pairs")
     public ResponseEntity<List<GherkinPostmanPairDTO>> getAllGherkinAndPostmanPairs(@RequestParam Long examPaperId) {
         List<GherkinPostmanPairDTO> result = gherkinScenarioService.getAllGherkinAndPostmanPairs(examPaperId);
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_GHERKIN_POSTMAN')")
     @GetMapping("/pairs/by-question")
     public ResponseEntity<List<GherkinPostmanPairDTO>> getAllGherkinAndPostmanPairsByQuestionId(
             @RequestParam Long questionId) {
@@ -43,54 +46,58 @@ public class GherkinScenarioController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<GherkinScenarioDTO>> getAllByExamPaperId(@RequestParam Long examPaperId) {
-        List<GherkinScenarioDTO> result = gherkinScenarioService.getAllGherkinScenariosByExamPaperId(examPaperId);
-        return ResponseEntity.ok(result);
+    // @PreAuthorize("hasAnyRole('ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_GHERKIN_POSTMAN')")
+    // @GetMapping("/all")
+    // public ResponseEntity<List<GherkinScenarioDTO>> getAllByExamPaperId(@RequestParam Long examPaperId) {
+    //     List<GherkinScenarioDTO> result = gherkinScenarioService.getAllGherkinScenariosByExamPaperId(examPaperId);
+    //     return ResponseEntity.ok(result);
 
-    }
+    // }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('GENERATE_GHERKIN_SCENARIO')")
     @PostMapping("/generate_gherkin_format")
-    public ResponseEntity<String> generateGherkinFormat(@RequestParam Long examQuestionId) {
-        String result = gherkinScenarioService.generateGherkinFormat(examQuestionId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<?> generateGherkinFormat(@RequestParam Long examQuestionId) {
+        return gherkinScenarioService.generateGherkinFormat(examQuestionId);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('GENERATE_GHERKIN_SCENARIO')")
     @PostMapping("/generate_gherkin_format_more")
-    public ResponseEntity<String> generateGherkinFormatMore(@RequestParam Long examQuestionId) {
-        String result = gherkinScenarioService.generateGherkinFormatMore(examQuestionId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<String> generateGherkinFormatMore(
+            @RequestBody List<Long> gherkinIds, @RequestParam Long examQuestionId) {
+        return gherkinScenarioService.generateGherkinFormatMore(gherkinIds, examQuestionId);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPDATE_GHERKIN_SCENARIO')")
     @PutMapping(value = "/{gherkinScenarioId}", consumes = "multipart/form-data")
     public ResponseEntity<GherkinScenarioResponseDTO> updateGherkinData(
             @PathVariable Long gherkinScenarioId,
             @RequestParam("gherkinData") String gherkinData) {
         try {
-            GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.updateGherkinScenarios(gherkinScenarioId, gherkinData);
+            GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.updateGherkinScenarios(gherkinScenarioId,
+                    gherkinData);
             return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity<>(null, e.getStatusCode());
         }
     }
-    
-    
 
-    @DeleteMapping("/{gherkinScenarioId}")
-    public ResponseEntity<GherkinScenarioResponseDTO> deleteGherkinScenario(@PathVariable Long gherkinScenarioId) {
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('DELETE_GHERKIN_SCENARIO')")
+    @DeleteMapping("/gherkinScenarioIds")
+    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds, @RequestParam Long examQuestionId) {
         try {
-            // Gọi service để xóa (cập nhật trạng thái) Gherkin Scenario và trả về DTO
-            GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioId);
-            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+
+            String result = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioIds, examQuestionId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Error deleting Gherkin Scenarios.", HttpStatus.NOT_FOUND);
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('CREATE_GHERKIN_SCENARIO')")
     @PostMapping("")
     public ResponseEntity<GherkinScenarioResponseDTO> createGherkinScenario(@RequestBody CreateGherkinScenarioDTO dto) {
         try {
-            // Gọi service để tạo mới Gherkin Scenario và trả về DTO
+
             GherkinScenarioResponseDTO responseDTO = gherkinScenarioService.createGherkinScenario(dto);
             return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -98,6 +105,7 @@ public class GherkinScenarioController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER','ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_GHERKIN_SCENARIO')")
     @GetMapping("/{gherkinScenarioId}")
     public ResponseEntity<GherkinScenarioDTO> getById(@PathVariable Long gherkinScenarioId) {
         GherkinScenarioDTO gherkinScenarioDTO = gherkinScenarioService.getById(gherkinScenarioId);

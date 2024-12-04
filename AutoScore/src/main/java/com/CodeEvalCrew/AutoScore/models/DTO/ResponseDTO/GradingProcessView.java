@@ -14,8 +14,7 @@ import lombok.Setter;
 public class GradingProcessView {
     private Long processId;
     private String status;
-    private int successProcess;
-    private int totalProcess;
     private LocalDateTime startDate;
     private LocalDateTime updateDate;
+    private Long examPaperId;
 }

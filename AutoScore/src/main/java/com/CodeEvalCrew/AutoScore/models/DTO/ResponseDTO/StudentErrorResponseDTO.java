@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentErrorResponseDTO {
-
-    private int studentErrorId;
+    private String studentEmail;
     private String errorContent;
     private String studentCode;
 }

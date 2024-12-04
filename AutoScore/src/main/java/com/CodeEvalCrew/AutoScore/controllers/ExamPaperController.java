@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperToExamRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioInfoDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_paper_service.IExamPaperService;
-import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 @RequestMapping("api/exam-paper")
@@ -38,6 +38,7 @@ public class ExamPaperController {
         this.examPaperService = examPaperService;
     }
 
+    
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         ExamPaperView result;
@@ -130,6 +131,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('IMPORT_POSTMAN')")
     @PostMapping("/import-postman-collections")
     public ResponseEntity<?> importPostmanCollections(
             @RequestParam("examPaperId") Long examPaperId,
@@ -142,39 +144,40 @@ public class ExamPaperController {
         }
     }
 
-    @GetMapping("/{examPaperId}/questions")
-    public ResponseEntity<?> getExamQuestionIds(@PathVariable Long examPaperId) {
-        try {
-            List<Long> questionIds = examPaperService.getExamQuestionIdsByExamPaperId(examPaperId);
-            return new ResponseEntity<>(questionIds, HttpStatus.OK);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // @GetMapping("/{examPaperId}/questions")
+    // public ResponseEntity<?> getExamQuestionIds(@PathVariable Long examPaperId) {
+    //     try {
+    //         List<Long> questionIds = examPaperService.getExamQuestionIdsByExamPaperId(examPaperId);
+    //         return new ResponseEntity<>(questionIds, HttpStatus.OK);
+    //     } catch (NotFoundException ex) {
+    //         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    //     } catch (Exception e) {
+    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
-    @GetMapping("/{examPaperId}/gherkin-scenarios")
-    public ResponseEntity<List<GherkinScenarioInfoDTO>> getGherkinScenariosByExamPaperId(
-            @PathVariable Long examPaperId) throws NotFoundException {
-        List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService
-                .getGherkinScenariosByExamPaperId(examPaperId);
-        return new ResponseEntity<>(gherkinScenarioInfoList, HttpStatus.OK);
-    }
+    // @PreAuthorize("hasAnyRole('ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('IMPORT_POSTMAN')")
+    // @GetMapping("/{examPaperId}/gherkin-scenarios")
+    // public ResponseEntity<List<GherkinScenarioInfoDTO>> getGherkinScenariosByExamPaperId(
+    //         @PathVariable Long examPaperId) throws NotFoundException {
+    //     List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService
+    //             .getGherkinScenariosByExamPaperId(examPaperId);
+    //     return new ResponseEntity<>(gherkinScenarioInfoList, HttpStatus.OK);
+    // }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('EXPORT_POSTMAN')")
     @GetMapping("/export-postman/{examPaperId}")
     public ResponseEntity<byte[]> exportPostmanCollection(@PathVariable Long examPaperId) {
         try {
             byte[] fileContent = examPaperService.exportPostmanCollection(examPaperId);
 
-            // Set the response headers for file download
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Disposition", "attachment; filename=postman_collection.json");
             headers.add("Content-Type", "application/json");
 
             return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
         } catch (Exception e) {
-            // Return error message as a byte array
+
             byte[] errorMessage = ("Failed to export Postman Collection: " + e.getMessage()).getBytes();
             return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
@@ -189,12 +192,13 @@ public class ExamPaperController {
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_INFO_POSTMAN')")
     @GetMapping("/infoFilePostman")
     public ResponseEntity<?> getExamPaper(@RequestParam Long examPaperId) {
         try {
@@ -207,12 +211,25 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('CONFIRM_BEFORE_GRADING')")
     @PutMapping("/confirmFilePostman/{examPaperId}")
     public ResponseEntity<?> confirmFilePostman(@PathVariable Long examPaperId) {
         try {
             String result = examPaperService.confirmFilePostman(examPaperId);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+         } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/exam-paper")
+    public ResponseEntity<?> updateExamPaperToAnExam(@RequestBody ExamPaperToExamRequest examPaperId) {
+        try {
+            examPaperService.updateExamPaperToAnExam(examPaperId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
          } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

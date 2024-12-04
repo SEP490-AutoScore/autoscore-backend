@@ -15,30 +15,30 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 public interface PostmanForGradingRepository extends JpaRepository<Postman_For_Grading, Long> {
     List<Postman_For_Grading> findByExamQuestion_ExamPaper_ExamPaperId(Long examPaperId);
 
-    // Truy vấn danh sách Postman_For_Grading theo examPaperId và sắp xếp theo
-    // orderBy
-    // @Query("SELECT p FROM Postman_For_Grading p WHERE p.examPaper.examPaperId = :examPaperId ORDER BY p.orderBy")
-    // List<Postman_For_Grading> findByExamPaperIdOrderByOrderBy(@Param("examPaperId") Long examPaperId);
-    List<Postman_For_Grading> findByExamPaper_ExamPaperIdOrderByOrderPriorityAsc(Long examPaperId);
-    
+    List<Postman_For_Grading> findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(Long examPaperId);
+
     List<Postman_For_Grading> findByExamPaper_ExamPaperId(Long examPaperId);
 
     Optional<Postman_For_Grading> findByPostmanFunctionName(String functionName);
 
     List<Postman_For_Grading> findByExamPaper_ExamPaperIdAndStatusTrue(Long examPaperId);
 
-    List<Postman_For_Grading> findByExamQuestionAndStatusTrue(Exam_Question examQuestion);
+    List<Postman_For_Grading> findByExamQuestionAndStatusTrueOrderByOrderPriorityAsc(Exam_Question examQuestion);
 
-    // Optional<Postman_For_Grading> findByGherkinScenario_GherkinScenarioId(Long gherkinScenarioId);
-
-    
     Optional<Postman_For_Grading> findByGherkinScenario_GherkinScenarioIdAndStatusTrue(Long gherkinScenarioId);
 
     List<Postman_For_Grading> findByPostmanFunctionNameInAndStatusTrue(List<String> functionNames);
 
-       @Query("SELECT p.postmanFunctionName FROM Postman_For_Grading p WHERE p.status = true")
+    @Query("SELECT p.postmanFunctionName FROM Postman_For_Grading p WHERE p.status = true")
     List<String> findFunctionNamesByStatusTrue();
 
-      @Query("SELECT p FROM Postman_For_Grading p WHERE p.examPaper.examPaperId = :examPaperId AND p.status = true ORDER BY p.orderPriority ASC")
-    List<Postman_For_Grading> findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriority(@Param("examPaperId") Long examPaperId);
+    @Query("SELECT COUNT(DISTINCT p.examQuestion.examQuestionId) " +
+           "FROM Postman_For_Grading p WHERE p.postmanForGradingId IN :ids AND p.status = true")
+    Long countDistinctExamQuestionIdsByIds(@Param("ids") List<Long> ids);
+
+    @Query("SELECT p FROM Postman_For_Grading p WHERE p.examQuestion.examQuestionId = :examQuestionId AND p.status = true")
+    List<Postman_For_Grading> findAllByExamQuestionIdAndStatusTrue(@Param("examQuestionId") Long examQuestionId);
 }
+
+
+

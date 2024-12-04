@@ -1,12 +1,12 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +16,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseD
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
 import com.CodeEvalCrew.AutoScore.services.score_service.IScoreService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,7 +45,7 @@ public class ScoreController {
         try {
             List<ScoreResponseDTO> scores = scoreService.getScoresByExamPaperId(exampaperid);
             scoreService.exportScoresToExcel(response, scores);
-        } catch (Exception e) {
+        } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
@@ -81,4 +82,45 @@ public class ScoreController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/total-students")
+    public ResponseEntity<Integer> getTotalStudents(@RequestParam Long examPaperId) {
+        try {
+            int totalStudents = scoreService.getTotalStudentsByExamPaperId(examPaperId);
+            return ResponseEntity.ok(totalStudents);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/students-with-zero-score")
+    public ResponseEntity<Integer> getTotalStudentsWithZeroScore(@RequestParam Long examPaperId) {
+        try {
+            int totalStudents = scoreService.getTotalStudentsWithZeroScore(examPaperId);
+            return ResponseEntity.ok(totalStudents);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/students-with-score-greater-than-zero")
+    public ResponseEntity<Integer> getTotalStudentsWithScoreGreaterThanZero(@RequestParam Long examPaperId) {
+        try {
+            int totalStudents = scoreService.getTotalStudentsWithScoreGreaterThanZero(examPaperId);
+            return ResponseEntity.ok(totalStudents);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/student-scores")
+    public ResponseEntity<List<StudentScoreDTO>> getStudentScoresByExamPaperId(@RequestParam Long examPaperId) {
+        try {
+            List<StudentScoreDTO> studentScores = scoreService.getStudentScoresByExamPaperId(examPaperId);
+            return ResponseEntity.ok(studentScores);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }

@@ -26,6 +26,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Organization {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long organizationId;
@@ -40,8 +41,7 @@ public class Organization {
     private boolean status;
     //rels
     //1-n emp
-    @OneToMany
-    @JoinColumn(name = "employeeId", nullable = true)
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Employee> employees;
 
     //1-n suborg
@@ -49,7 +49,7 @@ public class Organization {
     @JoinColumn(name = "subjectOrgId", nullable = true)
     private Set<Organization_Subject> organizationSubjects;
 
-    @OneToMany(mappedBy = "organization", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
     private Set<Account_Organization> accountOrganizations;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
