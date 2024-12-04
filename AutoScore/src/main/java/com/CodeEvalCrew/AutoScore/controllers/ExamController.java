@@ -18,6 +18,7 @@ import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamCreateRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamWithPapersDTO;
 import com.CodeEvalCrew.AutoScore.services.exam_service.IExamService;
 
 @RestController
@@ -89,4 +90,91 @@ public class ExamController {
         }
 
     }
+
+    // @PreAuthorize("hasAuthority('VIEW_EXAM')")
+    @GetMapping("list-exam-exampaper")
+    public ResponseEntity<List<ExamWithPapersDTO>> getExamsWithUsedPapers() {
+        try {
+            List<ExamWithPapersDTO> result = examService.getExamWithUsedPapers();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+
+
+    // @PostMapping("/merge")
+    // public ResponseEntity<byte[]> mergeData(@RequestBody Map<String, Object> data) {
+    //     try {
+    //         String templatePath = "AutoScore\\src\\main\\resources\\Template.docx"; // Path to your template
+
+    //         // Merge the data into the template
+    //         byte[] mergedDocument = examService.mergeDataIntoTemplate(templatePath, data);
+
+    //         // Prepare response headers
+    //         HttpHeaders headers = new HttpHeaders();
+    //         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+    //         headers.setContentDispositionFormData("attachment", "merged_document.docx");
+
+    //         // Return the document as a downloadable file
+    //         return new ResponseEntity<>(mergedDocument, headers, HttpStatus.OK);
+    //     } catch (Exception e) {
+    //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
+
+    // @GetMapping("/merge-word")
+    // public String mergeWord(@RequestParam String examCode, @RequestParam String examPaperCode, @RequestParam String semester) {
+    //     try {
+    //         String templatePath = "C:\\Project\\SEP490\\tp.docx";
+    //         // Prepare the merge data
+    //         Map<DataFieldName, String> data = new HashMap<>();
+    //         data.put(new DataFieldName("ExamCode"), examCode);
+    //         data.put(new DataFieldName("ExamPaperCode"), examPaperCode);
+    //         data.put(new DataFieldName("Semester"), semester);
+
+    //         // Merge data into the Word template
+    //         examService.mergeDataIntoWord(templatePath, "C:\\Project\\SEP490\\output.docx", data);
+
+    //         return "Word document merged successfully!";
+    //     } catch (Exception e) {
+    //         return "Error merging Word document: " + e.getMessage();
+    //     }
+    // }
+
+    // @GetMapping("/generate-word")
+    // public ResponseEntity<byte[]> generateWord() {
+    //     // Dotenv dotenv = Dotenv.load();
+    //     // String path = dotenv.get("PATH");
+    //     try {
+    //         // Define the path of the template and output file
+    //         String templatePath = "AutoScore\\src\\main\\resources\\Template.docx";
+    //         String outputPath = "C:\\Project\\SEP490\\output.docx";
+
+    //         // Create a map of data to be merged into the document
+    //         Map<String, String> data = new HashMap<>();
+
+    //         // Merge data into the Word template
+    //         examService.mergeDataToWord(templatePath, outputPath, data);
+
+    //         // Read the output file and return it as a downloadable file
+    //         File file = new File(outputPath);
+    //         @SuppressWarnings("resource")
+    //         byte[] documentContent = new FileInputStream(file).readAllBytes();
+    //         file.delete();
+    //         // Return the file as a response
+    //         return ResponseEntity.ok()
+    //                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=merged_word.docx")
+    //                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
+    //                 .body(documentContent);
+    //     } catch (IOException e) {
+    //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    //     } catch (InvalidFormatException e) {
+    //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    //     } catch (Exception e) {
+    //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+
+    // }
 }

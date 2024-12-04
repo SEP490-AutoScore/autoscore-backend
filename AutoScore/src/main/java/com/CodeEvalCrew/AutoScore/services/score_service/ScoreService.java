@@ -20,6 +20,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseD
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Code_Plagiarism;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score_Detail;
@@ -215,4 +216,33 @@ public class ScoreService implements IScoreService {
             throw new RuntimeException("Error retrieving plagiarism data for scoreId " + scoreId, e);
         }
     }
+
+    @Override
+    public int getTotalStudentsByExamPaperId(Long examPaperId) {
+        // Sử dụng repository để đếm số lượng sinh viên có examPaperId
+        return scoreRepository.countByExamPaperExamPaperId(examPaperId);
+    }
+
+    @Override
+    public int getTotalStudentsWithZeroScore(Long examPaperId) {
+        // Sử dụng repository để đếm số sinh viên có totalScore = 0
+        return scoreRepository.countByExamPaperExamPaperIdAndTotalScore(examPaperId, 0);
+    }
+
+    @Override
+    public int getTotalStudentsWithScoreGreaterThanZero(Long examPaperId) {
+        // Sử dụng repository để đếm số sinh viên có totalScore > 0
+        return scoreRepository.countByExamPaperIdAndTotalScoreGreaterThan(examPaperId, 0);
+    }
+
+    @Override
+    public List<StudentScoreDTO> getStudentScoresByExamPaperId(Long examPaperId) {
+    return scoreRepository.findStudentScoresByExamPaperId(examPaperId);
+}
+
+    
+    
+    
+
+
 }
