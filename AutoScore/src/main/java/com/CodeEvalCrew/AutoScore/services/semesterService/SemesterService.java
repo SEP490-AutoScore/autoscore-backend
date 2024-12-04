@@ -7,6 +7,8 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.CodeEvalCrew.AutoScore.mappers.SemesterMapper;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Semester.CreateSemesterRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Semester.SemesterView;
 import com.CodeEvalCrew.AutoScore.models.Entity.Semester;
 import com.CodeEvalCrew.AutoScore.repositories.semester_repository.SemesterRepository;
@@ -34,6 +36,25 @@ public class SemesterService implements ISemesterService{
             throw e;
         }catch (Exception e) {
             System.out.println(e.getCause());
+            throw e;
+        }
+    }
+
+    @Override
+    public SemesterView createNewSemester(CreateSemesterRequest request) {
+        SemesterView result;
+        try {
+            Semester semester = new Semester();
+            semester.setSemesterCode(request.getSubjectCode());
+            semester.setSemesterName(request.getSubjectName());
+            semester.setStatus(true);
+
+            semesterRepository.save(semester);
+
+            result = SemesterMapper.INSTANCE.semesterToView(semester);
+
+            return result;
+        } catch (Exception e) {
             throw e;
         }
     }

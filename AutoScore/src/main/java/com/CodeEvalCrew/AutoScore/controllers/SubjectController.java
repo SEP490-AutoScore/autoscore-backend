@@ -7,9 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SubjectRequest.CreateSubjectRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SubjectView;
 import com.CodeEvalCrew.AutoScore.services.subject_service.ISubjectService;
 
@@ -31,5 +36,30 @@ public class SubjectController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
+    @PostMapping("")
+    public ResponseEntity<?> createNewSubject(@RequestBody CreateSubjectRequest request) {
+        SubjectView result;
+        try {
+            result = subjectService.createNewSubject(request);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("update")
+    public ResponseEntity<?> addSubjectIntoOrganiztion(@RequestParam Long organizationId, @RequestParam Long subjectId) {
+        SubjectView result;
+        try {
+            result = subjectService.addSubjectintoOrganization(organizationId, subjectId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }   
 }
