@@ -1,7 +1,6 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
@@ -77,7 +76,7 @@ public class ExamController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateExam(@PathVariable Long id, @RequestBody ExamCreateRequestDTO request) {
         try {
