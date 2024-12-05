@@ -180,7 +180,7 @@ public class PermissionService implements IPermissionService {
             }
 
             for (Role_Permission rolePermission : rolePermissions) {
-                if (rolePermission.isStatus()) {
+                if (rolePermission.isStatus() && !rolePermission.getRole().getRoleCode().equals("ADMIN")) {
                     return OperationStatus.CANNOT_DELETE;
                 }
             }

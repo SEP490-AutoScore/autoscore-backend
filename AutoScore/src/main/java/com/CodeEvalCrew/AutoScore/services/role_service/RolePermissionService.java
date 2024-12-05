@@ -1,11 +1,8 @@
 package com.CodeEvalCrew.AutoScore.services.role_service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -93,7 +90,11 @@ public class RolePermissionService implements IRolePermissionService {
 
             rolePermission.setRole(role);
             rolePermission.setPermission(permission);
-            rolePermission.setStatus(false);
+            if (role.getRoleCode().equals("ADMIN")) {
+                rolePermission.setStatus(true);
+            } else {
+                rolePermission.setStatus(false);
+            }
             rolePermission.setCreatedAt(LocalDateTime.now());
             rolePermission.setCreatedBy(Util.getAuthenticatedAccountId());
 
@@ -131,59 +132,6 @@ public class RolePermissionService implements IRolePermissionService {
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
             return OperationStatus.ERROR;
-        }
-    }
-
-    // @Override
-    // @Transactional
-    // public OperationStatus deleteRolePermission(Long id) {
-    //     try {
-    //         if (id == null) {
-    //             return OperationStatus.INVALID_INPUT;
-    //         }
-    //         List<Role_Permission> rolePermissions = rolePermissionRepository.findAllByRole_RoleId(id);
-    //         if (rolePermissions == null || rolePermissions.isEmpty()) {
-    //             return OperationStatus.NOT_FOUND;
-    //         }
-    //         List<Account_Role> accountRoles = accountRoleRepository.findAllByRole_RoleId(id);
-    //         if (accountRoles != null && !accountRoles.isEmpty()) {
-    //             return OperationStatus.CANNOT_DELETE;
-    //         }
-    //         for (Role_Permission rolePermission : rolePermissions) {
-    //             rolePermissionRepository.delete(rolePermission);
-    //         }
-    //         return OperationStatus.SUCCESS;
-    //     } catch (Exception e) {
-    //         return OperationStatus.ERROR;
-    //     }
-    // }
-    private Role getRoleById(Long roleId) {
-        try {
-            if (roleId == null) {
-                throw new Exception("Id cannot be null");
-            }
-            Role role = roleRepository.findById(roleId).get();
-            if (role == null) {
-                throw new Exception("Role not found with id: " + roleId);
-            }
-            return role;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    private Permission getPermissionById(Long permissionId) {
-        try {
-            if (permissionId == null) {
-                throw new Exception("Id cannot be null");
-            }
-            Permission permission = permissionRepository.findById(permissionId).get();
-            if (permission == null) {
-                throw new Exception("Permission not found with id: " + permissionId);
-            }
-            return permission;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
         }
     }
 }
