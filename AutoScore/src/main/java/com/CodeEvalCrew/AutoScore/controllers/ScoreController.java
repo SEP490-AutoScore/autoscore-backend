@@ -17,6 +17,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.TopStudentDTO;
 import com.CodeEvalCrew.AutoScore.services.score_service.IScoreService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -121,6 +122,11 @@ public class ScoreController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+     @GetMapping("/top-students")
+    public List<TopStudentDTO> getTopStudents() {
+        return scoreService.getTopStudents();
     }
 
 }

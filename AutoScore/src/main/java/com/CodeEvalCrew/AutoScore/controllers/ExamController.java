@@ -1,6 +1,7 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.exceptions.NotFoundException;
@@ -101,6 +103,63 @@ public class ExamController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    // @PreAuthorize("hasAuthority('VIEW_EXAM')")
+ 
+    @GetMapping("count")
+    public ResponseEntity<Object> getExamCountByTypeAndCampus() {
+        try {
+            long count = examService.countExamsByTypeAndCampus();
+            return new ResponseEntity<>(count, HttpStatus.OK); 
+        } catch (IllegalArgumentException e) {
+
+            return new ResponseEntity<>("Authenticated user does not belong to any CAMPUS.", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("An internal server error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("countByGradingAt")
+public ResponseEntity<Long> getExamCountByTypeAndGradingAt() {
+    try {
+        long count = examService.countExamsByTypeAndGradingAt();
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    } catch (Exception e) {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); 
+    }
+}
+
+@GetMapping("countByGradingAtPassed")
+public ResponseEntity<Long> getExamCountByGradingAtPassed() {
+    try {
+        long count = examService.countExamsByGradingAtPassed();
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
+    } catch (Exception e) {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); 
+    }
+}
+
+@GetMapping("countByGradingAtPassedAndSemester")
+public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemester(@RequestParam int year) {
+    try {
+        // Lấy số lượng Exam đã vượt qua thời gian gradingAt và phân loại theo kỳ
+        Map<String, Long> examCounts = examService.countExamsByGradingAtPassedAndSemester(year);
+        return new ResponseEntity<>(examCounts, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Trả về lỗi nếu không có thông tin về campus
+    } catch (Exception e) {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Trả về lỗi khi có lỗi hệ thống
+    }
+}
+
+
+
+    
     
 
 
@@ -177,4 +236,6 @@ public class ExamController {
     //     }
 
     // }
+
+
 }

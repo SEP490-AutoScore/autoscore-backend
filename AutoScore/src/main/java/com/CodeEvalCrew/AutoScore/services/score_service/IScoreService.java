@@ -8,6 +8,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.TopStudentDTO;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -30,4 +31,6 @@ public interface IScoreService {
     int getTotalStudentsWithScoreGreaterThanZero(Long examPaperId);
 
     List<StudentScoreDTO> getStudentScoresByExamPaperId(Long examPaperId);
+
+      List<TopStudentDTO> getTopStudents();
 }
