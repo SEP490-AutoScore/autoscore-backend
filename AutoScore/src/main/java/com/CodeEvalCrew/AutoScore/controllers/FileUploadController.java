@@ -32,7 +32,7 @@ public class FileUploadController {
     @Autowired
     private FileProcessingProgressService progressService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPLOAD_FILE')")
+    @PreAuthorize("hasAnyAuthority('UPLOAD_FILE', 'ALL_ACCESS')")
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     @Operation(
             summary = "Tải lên file source code của sinh viên",

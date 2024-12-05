@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ public class DocumentController {
     @Autowired
     private IDocumentService documentService;
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping("/generate-word")
     public ResponseEntity<byte[]> generateWord(@RequestParam Long examPaperId) {
         // Dotenv dotenv = Dotenv.load();
@@ -50,6 +52,7 @@ public class DocumentController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     public ResponseEntity<?> importExamPaper(@RequestParam("file") MultipartFile file, @RequestParam("examPaperId") Long examPaperId) {
         Map<String, Object> response = new HashMap<>();

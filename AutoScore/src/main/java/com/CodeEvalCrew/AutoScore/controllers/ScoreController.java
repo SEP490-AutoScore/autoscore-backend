@@ -29,7 +29,7 @@ public class ScoreController {
     @Autowired
     private IScoreService scoreService;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SCORE', 'ALL_ACCESS')")
     @PostMapping
     public ResponseEntity<List<ScoreResponseDTO>> getScoreJSON(@RequestParam Long exampaperid) {
         try {
@@ -40,7 +40,7 @@ public class ScoreController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('EXPORT_SCORE')")
+    @PreAuthorize("hasAnyAuthority('EXPORT_SCORE', 'ALL_ACCESS')")
     @GetMapping("/export")
     public void exportScoresToExcel(HttpServletResponse response, @RequestParam Long exampaperid) {
         try {
@@ -51,7 +51,7 @@ public class ScoreController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SCORE', 'ALL_ACCESS')")
     @GetMapping("/getAll")
     public ResponseEntity<List<ScoreOverViewResponseDTO>> getAllScoreOverView() {
         try {
@@ -62,7 +62,7 @@ public class ScoreController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SCORE', 'ALL_ACCESS')")
     @PostMapping("/details")
     public ResponseEntity<List<ScoreDetailsResponseDTO>> getScoreDetailsByScoreId(@RequestParam Long scoreId) {
         try {
@@ -73,7 +73,7 @@ public class ScoreController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SCORE', 'ALL_ACCESS')")
     @GetMapping("/code-plagiarism")
     public ResponseEntity<List<CodePlagiarismResponseDTO>> getCodePlagiarismByScoreId(@RequestParam Long scoreId) {
         try {
@@ -84,6 +84,7 @@ public class ScoreController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("/total-students")
     public ResponseEntity<Integer> getTotalStudents(@RequestParam Long examPaperId) {
         try {
@@ -94,6 +95,7 @@ public class ScoreController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("/students-with-zero-score")
     public ResponseEntity<Integer> getTotalStudentsWithZeroScore(@RequestParam Long examPaperId) {
         try {
@@ -104,6 +106,7 @@ public class ScoreController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("/students-with-score-greater-than-zero")
     public ResponseEntity<Integer> getTotalStudentsWithScoreGreaterThanZero(@RequestParam Long examPaperId) {
         try {
@@ -114,6 +117,7 @@ public class ScoreController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("/student-scores")
     public ResponseEntity<List<StudentScoreDTO>> getStudentScoresByExamPaperId(@RequestParam Long examPaperId) {
         try {
@@ -124,9 +128,9 @@ public class ScoreController {
         }
     }
 
-     @GetMapping("/top-students")
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/top-students")
     public List<TopStudentDTO> getTopStudents() {
         return scoreService.getTopStudents();
     }
-
 }

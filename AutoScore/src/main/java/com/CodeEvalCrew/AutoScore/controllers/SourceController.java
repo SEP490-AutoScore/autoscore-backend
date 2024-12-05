@@ -27,7 +27,7 @@ public class SourceController {
     @Autowired
     private SourceService sourceService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_SOURCE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SOURCE', 'ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<?> getAllSource() {
         List<SourceView> result;
@@ -41,7 +41,7 @@ public class SourceController {
         }
     }
     
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_SOURCE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SOURCE', 'ALL_ACCESS')")
     @GetMapping("/{examId}")
     public ResponseEntity<List<SourcesResponseDTO>> getSourceByExamId(@PathVariable Long examId) {
         try {
@@ -52,5 +52,4 @@ public class SourceController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR) ;
         }
     }
-    
 }

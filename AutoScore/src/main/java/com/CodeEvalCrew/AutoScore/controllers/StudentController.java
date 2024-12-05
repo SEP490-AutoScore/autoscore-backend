@@ -43,7 +43,7 @@ public class StudentController {
         this.studentErrorService = studentErrorService;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER') or hasAuthority('IMPORT_STUDENT')")
+    @PreAuthorize("hasAnyAuthority('IMPORT_STUDENT', 'ALL_ACCESS')")
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     @Operation(
             summary = "Tải lên file Excel chứa thông tin sinh viên",
@@ -89,7 +89,7 @@ public class StudentController {
         return emitter;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER') or hasAuthority('VIEW_STUDENT')")
+    @PreAuthorize("hasAnyAuthority('VIEW_STUDENT', 'ALL_ACCESS')")
     @GetMapping("/getall")
     public ResponseEntity<List<StudentResponseDTO>> getAllStudents(@RequestParam("examId") Long examId) {
         List<StudentResponseDTO> students = studentService.getAllStudents(examId);
@@ -109,7 +109,7 @@ public class StudentController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'EXAMINER') or hasAuthority('VIEW_SCORE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SCORE', 'ALL_ACCESS')")
     @PostMapping("/student-error")
     public ResponseEntity<List<StudentErrorResponseDTO>> getStudentError(@RequestParam Long sourceid) {
         try {

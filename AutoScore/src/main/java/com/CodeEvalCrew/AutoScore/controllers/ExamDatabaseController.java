@@ -26,7 +26,7 @@ public class ExamDatabaseController {
     @Autowired
     private IExamDatabaseService examDatabaseService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('CREATE_EXAM_DATABASE')")
+    @PreAuthorize("hasAnyAuthority('CREATE_EXAM_DATABASE', 'ALL_ACCESS')")
     @PostMapping(value = "/import", consumes = { "multipart/form-data" })
     @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(mediaType = "multipart/form-data")
@@ -64,7 +64,7 @@ public class ExamDatabaseController {
     // }
     // }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPDATE_EXAM_DATABASE')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_EXAM_DATABASE', 'ALL_ACCESS')")
     @PutMapping(value = "/update", consumes = { "multipart/form-data" })
     @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(mediaType = "multipart/form-data") }))
@@ -90,7 +90,7 @@ public class ExamDatabaseController {
     // return ResponseEntity.ok(result);
     // }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_EXAM_DATABASE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM_DATABASE', 'ALL_ACCESS')")
     @GetMapping("/getbyExamPaperId")
     public ResponseEntity<ExamDatabaseDTO> getExamDatabaseByExamPaperId(@RequestParam Long examPaperId) {
         Optional<ExamDatabaseDTO> result = examDatabaseService.getExamDatabaseByExamPaperId(examPaperId);

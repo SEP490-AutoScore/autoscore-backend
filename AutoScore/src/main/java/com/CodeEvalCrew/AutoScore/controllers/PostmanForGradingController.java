@@ -28,7 +28,7 @@ public class PostmanForGradingController {
     @Autowired
     private IPostmanForGradingService postmanForGradingService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPDATE_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_POSTMAN', 'ALL_ACCESS')")
     @PutMapping("")
     public ResponseEntity<String> updatePostmanForGrading(@RequestBody PostmanForGradingUpdateRequest request) {
         String result = postmanForGradingService.updatePostmanForGrading(request.getExamPaperId(),
@@ -36,7 +36,7 @@ public class PostmanForGradingController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_POSTMAN_TREE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_POSTMAN_TREE', 'ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading_forFunctionTree(
             @RequestParam Long examPaperId) {
@@ -45,7 +45,7 @@ public class PostmanForGradingController {
         return new ResponseEntity<>(postmanForGradingList, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('GENERATE_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('GENERATE_POSTMAN', 'ALL_ACCESS')")
     @PostMapping("/generate")
     public ResponseEntity<?> generatePostmanCollection(@RequestParam Long gherkinScenarioId) {
         try {
@@ -56,7 +56,7 @@ public class PostmanForGradingController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('GENERATE_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('GENERATE_POSTMAN', 'ALL_ACCESS')")
     @PostMapping("/generate-more")
     public ResponseEntity<?> generatePostmanCollectionMore(@RequestParam Long gherkinScenarioId) {
         try {
@@ -67,7 +67,7 @@ public class PostmanForGradingController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('MERGE_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('MERGE_POSTMAN', 'ALL_ACCESS')")
     @PostMapping("/merge/{examPaperId}")
     public ResponseEntity<String> mergePostmanCollections(@PathVariable Long examPaperId) {
         try {
@@ -78,14 +78,14 @@ public class PostmanForGradingController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('DELETE_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('DELETE_POSTMAN', 'ALL_ACCESS')")
     @DeleteMapping("")
     public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examQuestionId) {
         String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examQuestionId);
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('VIEW_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<?> PostmanForGradingGetbyIdDTO(@PathVariable Long id) {
         try {
@@ -96,24 +96,22 @@ public class PostmanForGradingController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('UPDATE_QUESTION_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_QUESTION_POSTMAN', 'ALL_ACCESS')")
     @PutMapping("/update-exam-question/{postmanForGradingId}/{examQuestionId}")
     public ResponseEntity<String> updateExamQuestionId(
             @PathVariable Long postmanForGradingId,
             @PathVariable Long examQuestionId) {
-
         String result = postmanForGradingService.updateExamQuestionId(postmanForGradingId, examQuestionId);
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('CALCULATE_SCORE_QUESTION_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('CALCULATE_SCORE_QUESTION_POSTMAN', 'ALL_ACCESS')")
     @PostMapping("/calculate-scores")
     public ResponseEntity<?> calculateScores(
             @RequestParam("examPaperId") Long examPaperId,
             @RequestParam("examQuestionId") Long examQuestionId,
             @RequestBody List<GradingRequestDTO> requests) {
         try {
-         
             return postmanForGradingService.calculateScores(requests, examPaperId, examQuestionId);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body("Invalid input: " + ex.getMessage());
@@ -122,5 +120,4 @@ public class PostmanForGradingController {
                     .body("An error occurred: " + ex.getMessage());
         }
     }
-
 }
