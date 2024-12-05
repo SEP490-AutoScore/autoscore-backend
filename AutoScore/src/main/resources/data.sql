@@ -192,12 +192,12 @@ VALUES
 (true, 5, 11);
 
 INSERT INTO `position`
-(`position_id`, `name`, `status`)
+(`position_id`, `name`, `description`, `last_updated`, `status`)
 VALUES
-(1, 'Head of Department', true),
-(2, 'Examiner', true),
-(3, 'Lecturer', true),
-(4, 'Software Engineering ', true);
+(1, 'Head of Department', 'Responsible for managing the department.', '2024-12-06 00:00:00', true),
+(2, 'Examiner', 'Responsible for evaluating exams and assessments.', '2024-12-06 00:00:00', true),
+(3, 'Lecturer', 'Responsible for creating tests and assignments for university.', '2024-12-06 00:00:00', true),
+(4, 'Software Engineering', 'Responsible for creating and maintaining the functionality for the tool.', '2024-12-06 00:00:00', true);
 
 INSERT INTO `employee`
 (`employee_id`, `full_name`, `employee_code`, `account_id`, `position_id`, `organization_id`, `status`)
