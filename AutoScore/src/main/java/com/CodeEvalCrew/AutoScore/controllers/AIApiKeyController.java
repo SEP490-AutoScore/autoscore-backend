@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAIApiKeyDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIApiKeyDTO;
-import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
 import com.CodeEvalCrew.AutoScore.services.ai_api_key_service.IAIApiKeyService;
 
 @RestController
@@ -28,12 +28,14 @@ public class AIApiKeyController {
     @Autowired
     private IAIApiKeyService aiApiKeyService;
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<List<AIApiKeyDTO>> getAllAIApiKeys() {
         List<AIApiKeyDTO> apiKeys = aiApiKeyService.getAllAIApiKeys();
         return ResponseEntity.ok(apiKeys);
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("/update-selected-key")
     public ResponseEntity<String> updateSelectedKey(@RequestParam Long aiApiKeyId) {
         try {
@@ -46,6 +48,7 @@ public class AIApiKeyController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<AIApiKeyDTO> createAIApiKey(@RequestBody CreateAIApiKeyDTO dto) {
         try {
@@ -60,11 +63,9 @@ public class AIApiKeyController {
 // public ResponseEntity<String> updateAiApiKey(
 //         @RequestParam Long aiApiKeyId,
 //         @RequestParam String aiApiKey) {
-
 //     try {
 //         // Cập nhật API Key qua Service và nhận thông điệp từ service
 //         String responseMessage = aiApiKeyService.updateAiApiKey(aiApiKeyId, aiApiKey);
-
 //         // Trả về thông điệp thành công
 //         return new ResponseEntity<>(responseMessage, HttpStatus.OK);
 //     } catch (ResponseStatusException e) {
@@ -72,25 +73,24 @@ public class AIApiKeyController {
 //         return new ResponseEntity<>(e.getReason(), e.getStatusCode());
 //     }
 // }
-
-@PutMapping("/{aiApiKeyId}")
-public ResponseEntity<Void> updateAIApiKey(
-        @PathVariable Long aiApiKeyId,
-        @RequestParam String aiApiKey) {
-    try {
-        aiApiKeyService.updateAI_Api_Key(aiApiKeyId, aiApiKey);
-        return ResponseEntity.noContent().build(); // Trả về 204 nếu cập nhật thành công
-    } catch (ResponseStatusException ex) {
-        // Ném lại ResponseStatusException để trả mã lỗi chính xác
-        throw ex;
-    } catch (Exception ex) {
-        // Xử lý các lỗi không mong muốn
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi cập nhật API Key", ex);
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PutMapping("/{aiApiKeyId}")
+    public ResponseEntity<Void> updateAIApiKey(
+            @PathVariable Long aiApiKeyId,
+            @RequestParam String aiApiKey) {
+        try {
+            aiApiKeyService.updateAI_Api_Key(aiApiKeyId, aiApiKey);
+            return ResponseEntity.noContent().build(); // Trả về 204 nếu cập nhật thành công
+        } catch (ResponseStatusException ex) {
+            // Ném lại ResponseStatusException để trả mã lỗi chính xác
+            throw ex;
+        } catch (Exception ex) {
+            // Xử lý các lỗi không mong muốn
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi cập nhật API Key", ex);
+        }
     }
-}
 
-    
-
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @DeleteMapping("/{aiApiKeyId}")
     public ResponseEntity<String> deleteAiApiKey(@PathVariable Long aiApiKeyId) {
         try {

@@ -13,14 +13,14 @@ import com.CodeEvalCrew.AutoScore.services.employee_service.IEmployeeService;
 @RestController
 @RequestMapping("/api/employee")
 public class EmployeeController {
+
     private final IEmployeeService employeeService;
 
     public EmployeeController(IEmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
-
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping
     public List<EmployeeResponseDTO> getAllEmployees() {
         return employeeService.getAllEmployees();

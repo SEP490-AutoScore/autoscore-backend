@@ -26,7 +26,7 @@ public class PermissionController {
         this.permissionService = permissionService;
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('VIEW_PERMISSION', 'ALL_ACCESS')")
     @GetMapping
     public ResponseEntity<List<PermissionResponseDTO>> getAllPermissions() {
         List<PermissionResponseDTO> permissions = permissionService.getAllPermissions();
@@ -36,7 +36,7 @@ public class PermissionController {
         return ResponseEntity.ok(permissions);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('VIEW_PERMISSION', 'ALL_ACCESS')")
     @GetMapping("/{permissionId}")
     public ResponseEntity<PermissionResponseDTO> getPermissionById(@PathVariable Long permissionId) {
         PermissionResponseDTO permission = permissionService.getPermissionById(permissionId);
@@ -46,7 +46,7 @@ public class PermissionController {
         return ResponseEntity.ok(permission);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('CREATE_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('CREATE_PERMISSION', 'ALL_ACCESS')")
     @PostMapping("/create")
     public ResponseEntity<?> createPermission(@RequestBody PermissionRequestDTO permissionRequestDTO) {
         OperationStatus status = permissionService.createPermission(permissionRequestDTO);
@@ -62,7 +62,7 @@ public class PermissionController {
         };
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('UPDATE_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_PERMISSION', 'ALL_ACCESS')")
     @PostMapping("/update")
     public ResponseEntity<?> updatePermission(@RequestBody PermissionRequestDTO permissionRequestDTO) {
         OperationStatus status = permissionService.updatePermission(permissionRequestDTO);
@@ -78,7 +78,7 @@ public class PermissionController {
         };
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('DELETE_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('DELETE_PERMISSION', 'ALL_ACCESS')")
     @PostMapping("/delete/{permissionId}")
     public ResponseEntity<?> deletePermission(@PathVariable Long permissionId) {
         OperationStatus status = permissionService.deletePermission(permissionId);
@@ -92,7 +92,7 @@ public class PermissionController {
         };
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_PERMISSION')")
+    @PreAuthorize("hasAnyAuthority('VIEW_PERMISSION', 'ALL_ACCESS')")
     @GetMapping("/get-all")
     public ResponseEntity<List<PermissionPermissionCategoryResponseDTO>> getAllPermissionByPermissionCategory() {
         List<PermissionPermissionCategoryResponseDTO> permissions = permissionService.getAllPermissionByPermissionCategory();

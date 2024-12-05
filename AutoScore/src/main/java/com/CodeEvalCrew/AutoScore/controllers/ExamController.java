@@ -33,7 +33,7 @@ public class ExamController {
         this.examService = examService;
     }
 
-    @PreAuthorize("hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
     @GetMapping("{id}")
     public ResponseEntity<?> getExamById(@PathVariable long id) {
         ExamViewResponseDTO result;
@@ -47,7 +47,7 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_EXAMINER','ROLE_HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
     @PostMapping("/list")
     public ResponseEntity<?> getExam(@RequestBody ExamViewRequestDTO request) {
         List<ExamViewResponseDTO> result;
@@ -63,7 +63,7 @@ public class ExamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> creatNewExam(@RequestBody ExamCreateRequestDTO entity) {
         try {
@@ -78,7 +78,7 @@ public class ExamController {
 
     }
 
-    // @PreAuthorize("hasAnyAuthority('ADMIN','EXAMINER','HEAD_OF_DEPARTMENT') and hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateExam(@PathVariable Long id, @RequestBody ExamCreateRequestDTO request) {
         try {
@@ -93,7 +93,7 @@ public class ExamController {
 
     }
 
-    // @PreAuthorize("hasAuthority('VIEW_EXAM')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
     @GetMapping("list-exam-exampaper")
     public ResponseEntity<List<ExamWithPapersDTO>> getExamsWithUsedPapers() {
         try {
@@ -104,13 +104,12 @@ public class ExamController {
         }
     }
 
-    // @PreAuthorize("hasAuthority('VIEW_EXAM')")
- 
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
     @GetMapping("count")
     public ResponseEntity<Object> getExamCountByTypeAndCampus() {
         try {
             long count = examService.countExamsByTypeAndCampus();
-            return new ResponseEntity<>(count, HttpStatus.OK); 
+            return new ResponseEntity<>(count, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
 
             return new ResponseEntity<>("Authenticated user does not belong to any CAMPUS.", HttpStatus.BAD_REQUEST);
@@ -120,69 +119,62 @@ public class ExamController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping("countByGradingAt")
-public ResponseEntity<Long> getExamCountByTypeAndGradingAt() {
-    try {
-        long count = examService.countExamsByTypeAndGradingAt();
-        return new ResponseEntity<>(count, HttpStatus.OK);
-    } catch (IllegalArgumentException e) {
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    } catch (Exception e) {
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); 
+    public ResponseEntity<Long> getExamCountByTypeAndGradingAt() {
+        try {
+            long count = examService.countExamsByTypeAndGradingAt();
+            return new ResponseEntity<>(count, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-}
 
-@GetMapping("countByGradingAtPassed")
-public ResponseEntity<Long> getExamCountByGradingAtPassed() {
-    try {
-        long count = examService.countExamsByGradingAtPassed();
-        return new ResponseEntity<>(count, HttpStatus.OK);
-    } catch (IllegalArgumentException e) {
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
-    } catch (Exception e) {
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @GetMapping("countByGradingAtPassed")
+    public ResponseEntity<Long> getExamCountByGradingAtPassed() {
+        try {
+            long count = examService.countExamsByGradingAtPassed();
+            return new ResponseEntity<>(count, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-}
 
-@GetMapping("countByGradingAtPassedAndSemester")
-public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemester(@RequestParam int year) {
-    try {
-        // Lấy số lượng Exam đã vượt qua thời gian gradingAt và phân loại theo kỳ
-        Map<String, Long> examCounts = examService.countExamsByGradingAtPassedAndSemester(year);
-        return new ResponseEntity<>(examCounts, HttpStatus.OK);
-    } catch (IllegalArgumentException e) {
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Trả về lỗi nếu không có thông tin về campus
-    } catch (Exception e) {
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Trả về lỗi khi có lỗi hệ thống
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @GetMapping("countByGradingAtPassedAndSemester")
+    public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemester(@RequestParam int year) {
+        try {
+            // Lấy số lượng Exam đã vượt qua thời gian gradingAt và phân loại theo kỳ
+            Map<String, Long> examCounts = examService.countExamsByGradingAtPassedAndSemester(year);
+            return new ResponseEntity<>(examCounts, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Trả về lỗi nếu không có thông tin về campus
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Trả về lỗi khi có lỗi hệ thống
+        }
     }
-}
-
-
-
-    
-    
-
 
     // @PostMapping("/merge")
     // public ResponseEntity<byte[]> mergeData(@RequestBody Map<String, Object> data) {
     //     try {
     //         String templatePath = "AutoScore\\src\\main\\resources\\Template.docx"; // Path to your template
-
     //         // Merge the data into the template
     //         byte[] mergedDocument = examService.mergeDataIntoTemplate(templatePath, data);
-
     //         // Prepare response headers
     //         HttpHeaders headers = new HttpHeaders();
     //         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
     //         headers.setContentDispositionFormData("attachment", "merged_document.docx");
-
     //         // Return the document as a downloadable file
     //         return new ResponseEntity<>(mergedDocument, headers, HttpStatus.OK);
     //     } catch (Exception e) {
     //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     //     }
     // }
-
     // @GetMapping("/merge-word")
     // public String mergeWord(@RequestParam String examCode, @RequestParam String examPaperCode, @RequestParam String semester) {
     //     try {
@@ -192,16 +184,13 @@ public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemeste
     //         data.put(new DataFieldName("ExamCode"), examCode);
     //         data.put(new DataFieldName("ExamPaperCode"), examPaperCode);
     //         data.put(new DataFieldName("Semester"), semester);
-
     //         // Merge data into the Word template
     //         examService.mergeDataIntoWord(templatePath, "C:\\Project\\SEP490\\output.docx", data);
-
     //         return "Word document merged successfully!";
     //     } catch (Exception e) {
     //         return "Error merging Word document: " + e.getMessage();
     //     }
     // }
-
     // @GetMapping("/generate-word")
     // public ResponseEntity<byte[]> generateWord() {
     //     // Dotenv dotenv = Dotenv.load();
@@ -210,13 +199,10 @@ public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemeste
     //         // Define the path of the template and output file
     //         String templatePath = "AutoScore\\src\\main\\resources\\Template.docx";
     //         String outputPath = "C:\\Project\\SEP490\\output.docx";
-
     //         // Create a map of data to be merged into the document
     //         Map<String, String> data = new HashMap<>();
-
     //         // Merge data into the Word template
     //         examService.mergeDataToWord(templatePath, outputPath, data);
-
     //         // Read the output file and return it as a downloadable file
     //         File file = new File(outputPath);
     //         @SuppressWarnings("resource")
@@ -234,8 +220,5 @@ public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemeste
     //     } catch (Exception e) {
     //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     //     }
-
     // }
-
-
 }

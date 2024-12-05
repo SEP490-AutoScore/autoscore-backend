@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +23,6 @@ public class AuthController {
     private final ISingInWithGoogleService singInWithGoogleService;
     private final VerificationService verificationService;
 
-    @Autowired
     public AuthController(ISingInWithGoogleService singInWithGoogleService, VerificationService verificationService) {
         this.singInWithGoogleService = singInWithGoogleService;
         this.verificationService = verificationService;

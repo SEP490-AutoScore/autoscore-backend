@@ -23,7 +23,7 @@ public class RolePermisisionController {
         this.rolePermissionService = rolePermissionService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<RolePermissionResponseDTO> getRolePermissionById(@PathVariable Long id) {
         RolePermissionResponseDTO rolePermissionResponseDTO = rolePermissionService.getRolePermissionById(id);
@@ -33,7 +33,7 @@ public class RolePermisisionController {
         return ResponseEntity.ok(rolePermissionResponseDTO);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('UPDATE_ROLE')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_ROLE', 'ALL_ACCESS')")
     @PostMapping("/update")
     public ResponseEntity<?> updateRolePermission(@RequestBody RolePermissionRequestDTO rolePermissionRequestDTO) {
         OperationStatus operationStatus = rolePermissionService.updateRolePermission(rolePermissionRequestDTO);
