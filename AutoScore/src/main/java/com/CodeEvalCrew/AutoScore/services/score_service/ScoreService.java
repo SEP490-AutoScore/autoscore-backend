@@ -2,7 +2,11 @@ package com.CodeEvalCrew.AutoScore.services.score_service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -19,6 +23,7 @@ import com.CodeEvalCrew.AutoScore.mappers.CodePlagiarismMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ScoreDetailMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ScoreMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreCategoryDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
@@ -26,10 +31,10 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.TopStudentDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Code_Plagiarism;
-import com.CodeEvalCrew.AutoScore.models.Entity.Score;
-import com.CodeEvalCrew.AutoScore.models.Entity.Score_Detail;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
+import com.CodeEvalCrew.AutoScore.models.Entity.Score;
+import com.CodeEvalCrew.AutoScore.models.Entity.Score_Detail;
 import com.CodeEvalCrew.AutoScore.repositories.account_organization_repository.AccountOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.code_plagiarism_repository.CodePlagiarismRepository;
 import com.CodeEvalCrew.AutoScore.repositories.score_detail_repository.ScoreDetailRepository;
@@ -299,5 +304,122 @@ public class ScoreService implements IScoreService {
 
         return null;
     }
+
+    @Override
+public Map<Float, Long> getTotalScoreOccurrences() {
+    Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    String userCampus = checkCampusForAccount(authenticatedUserId);
+
+    // Fetch all scores
+    List<Score> scores = scoreRepository.findAll(); // Assuming findAll fetches all scores
+
+    // Filter and group scores
+    Map<Float, Long> scoreOccurrences = scores.stream()
+            .filter(score -> score.getStudent().isStatus() && // Filter by active students
+                    score.getExamPaper().getExam().getType().toString().equals("EXAM") && // Filter by exam type
+                    score.getStudent().getOrganization().getName().equals(userCampus)) // Match campus
+            .collect(Collectors.groupingBy(Score::getTotalScore, Collectors.counting())); // Group by totalScore
+
+    return scoreOccurrences;
+}
+
+@Override
+ public ScoreCategoryDTO getScoreCategories() {
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        String userCampus = checkCampusForAccount(authenticatedUserId);
+
+        // Lấy tất cả các điểm
+        List<Score> scores = scoreRepository.findAll();
+
+        // Lọc và phân loại điểm
+        long excellent = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 9 && score.getTotalScore() <= 10)
+                .count();
+
+        long good = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 8 && score.getTotalScore() < 9)
+                .count();
+
+        long fair = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 5 && score.getTotalScore() < 8)
+                .count();
+
+        long poor = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 4 && score.getTotalScore() < 5)
+                .count();
+
+        long bad = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 0 && score.getTotalScore() < 4)
+                .count();
+
+        return new ScoreCategoryDTO(excellent, good, fair, poor, bad);
+    }
+
+    @Override
+    public List<Map<String, Object>> analyzeLog() {
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();  // Lấy ID người dùng đã xác thực
+        String userCampus = checkCampusForAccount(authenticatedUserId); // Kiểm tra campus của tài khoản người dùng
+    
+        // Lấy tất cả các điểm số
+        List<Score> scores = scoreRepository.findAll();
+    
+        // Lọc các điểm số theo điều kiện tương tự như trong getTotalScoreOccurrences
+        List<String> logDataList = scores.stream()
+                .filter(score -> score.getStudent().isStatus() && // Lọc học sinh đang hoạt động
+                        score.getExamPaper().getExam().getType().toString().equals("EXAM") && // Lọc theo loại bài thi
+                        score.getStudent().getOrganization().getName().equals(userCampus)) // Lọc theo campus
+                .map(score -> score.getLogRunPostman())  // Lấy logRunPostman từ mỗi đối tượng Score
+                .collect(Collectors.toList());
+    
+        // Tạo một Map để chứa tên hàm và số lần xuất hiện
+        Map<String, Integer> functionCountMap = new HashMap<>();
+    
+        // Duyệt qua tất cả các logData và phân tích
+        for (String logData : logDataList) {
+            // Biểu thức chính quy để tìm các hàm sau dấu '→'
+            Pattern pattern = Pattern.compile("→\\s*([a-zA-Z0-9_]+)");
+            Matcher matcher = pattern.matcher(logData);
+    
+            // Duyệt qua tất cả các khớp với mẫu regex
+            while (matcher.find()) {
+                // Lấy tên hàm từ nhóm tìm được
+                String functionName = matcher.group(1);
+    
+                // Tăng số lần xuất hiện của hàm đó
+                functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
+            }
+        }
+    
+        // Chuyển đổi Map thành List với cấu trúc dữ liệu cần thiết cho biểu đồ
+        List<Map<String, Object>> formattedData = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : functionCountMap.entrySet()) {
+            Map<String, Object> entryMap = new HashMap<>();
+            entryMap.put("function", entry.getKey());
+            entryMap.put("occurrences", entry.getValue());
+            formattedData.add(entryMap);
+        }
+    
+        return formattedData;
+    }
+    
+
+
+
+    
 
 }
