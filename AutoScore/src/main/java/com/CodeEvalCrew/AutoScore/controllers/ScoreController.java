@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -136,21 +137,58 @@ public class ScoreController {
         return scoreService.getTopStudents();
     }
 
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("/total-score-occurrences")
-public ResponseEntity<Map<Float, Long>> getTotalScoreOccurrences() {
-    Map<Float, Long> scoreOccurrences = scoreService.getTotalScoreOccurrences();
-    return ResponseEntity.ok(scoreOccurrences);
-}
+    public ResponseEntity<Map<Float, Long>> getTotalScoreOccurrences() {
+        Map<Float, Long> scoreOccurrences = scoreService.getTotalScoreOccurrences();
+        return ResponseEntity.ok(scoreOccurrences);
+    }
 
- @GetMapping("/score-categories")
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/score-categories")
     public ResponseEntity<ScoreCategoryDTO> getScoreCategories() {
         ScoreCategoryDTO categories = scoreService.getScoreCategories();
         return ResponseEntity.ok(categories);
     }
 
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("/analyze-log")
     public List<Map<String, Object>> analyzeLog() {
         return scoreService.analyzeLog();
+    }
+
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/analyze-log-one-pass")
+    public ResponseEntity<?> analyzeScoresPartialPassLogRunPostman(@RequestParam Long examPaperId) {
+        try {
+            Map<String, Integer> partialPassCounts = scoreService.analyzeScoresPartialPassLogRunPostman(examPaperId);
+            return ResponseEntity.ok(partialPassCounts);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/analyze-log-all-pass")
+    public ResponseEntity<?> analyzeScoresFullyPassLogRunPostman(@RequestParam Long examPaperId) {
+        try {
+            Map<String, Integer> functionPassCount = scoreService.analyzeScoresFullyPassLogRunPostman(examPaperId);
+            return ResponseEntity.ok(functionPassCount);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/analyze-log-each-test")
+    public ResponseEntity<?> analyzeScoresTestCasePassLogRunPostman(@RequestParam Long examPaperId) {
+        try {
+            Map<String, Map<String, Integer>> testCasePassCounts = scoreService
+                    .analyzeScoresTestCasePassLogRunPostman(examPaperId);
+            return ResponseEntity.ok(testCasePassCounts);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
     }
 
 }
