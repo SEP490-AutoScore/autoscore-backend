@@ -10,6 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateSemesterRequest {
-    private String subjectCode;
-    private String subjectName;
+    private String semesterCode;
+    private String semesterName;
 }

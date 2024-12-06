@@ -60,7 +60,7 @@ public class SubjectService implements ISubjectService{
                 subject.setSubjectName(request.getSubjectName());
                 subject.setSubjectCode(request.getSubjectCode());
 
-                
+                subjectRepository.save(subject);
                 
                 result = SubjectMapper.INSTANCE.subjectToView(subject);
 
