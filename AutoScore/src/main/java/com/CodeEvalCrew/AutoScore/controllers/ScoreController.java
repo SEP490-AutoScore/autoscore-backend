@@ -2,6 +2,7 @@ package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreCategoryDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
@@ -133,4 +135,22 @@ public class ScoreController {
     public List<TopStudentDTO> getTopStudents() {
         return scoreService.getTopStudents();
     }
+
+    @GetMapping("/total-score-occurrences")
+public ResponseEntity<Map<Float, Long>> getTotalScoreOccurrences() {
+    Map<Float, Long> scoreOccurrences = scoreService.getTotalScoreOccurrences();
+    return ResponseEntity.ok(scoreOccurrences);
+}
+
+ @GetMapping("/score-categories")
+    public ResponseEntity<ScoreCategoryDTO> getScoreCategories() {
+        ScoreCategoryDTO categories = scoreService.getScoreCategories();
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/analyze-log")
+    public List<Map<String, Object>> analyzeLog() {
+        return scoreService.analyzeLog();
+    }
+
 }
