@@ -46,14 +46,6 @@ public class GherkinScenarioController {
         return ResponseEntity.ok(result);
     }
 
-    // @PreAuthorize("hasAnyRole('ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_GHERKIN_POSTMAN')")
-    // @GetMapping("/all")
-    // public ResponseEntity<List<GherkinScenarioDTO>> getAllByExamPaperId(@RequestParam Long examPaperId) {
-    //     List<GherkinScenarioDTO> result = gherkinScenarioService.getAllGherkinScenariosByExamPaperId(examPaperId);
-    //     return ResponseEntity.ok(result);
-
-    // }
-
     @PreAuthorize("hasAuthority('GENERATE_GHERKIN_SCENARIO', 'ALL_ACCESS')")
     @PostMapping("/generate_gherkin_format")
     public ResponseEntity<?> generateGherkinFormat(@RequestParam Long examQuestionId) {
@@ -83,10 +75,10 @@ public class GherkinScenarioController {
 
     @PreAuthorize("hasAnyAuthority('DELETE_GHERKIN_SCENARIO', 'ALL_ACCESS')")
     @DeleteMapping("/gherkinScenarioIds")
-    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds, @RequestParam Long examQuestionId) {
+    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds, @RequestParam Long examPaperId) {
         try {
 
-            String result = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioIds, examQuestionId);
+            String result = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioIds, examPaperId);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error deleting Gherkin Scenarios.", HttpStatus.NOT_FOUND);
@@ -105,7 +97,7 @@ public class GherkinScenarioController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('VIEW_GHERKIN_SCENARIO', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_GHERKIN_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/{gherkinScenarioId}")
     public ResponseEntity<GherkinScenarioDTO> getById(@PathVariable Long gherkinScenarioId) {
         GherkinScenarioDTO gherkinScenarioDTO = gherkinScenarioService.getById(gherkinScenarioId);

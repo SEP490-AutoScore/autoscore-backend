@@ -13,9 +13,11 @@ public interface IAIApiKeyService {
 
     AIApiKeyDTO createAIApiKey(CreateAIApiKeyDTO dto);
 
-    // String  updateAiApiKey(Long aiApiKeyId, String aiApiKey);
-
-    void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey);
+    void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey, boolean shared);
     
-     void deleteAiApiKey(Long aiApiKeyId);
+     boolean deleteAIApiKey(Long aiApiKeyId);
+
+      AIApiKeyDTO getAIApiKeyById(Long aiApiKeyId);
+     
+ 
 }

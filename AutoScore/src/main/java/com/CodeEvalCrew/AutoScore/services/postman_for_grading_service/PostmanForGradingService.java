@@ -30,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GradingRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateDTO;
@@ -796,14 +795,14 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     }
 
     @Override
-    public String deletePostmanForGrading(List<Long> postmanForGradingIds, Long examQuestionId) {
+    public String deletePostmanForGrading(List<Long> postmanForGradingIds, Long examPaperId) {
 
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
 
-        Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
-                .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
-        Exam_Paper examPaper2 = examQuestion.getExamPaper();
+        Exam_Paper examPaper2 = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new NoSuchElementException("Exam Paper not exists"));
+      
 
         StringBuilder response = new StringBuilder();
 

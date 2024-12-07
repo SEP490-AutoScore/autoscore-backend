@@ -28,14 +28,21 @@ public class AIApiKeyController {
     @Autowired
     private IAIApiKeyService aiApiKeyService;
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<List<AIApiKeyDTO>> getAllAIApiKeys() {
         List<AIApiKeyDTO> apiKeys = aiApiKeyService.getAllAIApiKeys();
         return ResponseEntity.ok(apiKeys);
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
+    @GetMapping("/{aiApiKeyId}")
+    public ResponseEntity<AIApiKeyDTO> getAIApiKeyById(@PathVariable Long aiApiKeyId) {
+        AIApiKeyDTO aiApiKeyDTO = aiApiKeyService.getAIApiKeyById(aiApiKeyId);
+        return ResponseEntity.ok(aiApiKeyDTO);
+    }
+
+    @PreAuthorize("hasAnyAuthority('SELECT_OTHER_KEY', 'ALL_ACCESS')")
     @PostMapping("/update-selected-key")
     public ResponseEntity<String> updateSelectedKey(@RequestParam Long aiApiKeyId) {
         try {
@@ -48,7 +55,7 @@ public class AIApiKeyController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CREATE_API_KEY', 'ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<AIApiKeyDTO> createAIApiKey(@RequestBody CreateAIApiKeyDTO dto) {
         try {
@@ -59,47 +66,32 @@ public class AIApiKeyController {
         }
     }
 
-//     @PutMapping("/updateKey")
-// public ResponseEntity<String> updateAiApiKey(
-//         @RequestParam Long aiApiKeyId,
-//         @RequestParam String aiApiKey) {
-//     try {
-//         // Cập nhật API Key qua Service và nhận thông điệp từ service
-//         String responseMessage = aiApiKeyService.updateAiApiKey(aiApiKeyId, aiApiKey);
-//         // Trả về thông điệp thành công
-//         return new ResponseEntity<>(responseMessage, HttpStatus.OK);
-//     } catch (ResponseStatusException e) {
-//         // Trả về thông điệp lỗi nếu không thể cập nhật
-//         return new ResponseEntity<>(e.getReason(), e.getStatusCode());
-//     }
-// }
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
     @PutMapping("/{aiApiKeyId}")
     public ResponseEntity<Void> updateAIApiKey(
             @PathVariable Long aiApiKeyId,
-            @RequestParam String aiApiKey) {
+            @RequestParam String aiApiKey,
+            @RequestParam boolean shared)  {
         try {
-            aiApiKeyService.updateAI_Api_Key(aiApiKeyId, aiApiKey);
-            return ResponseEntity.noContent().build(); // Trả về 204 nếu cập nhật thành công
+            aiApiKeyService.updateAI_Api_Key(aiApiKeyId, aiApiKey, shared);
+            return ResponseEntity.noContent().build();
         } catch (ResponseStatusException ex) {
-            // Ném lại ResponseStatusException để trả mã lỗi chính xác
             throw ex;
         } catch (Exception ex) {
-            // Xử lý các lỗi không mong muốn
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi cập nhật API Key", ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error when update", ex);
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DELETE_API_KEY', 'ALL_ACCESS')")
     @DeleteMapping("/{aiApiKeyId}")
-    public ResponseEntity<String> deleteAiApiKey(@PathVariable Long aiApiKeyId) {
-        try {
-            // Gọi hàm delete trong service để cập nhật status = false
-            aiApiKeyService.deleteAiApiKey(aiApiKeyId);
-            return ResponseEntity.ok("AI API Key status updated to false.");
-        } catch (Exception e) {
-            // Nếu có lỗi, trả về thông báo lỗi
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("AI API Key not found.");
+    public ResponseEntity<String> deleteAIApiKey(@PathVariable Long aiApiKeyId) {
+        boolean isDeleted = aiApiKeyService.deleteAIApiKey(aiApiKeyId);
+
+        if (isDeleted) {
+            return ResponseEntity.ok("Delete successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Delete failed");
         }
     }
+
 }
