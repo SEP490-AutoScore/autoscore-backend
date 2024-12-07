@@ -41,4 +41,15 @@ public interface IScoreService {
          ScoreCategoryDTO getScoreCategories();
 
           List<Map<String, Object>> analyzeLog();
+
+          Map<String, Integer> analyzeScoresPartialPassLogRunPostman(Long examPaperId);
+
+          Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId);
+
+          Map<String, Map<String, Integer>> analyzeScoresTestCasePassLogRunPostman(Long examPaperId);
+
+          
+
+     
+           
 }
