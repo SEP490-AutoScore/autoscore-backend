@@ -183,7 +183,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAuthority('VIEW_GHERKIN_POSTMAN', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_GHERKIN_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/infoFilePostman")
     public ResponseEntity<?> getExamPaper(@RequestParam Long examPaperId) {
         try {
@@ -196,7 +196,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAuthority('CONFIRM_BEFORE_GRADING', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CONFIRM_BEFORE_GRADING', 'ALL_ACCESS')")
     @PutMapping("/confirmFilePostman/{examPaperId}")
     public ResponseEntity<?> confirmFilePostman(@PathVariable Long examPaperId) {
         try {

@@ -46,7 +46,7 @@ public class GherkinScenarioController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasAuthority('GENERATE_GHERKIN_SCENARIO', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('GENERATE_GHERKIN_SCENARIO', 'ALL_ACCESS')")
     @PostMapping("/generate_gherkin_format")
     public ResponseEntity<?> generateGherkinFormat(@RequestParam Long examQuestionId) {
         return gherkinScenarioService.generateGherkinFormat(examQuestionId);
