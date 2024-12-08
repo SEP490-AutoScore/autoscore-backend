@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAIApiKeyDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIApiKeyDTO;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.AIName_Enum;
 import com.CodeEvalCrew.AutoScore.services.ai_api_key_service.IAIApiKeyService;
 
 @RestController
@@ -57,14 +58,15 @@ public class AIApiKeyController {
 
     @PreAuthorize("hasAnyAuthority('CREATE_API_KEY', 'ALL_ACCESS')")
     @PostMapping("")
-    public ResponseEntity<AIApiKeyDTO> createAIApiKey(@RequestBody CreateAIApiKeyDTO dto) {
+    public ResponseEntity<String> createAIApiKey(@RequestBody CreateAIApiKeyDTO dto) {
         try {
-            AIApiKeyDTO response = aiApiKeyService.createAIApiKey(dto);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            aiApiKeyService.createAIApiKey(dto);
+            return new ResponseEntity<>("Create successfully", HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Failed to create API Key", HttpStatus.BAD_REQUEST);
         }
     }
+    
 
     @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
     @PutMapping("/{aiApiKeyId}")
@@ -92,6 +94,13 @@ public class AIApiKeyController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Delete failed");
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
+    @GetMapping("/ai-names")
+    public List<AIName_Enum> getAllAINames() {
+        // Call the service to get the enum values
+        return aiApiKeyService.getAllAINameEnums();
     }
 
 }

@@ -57,6 +57,7 @@ public class AI_Api_Key {
 
     @ManyToOne
     @JoinColumn(name = "accountId", nullable = false)
+    @ToString.Exclude
     private Account account;
 
 }

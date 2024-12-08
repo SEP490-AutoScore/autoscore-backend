@@ -2,6 +2,7 @@ package com.CodeEvalCrew.AutoScore.services.ai_api_key_service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.AIName_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.repositories.account_organization_repository.AccountOrganizationRepository;
@@ -65,7 +67,7 @@ public class AIApiKeyService implements IAIApiKeyService {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
         String userCampus = checkCampusForAccount(authenticatedUserId);
-      
+
         List<AI_Api_Key> userApiKeys = aiApiKeyRepository.findByAccountAccountIdAndStatusTrue(authenticatedUserId);
 
         List<AI_Api_Key> sharedApiKeys = aiApiKeyRepository.findByStatusTrueAndSharedTrue();
@@ -91,17 +93,24 @@ public class AIApiKeyService implements IAIApiKeyService {
                 .stream()
                 .map(selectedKey -> selectedKey.getAiApiKey().getAiApiKeyId())
                 .collect(Collectors.toSet());
-
+    
         return apiKeys.stream()
                 .map(apiKey -> {
-
-                    String fullName = Optional.ofNullable(apiKey.getAccount())
-                            .map(account -> Optional
-                                    .ofNullable(employeeRepository.findByAccount_AccountId(account.getAccountId()))
-                                    .map(Employee::getFullName)
-                                    .orElse("Unknown"))
-                            .orElse("Unknown");
-
+    
+                    // Check if the API key belongs to the authenticated user
+                    String fullName = "Unknown"; // Default value
+    
+                    if (apiKey.getAccount() != null && apiKey.getAccount().getAccountId().equals(authenticatedUserId)) {
+                        fullName = "Owned By You"; // Replace with "owned by you" if it belongs to the authenticated user
+                    } else {
+                        fullName = Optional.ofNullable(apiKey.getAccount())
+                                .map(account -> Optional
+                                        .ofNullable(employeeRepository.findByAccount_AccountId(account.getAccountId()))
+                                        .map(Employee::getFullName)
+                                        .orElse("Unknown"))
+                                .orElse("Unknown");
+                    }
+    
                     return new AIApiKeyDTO(
                             apiKey.getAiApiKeyId(),
                             apiKey.getAiName(),
@@ -115,125 +124,115 @@ public class AIApiKeyService implements IAIApiKeyService {
                 })
                 .collect(Collectors.toList());
     }
+    
 
-//     @Override
-//     public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
+    // @Override
+    // public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
 
-//         Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    // Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-//         AI_Api_Key selectedApiKey = aiApiKeyRepository.findById(aiApiKeyId)
-//                 .orElseThrow(() -> new IllegalArgumentException("Invalid AI API Key ID"));
+    // AI_Api_Key selectedApiKey = aiApiKeyRepository.findById(aiApiKeyId)
+    // .orElseThrow(() -> new IllegalArgumentException("Invalid AI API Key ID"));
 
-//         List<Account_Selected_Key> existingSelectedKeys = accountSelectedKeyRepository
-//                 .findByAccountAccountId(authenticatedUserId);
+    // List<Account_Selected_Key> existingSelectedKeys =
+    // accountSelectedKeyRepository
+    // .findByAccountAccountId(authenticatedUserId);
 
-//         if (existingSelectedKeys.isEmpty()) {
+    // if (existingSelectedKeys.isEmpty()) {
 
-//             Account_Selected_Key newSelectedKey = new Account_Selected_Key();
-//             // newSelectedKey.setAccount(selectedApiKey.getAccount());
-//             Account authenticatedUserAccount = accountRepository.findById(authenticatedUserId)
-//     .orElseThrow(() -> new IllegalArgumentException("Authenticated account not found"));
-// newSelectedKey.setAccount(authenticatedUserAccount);
+    // Account_Selected_Key newSelectedKey = new Account_Selected_Key();
+    // // newSelectedKey.setAccount(selectedApiKey.getAccount());
+    // Account authenticatedUserAccount =
+    // accountRepository.findById(authenticatedUserId)
+    // .orElseThrow(() -> new IllegalArgumentException("Authenticated account not
+    // found"));
+    // newSelectedKey.setAccount(authenticatedUserAccount);
 
-//             newSelectedKey.setAiApiKey(selectedApiKey);
-//             accountSelectedKeyRepository.save(newSelectedKey);
-//         } else {
+    // newSelectedKey.setAiApiKey(selectedApiKey);
+    // accountSelectedKeyRepository.save(newSelectedKey);
+    // } else {
 
-//             Account_Selected_Key existingSelectedKey = existingSelectedKeys.get(0);
-//             existingSelectedKey.setAiApiKey(selectedApiKey);
-//             accountSelectedKeyRepository.save(existingSelectedKey);
-//         }
-//     }
-@Override
-public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
+    // Account_Selected_Key existingSelectedKey = existingSelectedKeys.get(0);
+    // existingSelectedKey.setAiApiKey(selectedApiKey);
+    // accountSelectedKeyRepository.save(existingSelectedKey);
+    // }
+    // }
+    @Override
+    public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
 
-    Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-    AI_Api_Key selectedApiKey = aiApiKeyRepository.findById(aiApiKeyId)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid AI API Key ID"));
+        AI_Api_Key selectedApiKey = aiApiKeyRepository.findById(aiApiKeyId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid AI API Key ID"));
 
-    Account authenticatedUserAccount = accountRepository.findById(authenticatedUserId)
-            .orElseThrow(() -> new IllegalArgumentException("Authenticated account not found"));
+        Account authenticatedUserAccount = accountRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Authenticated account not found"));
 
-    // Check if the user has already selected a key
-    Optional<Account_Selected_Key> existingSelectedKey = accountSelectedKeyRepository
-            .findByAccountAccountId(authenticatedUserId)
-            .stream()
-            .findFirst();
+        // Check if the user has already selected a key
+        Optional<Account_Selected_Key> existingSelectedKey = accountSelectedKeyRepository
+                .findByAccountAccountId(authenticatedUserId)
+                .stream()
+                .findFirst();
 
-    if (existingSelectedKey.isPresent()) {
-        // Update the existing key
-        Account_Selected_Key selectedKey = existingSelectedKey.get();
-        selectedKey.setAiApiKey(selectedApiKey);
-        accountSelectedKeyRepository.save(selectedKey);
-    } else {
-        // Create a new key selection
-        Account_Selected_Key newSelectedKey = new Account_Selected_Key();
-        newSelectedKey.setAccount(authenticatedUserAccount);
-        newSelectedKey.setAiApiKey(selectedApiKey);
-        accountSelectedKeyRepository.save(newSelectedKey);
+        if (existingSelectedKey.isPresent()) {
+            // Update the existing key
+            Account_Selected_Key selectedKey = existingSelectedKey.get();
+            selectedKey.setAiApiKey(selectedApiKey);
+            accountSelectedKeyRepository.save(selectedKey);
+        } else {
+            // Create a new key selection
+            Account_Selected_Key newSelectedKey = new Account_Selected_Key();
+            newSelectedKey.setAccount(authenticatedUserAccount);
+            newSelectedKey.setAiApiKey(selectedApiKey);
+            accountSelectedKeyRepository.save(newSelectedKey);
+        }
     }
-}
-
 
     @Override
-    public AIApiKeyDTO createAIApiKey(CreateAIApiKeyDTO dto) {
-
+    public void createAIApiKey(CreateAIApiKeyDTO dto) {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
         Account account = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found"));
 
-        String fullName = Optional.ofNullable(employeeRepository.findByAccount_AccountId(authenticatedUserId))
-                .map(Employee::getFullName)
-                .orElse("Unknown");
+    boolean apiKeyExists = aiApiKeyRepository.existsByAiApiKeyAndAccount_AccountIdAndStatusTrue(dto.getAiApiKey(), authenticatedUserId);
+    if (apiKeyExists) {
+        throw new IllegalArgumentException("API Key already exists for this user.");
+    }
 
         AI_Api_Key newApiKey = new AI_Api_Key();
         newApiKey.setAiName(dto.getAiName());
         newApiKey.setAiApiKey(dto.getAiApiKey());
         newApiKey.setStatus(true);
-        newApiKey.setShared(dto.isShared());
+        newApiKey.setShared(Optional.ofNullable(dto.isShared()).orElse(false)); 
         newApiKey.setCreatedAt(LocalDateTime.now());
-
         newApiKey.setAccount(account);
 
-        AI_Api_Key savedApiKey = aiApiKeyRepository.save(newApiKey);
-
-        return new AIApiKeyDTO(
-                savedApiKey.getAiApiKeyId(),
-                savedApiKey.getAiName(),
-                savedApiKey.getAiApiKey(),
-                savedApiKey.isStatus(),
-                savedApiKey.isShared(),
-                savedApiKey.getCreatedAt(),
-                savedApiKey.getUpdatedAt(),
-                fullName,
-                false);
+        aiApiKeyRepository.save(newApiKey);
     }
 
     @Override
     public void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey, boolean shared) {
 
         Optional<AI_Api_Key> existingApiKeyOpt = aiApiKeyRepository.findById(aiApiKeyId);
-    
+
         if (existingApiKeyOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "API Key not exists");
         }
-    
+
         AI_Api_Key existingApiKey = existingApiKeyOpt.get();
-    
+
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         if (!existingApiKey.getAccount().getAccountId().equals(authenticatedUserId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this key");
         }
-    
+
         existingApiKey.setAiApiKey(aiApiKey);
-        existingApiKey.setShared(shared);  
+        existingApiKey.setShared(shared);
         existingApiKey.setUpdatedAt(LocalDateTime.now());
-    
+
         aiApiKeyRepository.save(existingApiKey);
     }
-    
 
     @Override
     public boolean deleteAIApiKey(Long aiApiKeyId) {
@@ -267,20 +266,19 @@ public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
         AI_Api_Key aiApiKey = aiApiKeyOptional.get();
 
         String fullName = Optional.ofNullable(aiApiKey.getAccount())
-        .map(account -> Optional
-            .ofNullable(employeeRepository.findByAccount_AccountId(account.getAccountId()))
-            .map(Employee::getFullName)
-            .orElse("Unknown"))
-        .orElse("Unknown");
-        
+                .map(account -> Optional
+                        .ofNullable(employeeRepository.findByAccount_AccountId(account.getAccountId()))
+                        .map(Employee::getFullName)
+                        .orElse("Unknown"))
+                .orElse("Unknown");
+
         Set<Long> selectedKeyIds = accountSelectedKeyRepository
-        .findByAccountAccountId(authenticatedUserId)
-        .stream()
-        .map(selectedKey -> selectedKey.getAiApiKey().getAiApiKeyId())
-        .collect(Collectors.toSet());
+                .findByAccountAccountId(authenticatedUserId)
+                .stream()
+                .map(selectedKey -> selectedKey.getAiApiKey().getAiApiKeyId())
+                .collect(Collectors.toSet());
 
         AIApiKeyDTO aiApiKeyDTO = new AIApiKeyDTO(
-        
 
                 aiApiKey.getAiApiKeyId(),
                 aiApiKey.getAiName(),
@@ -290,10 +288,15 @@ public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
                 aiApiKey.getCreatedAt(),
                 aiApiKey.getUpdatedAt(),
                 fullName,
-                selectedKeyIds.contains(aiApiKey.getAiApiKeyId())
-                );
-               
+                selectedKeyIds.contains(aiApiKey.getAiApiKeyId()));
+
         return aiApiKeyDTO;
+    }
+
+    @Override
+       public List<AIName_Enum> getAllAINameEnums() {
+        // Return the enum values as a list
+        return Arrays.asList(AIName_Enum.values());
     }
 
 
