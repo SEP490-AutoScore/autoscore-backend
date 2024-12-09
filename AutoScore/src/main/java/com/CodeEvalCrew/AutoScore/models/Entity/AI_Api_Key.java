@@ -41,7 +41,6 @@ public class AI_Api_Key {
     @Enumerated(EnumType.STRING)
     private AIName_Enum aiName;
 
-    // @NotNull
     private String aiApiKey;
 
     private boolean status;
@@ -58,6 +57,7 @@ public class AI_Api_Key {
 
     @ManyToOne
     @JoinColumn(name = "accountId", nullable = false)
+    @ToString.Exclude
     private Account account;
 
 }

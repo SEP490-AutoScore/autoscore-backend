@@ -93,7 +93,7 @@ public class ExamController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("list-exam-exampaper")
     public ResponseEntity<List<ExamWithPapersDTO>> getExamsWithUsedPapers() {
         try {
@@ -104,7 +104,7 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('VIEW_EXAM', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("count")
     public ResponseEntity<Object> getExamCountByTypeAndCampus() {
         try {
@@ -119,7 +119,7 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("countByGradingAt")
     public ResponseEntity<Long> getExamCountByTypeAndGradingAt() {
         try {
@@ -132,7 +132,7 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("countByGradingAtPassed")
     public ResponseEntity<Long> getExamCountByGradingAtPassed() {
         try {
@@ -145,7 +145,7 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("countByGradingAtPassedAndSemester")
     public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemester(@RequestParam int year) {
         try {

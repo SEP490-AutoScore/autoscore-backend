@@ -149,25 +149,6 @@ public class ExamPaperController {
         }
     }
 
-    // @GetMapping("/{examPaperId}/questions")
-    // public ResponseEntity<?> getExamQuestionIds(@PathVariable Long examPaperId) {
-    //     try {
-    //         List<Long> questionIds = examPaperService.getExamQuestionIdsByExamPaperId(examPaperId);
-    //         return new ResponseEntity<>(questionIds, HttpStatus.OK);
-    //     } catch (NotFoundException ex) {
-    //         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    //     } catch (Exception e) {
-    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    // }
-    // @PreAuthorize("hasAnyRole('ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('IMPORT_POSTMAN')")
-    // @GetMapping("/{examPaperId}/gherkin-scenarios")
-    // public ResponseEntity<List<GherkinScenarioInfoDTO>> getGherkinScenariosByExamPaperId(
-    //         @PathVariable Long examPaperId) throws NotFoundException {
-    //     List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService
-    //             .getGherkinScenariosByExamPaperId(examPaperId);
-    //     return new ResponseEntity<>(gherkinScenarioInfoList, HttpStatus.OK);
-    // }
     @PreAuthorize("hasAnyAuthority('EXPORT_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/export-postman/{examPaperId}")
     public ResponseEntity<byte[]> exportPostmanCollection(@PathVariable Long examPaperId) {
@@ -202,7 +183,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAuthority('VIEW_INFO_POSTMAN', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_GHERKIN_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/infoFilePostman")
     public ResponseEntity<?> getExamPaper(@RequestParam Long examPaperId) {
         try {
@@ -215,7 +196,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAuthority('CONFIRM_BEFORE_GRADING', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CONFIRM_BEFORE_GRADING', 'ALL_ACCESS')")
     @PutMapping("/confirmFilePostman/{examPaperId}")
     public ResponseEntity<?> confirmFilePostman(@PathVariable Long examPaperId) {
         try {

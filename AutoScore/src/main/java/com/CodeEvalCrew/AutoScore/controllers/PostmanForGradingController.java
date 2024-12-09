@@ -36,7 +36,7 @@ public class PostmanForGradingController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('VIEW_POSTMAN_TREE', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_GHERKIN_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<List<PostmanForGradingDTO>> getPostmanForGrading_forFunctionTree(
             @RequestParam Long examPaperId) {
@@ -80,12 +80,12 @@ public class PostmanForGradingController {
 
     @PreAuthorize("hasAnyAuthority('DELETE_POSTMAN', 'ALL_ACCESS')")
     @DeleteMapping("")
-    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examQuestionId) {
-        String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examQuestionId);
+    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examPaperId) {
+        String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examPaperId);
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyAuthority('VIEW_POSTMAN', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_GHERKIN_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<?> PostmanForGradingGetbyIdDTO(@PathVariable Long id) {
         try {
