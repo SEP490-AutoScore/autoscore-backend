@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GradingRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetbyIdDTO;
@@ -30,6 +29,6 @@ public interface IPostmanForGradingService {
 
       String updateExamQuestionId(Long postmanForGradingId, Long examQuestionId);
 
-      ResponseEntity<?> calculateScores(List<GradingRequestDTO> requests, Long examPaperId, Long examQuestionId);
+       void calculateScores(Long examPaperId) throws Exception;
 
 }
