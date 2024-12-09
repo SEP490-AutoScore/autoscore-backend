@@ -31,7 +31,7 @@ VALUES
 ('CREATE_PERMISSION', 11, 'Create permission', 3, 1, 'Allows creating new permissions'),
 ('UPDATE_PERMISSION', 18, 'Update permission', 3, 1, 'Allows updating existing permissions'),
 ('DELETE_PERMISSION', 25, 'Delete permission', 3, 1, 'Allows deleting permissions'),
-('UPDATE_ROLE_PERMISSION', 57, 'Update role permission', 3, 1, 'Allows updating role permissions'),
+('UPDATE_ROLE_PERMISSION', 54, 'Update role permission', 3, 1, 'Allows updating role permissions'),
 
 -- Organization Management
 ('VIEW_CAMPUS', 4, 'View campus', 4, 1, 'Allows viewing campus details'),
@@ -64,40 +64,47 @@ VALUES
 ('DELETE_EXAM_DATABASE', 33, 'Delete exam database', 7, 1, 'Allows deleting exam database entries'),
 
 -- Gherkin Scenario
-('VIEW_GHERKIN_SCENARIO', 34, 'View gherkin scenario', 7, 1, 'Allows viewing Gherkin scenario'),
+('VIEW_GHERKIN_POSTMAN', 34, 'View gherkin scenario and postman script', 7, 1, 'Allows viewing Gherkin scenario and Postman script'),
 ('CREATE_GHERKIN_SCENARIO', 35, 'Create gherkin scenario', 7, 1, 'Allows creating new Gherkin scenario'),
 ('UPDATE_GHERKIN_SCENARIO', 36, 'Update gherkin scenario', 7, 1, 'Allows updating Gherkin scenario'),
 ('DELETE_GHERKIN_SCENARIO', 37, 'Delete gherkin scenario', 7, 1, 'Allows deleting Gherkin scenario'),
-('VIEW_GHERKIN_POSTMAN', 42, 'View gherkin scenario', 7, 1, 'Allows viewing Gherkin scenario and Postman script'),
-('GENERATE_GHERKIN_SCENARIO', 43, 'Generate gherkin scenario', 7, 1, 'Allows generating Gherkin scenario'),
+('GENERATE_GHERKIN_SCENARIO', 38, 'Generate gherkin scenario', 7, 1, 'Allows generating Gherkin scenario'),
 
 -- Postman script
-('UPDATE_POSTMAN', 44, 'Update postman', 7, 1, 'Allows updating tree of function postman'),
-('VIEW_POSTMAN_TREE', 45, 'View postman tree', 7, 1, 'Allows viewing tree of function postman'),
-('GENERATE_POSTMAN', 46, 'Generate postman', 7, 1, 'Allows generating postman script'),
-('MERGE_POSTMAN', 47, 'Merge postman', 7, 1, 'Allows merging postman script to main file collection postman'),
-('DELETE_POSTMAN', 48, 'Delete postman', 7, 1, 'Allows deleting postman script'),
-('VIEW_POSTMAN', 49, 'View postman', 7, 1, 'Allows viewing postman script'),
-('UPDATE_QUESTION_POSTMAN', 50, 'Update question of postman', 7, 1, 'Allows updating question of postman script'),
-('CALCULATE_SCORE_QUESTION_POSTMAN', 51, 'Calculate score question of postman', 7, 1, 'Allows using calculate score function for postman script'),
+('UPDATE_POSTMAN', 39, 'Update postman', 7, 1, 'Allows updating tree of function postman'),
+('GENERATE_POSTMAN', 40, 'Generate postman', 7, 1, 'Allows generating postman script'),
+('MERGE_POSTMAN', 41, 'Merge postman', 7, 1, 'Allows merging postman script to main file collection postman'),
+('DELETE_POSTMAN', 42, 'Delete postman', 7, 1, 'Allows deleting postman script'),
+('UPDATE_QUESTION_POSTMAN', 43, 'Update question of postman', 7, 1, 'Allows updating question of postman script'),
+('CALCULATE_SCORE_QUESTION_POSTMAN', 44, 'Calculate score question of postman', 7, 1, 'Allows using calculate score function for postman script'),
+
+-- AI-key
+('VIEW_API_KEY', 49, 'View api key', 9, 1, 'Allows viewing api key'),
+('SELECT_OTHER_KEY', 50, 'Select other api key', 9, 1, 'Allows selecting other api key'),
+('CREATE_API_KEY', 51, 'Create api key', 9, 1, 'Allows creating api key'),
+('DELETE_API_KEY', 52, 'Delete api key', 9, 1, 'Allows deleting api key'),
 
 -- Exam paper
-('IMPORT_POSTMAN', 52, 'Import postman', 7, 1, 'Allows importing file collection postman'),
-('EXPORT_POSTMAN', 53, 'Export postman', 7, 1, 'Allows exporting file collection postman'),
-('VIEW_INFO_POSTMAN', 54, 'View info postman', 7, 1, 'Allows viewing info file collection postman'),
-('CONFIRM_BEFORE_GRADING', 55, 'Confirm before grading', 7, 1, 'Allows confirming before grading'),
+('IMPORT_POSTMAN', 45, 'Import postman', 7, 1, 'Allows importing file collection postman'),
+('EXPORT_POSTMAN', 46, 'Export postman', 7, 1, 'Allows exporting file collection postman'),
+('CONFIRM_BEFORE_GRADING', 47, 'Confirm before grading', 7, 1, 'Allows confirming before grading'),
 
 -- Score Management
 ('VIEW_SCORE', 8, 'View score', 8, 1, 'Allows viewing scores'),
-('EXPORT_SCORE', 38, 'Export score', 8, 1, 'Allows exporting score reports'),
+('EXPORT_SCORE', 53, 'Export score', 8, 1, 'Allows exporting score reports'),
 
 -- Dashboard
-('DASHBOARD', 39, 'Dashboard access', 9, 1, 'Allows access to the dashboard'),
-('ALL_ACCESS', 56, 'All access', 9, 1, 'Allows access to all features'),
+('DASHBOARD', 55, 'Dashboard access', 9, 1, 'Allows access to the dashboard'),
+('ALL_ACCESS', 48, 'All access', 9, 1, 'Allows access to all features'),
 
 -- Student
-('VIEW_STUDENT', 40, 'View student', 7, 1, 'Allows viewing student details'),
-('IMPORT_STUDENT', 41, 'Import student', 7, 1, 'Allows importing student data');
+('VIEW_STUDENT', 56, 'View student', 7, 1, 'Allows viewing student details'),
+('IMPORT_STUDENT', 57, 'Import student', 7, 1, 'Allows importing student data'),
+
+--Content AI
+('VIEW_PROMPT_AI', 58, 'View prompt AI', 7, 1, 'Allows viewing prompt ai'),
+('EDIT_PROMPT_AI', 59, 'Edit prompt AI', 7, 1, 'Allows editing prompt ai');
+
 INSERT INTO `role`
 (`status`, `role_id`, `role_code`, `role_name`, `description`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
 VALUES
@@ -115,28 +122,28 @@ VALUES
 (true, 1, 21), (true, 1, 22), (true, 1, 23), (true, 1, 24), (true, 1, 25), (true, 1, 26), (true, 1, 27), (true, 1, 28), (true, 1, 29), (true, 1, 30),
 (true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39), (true, 1, 40),
 (true, 1, 41), (true, 1, 42), (true, 1, 43), (true, 1, 44), (true, 1, 45), (true, 1, 46), (true, 1, 47), (true, 1, 48), (true, 1, 49), (true, 1, 50),
-(true, 1, 51), (true, 1, 52), (true, 1, 53), (true, 1, 54), (true, 1, 55), (true, 1, 56), (true, 1, 57),
+(true, 1, 51),(true, 1, 52),(true, 1, 53),(true, 1, 54),(true, 1, 55),(true, 1, 56),(true, 1, 57),(true, 1, 58),(true, 1, 59),
 -- Examiner
 (false, 2, 2), (false, 2, 3), (false, 2, 10), (false, 2, 11), (false, 2, 17), (false, 2, 18), (false, 2, 23), (false, 2, 24), (false, 2, 25), (false, 2, 39),
 (true, 2, 1), (true, 2, 4), (true, 2, 5), (true, 2, 6), (true, 2, 7), (true, 2, 8), (true, 2, 9), (true, 2, 12), (true, 2, 13), (true, 2, 14),
 (true, 2, 15), (true, 2, 16), (true, 2, 19), (true, 2, 20), (true, 2, 21), (true, 2, 22), (true, 2, 26), (true, 2, 27), (true, 2, 28), (true, 2, 29),
 (true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40),
 (true, 2, 41), (true, 2, 42), (true, 2, 43), (true, 2, 44), (true, 2, 45), (true, 2, 46), (true, 2, 47), (true, 2, 48), (true, 2, 49), (true, 2, 50),
-(true, 2, 51), (true, 2, 52), (true, 2, 53), (true, 2, 54), (true, 2, 55), (false, 2, 56), (true, 2, 57),
+(true, 2, 51),(true, 2, 52),(true, 2, 53),(true, 2, 54),(true, 2, 55),(true, 2, 56),(true, 2, 57),(true, 2, 58),(true, 2, 59),
 -- Head of Department
 (false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
 (false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30),
 (false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
 (true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
 (true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 46), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
-(true, 3, 51), (true, 3, 52), (true, 3, 53), (true, 3, 54), (true, 3, 55), (false, 3, 56), (true, 3, 57),
+(true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(true, 3, 58),(true, 3, 59),
 -- Lecturer
 (false, 4, 2), (false, 4, 3), (false, 4, 10), (false, 4, 11), (false, 4, 17), (false, 4, 18), (false, 4, 23), (false, 4, 24), (false, 4, 25), (false, 4, 26),
 (false, 4, 15), (false, 4, 16), (false, 4, 19), (false, 4, 20), (false, 4, 21), (false, 4, 22), (false, 4, 27), (false, 4, 28),(false, 4, 29), (false, 4, 30),
 (false, 4, 31), (false, 4, 32), (false, 4, 33), (false, 4, 34), (false, 4, 35), (false, 4, 36), (false, 4, 37), (false, 4, 38), (false, 4, 39),
 (true, 4, 1), (true, 4, 4), (true, 4, 5), (true, 4, 6), (true, 4, 7), (true, 4, 8), (true, 4, 9), (true, 4, 12), (true, 4, 13), (true, 4, 14), (true, 4, 40),
 (true, 4, 41), (true, 4, 42), (true, 4, 43), (true, 4, 44), (true, 4, 45), (true, 4, 46), (true, 4, 47), (true, 4, 48), (true, 4, 49), (true, 4, 50),
-(true, 4, 51), (true, 4, 52), (true, 4, 53), (true, 4, 54), (true, 4, 55), (false, 4, 56), (true, 4, 57);
+(true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(true, 4, 58),(true, 4, 59);
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
@@ -181,8 +188,11 @@ VALUES
 (true, 1, 1),
 (true, 2, 1),
 (true, 3, 1),
+(true, 6, 7),
 (true, 6, 2),
+(true, 7, 7),
 (true, 7, 2),
+(true, 8, 8),
 (true, 8, 2),
 (true, 4, 1),
 (true, 1, 2),
@@ -204,9 +214,9 @@ INSERT INTO `employee`
 VALUES
 (1, 'Võ Thanh Tuyền', 'AD0001', 1, 4, 1, true),
 (2, 'Hà Nhật Trường', 'AD0002', 2, 4, 1, true),
-(3, 'Võ Trọng Vương Admin', 'AD0003', 3, 4, 1, true),
-(6, 'Võ Trọng Vương Examiner', 'AD0006', 6, 2, 2, true),
-(7, 'Võ Trọng Vương Head of department', 'AD0007', 7, 1, 2, true),
+(3, 'Võ Trọng Vương admin', 'AD0003', 3, 4, 1, true),
+(6, 'Võ Trọng Vương Examinar', 'AD0006', 6, 2, 2, true),
+(7, 'Võ Trọng Vương Head of Department', 'AD0007', 7, 1, 2, true),
 (8, 'Võ Trọng Vương Lecturer', 'AD0008', 8, 3, 2, true),
 (4, 'Thiều Phan Văn Minh', 'AD0004', 4, 4, 1, true),
 (5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 2, true);
@@ -388,30 +398,48 @@ VALUES
 INSERT INTO `content`
 (`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
-('This is Database, Save to your memory, do not reply
+('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_GHERKIN_FORMAT'),
-('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline:
-{{ 
-Scenario: [Brief and clear description of the scenario]
-  Given [Describe the initial condition or prerequisite]
-  And [Optional additional conditions or prerequisites, if applicable]
-  When [Describe the key action or event that occurs]
-  And [Optional additional actions or events, if applicable]
-  Then [Describe the primary outcome or result]
-  And [Optional additional outcomes or verifications, if applicable]
+('Generate Gherkin format scenarios for the given API based on the database structure and sample data provided earlier. Ensure the scenarios reflect real-world interactions, grounded in the fields and data existing in the database. Avoid using IDs or data that do not exist in the database.
+
+**Important Instructions:**
+- Only use real values and references from the database. For example, do not refer to a person with ID 123 if no such record exists.
+- Avoid generic descriptions like "valid person ID" or "successful response" unless explicitly derived from the database schema or example data.
+- Use specific field names and example values when describing request parameters or expected results.
+- Each complete scenario must be fully enclosed in double curly braces {{ }}.
+
+The structure should follow the pattern:
+{{
+    Scenario: [Brief and clear description of the scenario]
+    Given [Describe the initial condition or prerequisite, based on the database]
+    When [Describe the key action, using specific fields from the database if applicable]
+    Then [Describe the primary outcome, reflecting database contents]
+    And [Optional additional outcomes or verifications, reflecting database content]
 }}
+
 ', 2,'GENERATE_GHERKIN_FORMAT'),
-('Save to your memory, do not reply
+('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
-('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline: '
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline: 
+'
 ,2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
-('Save to your memory, do not reply
+('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_POSTMAN_COLLECTION'),
-('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. The `event.script.exec` section in `item` must contain valid Postman test scripts (using pm.test). Write a JSON Postman collection that contains `info` and `item`. The `info` section should include `_postman_id`, `name`, `schema`, `_exporter_id`. The `item` section should include `name`, `event.listen` with the value `test`, and `event.script.exec` with the value `pm.test`. Do not explain the JSON structure, just provide the raw JSON.
+('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. Ensure that:  
+1. The `event.script.exec` section in `item` contains valid Postman test scripts (using `pm.test`).  
+2. The `info` section includes `_postman_id`, `name`, `schema`, `_exporter_id`.  
+3. The `item` section includes:  
+   - `name`, which should closely reflect the Gherkin scenario name,  
+   - `request.url` which must start with `http://localhost:8080/`,  
+   - `event.listen` with the value `test`,  
+   - `event.script.exec` with the value `pm.test`.  
+
+Do not explain the JSON structure, just provide the raw JSON. Use `http://localhost:8080/` as the base URL for all requests.  
 ', 2,'GENERATE_POSTMAN_COLLECTION'),
 
-('This is Database, Save to your memory, do not reply', 1,'GENERATE_POSTMAN_COLLECTION_MORE'),
+('This is the database structure and sample data. Save it to your memory, do not reply.
+', 1,'GENERATE_POSTMAN_COLLECTION_MORE'),
 ('Given the JSON Postman collection below, please add multiple pm.test scripts within the same test case. Ensure that each test script is inside the same `event.script.exec` block, but each script checks a different condition or assertion. In the provided Postman JSON, within the `event.script.exec` section, please create multiple `pm.test` scripts under the same test case. Each `pm.test` should check a separate condition without creating additional test cases.', 2,'GENERATE_POSTMAN_COLLECTION_MORE');
 
 

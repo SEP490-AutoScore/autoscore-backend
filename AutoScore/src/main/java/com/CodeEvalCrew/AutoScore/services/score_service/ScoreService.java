@@ -2,7 +2,13 @@ package com.CodeEvalCrew.AutoScore.services.score_service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -19,6 +25,7 @@ import com.CodeEvalCrew.AutoScore.mappers.CodePlagiarismMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ScoreDetailMapper;
 import com.CodeEvalCrew.AutoScore.mappers.ScoreMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.CodePlagiarismResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreCategoryDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreDetailsResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreOverViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ScoreResponseDTO;
@@ -26,12 +33,14 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.TopStudentDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Code_Plagiarism;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score_Detail;
-import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
-import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.repositories.account_organization_repository.AccountOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.code_plagiarism_repository.CodePlagiarismRepository;
+import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.score_detail_repository.ScoreDetailRepository;
 import com.CodeEvalCrew.AutoScore.repositories.score_repository.ScoreRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
@@ -49,11 +58,14 @@ public class ScoreService implements IScoreService {
     private final CodePlagiarismMapper codePlagiarismMapper;
     @Autowired
     private final AccountOrganizationRepository accountOrganizationRepository;
+    @Autowired
+    private final IExamPaperRepository examPaperRepository;
 
     public ScoreService(ScoreRepository scoreRepository, ScoreDetailRepository scoreDetailRepository,
             CodePlagiarismRepository codePlagiarismRepository, ScoreMapper scoreMapper,
             ScoreDetailMapper scoreDetailMapper, CodePlagiarismMapper codePlagiarismMapper,
-            AccountOrganizationRepository accountOrganizationRepository) {
+            AccountOrganizationRepository accountOrganizationRepository,
+            IExamPaperRepository examPaperRepository) {
         this.scoreRepository = scoreRepository;
         this.scoreDetailRepository = scoreDetailRepository;
         this.codePlagiarismRepository = codePlagiarismRepository;
@@ -61,6 +73,7 @@ public class ScoreService implements IScoreService {
         this.scoreDetailMapper = scoreDetailMapper;
         this.codePlagiarismMapper = codePlagiarismMapper;
         this.accountOrganizationRepository = accountOrganizationRepository;
+        this.examPaperRepository = examPaperRepository;
     }
 
     @Override
@@ -299,5 +312,342 @@ public class ScoreService implements IScoreService {
 
         return null;
     }
+
+    @Override
+    public Map<Float, Long> getTotalScoreOccurrences() {
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        String userCampus = checkCampusForAccount(authenticatedUserId);
+
+        // Fetch all scores
+        List<Score> scores = scoreRepository.findAll(); // Assuming findAll fetches all scores
+
+        // Filter and group scores
+        Map<Float, Long> scoreOccurrences = scores.stream()
+                .filter(score -> score.getStudent().isStatus() && // Filter by active students
+                        score.getExamPaper().getExam().getType().toString().equals("EXAM") && // Filter by exam type
+                        score.getStudent().getOrganization().getName().equals(userCampus)) // Match campus
+                .collect(Collectors.groupingBy(Score::getTotalScore, Collectors.counting())); // Group by totalScore
+
+        return scoreOccurrences;
+    }
+
+    @Override
+    public ScoreCategoryDTO getScoreCategories() {
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        String userCampus = checkCampusForAccount(authenticatedUserId);
+
+        // Lấy tất cả các điểm
+        List<Score> scores = scoreRepository.findAll();
+
+        // Lọc và phân loại điểm
+        long excellent = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 9 && score.getTotalScore() <= 10)
+                .count();
+
+        long good = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 8 && score.getTotalScore() < 9)
+                .count();
+
+        long fair = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 5 && score.getTotalScore() < 8)
+                .count();
+
+        long poor = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 4 && score.getTotalScore() < 5)
+                .count();
+
+        long bad = scores.stream()
+                .filter(score -> score.getStudent().isStatus()
+                        && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                        && score.getStudent().getOrganization().getName().equals(userCampus)
+                        && score.getTotalScore() >= 0 && score.getTotalScore() < 4)
+                .count();
+
+        return new ScoreCategoryDTO(excellent, good, fair, poor, bad);
+    }
+
+    @Override
+    public List<Map<String, Object>> analyzeLog() {
+        Long authenticatedUserId = Util.getAuthenticatedAccountId(); // Lấy ID người dùng đã xác thực
+        String userCampus = checkCampusForAccount(authenticatedUserId); // Kiểm tra campus của tài khoản người dùng
+
+        // Lấy tất cả các điểm số
+        List<Score> scores = scoreRepository.findAll();
+
+        // Lọc các điểm số theo điều kiện tương tự như trong getTotalScoreOccurrences
+        List<String> logDataList = scores.stream()
+                .filter(score -> score.getStudent().isStatus() && // Lọc học sinh đang hoạt động
+                        score.getExamPaper().getExam().getType().toString().equals("EXAM") && // Lọc theo loại bài thi
+                        score.getStudent().getOrganization().getName().equals(userCampus)) // Lọc theo campus
+                .map(score -> score.getLogRunPostman()) // Lấy logRunPostman từ mỗi đối tượng Score
+                .collect(Collectors.toList());
+
+        // Tạo một Map để chứa tên hàm và số lần xuất hiện
+        Map<String, Integer> functionCountMap = new HashMap<>();
+
+        // Duyệt qua tất cả các logData và phân tích
+        for (String logData : logDataList) {
+            // Biểu thức chính quy để tìm các hàm sau dấu '→'
+            Pattern pattern = Pattern.compile("→\\s*([a-zA-Z0-9_]+)");
+            Matcher matcher = pattern.matcher(logData);
+
+            // Duyệt qua tất cả các khớp với mẫu regex
+            while (matcher.find()) {
+                // Lấy tên hàm từ nhóm tìm được
+                String functionName = matcher.group(1);
+
+                // Tăng số lần xuất hiện của hàm đó
+                functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
+            }
+        }
+
+        // Chuyển đổi Map thành List với cấu trúc dữ liệu cần thiết cho biểu đồ
+        List<Map<String, Object>> formattedData = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : functionCountMap.entrySet()) {
+            Map<String, Object> entryMap = new HashMap<>();
+            entryMap.put("function", entry.getKey());
+            entryMap.put("occurrences", entry.getValue());
+            formattedData.add(entryMap);
+        }
+
+        return formattedData;
+    }
+
+    @Override
+    public Map<String, Integer> analyzeScoresPartialPassLogRunPostman(Long examPaperId) {
+        // Fetch the `Exam_Paper` entity by ID
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new RuntimeException("Exam paper not found"));
+
+        // Get all associated Scores
+        Set<Score> scores = examPaper.getScores();
+        if (scores == null || scores.isEmpty()) {
+            throw new RuntimeException("No scores available for the given exam paper");
+        }
+
+        Map<String, Integer> partialPassCounts = new HashMap<>();
+
+        // Process each Score's logRunPostman
+        for (Score score : scores) {
+            String log = score.getLogRunPostman();
+            if (log == null || log.isEmpty()) {
+                continue; // Skip if no log is available
+            }
+
+            // Analyze the log for partially passed functions
+            Set<String> partiallyPassedFunctions = extractPartiallyPassedFunctions(log);
+
+            // Increment the count for each partially passed function
+            for (String function : partiallyPassedFunctions) {
+                partialPassCounts.put(function, partialPassCounts.getOrDefault(function, 0) + 1);
+            }
+        }
+
+        return partialPassCounts;
+    }
+
+    private Set<String> extractPartiallyPassedFunctions(String log) {
+        Set<String> partiallyPassedFunctions = new HashSet<>();
+
+        // Extract function names and their associated log entries
+        Pattern functionPattern = Pattern.compile("→\\s*(.+)$", Pattern.MULTILINE);
+        Matcher functionMatcher = functionPattern.matcher(log);
+
+        while (functionMatcher.find()) {
+            String functionName = functionMatcher.group(1).trim();
+
+            // Locate log entries related to the function
+            String functionLog = extractLogForFunction(log, functionName);
+
+            // Check if the function has at least one test case passed ("√")
+            if (hasPartialPass(functionLog)) {
+                partiallyPassedFunctions.add(functionName);
+            }
+        }
+
+        return partiallyPassedFunctions;
+    }
+
+    private boolean hasPartialPass(String functionLog) {
+        // Return true if at least one "√" exists
+        return countOccurrences(functionLog, "√") > 0;
+    }
+
+    private long countOccurrences(String text, String target) {
+        return Pattern.compile(Pattern.quote(target)).matcher(text).results().count();
+    }
+
+    @Override
+    public Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId) {
+        // Fetch the `Exam_Paper` entity by ID
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new RuntimeException("Exam paper not found"));
+
+        // Get all associated Scores
+        Set<Score> scores = examPaper.getScores();
+        if (scores == null || scores.isEmpty()) {
+            throw new RuntimeException("No scores available for the given exam paper");
+        }
+
+        Map<String, Integer> functionPassCounts = new HashMap<>();
+
+        // Process each Score's logRunPostman
+        for (Score score : scores) {
+            String log = score.getLogRunPostman();
+            if (log == null || log.isEmpty()) {
+                continue; // Skip if no log is available
+            }
+
+            // Analyze the log for fully passed functions
+            Set<String> fullyPassedFunctions = extractFullyPassedFunctions(log);
+
+            // Increment the count for each fully passed function
+            for (String function : fullyPassedFunctions) {
+                functionPassCounts.put(function, functionPassCounts.getOrDefault(function, 0) + 1);
+            }
+        }
+
+        return functionPassCounts;
+    }
+
+    private Set<String> extractFullyPassedFunctions(String log) {
+        Set<String> fullyPassedFunctions = new HashSet<>();
+
+        // Extract function names and their associated log entries
+        Pattern functionPattern = Pattern.compile("→\\s*(.+)$", Pattern.MULTILINE);
+        Matcher functionMatcher = functionPattern.matcher(log);
+
+        while (functionMatcher.find()) {
+            String functionName = functionMatcher.group(1).trim();
+
+            // Locate log entries related to the function
+            String functionLog = extractLogForFunction(log, functionName);
+
+            // Check if the function passes all test cases (contains only "√")
+            if (isFullyPassed(functionLog)) {
+                fullyPassedFunctions.add(functionName);
+            }
+        }
+
+        return fullyPassedFunctions;
+    }
+
+    private String extractLogForFunction(String log, String functionName) {
+        Pattern functionBlockPattern = Pattern.compile(
+                "→\\s*" + Pattern.quote(functionName) + "\\b(.+?)(?=→|$)", Pattern.DOTALL);
+        Matcher matcher = functionBlockPattern.matcher(log);
+
+        return matcher.find() ? matcher.group(1) : "";
+    }
+
+    private boolean isFullyPassed(String functionLog) {
+        // Ensure no numeric failures and all logs contain "√"
+        return !Pattern.compile("\\d+").matcher(functionLog).find() &&
+                countOccurrences(functionLog, "√") > 0;
+    }
+
+
+    @Override
+    public Map<String, Map<String, Integer>> analyzeScoresTestCasePassLogRunPostman(Long examPaperId) {
+        // Fetch the `Exam_Paper` entity by ID
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new RuntimeException("Exam paper not found"));
+    
+        // Get all associated Scores
+        Set<Score> scores = examPaper.getScores();
+        if (scores == null || scores.isEmpty()) {
+            throw new RuntimeException("No scores available for the given exam paper");
+        }
+    
+        Map<String, Map<String, Integer>> testCasePassCounts = new HashMap<>();
+    
+        // Process each Score's logRunPostman
+        for (Score score : scores) {
+            String log = score.getLogRunPostman();
+            if (log == null || log.isEmpty()) {
+                continue; // Skip if no log is available
+            }
+    
+            // Analyze the log for each function and its test cases
+            Map<String, Set<String>> functionTestCases = extractFunctionTestCases(log);
+    
+            // Update the count of students passing each test case in each function
+            for (Map.Entry<String, Set<String>> entry : functionTestCases.entrySet()) {
+                String functionName = entry.getKey();
+                Set<String> passedTestCases = entry.getValue();
+    
+                // Ensure the function entry exists in the result map
+                testCasePassCounts.putIfAbsent(functionName, new HashMap<>());
+    
+                // Update pass counts for each test case
+                for (String testCase : passedTestCases) {
+                    testCasePassCounts.get(functionName).put(testCase,
+                            testCasePassCounts.get(functionName).getOrDefault(testCase, 0) + 1);
+                }
+            }
+        }
+    
+        return testCasePassCounts;
+    }
+
+    private Map<String, Set<String>> extractFunctionTestCases(String log) {
+        Map<String, Set<String>> functionTestCases = new HashMap<>();
+    
+        // Extract function names and their associated log entries
+        Pattern functionPattern = Pattern.compile("→\\s*(.+)$", Pattern.MULTILINE);
+        Matcher functionMatcher = functionPattern.matcher(log);
+    
+        while (functionMatcher.find()) {
+            String functionName = functionMatcher.group(1).trim();
+    
+            // Locate log entries related to the function
+            String functionLog = extractLogForFunction(log, functionName);
+    
+            // Extract all passed test cases from the function's log
+            Set<String> passedTestCases = extractPassedTestCases(functionLog);
+            if (!passedTestCases.isEmpty()) {
+                functionTestCases.put(functionName, passedTestCases);
+            }
+        }
+    
+        return functionTestCases;
+    }
+    private Set<String> extractPassedTestCases(String functionLog) {
+        Set<String> passedTestCases = new HashSet<>();
+    
+        // Split the function log into individual test case entries
+        Pattern testCasePattern = Pattern.compile("(√|\\d+)(.*?)$");
+        Matcher testCaseMatcher = testCasePattern.matcher(functionLog);
+    
+        while (testCaseMatcher.find()) {
+            String result = testCaseMatcher.group(1);  // "√" or number
+            String testCase = testCaseMatcher.group(2).trim();  // The test case description
+    
+            if ("√".equals(result)) {
+                passedTestCases.add(testCase);  // Add passed test case to the set
+            }
+        }
+    
+        return passedTestCases;
+    }
+   
+    
+    
+    
+
+    
+
 
 }

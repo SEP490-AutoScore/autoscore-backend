@@ -30,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GradingRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateDTO;
@@ -112,7 +111,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         return firstElement != null
                 && firstElement.getPostmanForGradingId() == 0
-                && "Hidden".equals(firstElement.getPostmanFunctionName());
+                && "Root of tree".equals(firstElement.getPostmanFunctionName());
 
     }
 
@@ -143,8 +142,8 @@ public class PostmanForGradingService implements IPostmanForGradingService {
                     .orElseThrow(() -> new RuntimeException(
                             "Postman_For_Grading with ID not found: " + dto.getPostmanForGradingId()));
 
-            postman.setPostmanFunctionName(dto.getPostmanFunctionName());
-            postman.setScoreOfFunction(dto.getScoreOfFunction());
+            // postman.setPostmanFunctionName(dto.getPostmanFunctionName());
+            // postman.setScoreOfFunction(dto.getScoreOfFunction());
             postman.setPostmanForGradingParentId(dto.getPostmanForGradingParentId());
 
             if (dto.getPostmanForGradingParentId() == 0) {
@@ -218,67 +217,60 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     public String mergePostmanCollections(Long examPaperId) {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
-
+    
         try {
-
             List<Postman_For_Grading> postmanList = postmanForGradingRepository
                     .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
-
+    
             if (postmanList.isEmpty()) {
                 return "No Postman Collection files found for Exam Paper ID:" + examPaperId;
             }
-
+    
             JSONObject mergedCollection = new JSONObject();
             JSONArray mergedItems = new JSONArray();
+    
+            // Lấy thông tin từ Exam_Paper
+            Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElseThrow(
+                    () -> new RuntimeException("Exam Paper không tồn tại với ID: " + examPaperId));
 
-            Postman_For_Grading firstPostman = postmanList.get(0);
-            JSONObject firstFileCollection = new JSONObject(
-                    new String(firstPostman.getFileCollectionPostman(), StandardCharsets.UTF_8));
-
-            if (firstFileCollection.has("info")) {
-                mergedCollection.put("info", firstFileCollection.getJSONObject("info"));
-            } else {
-                return "The first JSON file does not contain 'info' information.";
-            }
-
-            if (firstFileCollection.has("item")) {
-                JSONArray firstItems = firstFileCollection.getJSONArray("item");
-                if (firstItems.length() > 0) {
-
-                    mergedItems.put(firstItems.getJSONObject(0));
-                }
-            } else {
-                return "The first JSON file does not contain the list 'item'.";
-            }
-
-            for (int index = 1; index < postmanList.size(); index++) {
-                Postman_For_Grading postman = postmanList.get(index);
+                    String examCode = (examPaper.getExam() != null) ? examPaper.getExam().getExamCode() : "Unknown";
+    
+            // Tạo trường "info"
+            JSONObject info = new JSONObject();
+            info.put("_postman_id", java.util.UUID.randomUUID().toString());
+            info.put("name", examCode + "-" + examPaper.getExamPaperCode() + "-postman-collection");
+            info.put("schema", "https://schema.getpostman.com/json/collection/v2.1.0/collection.json");
+            info.put("_exporter_id", "29781870");
+    
+            mergedCollection.put("info", info);
+    
+            // Hợp nhất tất cả các "item" từ các tệp Postman
+            for (Postman_For_Grading postman : postmanList) {
                 String fileContent = new String(postman.getFileCollectionPostman(), StandardCharsets.UTF_8);
                 JSONObject jsonObject = new JSONObject(fileContent);
-
+    
                 if (jsonObject.has("item")) {
                     JSONArray items = jsonObject.getJSONArray("item");
-                    if (items.length() > 0) {
-
-                        mergedItems.put(items.getJSONObject(0));
+                    for (int i = 0; i < items.length(); i++) {
+                        mergedItems.put(items.getJSONObject(i));
                     }
                 }
             }
-
+    
+            // Gán danh sách "item" hợp nhất vào mergedCollection
             mergedCollection.put("item", mergedItems);
-
+    
+            // Lưu kết quả vào Exam_Paper
             byte[] mergedFileContent = mergedCollection.toString().getBytes(StandardCharsets.UTF_8);
-
-            Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElseThrow(
-                    () -> new RuntimeException("Exam Paper không tồn tại với ID: " + examPaperId));
             examPaper.setFileCollectionPostman(mergedFileContent);
             examPaper.setIsComfirmFile(false);
             examPaperRepository.save(examPaper);
-
+    
+            // Ghi log
             saveLog(examPaper.getExamPaperId(),
-                    "Account [" + authenticatedUserId + "] [Generate gherkin successfully] at [" + time + "]");
+                    "Account [" + authenticatedUserId + "] [Generate postman collection successfully] at [" + time + "]");
             return "Successfully merged Postman Collections for examPaperId " + examPaperId;
-
+    
         } catch (org.json.JSONException e) {
             e.printStackTrace();
             return "An error occurred when merging the Postman Collection file: " + e.getMessage();
@@ -287,6 +279,81 @@ public class PostmanForGradingService implements IPostmanForGradingService {
             return "An unknown error occurred: " + e.getMessage();
         }
     }
+
+    
+    // @Override
+    // public String mergePostmanCollections(Long examPaperId) {
+    //     Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    //     LocalDateTime time = Util.getCurrentDateTime();
+
+    //     try {
+
+    //         List<Postman_For_Grading> postmanList = postmanForGradingRepository
+    //                 .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
+
+    //         if (postmanList.isEmpty()) {
+    //             return "No Postman Collection files found for Exam Paper ID:" + examPaperId;
+    //         }
+
+    //         JSONObject mergedCollection = new JSONObject();
+    //         JSONArray mergedItems = new JSONArray();
+
+    //         Postman_For_Grading firstPostman = postmanList.get(0);
+    //         JSONObject firstFileCollection = new JSONObject(
+    //                 new String(firstPostman.getFileCollectionPostman(), StandardCharsets.UTF_8));
+
+    //         if (firstFileCollection.has("info")) {
+    //             mergedCollection.put("info", firstFileCollection.getJSONObject("info"));
+    //         } else {
+    //             return "The first JSON file does not contain 'info' information.";
+    //         }
+
+    //         if (firstFileCollection.has("item")) {
+    //             JSONArray firstItems = firstFileCollection.getJSONArray("item");
+    //             if (firstItems.length() > 0) {
+
+    //                 mergedItems.put(firstItems.getJSONObject(0));
+    //             }
+    //         } else {
+    //             return "The first JSON file does not contain the list 'item'.";
+    //         }
+
+    //         for (int index = 1; index < postmanList.size(); index++) {
+    //             Postman_For_Grading postman = postmanList.get(index);
+    //             String fileContent = new String(postman.getFileCollectionPostman(), StandardCharsets.UTF_8);
+    //             JSONObject jsonObject = new JSONObject(fileContent);
+
+    //             if (jsonObject.has("item")) {
+    //                 JSONArray items = jsonObject.getJSONArray("item");
+    //                 if (items.length() > 0) {
+
+    //                     mergedItems.put(items.getJSONObject(0));
+    //                 }
+    //             }
+    //         }
+
+    //         mergedCollection.put("item", mergedItems);
+
+    //         byte[] mergedFileContent = mergedCollection.toString().getBytes(StandardCharsets.UTF_8);
+
+    //         Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElseThrow(
+    //                 () -> new RuntimeException("Exam Paper không tồn tại với ID: " + examPaperId));
+    //         examPaper.setFileCollectionPostman(mergedFileContent);
+    //         examPaper.setIsComfirmFile(false);
+    //         examPaperRepository.save(examPaper);
+
+    //         saveLog(examPaper.getExamPaperId(),
+    //                 "Account [" + authenticatedUserId + "] [Generate gherkin successfully] at [" + time + "]");
+    //         return "Successfully merged Postman Collections for examPaperId " + examPaperId;
+
+    //     } catch (org.json.JSONException e) {
+    //         e.printStackTrace();
+    //         return "An error occurred when merging the Postman Collection file: " + e.getMessage();
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         return "An unknown error occurred: " + e.getMessage();
+    //     }
+    // }
 
     @Override
     public ResponseEntity<?> generatePostmanCollection(Long gherkinScenarioId) {
@@ -730,7 +797,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         PostmanForGradingDTO rootElement = new PostmanForGradingDTO();
         rootElement.setPostmanForGradingId(0L);
-        rootElement.setPostmanFunctionName("Hidden");
+        rootElement.setPostmanFunctionName("Root of tree");
         rootElement.setScoreOfFunction(0F);
         rootElement.setTotalPmTest(null);
         rootElement.setOrderPriority(0L);
@@ -796,14 +863,14 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     }
 
     @Override
-    public String deletePostmanForGrading(List<Long> postmanForGradingIds, Long examQuestionId) {
+    public String deletePostmanForGrading(List<Long> postmanForGradingIds, Long examPaperId) {
 
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
 
-        Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
-                .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
-        Exam_Paper examPaper2 = examQuestion.getExamPaper();
+        Exam_Paper examPaper2 = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new NoSuchElementException("Exam Paper not exists"));
+      
 
         StringBuilder response = new StringBuilder();
 

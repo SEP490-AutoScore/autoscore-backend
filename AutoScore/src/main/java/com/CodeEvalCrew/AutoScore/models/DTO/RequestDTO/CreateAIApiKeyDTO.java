@@ -21,5 +21,5 @@ public class CreateAIApiKeyDTO {
     @NotNull
     private String aiApiKey;
 
-    private boolean shared;
+    private boolean shared = false;
 }

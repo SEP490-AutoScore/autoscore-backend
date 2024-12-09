@@ -46,23 +46,6 @@ public class ExamDatabaseController {
         }
     }
 
-    // @PostMapping(value = "/import", consumes = { "multipart/form-data" })
-    // @Operation(requestBody =
-    // @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
-    // @Content(mediaType = "multipart/form-data")
-    // }))
-    // public ResponseEntity<String> importSqlFile(@RequestParam("file.sql")
-    // MultipartFile sqlFile,
-    // @RequestParam("fileimage") MultipartFile imageFile,
-    // @RequestParam("examPaperId") Long examPaperId) {
-    // try {
-    // String result = examDatabaseService.importSqlFile(sqlFile, imageFile,
-    // examPaperId);
-    // return ResponseEntity.ok(result);
-    // } catch (Exception e) {
-    // return ResponseEntity.status(500).body("Error: " + e.getMessage());
-    // }
-    // }
 
     @PreAuthorize("hasAnyAuthority('UPDATE_EXAM_DATABASE', 'ALL_ACCESS')")
     @PutMapping(value = "/update", consumes = { "multipart/form-data" })
@@ -81,14 +64,6 @@ public class ExamDatabaseController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
-
-    // @GetMapping("/getbyExamPaperId")
-    // public ResponseEntity<ExamDatabaseDTO>
-    // getExamDatabaseByExamPaperId(@RequestParam Long examPaperId) {
-    // ExamDatabaseDTO result =
-    // examDatabaseService.getExamDatabaseByExamPaperId(examPaperId);
-    // return ResponseEntity.ok(result);
-    // }
 
     @PreAuthorize("hasAnyAuthority('VIEW_EXAM_DATABASE', 'ALL_ACCESS')")
     @GetMapping("/getbyExamPaperId")

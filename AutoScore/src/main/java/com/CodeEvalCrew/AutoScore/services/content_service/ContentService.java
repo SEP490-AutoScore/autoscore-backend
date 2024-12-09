@@ -11,16 +11,16 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Content;
 import com.CodeEvalCrew.AutoScore.repositories.content_repository.ContentRepository;
 
 @Service
-public class ContentService {
+public class ContentService implements IContentService  {
 
     @Autowired
     private ContentRepository contentRepository;
 
+    @Override
     public List<ContentDTO> getAllContent() {
-        // Lấy tất cả Content sắp xếp theo purpose và orderPriority
+     
         List<Content> contentList = contentRepository.findAllByOrderByPurposeAscOrderPriorityAsc();
 
-        // Chuyển đổi từ Content sang ContentDTO
         return contentList.stream()
                 .map(content -> new ContentDTO(
                         content.getContentId(),
@@ -29,5 +29,16 @@ public class ContentService {
                         content.getPurpose()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+      public void updateQuestionAskAiContent(Long contentId, String newQuestionAskAiContent) {
+
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new IllegalArgumentException("Content not found with ID: " + contentId));
+
+        content.setQuestionAskAiContent(newQuestionAskAiContent);
+
+        contentRepository.save(content);
     }
 }

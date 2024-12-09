@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.CreateAIApiKeyDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIApiKeyDTO;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.AIName_Enum;
 
 
 public interface IAIApiKeyService {
@@ -11,11 +12,15 @@ public interface IAIApiKeyService {
 
     void updateOrCreateAccountSelectedKey(Long aiApiKeyId);
 
-    AIApiKeyDTO createAIApiKey(CreateAIApiKeyDTO dto);
+     void createAIApiKey(CreateAIApiKeyDTO dto);
 
-    // String  updateAiApiKey(Long aiApiKeyId, String aiApiKey);
-
-    void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey);
+    void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey, boolean shared);
     
-     void deleteAiApiKey(Long aiApiKeyId);
+     boolean deleteAIApiKey(Long aiApiKeyId);
+
+      AIApiKeyDTO getAIApiKeyById(Long aiApiKeyId);
+
+       List<AIName_Enum> getAllAINameEnums();
+     
+ 
 }

@@ -630,14 +630,14 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         }
 
         @Override
-        public String deleteGherkinScenario(List<Long> gherkinScenarioIds, Long examquestionId) {
+        public String deleteGherkinScenario(List<Long> gherkinScenarioIds, Long examPaperId) {
 
                 Long authenticatedUserId = Util.getAuthenticatedAccountId();
                 LocalDateTime time = Util.getCurrentDateTime();
 
-                Exam_Question examQuestion = examQuestionRepository.findById(examquestionId)
-                                .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
-                Exam_Paper examPaper = examQuestion.getExamPaper();
+                Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                                .orElseThrow(() -> new NoSuchElementException("Exam Paper not exists"));
+             
 
                 for (Long gherkinScenarioId : gherkinScenarioIds) {
                         Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository
