@@ -78,4 +78,6 @@ public class Account {
     @ToString.Exclude
     private Account_Selected_Key accountSelectedKey;
 
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private Set<Accout_Notification> notification_Accounts;
 }

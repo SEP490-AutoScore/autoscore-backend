@@ -470,17 +470,21 @@ Scenario: [Brief and clear description of the scenario]
 INSERT INTO `autoscore`.`important`
 (`subject_id`,
 `important_code`,
-`important_name`)
+`important_name`,
+`important_scrip`)
 VALUES
 (1,
 'CNS',
-'Check connection String of the appsetting'),
+'Check connection String of the appsetting',
+'The database connection string must get from the appsettings.json file. The conection code must be in program.cs. In the case your code connects direct to the database from ASP.NET Core Web API or hard coded the connection string, you will get 0 point.'),
 (1,
 'SLN',
-'Check solution name'),
+'Check solution name',
+'Create Solution/Project in Visual Studio named {ExamCode}_{ExamPaperCode}_{StudentCode} _BE'),
 (1,
 'SST',
-'Check source structure');
+'Check source structure',
+'You are not allowed to connect directly to a database from ASP.NET Core Web API, every database connection must be used with Repository and Data Access Objects');
 
 INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '1', '1');
 INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '2', '2');
