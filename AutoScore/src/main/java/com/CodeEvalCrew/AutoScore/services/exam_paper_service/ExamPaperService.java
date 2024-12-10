@@ -208,7 +208,7 @@ public class ExamPaperService implements IExamPaperService {
                 Important important = checkEntityExistence(importantRepository.findById(importantId), "Important",
                         importantId);
 
-                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, Exam_Status_Enum.DRAFT,
+                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, Exam_Status_Enum.ACTIVE,
                         important, examPaper);
 
                 importants.add(importantExamPaper);
@@ -250,9 +250,26 @@ public class ExamPaperService implements IExamPaperService {
             // check Exam
             Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
 
+            importantExamPaperRepository.deleteByExamPaper_ExamPaperId(id);
+            Set<Important_Exam_Paper> importants = new HashSet<>();
+
+            Set<ImportantView> set = new HashSet<>();
+            for (Long importantId : request.getImportantIdList()) {
+                Important important = checkEntityExistence(importantRepository.findById(importantId), "Important",
+                        importantId);
+
+                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, Exam_Status_Enum.ACTIVE,
+                        important, examPaper);
+
+                importants.add(importantExamPaper);
+                ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
+                set.add(view);
+            }
+
             // update side in4
             examPaper.setExamPaperCode(request.getExamPaperCode());
             examPaper.setExam(exam);
+            examPaper.setImportants(importants);
             examPaper.setInstruction(request.getInstruction());
             examPaper.setDuration(request.getDuration());
             examPaper.setStatus(Exam_Status_Enum.DRAFT);
@@ -261,7 +278,10 @@ public class ExamPaperService implements IExamPaperService {
 
             examPaperRepository.save(examPaper);
 
-            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            examPaperView.setImportants(set);
+
+            return examPaperView;
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
