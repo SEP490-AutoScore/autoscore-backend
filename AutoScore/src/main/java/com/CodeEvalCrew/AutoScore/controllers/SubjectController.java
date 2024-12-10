@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,9 +22,11 @@ import com.CodeEvalCrew.AutoScore.services.subject_service.ISubjectService;
 @RestController
 @RequestMapping("api/subject")
 public class SubjectController {
+
     @Autowired
     private ISubjectService subjectService;
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<?> getSubject() {
         List<SubjectView> result;
@@ -37,6 +40,7 @@ public class SubjectController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createNewSubject(@RequestBody CreateSubjectRequest request) {
         SubjectView result;
@@ -50,6 +54,7 @@ public class SubjectController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("update")
     public ResponseEntity<?> addSubjectIntoOrganiztion(@RequestParam Long organizationId, @RequestParam Long subjectId) {
         SubjectView result;
@@ -61,5 +66,5 @@ public class SubjectController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }   
+    }
 }

@@ -23,7 +23,7 @@ public class RoleController {
     @Autowired
     private IRoleService roleService;
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @GetMapping
     public ResponseEntity<List<RoleResponseDTO>> getAllRoles() {
         try {
@@ -37,7 +37,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @GetMapping("/{roleId}")
     public ResponseEntity<RoleResponseDTO> getRoleById(@PathVariable Long roleId) {
         try {
@@ -51,7 +51,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @PostMapping("/getbyname/{roleName}")
     public ResponseEntity<RoleResponseDTO> getRoleByName(@PathVariable String roleName) {
         try {
@@ -65,7 +65,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('CREATE_ROLE')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLE', 'ALL_ACCESS')")
     @PostMapping("/create")
     public ResponseEntity<?> createRole(@RequestBody RoleRequestDTO roleRequestDTO) {
         try {
@@ -84,7 +84,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('UPDATE_ROLE')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_ROLE', 'ALL_ACCESS')")
     @PostMapping("/update")
     public ResponseEntity<?> updateRole(@RequestBody RoleRequestDTO roleRequestDTO) {
         try {
@@ -103,7 +103,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('DELETE_ROLE')")
+    @PreAuthorize("hasAnyAuthority('DELETE_ROLE', 'ALL_ACCESS')")
     @PostMapping("/delete/{roleId}")
     public ResponseEntity<?> deleteRole(@PathVariable Long roleId) {
         try {

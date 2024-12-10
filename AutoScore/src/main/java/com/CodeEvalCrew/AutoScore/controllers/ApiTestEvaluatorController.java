@@ -3,6 +3,7 @@ package com.CodeEvalCrew.AutoScore.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ public class ApiTestEvaluatorController {
     @Autowired
     private IApiTestEvaluator apiTestEvaluator;
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping
     @Operation(summary = "Evaluate API test cases")
     public JSONObject evaluateTestCases(@RequestParam("studentId") Long studentId,

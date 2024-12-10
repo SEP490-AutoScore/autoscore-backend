@@ -45,8 +45,8 @@ public class SemesterService implements ISemesterService{
         SemesterView result;
         try {
             Semester semester = new Semester();
-            semester.setSemesterCode(request.getSubjectCode());
-            semester.setSemesterName(request.getSubjectName());
+            semester.setSemesterCode(request.getSemesterCode());
+            semester.setSemesterName(request.getSemesterName());
             semester.setStatus(true);
 
             semesterRepository.save(semester);

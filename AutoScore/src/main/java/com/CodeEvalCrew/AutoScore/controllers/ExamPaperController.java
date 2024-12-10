@@ -38,7 +38,7 @@ public class ExamPaperController {
         this.examPaperService = examPaperService;
     }
 
-    
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         ExamPaperView result;
@@ -54,6 +54,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createNewExamPaper(@RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;
@@ -69,6 +70,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("/new")
     public ResponseEntity<?> createNewExamPaperNotUsed(@RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;
@@ -84,6 +86,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PutMapping("{id}")
     public ResponseEntity<?> updateExamPaper(@PathVariable Long id, @RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;
@@ -99,6 +102,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("list")
     public ResponseEntity<?> getList(@RequestBody ExamPaperViewRequest request) {
         List<ExamPaperView> result;
@@ -116,6 +120,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteExamPaper(@PathVariable Long id) {
         ExamPaperView result;
@@ -131,7 +136,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('IMPORT_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('IMPORT_POSTMAN', 'ALL_ACCESS')")
     @PostMapping("/import-postman-collections")
     public ResponseEntity<?> importPostmanCollections(
             @RequestParam("examPaperId") Long examPaperId,
@@ -144,28 +149,7 @@ public class ExamPaperController {
         }
     }
 
-    // @GetMapping("/{examPaperId}/questions")
-    // public ResponseEntity<?> getExamQuestionIds(@PathVariable Long examPaperId) {
-    //     try {
-    //         List<Long> questionIds = examPaperService.getExamQuestionIdsByExamPaperId(examPaperId);
-    //         return new ResponseEntity<>(questionIds, HttpStatus.OK);
-    //     } catch (NotFoundException ex) {
-    //         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    //     } catch (Exception e) {
-    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    // }
-
-    // @PreAuthorize("hasAnyRole('ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('IMPORT_POSTMAN')")
-    // @GetMapping("/{examPaperId}/gherkin-scenarios")
-    // public ResponseEntity<List<GherkinScenarioInfoDTO>> getGherkinScenariosByExamPaperId(
-    //         @PathVariable Long examPaperId) throws NotFoundException {
-    //     List<GherkinScenarioInfoDTO> gherkinScenarioInfoList = examPaperService
-    //             .getGherkinScenariosByExamPaperId(examPaperId);
-    //     return new ResponseEntity<>(gherkinScenarioInfoList, HttpStatus.OK);
-    // }
-
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('EXPORT_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('EXPORT_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/export-postman/{examPaperId}")
     public ResponseEntity<byte[]> exportPostmanCollection(@PathVariable Long examPaperId) {
         try {
@@ -183,6 +167,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllExamPaper() {
         List<ExamPaperView> result;
@@ -198,7 +183,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('VIEW_INFO_POSTMAN')")
+    @PreAuthorize("hasAnyAuthority('VIEW_GHERKIN_POSTMAN', 'ALL_ACCESS')")
     @GetMapping("/infoFilePostman")
     public ResponseEntity<?> getExamPaper(@RequestParam Long examPaperId) {
         try {
@@ -211,7 +196,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HEAD_OF_DEPARTMENT', 'ROLE_LECTURER') or hasAuthority('CONFIRM_BEFORE_GRADING')")
+    @PreAuthorize("hasAnyAuthority('CONFIRM_BEFORE_GRADING', 'ALL_ACCESS')")
     @PutMapping("/confirmFilePostman/{examPaperId}")
     public ResponseEntity<?> confirmFilePostman(@PathVariable Long examPaperId) {
         try {
@@ -219,11 +204,12 @@ public class ExamPaperController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-         } catch (Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PutMapping("/exam-paper")
     public ResponseEntity<?> updateExamPaperToAnExam(@RequestBody ExamPaperToExamRequest examPaperId) {
         try {
@@ -231,9 +217,9 @@ public class ExamPaperController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-         } catch (Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
 }

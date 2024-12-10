@@ -16,6 +16,6 @@ import lombok.ToString;
 public class PostmanForGradingUpdateDTO {
     private Long postmanForGradingId;
     private String postmanFunctionName;
-    private Float scoreOfFunction;
+    // private Float scoreOfFunction;
     private Long postmanForGradingParentId;
 }

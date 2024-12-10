@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -40,13 +41,17 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestio
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamWithPapersDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Semester;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
+import com.CodeEvalCrew.AutoScore.repositories.account_organization_repository.AccountOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
@@ -80,6 +85,9 @@ public class ExamService implements IExamService {
     private final IExamDatabaseRepository examDatabaseRepository;
     @Autowired
     private final IExamQuestionRepository examQuestionRepository;
+    @Autowired
+    private final AccountOrganizationRepository accountOrganizationRepository;
+    
 
     public ExamService(IExamRepository examRepository,
             ISubjectRepository subjectRepository,
@@ -88,7 +96,8 @@ public class ExamService implements IExamService {
             IExamQuestionRepository examQuestionRepository,
             IExamDatabaseRepository examDatabaseRepository,
             SemesterRepository semesterRepository,
-            IEmployeeRepository employeeRepository) {
+            IEmployeeRepository employeeRepository,
+            AccountOrganizationRepository accountOrganizationRepository) {
         this.examRepository = examRepository;
         this.subjectRepository = subjectRepository;
         this.accountRepository = accountRepository;
@@ -96,6 +105,7 @@ public class ExamService implements IExamService {
         this.examDatabaseRepository = examDatabaseRepository;
         this.examQuestionRepository = examQuestionRepository;
         this.semesterRepository = semesterRepository;
+        this.accountOrganizationRepository= accountOrganizationRepository;
     }
 
     @Override
@@ -485,8 +495,134 @@ public class ExamService implements IExamService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    private String checkCampusForAccount(Long accountId) {
+       
+        List<Account_Organization> accountOrganizations = accountOrganizationRepository.findByAccount_AccountId(accountId);
+        
+        for (Account_Organization accountOrg : accountOrganizations) {
+            Organization organization = accountOrg.getOrganization(); 
+            if (organization.getType() == Organization_Enum.CAMPUS) {
+                return organization.getName(); 
+            }
+        }
+        
+        return null; 
+    }
+    
+@Override
+public long countExamsByTypeAndCampus() {
+
+    Long authenticatedUserId = Util.getAuthenticatedAccountId();
+
+    String userCampus = checkCampusForAccount(authenticatedUserId);
+
+    if (userCampus == null) {
+        throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+    }
+
+    List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+    
+    long count = exams.stream()
+    .filter(exam -> checkCampusForAccount(exam.getCreatedBy()).equals(userCampus)) 
+    .count();
+
+return count;
+}
+
+@Override
+public long countExamsByTypeAndGradingAt() {
+    Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    
+    String userCampus = checkCampusForAccount(authenticatedUserId);
+    
+    if (userCampus == null) {
+        throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+    }
+
+    List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+    
+    long count = exams.stream()
+            .filter(exam -> exam.getGradingAt().isAfter(LocalDateTime.now()) 
+                    && checkCampusForAccount(exam.getCreatedBy()).equals(userCampus)) 
+            .count();
+
+    return count;
+}
+
+@Override
+public long countExamsByGradingAtPassed() {
+    Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    
+    String userCampus = checkCampusForAccount(authenticatedUserId);
+    
+    if (userCampus == null) {
+        throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+    }
+
+    List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+    
+    long count = exams.stream()
+            .filter(exam -> exam.getGradingAt().isBefore(LocalDateTime.now()) 
+                    && checkCampusForAccount(exam.getCreatedBy()).equals(userCampus)) 
+            .count();
+
+    return count;
+}
+
+@Override
+public Map<String, Long> countExamsByGradingAtPassedAndSemester(int year) {
+    Long authenticatedUserId = Util.getAuthenticatedAccountId();
+    
+    // Kiểm tra campus của authenticatedUserId
+    String userCampus = checkCampusForAccount(authenticatedUserId);
+    
+    if (userCampus == null) {
+        throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+    }
+
+    // Lấy tất cả các Exam có type là EXAM
+    List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+
+    // Tạo map để lưu số lượng exam cho từng kỳ
+    Map<String, Long> examCounts = new HashMap<>();
+    examCounts.put("Spring", 0L);
+    examCounts.put("Summer", 0L);
+    examCounts.put("Fall", 0L);
+
+    // Lọc các Exam có gradingAt đã vượt qua thời gian hiện tại
+    for (Exam exam : exams) {
+        if (exam.getGradingAt().isBefore(LocalDateTime.now()) // gradingAt đã vượt qua thời gian hiện tại
+                && checkCampusForAccount(exam.getCreatedBy()).equals(userCampus) // Kiểm tra campus của createdBy
+                && exam.getGradingAt().getYear() == year) { // Kiểm tra năm của gradingAt
+
+            // Lọc theo kỳ (Spring: tháng 1-4, Summer: tháng 5-8, Fall: tháng 9-12)
+            int month = exam.getGradingAt().getMonthValue();
+            if (month >= 1 && month <= 4) {
+                examCounts.put("Spring", examCounts.get("Spring") + 1);
+            } else if (month >= 5 && month <= 8) {
+                examCounts.put("Summer", examCounts.get("Summer") + 1);
+            } else if (month >= 9 && month <= 12) {
+                examCounts.put("Fall", examCounts.get("Fall") + 1);
+            }
+        }
+    }
+
+    return examCounts;
+}
+
+
+
+
+
+ 
+    
+    
+}
+
+    
     
     
     
 
-}
+

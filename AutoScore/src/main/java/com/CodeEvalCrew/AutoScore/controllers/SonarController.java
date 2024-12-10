@@ -3,6 +3,7 @@ package com.CodeEvalCrew.AutoScore.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,11 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.SonarQube.SonarQubeRunnerRequest;
 import com.CodeEvalCrew.AutoScore.utils.ThirdPartyUtil;
 
-
-
 @RestController
 @RequestMapping("api/sonar/")
 public class SonarController {
+
     @Autowired
     private final ThirdPartyUtil util;
 
@@ -24,6 +24,7 @@ public class SonarController {
         this.util = util;
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createSonarProject(@RequestBody SonarQubeRunnerRequest request) {
         int result;
@@ -31,10 +32,11 @@ public class SonarController {
             result = util.sonarQubeRunner(request);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
-        }       
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<?> getResultSonarProject() {
         String result;
@@ -46,10 +48,7 @@ public class SonarController {
             result = util.sonarQubeResultFeatch(request);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
-        }   
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
-    
-    
-
 }

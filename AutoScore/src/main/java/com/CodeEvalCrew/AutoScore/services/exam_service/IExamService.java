@@ -14,6 +14,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Exam.ExamViewRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamViewResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamWithPapersDTO;
 
+
 public interface IExamService{
     ExamViewResponseDTO getExamById(long id)throws Exception,NotFoundException;
 
@@ -30,4 +31,12 @@ public interface IExamService{
     public void mergeDataToWord(String templatePath, String outputPath, Map<String, String> data) throws FileNotFoundException, IOException, InvalidFormatException, Exception;
 
     List<ExamWithPapersDTO> getExamWithUsedPapers();
+
+    long countExamsByTypeAndCampus();
+
+ long countExamsByTypeAndGradingAt();
+
+  long countExamsByGradingAtPassed();
+
+  Map<String, Long> countExamsByGradingAtPassedAndSemester(int year);
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization_Subject;
 import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
-import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationRepoistory;
+import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.SubjectOrgenizationRepository;
 
@@ -28,7 +27,7 @@ public class SubjectService implements ISubjectService{
     @Autowired
     private SubjectOrgenizationRepository subjectOrganizationRepository;
     @Autowired
-    private IOrganizationRepoistory organizationRepository;
+    private IOrganizationRepository organizationRepository;
 
     @Override
     public List<SubjectView> getAllSubject() {
@@ -61,7 +60,7 @@ public class SubjectService implements ISubjectService{
                 subject.setSubjectName(request.getSubjectName());
                 subject.setSubjectCode(request.getSubjectCode());
 
-                
+                subjectRepository.save(subject);
                 
                 result = SubjectMapper.INSTANCE.subjectToView(subject);
 

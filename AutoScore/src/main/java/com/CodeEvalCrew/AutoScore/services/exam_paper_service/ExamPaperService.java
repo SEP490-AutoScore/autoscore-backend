@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,7 +33,6 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanRes
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ImportantView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.NewmanResult;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanFunctionInfo;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
@@ -211,7 +208,7 @@ public class ExamPaperService implements IExamPaperService {
                 Important important = checkEntityExistence(importantRepository.findById(importantId), "Important",
                         importantId);
 
-                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, Exam_Status_Enum.DRAFT,
+                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, Exam_Status_Enum.ACTIVE,
                         important, examPaper);
 
                 importants.add(importantExamPaper);
@@ -253,9 +250,26 @@ public class ExamPaperService implements IExamPaperService {
             // check Exam
             Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
 
+            importantExamPaperRepository.deleteByExamPaper_ExamPaperId(id);
+            Set<Important_Exam_Paper> importants = new HashSet<>();
+
+            Set<ImportantView> set = new HashSet<>();
+            for (Long importantId : request.getImportantIdList()) {
+                Important important = checkEntityExistence(importantRepository.findById(importantId), "Important",
+                        importantId);
+
+                Important_Exam_Paper importantExamPaper = new Important_Exam_Paper(null, Exam_Status_Enum.ACTIVE,
+                        important, examPaper);
+
+                importants.add(importantExamPaper);
+                ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
+                set.add(view);
+            }
+
             // update side in4
             examPaper.setExamPaperCode(request.getExamPaperCode());
             examPaper.setExam(exam);
+            examPaper.setImportants(importants);
             examPaper.setInstruction(request.getInstruction());
             examPaper.setDuration(request.getDuration());
             examPaper.setStatus(Exam_Status_Enum.DRAFT);
@@ -264,7 +278,10 @@ public class ExamPaperService implements IExamPaperService {
 
             examPaperRepository.save(examPaper);
 
-            return ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            examPaperView.setImportants(set);
+
+            return examPaperView;
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -313,6 +330,40 @@ public class ExamPaperService implements IExamPaperService {
         }
     }
 
+    public void updatePostmanForGradingStatus(Long examPaperId) {
+        // Fetch all Postman_For_Grading entities for the given examPaperId
+        List<Postman_For_Grading> postmanForGradingList = postmanForGradingRepository.findByExamPaper_ExamPaperId(examPaperId);
+
+        // Iterate through the list and update the fields
+        for (Postman_For_Grading postman : postmanForGradingList) {
+            postman.setStatus(false);            // Set status to false
+            postman.setExamQuestion(null);       // Set examQuestionId to null
+            if (postman.getGherkinScenario() != null) {
+               postman.setGherkinScenario(null);
+            }
+        }
+
+        // Save the updated entities back to the database
+        postmanForGradingRepository.saveAll(postmanForGradingList);
+    }
+
+    private void validateUniqueItemNames(String fileContent) throws Exception {
+        JSONObject json = new JSONObject(fileContent);
+        JSONArray items = json.getJSONArray("item");
+    
+        Set<String> existingNames = new HashSet<>();
+        for (int i = 0; i < items.length(); i++) {
+            JSONObject item = items.getJSONObject(i);
+            String name = item.getString("name");
+    
+            if (!existingNames.add(name)) {
+                throw new Exception("Duplicate item name detected: " + name);
+            }
+        }
+    }
+    
+
+
     @Override
     public void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception {
 
@@ -323,14 +374,23 @@ public class ExamPaperService implements IExamPaperService {
             Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                     .orElseThrow(() -> new NotFoundException("Exam Paper not found for ID: " + examPaperId));
 
-            List<PostmanFunctionInfo> functionInfoList = getPostmanFunctionInfoByExamPaperId(examPaperId);
+            // List<PostmanFunctionInfo> functionInfoList = getPostmanFunctionInfoByExamPaperId(examPaperId);
 
-            List<String> allNewmanFunctionNames = new ArrayList<>();
+            // List<String> allNewmanFunctionNames = new ArrayList<>();
 
+          
             for (MultipartFile file : files) {
+
+                
+
                 byte[] fileData = file.getBytes();
 
                 String fileContent = new String(fileData, StandardCharsets.UTF_8);
+
+                validateUniqueItemNames(fileContent);
+
+                updatePostmanForGradingStatus(examPaperId);
+
                 java.io.File tempFile = convertBytesToFile(fileData, file.getOriginalFilename());
 
                 if (!isValidJson(tempFile)) {
@@ -339,21 +399,24 @@ public class ExamPaperService implements IExamPaperService {
 
                 String newmanOutput = runNewmanTest(tempFile);
 
-                NewmanResult newmanResult = handleNewmanResult(newmanOutput, functionInfoList, examPaperId);
+                NewmanResult newmanResult = handleNewmanResult(newmanOutput, examPaperId);
 
-                allNewmanFunctionNames.addAll(newmanResult.getFunctionNames());
+                // allNewmanFunctionNames.addAll(newmanResult.getFunctionNames());
+
+                
 
                 updateFileCollectionPostmanForGrading(fileContent.getBytes(StandardCharsets.UTF_8), examPaperId);
 
-                List<String> functionNamesInDb = postmanForGradingRepository.findFunctionNamesByStatusTrue();
-                List<String> functionNamesNotInNewman = functionNamesInDb.stream()
-                        .filter(name -> !allNewmanFunctionNames.contains(name))
-                        .collect(Collectors.toList());
+                // List<String> functionNamesInDb = postmanForGradingRepository.findFunctionNamesByStatusTrue();
+                // List<String> functionNamesNotInNewman = functionNamesInDb.stream()
+                //         .filter(name -> !allNewmanFunctionNames.contains(name))
+                //         .collect(Collectors.toList());
 
-                setStatusFalseForFunctionsNotInNewman(functionNamesNotInNewman);
+                // setStatusFalseForFunctionsNotInNewman(functionNamesNotInNewman);
 
                 updateExamQuestionInPostman(fileContent.getBytes(StandardCharsets.UTF_8), examPaperId);
 
+                examPaper.setFileCollectionPostman(null);
                 examPaper.setFileCollectionPostman(fileContent.getBytes(StandardCharsets.UTF_8));
                 examPaper.setIsComfirmFile(false);
                 examPaper.setLogRunPostman(null);
@@ -373,42 +436,91 @@ public class ExamPaperService implements IExamPaperService {
         }
     }
 
+    // public void updateExamQuestionInPostman(byte[] fileContent, Long examPaperId) throws Exception {
+    //     try {
+
+    //         String jsonContent = new String(fileContent, StandardCharsets.UTF_8);
+    //         JSONObject collectionJson = new JSONObject(jsonContent);
+
+    //         JSONArray items = collectionJson.getJSONArray("item");
+
+    //         List<Postman_For_Grading> postmanForGradingList = postmanForGradingRepository
+    //                 .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
+
+    //         List<Exam_Question> examQuestions = examQuestionRepository.findByExamPaperId(examPaperId);
+
+    //         for (Postman_For_Grading postmanFunction : postmanForGradingList) {
+    //             String functionName = postmanFunction.getPostmanFunctionName();
+
+    //             for (int i = 0; i < items.length(); i++) {
+    //                 JSONObject item = items.getJSONObject(i);
+    //                 String itemName = item.getString("name");
+
+    //                 if (itemName.equals(functionName)) {
+
+    //                     JSONObject request = item.getJSONObject("request");
+    //                     String httpMethod = request.getString("method").toUpperCase();
+    //                     String rawUrl = request.getJSONObject("url").getString("raw");
+
+    //                     String pathFromRawUrl = extractPathFromRawUrl(rawUrl);
+
+    //                     Exam_Question matchingQuestion = examQuestions.stream()
+    //                             .filter(question -> question.getHttpMethod().equals(httpMethod)
+    //                                     && isPathMatching(question.getEndPoint(), pathFromRawUrl))
+    //                             .findFirst()
+    //                             .orElse(null);
+
+    //                     if (matchingQuestion != null) {
+
+    //                         postmanFunction.setExamQuestion(matchingQuestion);
+    //                         postmanForGradingRepository.save(postmanFunction);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     } catch (Exception e) {
+    //         throw new Exception("Failed to update Postman functions: " + e.getMessage(), e);
+    //     }
+    // }
     public void updateExamQuestionInPostman(byte[] fileContent, Long examPaperId) throws Exception {
         try {
-
             String jsonContent = new String(fileContent, StandardCharsets.UTF_8);
             JSONObject collectionJson = new JSONObject(jsonContent);
-
+    
             JSONArray items = collectionJson.getJSONArray("item");
-
+    
             List<Postman_For_Grading> postmanForGradingList = postmanForGradingRepository
                     .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
-
+    
             List<Exam_Question> examQuestions = examQuestionRepository.findByExamPaperId(examPaperId);
-
+    
             for (Postman_For_Grading postmanFunction : postmanForGradingList) {
                 String functionName = postmanFunction.getPostmanFunctionName();
-
+    
                 for (int i = 0; i < items.length(); i++) {
                     JSONObject item = items.getJSONObject(i);
                     String itemName = item.getString("name");
-
+    
                     if (itemName.equals(functionName)) {
-
                         JSONObject request = item.getJSONObject("request");
                         String httpMethod = request.getString("method").toUpperCase();
-                        String rawUrl = request.getJSONObject("url").getString("raw");
+                        // String rawUrl = request.getJSONObject("url").getString("raw");
+    
+                        // Chỉ lấy phần path từ raw URL
+                        // String pathFromRawUrl = extractPathFromRawUrl(rawUrl);
+      // Lấy path từ request.url.path
+      JSONObject urlObject = request.getJSONObject("url");
+      JSONArray pathArray = urlObject.getJSONArray("path");
+      String actualPath = "/" + String.join("/", pathArray.toList().stream().map(Object::toString).toArray(String[]::new));
 
-                        String pathFromRawUrl = extractPathFromRawUrl(rawUrl);
-
+                        // Tìm câu hỏi khớp
                         Exam_Question matchingQuestion = examQuestions.stream()
                                 .filter(question -> question.getHttpMethod().equals(httpMethod)
-                                        && isPathMatching(question.getEndPoint(), pathFromRawUrl))
+                                        && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
                                 .findFirst()
                                 .orElse(null);
-
+    
                         if (matchingQuestion != null) {
-
                             postmanFunction.setExamQuestion(matchingQuestion);
                             postmanForGradingRepository.save(postmanFunction);
                         }
@@ -419,30 +531,37 @@ public class ExamPaperService implements IExamPaperService {
             throw new Exception("Failed to update Postman functions: " + e.getMessage(), e);
         }
     }
-
-    private String extractPathFromRawUrl(String rawUrl) {
-        try {
-            URL url = new URL(rawUrl);
-            return url.getPath();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid URL format: " + rawUrl, e);
-        }
+    private boolean isPathMatchingWithDynamicSegments(String endpointPattern, String actualPath) {
+        // Thay thế các tham số động `{param}` trong endpoint bằng regex
+        String regexPattern = endpointPattern.replaceAll("\\{[^/]+\\}", "[^/]+");
+        return actualPath.matches(regexPattern);
     }
+    
+    
 
-    private boolean isPathMatching(String template, String path) {
+    // private String extractPathFromRawUrl(String rawUrl) {
+    //     try {
+    //         URL url = new URL(rawUrl);
+    //         return url.getPath();
+    //     } catch (Exception e) {
+    //         throw new IllegalArgumentException("Invalid URL format: " + rawUrl, e);
+    //     }
+    // }
 
-        String regex = template.replaceAll("\\{[^/]+\\}", "[^/]+");
-        return path.matches(regex);
-    }
+    // private boolean isPathMatching(String template, String path) {
 
-    private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
-        return postmanForGradingRepository.findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId)
-                .stream()
-                .map(postmanForGrading -> new PostmanFunctionInfo(
-                        postmanForGrading.getPostmanFunctionName(),
-                        postmanForGrading.getTotalPmTest()))
-                .collect(Collectors.toList());
-    }
+    //     String regex = template.replaceAll("\\{[^/]+\\}", "[^/]+");
+    //     return path.matches(regex);
+    // }
+
+    // private List<PostmanFunctionInfo> getPostmanFunctionInfoByExamPaperId(Long examPaperId) {
+    //     return postmanForGradingRepository.findByExamPaper_ExamPaperIdAndStatusTrue(examPaperId)
+    //             .stream()
+    //             .map(postmanForGrading -> new PostmanFunctionInfo(
+    //                     postmanForGrading.getPostmanFunctionName(),
+    //                     postmanForGrading.getTotalPmTest()))
+    //             .collect(Collectors.toList());
+    // }
 
     private void updateFileCollectionPostmanForGrading(byte[] fileData, Long examPaperId) throws Exception {
 
@@ -517,11 +636,11 @@ public class ExamPaperService implements IExamPaperService {
         return output.toString();
     }
 
-    private NewmanResult handleNewmanResult(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo,
-            Long examPaperId)
+    // List<PostmanFunctionInfo> expectedFunctionInfo,
+    private NewmanResult handleNewmanResult(String newmanOutput, Long examPaperId)
             throws NotFoundException {
 
-        NewmanResult result = parseNewmanOutput(newmanOutput, expectedFunctionInfo);
+        NewmanResult result = parseNewmanOutput(newmanOutput);
 
         List<String> functionNamesFromNewman = result.getFunctionNames();
 
@@ -529,43 +648,43 @@ public class ExamPaperService implements IExamPaperService {
             String functionName = functionNamesFromNewman.get(i);
             Long newTotalPmTest = (long) result.getTotalPmTests().get(i);
 
-            Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
-                    .filter(info -> info.getFunctionName().equals(functionName))
-                    .findFirst();
+            // Optional<PostmanFunctionInfo> expectedInfoOpt = expectedFunctionInfo.stream()
+            //         .filter(info -> info.getFunctionName().equals(functionName))
+            //         .findFirst();
 
-            if (expectedInfoOpt.isPresent()) {
-                PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
+            // if (expectedInfoOpt.isPresent()) {
+                // PostmanFunctionInfo expectedInfo = expectedInfoOpt.get();
 
-                if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
-                    updateTotalPmTestInDatabase(functionName, newTotalPmTest);
-                }
+                // if (!expectedInfo.getTotalPmTest().equals(newTotalPmTest)) {
+                //     updateTotalPmTestInDatabase(functionName, newTotalPmTest);
+                // }
 
-            } else {
+            // } else {
 
                 createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
 
-            }
+            // }
         }
 
         return result;
     }
 
-    private void setStatusFalseForFunctionsNotInNewman(List<String> functionNamesNotInNewman) {
-        if (!functionNamesNotInNewman.isEmpty()) {
+    // private void setStatusFalseForFunctionsNotInNewman(List<String> functionNamesNotInNewman) {
+    //     if (!functionNamesNotInNewman.isEmpty()) {
 
-            List<Postman_For_Grading> postmenToUpdate = postmanForGradingRepository
-                    .findByPostmanFunctionNameInAndStatusTrue(functionNamesNotInNewman);
-            for (Postman_For_Grading postman : postmenToUpdate) {
-                postman.setStatus(false);
-                postman.setPostmanFunctionName(null);
+    //         List<Postman_For_Grading> postmenToUpdate = postmanForGradingRepository
+    //                 .findByPostmanFunctionNameInAndStatusTrue(functionNamesNotInNewman);
+    //         for (Postman_For_Grading postman : postmenToUpdate) {
+    //             postman.setStatus(false);
+    //             postman.setPostmanFunctionName(null);
 
-                if (postman.getGherkinScenario() != null) {
-                    postman.setGherkinScenario(null);
-                }
-            }
-            postmanForGradingRepository.saveAll(postmenToUpdate);
-        }
-    }
+    //             if (postman.getGherkinScenario() != null) {
+    //                 postman.setGherkinScenario(null);
+    //             }
+    //         }
+    //         postmanForGradingRepository.saveAll(postmenToUpdate);
+    //     }
+    // }
 
     private void createNewPostmanForGrading(String functionName, Long totalPmTest, Long examPaperId)
             throws NotFoundException {
@@ -582,18 +701,18 @@ public class ExamPaperService implements IExamPaperService {
         postmanForGradingRepository.save(newPostmanForGrading);
     }
 
-    private void updateTotalPmTestInDatabase(String functionName, Long newTotalPmTest) throws NotFoundException {
-        Postman_For_Grading postmanForGrading = postmanForGradingRepository
-                .findByPostmanFunctionName(functionName)
-                .orElseThrow(() -> new NotFoundException("Postman Function Name not found: " + functionName));
+    // private void updateTotalPmTestInDatabase(String functionName, Long newTotalPmTest) throws NotFoundException {
+    //     Postman_For_Grading postmanForGrading = postmanForGradingRepository
+    //             .findByPostmanFunctionName(functionName)
+    //             .orElseThrow(() -> new NotFoundException("Postman Function Name not found: " + functionName));
 
-        postmanForGrading.setTotalPmTest(newTotalPmTest);
-        postmanForGradingRepository.save(postmanForGrading);
+    //     postmanForGrading.setTotalPmTest(newTotalPmTest);
+    //     postmanForGradingRepository.save(postmanForGrading);
 
-        System.out.println("Updated " + functionName + " in database to " + newTotalPmTest);
-    }
+    //     System.out.println("Updated " + functionName + " in database to " + newTotalPmTest);
+    // }
 
-    private NewmanResult parseNewmanOutput(String newmanOutput, List<PostmanFunctionInfo> expectedFunctionInfo) {
+    private NewmanResult parseNewmanOutput(String newmanOutput) {
         NewmanResult result = new NewmanResult();
         List<String> functionNames = new ArrayList<>();
         List<Integer> totalPmTests = new ArrayList<>();
@@ -834,13 +953,18 @@ public class ExamPaperService implements IExamPaperService {
             List<Postman_For_Grading> gradingItems = postmanForGradingRepository
                     .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
 
-            for (Postman_For_Grading gradingItem : gradingItems) {
-                if (gradingItem.getExamQuestion() == null) {
-                    throw new IllegalArgumentException(String.format(
-                            "Grading item '%s' does not have a valid examQuestionId.",
-                            gradingItem.getPostmanFunctionName()));
-                }
-            }
+                    for (Postman_For_Grading gradingItem : gradingItems) {
+                        if (gradingItem.getExamQuestion() == null) {
+                            throw new IllegalArgumentException(String.format(
+                                    "Grading item '%s' does not have a valid examQuestionId.",
+                                    gradingItem.getPostmanFunctionName()));
+                        }
+                        if (gradingItem.getTotalPmTest() == null || gradingItem.getTotalPmTest() <= 0) {
+                            throw new IllegalArgumentException(String.format(
+                                    "Grading item '%s' has invalid totalPmTest: must be greater than 0.",
+                                    gradingItem.getPostmanFunctionName()));
+                        }
+                    }
 
             if (fileItemNames.size() != gradingItems.size()) {
                 throw new IllegalArgumentException(

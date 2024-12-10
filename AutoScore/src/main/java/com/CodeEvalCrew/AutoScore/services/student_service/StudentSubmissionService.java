@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -108,6 +110,8 @@ public class StudentSubmissionService {
 
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
+        List<Exam_Paper> foundExamPapers = new ArrayList<>();
+        Set<Long> loggedExamPaperIds = new HashSet<>();
 
         List<String> unmatchedStudents = Collections.synchronizedList(new ArrayList<>());
         List<String> errors = Collections.synchronizedList(new ArrayList<>()); // Danh sách lưu lỗi
@@ -120,7 +124,8 @@ public class StudentSubmissionService {
             File rootDirectory = new File(rootFolder);
 
             if (!rootDirectory.exists() || !rootDirectory.isDirectory()) {
-                logger.error("Root directory does not exist or is not a directory: {}", rootDirectory.getAbsolutePath());
+                logger.error("Root directory does not exist or is not a directory: {}",
+                        rootDirectory.getAbsolutePath());
                 progressService.sendProgress(100); // Hoàn tất vì không thể xử lý
                 return unmatchedStudents;
             }
@@ -140,24 +145,28 @@ public class StudentSubmissionService {
             for (File examFolder : examFolders) {
                 Optional<Exam_Paper> examPaper = examPaperRepository.findByExamPaperCode(examFolder.getName());
 
-                if (!examPaper.isPresent() || !examPaper.get().getExam().getExamId().equals(examId) || !examPaper.get().getIsUsed() || !examPaper.get().getStatus().equals(Exam_Status_Enum.COMPLETE)) {
+                if (!examPaper.isPresent() || !examPaper.get().getExam().getExamId().equals(examId)
+                        || !examPaper.get().getIsUsed()
+                        || !examPaper.get().getStatus().equals(Exam_Status_Enum.COMPLETE)) {
                     errors.add("No matching exam paper found for folder: " + examFolder.getName());
                     completedExamFolders.incrementAndGet();
-                    progressService.sendProgress((completedExamFolders.get() * 100) / totalExamFolders); // Tiến độ theo folder
+                    progressService.sendProgress((completedExamFolders.get() * 100) / totalExamFolders); // Tiến độ theo
+                                                                                                         // folder
                     continue;
                 }
 
                 Exam_Paper foundExamPaper = examPaper.get();
-                Source source = sourceService.saveMainSource(examFolder.getAbsolutePath(), examPaper.get());
-                
-                // Xử lý các studentFolders bên trong examFolder
-                processStudentFolders(examFolder, examPaper.get(), unmatchedStudents, errors, completionService, source);
+                foundExamPapers.add(foundExamPaper);
 
-                saveLog(foundExamPaper.getExamPaperId(),
-                        "Account [" + authenticatedUserId + "] [Import list student successfully] at [" + time + "]");
+                Source source = sourceService.saveMainSource(examFolder.getAbsolutePath(), examPaper.get());
+
+                // Xử lý các studentFolders bên trong examFolder
+                processStudentFolders(examFolder, examPaper.get(), unmatchedStudents, errors, completionService,
+                        source);
 
                 completedExamFolders.incrementAndGet();
-                progressService.sendProgress((completedExamFolders.get() * 100) / totalExamFolders); // Cập nhật tiến trình tổng
+                progressService.sendProgress((completedExamFolders.get() * 100) / totalExamFolders); // Cập nhật tiến
+                                                                                                     // trình tổng
             }
 
             // Chờ tất cả các tác vụ hoàn thành
@@ -194,8 +203,17 @@ public class StudentSubmissionService {
             executorService.shutdownNow();
         }
 
-        // Kết hợp danh sách lỗi và unmatchedStudents để trả về
         unmatchedStudents.addAll(errors);
+
+        for (Exam_Paper examPaper : foundExamPapers) {
+            if (!loggedExamPaperIds.contains(examPaper.getExamPaperId())) {
+                saveLog(
+                        examPaper.getExamPaperId(),
+                        "Account [" + authenticatedUserId + "] [Import list student successfully] at [" + time + "]");
+                loggedExamPaperIds.add(examPaper.getExamPaperId());
+            }
+        }
+
         return unmatchedStudents;
     }
 
@@ -217,7 +235,8 @@ public class StudentSubmissionService {
             completionService.submit(() -> {
                 try {
                     new SubmissionTask(studentFolder, source,
-                            unmatchedStudents, examPaper.getExam().getType().toString(), errors, examPaper.getExam().getExamId()).call();
+                            unmatchedStudents, examPaper.getExam().getType().toString(), errors,
+                            examPaper.getExam().getExamId()).call();
                 } catch (Exception e) {
                     errors.add("Error processing folder " + studentFolder.getName() + ": " + e.getMessage());
                     logger.error("Error processing folder: " + studentFolder.getName(), e);
@@ -246,7 +265,8 @@ public class StudentSubmissionService {
         private final List<String> errors;
         private final Long examId;
 
-        public SubmissionTask(File studentFolder, Source source, List<String> unmatchedStudents, String examType, List<String> errors, Long examId) {
+        public SubmissionTask(File studentFolder, Source source, List<String> unmatchedStudents, String examType,
+                List<String> errors, Long examId) {
             this.studentFolder = studentFolder;
             this.source = source;
             this.unmatchedStudents = unmatchedStudents;
@@ -266,14 +286,16 @@ public class StudentSubmissionService {
 
             Optional<Student> studentOpt = studentRepository.findByStudentCodeAndExamExamId(studentCode, examId);
             if (!studentOpt.isPresent()) {
-                studentErrorService.saveStudentError(source, null, "Student not found with student code: " + studentCode);
+                studentErrorService.saveStudentError(source, null,
+                        "Student not found with student code: " + studentCode);
                 failedTasks.incrementAndGet(); // Đánh dấu thất bại
                 return null;
             }
 
             try {
                 // Giải nén đệ quy và tìm thư mục chứa .sln
-                File slnFileFolder = fileExtractionService.processExtractedFolder(studentFolder, source, studentOpt.get());
+                File slnFileFolder = fileExtractionService.processExtractedFolder(studentFolder, source,
+                        studentOpt.get());
                 if (slnFileFolder != null) {
                     sourceDetailService.saveStudentSubmission(slnFileFolder, studentOpt.get(), source, examType);
                 } else {
