@@ -10,4 +10,5 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 @Repository
 public interface LogRepository extends JpaRepository<Log, Long> {
     Optional<Log> findByExamPaper_ExamPaperId(Long examPaperId);
+
 }

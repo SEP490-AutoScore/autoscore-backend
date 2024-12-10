@@ -23,12 +23,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "content")
-public class Content {
+@Table(name = "ai_prompt")
+public class AI_Prompt  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long contentId;
+    private Long aiPromptId;
 
     @NotNull
     @Lob

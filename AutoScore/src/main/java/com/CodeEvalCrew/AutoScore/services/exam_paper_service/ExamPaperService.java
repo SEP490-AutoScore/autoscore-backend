@@ -953,13 +953,18 @@ public class ExamPaperService implements IExamPaperService {
             List<Postman_For_Grading> gradingItems = postmanForGradingRepository
                     .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
 
-            for (Postman_For_Grading gradingItem : gradingItems) {
-                if (gradingItem.getExamQuestion() == null) {
-                    throw new IllegalArgumentException(String.format(
-                            "Grading item '%s' does not have a valid examQuestionId.",
-                            gradingItem.getPostmanFunctionName()));
-                }
-            }
+                    for (Postman_For_Grading gradingItem : gradingItems) {
+                        if (gradingItem.getExamQuestion() == null) {
+                            throw new IllegalArgumentException(String.format(
+                                    "Grading item '%s' does not have a valid examQuestionId.",
+                                    gradingItem.getPostmanFunctionName()));
+                        }
+                        if (gradingItem.getTotalPmTest() == null || gradingItem.getTotalPmTest() <= 0) {
+                            throw new IllegalArgumentException(String.format(
+                                    "Grading item '%s' has invalid totalPmTest: must be greater than 0.",
+                                    gradingItem.getPostmanFunctionName()));
+                        }
+                    }
 
             if (fileItemNames.size() != gradingItems.size()) {
                 throw new IllegalArgumentException(

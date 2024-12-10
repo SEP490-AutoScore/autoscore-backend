@@ -239,6 +239,11 @@ public class ExamDatabaseService implements IExamDatabaseService {
                 Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                         .orElseThrow(() -> new Exception("Exam paper not found with id: " + examPaperId));
 
+                           // Set isComfirmFile to false
+            examPaper.setIsComfirmFile(false);
+            // Save the updated exam paper
+            examPaperRepository.save(examPaper);
+
                 Exam_Database updatedDatabase = existingDatabase != null ? existingDatabase : new Exam_Database();
                 updatedDatabase.setDatabaseScript(databaseScript);
                 updatedDatabase.setDatabaseName(dbName);
