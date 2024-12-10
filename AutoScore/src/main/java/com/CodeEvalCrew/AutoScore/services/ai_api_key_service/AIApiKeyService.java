@@ -125,38 +125,6 @@ public class AIApiKeyService implements IAIApiKeyService {
                 .collect(Collectors.toList());
     }
     
-
-    // @Override
-    // public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
-
-    // Long authenticatedUserId = Util.getAuthenticatedAccountId();
-
-    // AI_Api_Key selectedApiKey = aiApiKeyRepository.findById(aiApiKeyId)
-    // .orElseThrow(() -> new IllegalArgumentException("Invalid AI API Key ID"));
-
-    // List<Account_Selected_Key> existingSelectedKeys =
-    // accountSelectedKeyRepository
-    // .findByAccountAccountId(authenticatedUserId);
-
-    // if (existingSelectedKeys.isEmpty()) {
-
-    // Account_Selected_Key newSelectedKey = new Account_Selected_Key();
-    // // newSelectedKey.setAccount(selectedApiKey.getAccount());
-    // Account authenticatedUserAccount =
-    // accountRepository.findById(authenticatedUserId)
-    // .orElseThrow(() -> new IllegalArgumentException("Authenticated account not
-    // found"));
-    // newSelectedKey.setAccount(authenticatedUserAccount);
-
-    // newSelectedKey.setAiApiKey(selectedApiKey);
-    // accountSelectedKeyRepository.save(newSelectedKey);
-    // } else {
-
-    // Account_Selected_Key existingSelectedKey = existingSelectedKeys.get(0);
-    // existingSelectedKey.setAiApiKey(selectedApiKey);
-    // accountSelectedKeyRepository.save(existingSelectedKey);
-    // }
-    // }
     @Override
     public void updateOrCreateAccountSelectedKey(Long aiApiKeyId) {
 

@@ -28,7 +28,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioResponse
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
-import com.CodeEvalCrew.AutoScore.models.Entity.Content;
+import com.CodeEvalCrew.AutoScore.models.Entity.AI_Prompt;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Purpose_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
@@ -37,7 +37,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
 import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
-import com.CodeEvalCrew.AutoScore.repositories.content_repository.ContentRepository;
+import com.CodeEvalCrew.AutoScore.repositories.aiprompt_repository.AIPromptRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
@@ -64,7 +64,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         @Autowired
         private AccountSelectedKeyRepository accountSelectedKeyRepository;
         @Autowired
-        private ContentRepository contentRepository;
+        private AIPromptRepository aiPromptRepository;
         @Autowired
         private LogRepository logRepository;
         @Autowired
@@ -351,14 +351,14 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
                 StringBuilder responseBuilder = new StringBuilder();
 
-                List<Content> orderedContents = contentRepository
+                List<AI_Prompt> orderedAIPrompts = aiPromptRepository
                                 .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT);
 
-                for (Content content : orderedContents) {
-                        String question = content.getQuestionAskAiContent();
-                        if (content.getOrderPriority() == 1) {
+                for (AI_Prompt aiprompt : orderedAIPrompts) {
+                        String question = aiprompt.getQuestionAskAiContent();
+                        if (aiprompt.getOrderPriority() == 1) {
                                 question += "\n" + databaseScript;
-                        } else if (content.getOrderPriority() == 2) {
+                        } else if (aiprompt.getOrderPriority() == 2) {
                                 question += ""
                                                 + "\n - Question Content: " + examQuestion.getQuestionContent()
                                                 + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
@@ -378,7 +378,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
                         responseBuilder.append(response).append("\n");
 
-                        if (content.getOrderPriority() == 2) {
+                        if (aiprompt.getOrderPriority() == 2) {
                                 List<String> gherkinDataList = extractGherkinData(response);
                                 saveGherkinData(gherkinDataList, examQuestion);
 
@@ -476,15 +476,15 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                 .map(data -> "{{ " + data + " }}")
                                 .collect(Collectors.joining("\n"));
 
-                List<Content> orderedContents = contentRepository
+                List<AI_Prompt> orderedAIPrompts = aiPromptRepository
                                 .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT_MORE);
 
-                for (Content content : orderedContents) {
-                        String question = content.getQuestionAskAiContent();
+                for (AI_Prompt aiprompt : orderedAIPrompts) {
+                        String question = aiprompt.getQuestionAskAiContent();
 
-                        if (content.getOrderPriority() == 1) {
+                        if (aiprompt.getOrderPriority() == 1) {
                                 question += "\n" + databaseScript;
-                        } else if (content.getOrderPriority() == 2) {
+                        } else if (aiprompt.getOrderPriority() == 2) {
                                 question += "\n" + formattedGherkinData
                                                 + "\n - Question Content: " + examQuestion.getQuestionContent()
                                                 + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
@@ -502,7 +502,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                         StandardCharsets.UTF_8);
                         String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
 
-                        if (content.getOrderPriority() == 2) {
+                        if (aiprompt.getOrderPriority() == 2) {
 
                                 List<String> gherkinDataList = extractGherkinData(response);
                                 saveGherkinData(gherkinDataList, examQuestion);

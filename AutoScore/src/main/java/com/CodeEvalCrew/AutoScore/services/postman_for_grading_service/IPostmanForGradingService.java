@@ -11,14 +11,10 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetbyI
 public interface IPostmanForGradingService {
       List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId);
 
-      // void updatePostmanForGradingList(List<PostmanForGradingDTO>
-      // postmanForGradingDTOs);
-
       ResponseEntity<?> generatePostmanCollection(Long gherkinScenarioId);
 
-      ResponseEntity<?> generatePostmanCollectionMore(Long gherkinScenarioId);
+      ResponseEntity<?> generatePostmanCollectionMore(Long postmanForGradingId);
 
-      // Hàm merge các file Postman collection của cùng 1 examPaperId
       String mergePostmanCollections(Long examPaperId);
 
       String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs);
@@ -29,6 +25,6 @@ public interface IPostmanForGradingService {
 
       String updateExamQuestionId(Long postmanForGradingId, Long examQuestionId);
 
-       void calculateScores(Long examPaperId) throws Exception;
+      void calculateScores(Long examPaperId) throws Exception;
 
 }

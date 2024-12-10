@@ -382,11 +382,20 @@ Request Body (JSON):
 
 
 
-INSERT INTO `ai_api_key`
-(`ai_api_key`, `ai_name`, `account_id`,`status`,`shared`)
+-- INSERT INTO `ai_api_key`
+-- (`ai_api_key`, `ai_name`, `account_id`,`status`,`shared`)
+-- VALUES
+-- ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',3,true,true),
+-- ('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',7,true,true);
+
+INSERT INTO `ai_api_key` 
+(`ai_name`, `ai_api_key`, `status`, `created_at`, `updated_at`, `shared`, `account_id`)
 VALUES
-('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',3,true,true),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',7,true,true);
+('GEMINI', 'AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', true, NOW(), NOW(), true, 3),
+('GEMINI', 'AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', true, NOW(), NOW(), true, 7);
+
+
+
 
 INSERT INTO `account_selected_key`
 (`account_id`, `selected_ai_api_key_id`)
@@ -398,7 +407,7 @@ VALUES
 (4, 1);
 
 
-INSERT INTO `content`
+INSERT INTO `ai_prompt`
 (`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
 ('This is the database structure and sample data. Save it to your memory, do not reply.

@@ -57,9 +57,9 @@ public class PostmanForGradingController {
 
     @PreAuthorize("hasAnyAuthority('GENERATE_POSTMAN', 'ALL_ACCESS')")
     @PostMapping("/generate-more")
-    public ResponseEntity<?> generatePostmanCollectionMore(@RequestParam Long gherkinScenarioId) {
+    public ResponseEntity<?> generatePostmanCollectionMore(@RequestParam Long postmanForGradingId) {
         try {
-            return postmanForGradingService.generatePostmanCollectionMore(gherkinScenarioId);
+            return postmanForGradingService.generatePostmanCollectionMore(postmanForGradingId);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error: " + e.getMessage());
@@ -79,7 +79,8 @@ public class PostmanForGradingController {
 
     @PreAuthorize("hasAnyAuthority('DELETE_POSTMAN', 'ALL_ACCESS')")
     @DeleteMapping("")
-    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examPaperId) {
+    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds,
+            Long examPaperId) {
         String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examPaperId);
         return ResponseEntity.ok(response);
     }
@@ -103,7 +104,7 @@ public class PostmanForGradingController {
         String result = postmanForGradingService.updateExamQuestionId(postmanForGradingId, examQuestionId);
         return ResponseEntity.ok(result);
     }
-    
+
     @PostMapping("/calculate")
     public ResponseEntity<String> calculateScores(@RequestParam Long examPaperId) {
         try {
