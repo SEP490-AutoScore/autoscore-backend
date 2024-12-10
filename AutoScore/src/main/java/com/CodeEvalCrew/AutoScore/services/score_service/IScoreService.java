@@ -18,7 +18,7 @@ public interface IScoreService {
 
     List<ScoreResponseDTO> getScoresByExamPaperId(Long examPaperId);
 
-    void exportScoresToExcel(HttpServletResponse response, List<ScoreResponseDTO> scores) throws IOException;
+    void exportScoresToExcel(HttpServletResponse response, Long examPaperId) throws IOException;
 
     List<ScoreOverViewResponseDTO> getScoreOverView();
 
