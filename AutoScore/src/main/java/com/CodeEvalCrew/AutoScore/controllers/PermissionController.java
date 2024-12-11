@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PermissionRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCategoryResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionCategoryResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
 import com.CodeEvalCrew.AutoScore.services.permission_service.IPermissionService;
 
@@ -94,8 +94,8 @@ public class PermissionController {
 
     @PreAuthorize("hasAnyAuthority('VIEW_PERMISSION', 'ALL_ACCESS')")
     @GetMapping("/get-all")
-    public ResponseEntity<List<PermissionPermissionCategoryResponseDTO>> getAllPermissionByPermissionCategory() {
-        List<PermissionPermissionCategoryResponseDTO> permissions = permissionService.getAllPermissionByPermissionCategory();
+    public ResponseEntity<List<PermissionCategoryResponseDTO>> getAllPermissionByPermissionCategory() {
+        List<PermissionCategoryResponseDTO> permissions = permissionService.getAllPermissionByPermissionCategory();
         if (permissions == null) {
             return ResponseEntity.notFound().build();
         }
