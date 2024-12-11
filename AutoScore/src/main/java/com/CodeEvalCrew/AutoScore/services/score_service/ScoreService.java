@@ -90,7 +90,8 @@ public class ScoreService implements IScoreService {
     }
 
     @Override
-    public void exportScoresToExcel(HttpServletResponse response, List<ScoreResponseDTO> scores) throws IOException {
+    public void exportScoresToExcel(HttpServletResponse response, Long examPaperId) throws IOException {
+        List<ScoreResponseDTO> scores = getScoresByExamPaperId(examPaperId);
         if (scores == null || scores.isEmpty()) {
             throw new IllegalArgumentException("No scores available to export.");
         }

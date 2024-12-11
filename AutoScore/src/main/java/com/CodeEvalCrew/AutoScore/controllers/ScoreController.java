@@ -47,8 +47,7 @@ public class ScoreController {
     @GetMapping("/export")
     public void exportScoresToExcel(HttpServletResponse response, @RequestParam Long exampaperid) {
         try {
-            List<ScoreResponseDTO> scores = scoreService.getScoresByExamPaperId(exampaperid);
-            scoreService.exportScoresToExcel(response, scores);
+            scoreService.exportScoresToExcel(response, exampaperid);
         } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
