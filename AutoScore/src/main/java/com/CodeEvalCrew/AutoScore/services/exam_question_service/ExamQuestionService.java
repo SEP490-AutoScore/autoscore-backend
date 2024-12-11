@@ -133,7 +133,6 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView deleteExamQuestion(Long id) throws NotFoundException {
-        ExamQuestionView result;
         try {
             //check examQuestion
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam question", id);
@@ -145,7 +144,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {

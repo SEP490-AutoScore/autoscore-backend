@@ -65,7 +65,7 @@ public class NotificationService implements INotificationService {
             Notification noti = checkEntityExistence(notificactionRepository.findById(notificationId), "Notification", notificationId);
             Optional<Accout_Notification> optAccoutNotification = accountNotificationRepository.findByAccountAccountIdAndNotificationNotificationId(accountId, notificationId);
             if (!optAccoutNotification.isPresent()) {
-
+                
             }
             Accout_Notification accountNoti = optAccoutNotification.get();
             accountNoti.setStatus(Notification_Status_Enum.READED);
