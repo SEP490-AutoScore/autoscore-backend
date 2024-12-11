@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PermissionRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCategoryResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionCategoryResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
 
 public interface IPermissionService {
@@ -13,5 +13,5 @@ public interface IPermissionService {
     OperationStatus createPermission(PermissionRequestDTO permissionRequestDTO);
     OperationStatus updatePermission(PermissionRequestDTO permissionRequestDTO);
     OperationStatus deletePermission(Long permissionId);
-    List<PermissionPermissionCategoryResponseDTO> getAllPermissionByPermissionCategory();
+    List<PermissionCategoryResponseDTO> getAllPermissionByPermissionCategory();
 }

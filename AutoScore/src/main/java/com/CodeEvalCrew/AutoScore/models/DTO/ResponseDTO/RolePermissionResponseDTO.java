@@ -17,5 +17,5 @@ public class RolePermissionResponseDTO {
     private String roleCode;
     private String description;
     private boolean status;
-    private List<PermissionPermissionCategoryResponseDTO> permissionsCategory;
+    private List<PermissionCategoryResponseDTO> permissionsCategory;
 }
