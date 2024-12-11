@@ -46,8 +46,9 @@ public interface IScoreService {
 
           Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId);
 
-          Map<String, Map<String, Integer>> analyzeScoresTestCasePassLogRunPostman(Long examPaperId);
+          Map<String, Integer> analyzeScoresFailedAllTests(Long examPaperId);
 
+           Map<String, Map<String, Double>> getTotalRunAndAverageResponseTime(Long examPaperId);
           
 
      

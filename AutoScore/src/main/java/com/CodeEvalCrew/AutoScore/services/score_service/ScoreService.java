@@ -267,7 +267,15 @@ public class ScoreService implements IScoreService {
 
     @Override
     public List<StudentScoreDTO> getStudentScoresByExamPaperId(Long examPaperId) {
-        return scoreRepository.findStudentScoresByExamPaperId(examPaperId);
+        // Retrieve all scores for the given examPaperId
+        List<Score> allScores = scoreRepository.findAllByExamPaper_ExamPaperId(examPaperId);
+
+        // Filter the scores based on some conditions if necessary
+        return allScores.stream()
+                .map(score -> new StudentScoreDTO(
+                        score.getStudent().getStudentCode(),
+                        score.getTotalScore()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -380,37 +388,68 @@ public class ScoreService implements IScoreService {
 
     @Override
     public List<Map<String, Object>> analyzeLog() {
-        Long authenticatedUserId = Util.getAuthenticatedAccountId(); // Lấy ID người dùng đã xác thực
-        String userCampus = checkCampusForAccount(authenticatedUserId); // Kiểm tra campus của tài khoản người dùng
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        if (authenticatedUserId == null) {
+            // Handle the case where the authenticated user ID is not found
+            throw new IllegalStateException("Authenticated user ID is null.");
+        }
+
+        String userCampus = checkCampusForAccount(authenticatedUserId);
+        if (userCampus == null) {
+            // Handle the case where campus is not found
+            throw new IllegalStateException("User campus is null.");
+        }
 
         // Lấy tất cả các điểm số
         List<Score> scores = scoreRepository.findAll();
 
         // Lọc các điểm số theo điều kiện tương tự như trong getTotalScoreOccurrences
         List<String> logDataList = scores.stream()
-                .filter(score -> score.getStudent().isStatus() && // Lọc học sinh đang hoạt động
-                        score.getExamPaper().getExam().getType().toString().equals("EXAM") && // Lọc theo loại bài thi
-                        score.getStudent().getOrganization().getName().equals(userCampus)) // Lọc theo campus
-                .map(score -> score.getLogRunPostman()) // Lấy logRunPostman từ mỗi đối tượng Score
+                .filter(score -> score.getStudent() != null &&
+                        score.getStudent().isStatus() &&
+                        score.getExamPaper().getExam().getType().toString().equals("EXAM") &&
+                        score.getStudent().getOrganization().getName().equals(userCampus))
+                .map(score -> {
+                    String logRunPostman = score.getLogRunPostman();
+                    return logRunPostman != null ? logRunPostman : "";
+                })
                 .collect(Collectors.toList());
 
-        // Tạo một Map để chứa tên hàm và số lần xuất hiện
-        Map<String, Integer> functionCountMap = new HashMap<>();
+        // Tạo một Set để chứa các hàm duy nhất theo examPaperId và tên hàm
+        Set<String> uniqueFunctionsSet = new HashSet<>();
 
         // Duyệt qua tất cả các logData và phân tích
-        for (String logData : logDataList) {
+        for (Score score : scores) {
+            // Extract the examPaperId from the Score entity
+            Long examPaperId = score.getExamPaper().getExamPaperId(); // Assuming Exam_Paper has the 'examPaperId' field
+
+            // Get the log data associated with this score
+            String logData = score.getLogRunPostman();
+
             // Biểu thức chính quy để tìm các hàm sau dấu '→'
-            Pattern pattern = Pattern.compile("→\\s*([a-zA-Z0-9_]+)");
+            Pattern pattern = Pattern.compile("→\\s*(.+)"); // Capture everything after '→'
             Matcher matcher = pattern.matcher(logData);
 
             // Duyệt qua tất cả các khớp với mẫu regex
             while (matcher.find()) {
                 // Lấy tên hàm từ nhóm tìm được
-                String functionName = matcher.group(1);
+                String functionName = matcher.group(1).trim(); // Capture everything and remove extra spaces
 
-                // Tăng số lần xuất hiện của hàm đó
-                functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
+                // Tạo một chuỗi duy nhất kết hợp examPaperId và tên hàm
+                String uniqueKey = examPaperId + ":" + functionName;
+
+                // Nếu chưa có, thì thêm vào Set
+                uniqueFunctionsSet.add(uniqueKey);
             }
+        }
+
+        // Tạo một Map để chứa tên hàm và số lần xuất hiện
+        Map<String, Integer> functionCountMap = new HashMap<>();
+
+        // Duyệt qua các hàm duy nhất trong Set
+        for (String uniqueKey : uniqueFunctionsSet) {
+            String functionName = uniqueKey.split(":")[1]; // Lấy tên hàm từ uniqueKey
+            functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
         }
 
         // Chuyển đổi Map thành List với cấu trúc dữ liệu cần thiết cho biểu đồ
@@ -423,6 +462,55 @@ public class ScoreService implements IScoreService {
         }
 
         return formattedData;
+    }
+
+    @Override
+    public Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId) {
+        // Fetch all Score_Detail entities for the given examPaperId
+        List<Score_Detail> scoreDetails = scoreDetailRepository.findAllByScore_ExamPaper_ExamPaperId(examPaperId);
+
+        if (scoreDetails == null || scoreDetails.isEmpty()) {
+            throw new RuntimeException("No score details available for the given exam paper");
+        }
+
+        Map<String, Integer> functionPassCounts = new HashMap<>();
+
+        // Iterate over each Score_Detail and count the fully passed functions
+        for (Score_Detail detail : scoreDetails) {
+            // Check if the function is fully passed (noPmtestAchieve == totalPmtest)
+            if (detail.getNoPmtestAchieve().equals(detail.getTotalPmtest())) {
+                // Increment the count for the fully passed function
+                functionPassCounts.put(detail.getPostmanFunctionName(),
+                        functionPassCounts.getOrDefault(detail.getPostmanFunctionName(), 0) + 1);
+            }
+        }
+
+        return functionPassCounts;
+    }
+
+    @Override
+    public Map<String, Integer> analyzeScoresFailedAllTests(Long examPaperId) {
+        // Fetch all Score_Detail entities for the given examPaperId
+        List<Score_Detail> scoreDetails = scoreDetailRepository.findAllByScore_ExamPaper_ExamPaperId(examPaperId);
+
+        if (scoreDetails == null || scoreDetails.isEmpty()) {
+            throw new RuntimeException("No score details available for the given exam paper");
+        }
+
+        Map<String, Integer> functionFailCounts = new HashMap<>();
+
+        // Iterate over each Score_Detail and count the functions with no successful
+        // tests
+        for (Score_Detail detail : scoreDetails) {
+            // Check if noPmtestAchieve == 0 (function failed all tests)
+            if (detail.getNoPmtestAchieve() != null && detail.getNoPmtestAchieve() == 0) {
+                // Increment the count for the failed function
+                functionFailCounts.put(detail.getPostmanFunctionName(),
+                        functionFailCounts.getOrDefault(detail.getPostmanFunctionName(), 0) + 1);
+            }
+        }
+
+        return functionFailCounts;
     }
 
     @Override
@@ -489,61 +577,6 @@ public class ScoreService implements IScoreService {
         return Pattern.compile(Pattern.quote(target)).matcher(text).results().count();
     }
 
-    @Override
-    public Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId) {
-        // Fetch the `Exam_Paper` entity by ID
-        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
-                .orElseThrow(() -> new RuntimeException("Exam paper not found"));
-
-        // Get all associated Scores
-        Set<Score> scores = examPaper.getScores();
-        if (scores == null || scores.isEmpty()) {
-            throw new RuntimeException("No scores available for the given exam paper");
-        }
-
-        Map<String, Integer> functionPassCounts = new HashMap<>();
-
-        // Process each Score's logRunPostman
-        for (Score score : scores) {
-            String log = score.getLogRunPostman();
-            if (log == null || log.isEmpty()) {
-                continue; // Skip if no log is available
-            }
-
-            // Analyze the log for fully passed functions
-            Set<String> fullyPassedFunctions = extractFullyPassedFunctions(log);
-
-            // Increment the count for each fully passed function
-            for (String function : fullyPassedFunctions) {
-                functionPassCounts.put(function, functionPassCounts.getOrDefault(function, 0) + 1);
-            }
-        }
-
-        return functionPassCounts;
-    }
-
-    private Set<String> extractFullyPassedFunctions(String log) {
-        Set<String> fullyPassedFunctions = new HashSet<>();
-
-        // Extract function names and their associated log entries
-        Pattern functionPattern = Pattern.compile("→\\s*(.+)$", Pattern.MULTILINE);
-        Matcher functionMatcher = functionPattern.matcher(log);
-
-        while (functionMatcher.find()) {
-            String functionName = functionMatcher.group(1).trim();
-
-            // Locate log entries related to the function
-            String functionLog = extractLogForFunction(log, functionName);
-
-            // Check if the function passes all test cases (contains only "√")
-            if (isFullyPassed(functionLog)) {
-                fullyPassedFunctions.add(functionName);
-            }
-        }
-
-        return fullyPassedFunctions;
-    }
-
     private String extractLogForFunction(String log, String functionName) {
         Pattern functionBlockPattern = Pattern.compile(
                 "→\\s*" + Pattern.quote(functionName) + "\\b(.+?)(?=→|$)", Pattern.DOTALL);
@@ -552,102 +585,64 @@ public class ScoreService implements IScoreService {
         return matcher.find() ? matcher.group(1) : "";
     }
 
-    private boolean isFullyPassed(String functionLog) {
-        // Ensure no numeric failures and all logs contain "√"
-        return !Pattern.compile("\\d+").matcher(functionLog).find() &&
-                countOccurrences(functionLog, "√") > 0;
-    }
-
-
     @Override
-    public Map<String, Map<String, Integer>> analyzeScoresTestCasePassLogRunPostman(Long examPaperId) {
+    public Map<String, Map<String, Double>> getTotalRunAndAverageResponseTime(Long examPaperId) {
         // Fetch the `Exam_Paper` entity by ID
         Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                 .orElseThrow(() -> new RuntimeException("Exam paper not found"));
-    
+
         // Get all associated Scores
         Set<Score> scores = examPaper.getScores();
         if (scores == null || scores.isEmpty()) {
             throw new RuntimeException("No scores available for the given exam paper");
         }
-    
-        Map<String, Map<String, Integer>> testCasePassCounts = new HashMap<>();
-    
+
+        Map<String, Map<String, Double>> studentTotalAndAverageResponseTimes = new HashMap<>();
+
         // Process each Score's logRunPostman
         for (Score score : scores) {
             String log = score.getLogRunPostman();
             if (log == null || log.isEmpty()) {
                 continue; // Skip if no log is available
             }
-    
-            // Analyze the log for each function and its test cases
-            Map<String, Set<String>> functionTestCases = extractFunctionTestCases(log);
-    
-            // Update the count of students passing each test case in each function
-            for (Map.Entry<String, Set<String>> entry : functionTestCases.entrySet()) {
-                String functionName = entry.getKey();
-                Set<String> passedTestCases = entry.getValue();
-    
-                // Ensure the function entry exists in the result map
-                testCasePassCounts.putIfAbsent(functionName, new HashMap<>());
-    
-                // Update pass counts for each test case
-                for (String testCase : passedTestCases) {
-                    testCasePassCounts.get(functionName).put(testCase,
-                            testCasePassCounts.get(functionName).getOrDefault(testCase, 0) + 1);
-                }
-            }
-        }
-    
-        return testCasePassCounts;
-    }
 
-    private Map<String, Set<String>> extractFunctionTestCases(String log) {
-        Map<String, Set<String>> functionTestCases = new HashMap<>();
-    
-        // Extract function names and their associated log entries
-        Pattern functionPattern = Pattern.compile("→\\s*(.+)$", Pattern.MULTILINE);
-        Matcher functionMatcher = functionPattern.matcher(log);
-    
-        while (functionMatcher.find()) {
-            String functionName = functionMatcher.group(1).trim();
-    
-            // Locate log entries related to the function
-            String functionLog = extractLogForFunction(log, functionName);
-    
-            // Extract all passed test cases from the function's log
-            Set<String> passedTestCases = extractPassedTestCases(functionLog);
-            if (!passedTestCases.isEmpty()) {
-                functionTestCases.put(functionName, passedTestCases);
-            }
+            // Extract total run duration and average response time from the log
+            Double totalRunDuration = extractTotalRunDurationFromLog(log);
+            Double averageResponseTime = extractAverageResponseTimeFromLog(log);
+
+            // Create an inner map for this student
+            Map<String, Double> studentData = new HashMap<>();
+            studentData.put("totalRunDuration", totalRunDuration);
+            studentData.put("averageResponseTime", averageResponseTime);
+
+            // Store the inner map in the outer map with the student code as key
+            studentTotalAndAverageResponseTimes.put(score.getStudent().getStudentCode(), studentData);
         }
-    
-        return functionTestCases;
+
+        return studentTotalAndAverageResponseTimes;
     }
-    private Set<String> extractPassedTestCases(String functionLog) {
-        Set<String> passedTestCases = new HashSet<>();
-    
-        // Split the function log into individual test case entries
-        Pattern testCasePattern = Pattern.compile("(√|\\d+)(.*?)$");
-        Matcher testCaseMatcher = testCasePattern.matcher(functionLog);
-    
-        while (testCaseMatcher.find()) {
-            String result = testCaseMatcher.group(1);  // "√" or number
-            String testCase = testCaseMatcher.group(2).trim();  // The test case description
-    
-            if ("√".equals(result)) {
-                passedTestCases.add(testCase);  // Add passed test case to the set
-            }
-        }
-    
-        return passedTestCases;
+// Helper method to extract total run duration from the log
+private Double extractTotalRunDurationFromLog(String log) {
+
+    Pattern totalDurationPattern = Pattern.compile("total run duration: ([0-9.]+)s");
+    Matcher matcher = totalDurationPattern.matcher(log);
+    if (matcher.find()) {
+        return Double.parseDouble(matcher.group(1)); // Return duration in seconds
     }
-   
-    
-    
-    
+    return 0.0; // Default if not found
+}
+
+// Helper method to extract average response time from the log
+private Double extractAverageResponseTimeFromLog(String log) {
+
+    Pattern averageResponsePattern = Pattern.compile("average response time: ([0-9]+)ms");
+    Matcher matcher = averageResponsePattern.matcher(log);
+    if (matcher.find()) {
+        return Double.parseDouble(matcher.group(1)) / 1000.0; // Convert ms to seconds
+    }
+    return 0.0; // Default if not found
+}
 
     
-
 
 }
