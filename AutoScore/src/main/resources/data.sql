@@ -31,7 +31,7 @@ VALUES
 ('CREATE_PERMISSION', 11, 'Create permission', 3, 1, 'Allows creating new permissions'),
 ('UPDATE_PERMISSION', 18, 'Update permission', 3, 1, 'Allows updating existing permissions'),
 ('DELETE_PERMISSION', 25, 'Delete permission', 3, 1, 'Allows deleting permissions'),
-('UPDATE_ROLE_PERMISSION', 54, 'Update role permission', 3, 1, 'Allows updating role permissions'),
+('UPDATE_ROLE_PERMISSION', 53, 'Update role permission', 3, 1, 'Allows updating role permissions'),
 
 -- Organization Management
 ('VIEW_CAMPUS', 4, 'View campus', 4, 1, 'Allows viewing campus details'),
@@ -76,34 +76,37 @@ VALUES
 ('MERGE_POSTMAN', 41, 'Merge postman', 7, 1, 'Allows merging postman script to main file collection postman'),
 ('DELETE_POSTMAN', 42, 'Delete postman', 7, 1, 'Allows deleting postman script'),
 ('UPDATE_QUESTION_POSTMAN', 43, 'Update question of postman', 7, 1, 'Allows updating question of postman script'),
-('CALCULATE_SCORE_QUESTION_POSTMAN', 44, 'Calculate score question of postman', 7, 1, 'Allows using calculate score function for postman script'),
 
 -- AI-key
-('VIEW_API_KEY', 49, 'View api key', 9, 1, 'Allows viewing api key'),
-('SELECT_OTHER_KEY', 50, 'Select other api key', 9, 1, 'Allows selecting other api key'),
-('CREATE_API_KEY', 51, 'Create api key', 9, 1, 'Allows creating api key'),
-('DELETE_API_KEY', 52, 'Delete api key', 9, 1, 'Allows deleting api key'),
+('VIEW_API_KEY', 48, 'View api key', 9, 1, 'Allows viewing api key'),
+('SELECT_OTHER_KEY', 49, 'Select other api key', 9, 1, 'Allows selecting other api key'),
+('CREATE_API_KEY', 50, 'Create api key', 9, 1, 'Allows creating api key'),
+('DELETE_API_KEY', 51, 'Delete api key', 9, 1, 'Allows deleting api key'),
 
 -- Exam paper
-('IMPORT_POSTMAN', 45, 'Import postman', 7, 1, 'Allows importing file collection postman'),
-('EXPORT_POSTMAN', 46, 'Export postman', 7, 1, 'Allows exporting file collection postman'),
-('CONFIRM_BEFORE_GRADING', 47, 'Confirm before grading', 7, 1, 'Allows confirming before grading'),
+('IMPORT_POSTMAN', 44, 'Import postman', 7, 1, 'Allows importing file collection postman'),
+('EXPORT_POSTMAN', 45, 'Export postman', 7, 1, 'Allows exporting file collection postman'),
+('CONFIRM_BEFORE_GRADING', 46, 'Confirm before grading', 7, 1, 'Allows confirming before grading'),
 
 -- Score Management
 ('VIEW_SCORE', 8, 'View score', 8, 1, 'Allows viewing scores'),
-('EXPORT_SCORE', 53, 'Export score', 8, 1, 'Allows exporting score reports'),
+('EXPORT_SCORE', 52, 'Export score', 8, 1, 'Allows exporting score reports'),
 
 -- Dashboard
-('DASHBOARD', 55, 'Dashboard access', 9, 1, 'Allows access to the dashboard'),
-('ALL_ACCESS', 48, 'All access', 9, 1, 'Allows access to all features'),
+('DASHBOARD', 54, 'Dashboard access', 9, 1, 'Allows access to the dashboard'),
+('ALL_ACCESS', 47, 'All access', 9, 1, 'Allows access to all features'),
 
 -- Student
-('VIEW_STUDENT', 56, 'View student', 7, 1, 'Allows viewing student details'),
-('IMPORT_STUDENT', 57, 'Import student', 7, 1, 'Allows importing student data'),
+('VIEW_STUDENT', 55, 'View student', 7, 1, 'Allows viewing student details'),
+('IMPORT_STUDENT', 56, 'Import student', 7, 1, 'Allows importing student data'),
 
 --Content AI
-('VIEW_PROMPT_AI', 58, 'View prompt AI', 7, 1, 'Allows viewing prompt ai'),
-('EDIT_PROMPT_AI', 59, 'Edit prompt AI', 7, 1, 'Allows editing prompt ai');
+('VIEW_PROMPT_AI', 57, 'View prompt AI', 7, 1, 'Allows viewing prompt ai'),
+('EDIT_PROMPT_AI', 58, 'Edit prompt AI', 7, 1, 'Allows editing prompt ai'),
+
+--Log
+('EXPORT_LOG', 59, 'Export log', 7, 1, 'Allows exporting log data');
+
 
 INSERT INTO `role`
 (`status`, `role_id`, `role_code`, `role_name`, `description`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`)
@@ -136,14 +139,14 @@ VALUES
 (false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
 (true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
 (true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 46), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
-(true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(true, 3, 58),(true, 3, 59),
+(true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(true, 3, 58),(false, 3, 59),
 -- Lecturer
 (false, 4, 2), (false, 4, 3), (false, 4, 10), (false, 4, 11), (false, 4, 17), (false, 4, 18), (false, 4, 23), (false, 4, 24), (false, 4, 25), (false, 4, 26),
 (false, 4, 15), (false, 4, 16), (false, 4, 19), (false, 4, 20), (false, 4, 21), (false, 4, 22), (false, 4, 27), (false, 4, 28),(false, 4, 29), (false, 4, 30),
 (false, 4, 31), (false, 4, 32), (false, 4, 33), (false, 4, 34), (false, 4, 35), (false, 4, 36), (false, 4, 37), (false, 4, 38), (false, 4, 39),
 (true, 4, 1), (true, 4, 4), (true, 4, 5), (true, 4, 6), (true, 4, 7), (true, 4, 8), (true, 4, 9), (true, 4, 12), (true, 4, 13), (true, 4, 14), (true, 4, 40),
 (true, 4, 41), (true, 4, 42), (true, 4, 43), (true, 4, 44), (true, 4, 45), (true, 4, 46), (true, 4, 47), (true, 4, 48), (true, 4, 49), (true, 4, 50),
-(true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(true, 4, 58),(true, 4, 59);
+(true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(true, 4, 58),(false, 4, 59);
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
@@ -379,11 +382,20 @@ Request Body (JSON):
 
 
 
-INSERT INTO `ai_api_key`
-(`ai_api_key`, `ai_name`, `account_id`,`status`,`shared`)
+-- INSERT INTO `ai_api_key`
+-- (`ai_api_key`, `ai_name`, `account_id`,`status`,`shared`)
+-- VALUES
+-- ('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',3,true,true),
+-- ('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',7,true,true);
+
+INSERT INTO `ai_api_key` 
+(`ai_name`, `ai_api_key`, `status`, `created_at`, `updated_at`, `shared`, `account_id`)
 VALUES
-('AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', 'Gemini',3,true,true),
-('AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', 'Gemini',7,true,true);
+('GEMINI', 'AIzaSyDxNBkQgMw5bxnB47_NLI5dnmiwKoRPqJc', true, NOW(), NOW(), true, 3),
+('GEMINI', 'AIzaSyChK5Jo_vP3JM2xeCALY_QXLuCkoad-y5U', true, NOW(), NOW(), true, 7);
+
+
+
 
 INSERT INTO `account_selected_key`
 (`account_id`, `selected_ai_api_key_id`)
@@ -395,7 +407,7 @@ VALUES
 (4, 1);
 
 
-INSERT INTO `content`
+INSERT INTO `ai_prompt`
 (`question_ask_ai_content`, `order_priority`,`purpose`)
 VALUES
 ('This is the database structure and sample data. Save it to your memory, do not reply.
@@ -406,6 +418,7 @@ VALUES
 - Only use real values and references from the database. For example, do not refer to a person with ID 123 if no such record exists.
 - Avoid generic descriptions like "valid person ID" or "successful response" unless explicitly derived from the database schema or example data.
 - Use specific field names and example values when describing request parameters or expected results.
+- **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.**
 - Each complete scenario must be fully enclosed in double curly braces {{ }}.
 
 The structure should follow the pattern:
@@ -416,11 +429,10 @@ The structure should follow the pattern:
     Then [Describe the primary outcome, reflecting database contents]
     And [Optional additional outcomes or verifications, reflecting database content]
 }}
-
 ', 2,'GENERATE_GHERKIN_FORMAT'),
 ('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
-('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. Use the following structure as a guideline: 
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.** Use the following structure as a guideline: 
 '
 ,2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
@@ -498,20 +510,23 @@ Do not explain the JSON structure, just provide the raw JSON. Use `http://localh
 INSERT INTO `autoscore`.`important`
 (`subject_id`,
 `important_code`,
-`important_name`)
+`important_name`,
+`important_scrip`)
 VALUES
 (1,
 'CNS',
-'Check connection String of the appsetting'),
+'Check connection String of the appsetting',
+'The database connection string must get from the appsettings.json file. The conection code must be in program.cs. In the case your code connects direct to the database from ASP.NET Core Web API or hard coded the connection string, you will get 0 point.'),
 (1,
 'SLN',
-'Check solution name'),
+'Check solution name',
+'Create Solution/Project in Visual Studio named {ExamCode}_{ExamPaperCode}_{StudentCode} _BE'),
 (1,
 'SST',
-'Check source structure');
+'Check source structure',
+'You are not allowed to connect directly to a database from ASP.NET Core Web API, every database connection must be used with Repository and Data Access Objects');
 
 INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '1', '1');
-INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '2', '2');
 
 
 

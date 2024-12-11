@@ -73,16 +73,6 @@ public class DocumentController {
 
             documentService.importExamPaper(examPaperId, file);
 
-            // // Lưu tệp
-            // Path uploadPath = Paths.get(UPLOAD_DIR);
-            // if (!Files.exists(uploadPath)) {
-            //     Files.createDirectories(uploadPath); // Tạo thư mục nếu chưa tồn tại
-            // }
-            // Path filePath = uploadPath.resolve(file.getOriginalFilename());
-            // file.transferTo(filePath.toFile());
-
-            // response.put("message", "File uploaded successfully");
-            // response.put("filePath", filePath.toString());
             return ResponseEntity.status(HttpStatus.OK).body(response);
 
         } catch ( NotFoundException e) {

@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContentDTO {
-     private Long contentId;
+public class AIPromptDTO {
+     private Long aiPromptId;
     private String questionAskAiContent;
     private Long orderPriority;
     private Purpose_Enum purpose;

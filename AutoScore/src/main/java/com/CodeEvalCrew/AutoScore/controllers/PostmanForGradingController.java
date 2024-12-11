@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.GradingRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 import com.CodeEvalCrew.AutoScore.services.postman_for_grading_service.IPostmanForGradingService;
@@ -58,9 +57,9 @@ public class PostmanForGradingController {
 
     @PreAuthorize("hasAnyAuthority('GENERATE_POSTMAN', 'ALL_ACCESS')")
     @PostMapping("/generate-more")
-    public ResponseEntity<?> generatePostmanCollectionMore(@RequestParam Long gherkinScenarioId) {
+    public ResponseEntity<?> generatePostmanCollectionMore(@RequestParam Long postmanForGradingId) {
         try {
-            return postmanForGradingService.generatePostmanCollectionMore(gherkinScenarioId);
+            return postmanForGradingService.generatePostmanCollectionMore(postmanForGradingId);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error: " + e.getMessage());
@@ -80,7 +79,8 @@ public class PostmanForGradingController {
 
     @PreAuthorize("hasAnyAuthority('DELETE_POSTMAN', 'ALL_ACCESS')")
     @DeleteMapping("")
-    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds, Long examPaperId) {
+    public ResponseEntity<String> deletePostmanForGrading(@RequestParam List<Long> postmanForGradingIds,
+            Long examPaperId) {
         String response = postmanForGradingService.deletePostmanForGrading(postmanForGradingIds, examPaperId);
         return ResponseEntity.ok(response);
     }
@@ -105,19 +105,14 @@ public class PostmanForGradingController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasAnyAuthority('CALCULATE_SCORE_QUESTION_POSTMAN', 'ALL_ACCESS')")
-    @PostMapping("/calculate-scores")
-    public ResponseEntity<?> calculateScores(
-            @RequestParam("examPaperId") Long examPaperId,
-            @RequestParam("examQuestionId") Long examQuestionId,
-            @RequestBody List<GradingRequestDTO> requests) {
+    @PostMapping("/calculate")
+    public ResponseEntity<String> calculateScores(@RequestParam Long examPaperId) {
         try {
-            return postmanForGradingService.calculateScores(requests, examPaperId, examQuestionId);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body("Invalid input: " + ex.getMessage());
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred: " + ex.getMessage());
+            postmanForGradingService.calculateScores(examPaperId);
+            return ResponseEntity.ok("Scores calculated successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+
 }
