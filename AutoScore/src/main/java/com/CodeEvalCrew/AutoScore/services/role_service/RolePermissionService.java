@@ -12,7 +12,7 @@ import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.RolePermissionRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionListResponseDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCategoryResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionCategoryResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.RolePermissionResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
@@ -54,13 +54,13 @@ public class RolePermissionService implements IRolePermissionService {
                 return null;
             }
 
-            List<PermissionPermissionCategoryResponseDTO> permissionCategories = permissionService.getAllPermissionByPermissionCategory();
+            List<PermissionCategoryResponseDTO> permissionCategories = permissionService.getAllPermissionByPermissionCategory();
             if (permissionCategories == null || permissionCategories.isEmpty()) {
                 return null;
             }
 
             for (Role_Permission rolePermission : rolePermissions) {
-                for (PermissionPermissionCategoryResponseDTO permissionCategory : permissionCategories) {
+                for (PermissionCategoryResponseDTO permissionCategory : permissionCategories) {
                     for (PermissionListResponseDTO permission : permissionCategory.getPermissions()) {
                         if (rolePermission.getPermission().getPermissionId().equals(permission.getPermissionId())) {
                             permission.setStatus(rolePermission.isStatus());

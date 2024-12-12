@@ -527,7 +527,6 @@ VALUES
 'You are not allowed to connect directly to a database from ASP.NET Core Web API, every database connection must be used with Repository and Data Access Objects');
 
 INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '1', '1');
-INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '2', '2');
 
 
 
