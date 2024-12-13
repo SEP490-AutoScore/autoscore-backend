@@ -10,5 +10,7 @@ public interface ISemesterService {
     List<SemesterView> getAllSemester();
 
     SemesterView createNewSemester(CreateSemesterRequest request);
+
+    SemesterView updateSemesterInfo(Long semesterId, CreateSemesterRequest request) throws Exception;
     
 }
