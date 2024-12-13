@@ -14,7 +14,7 @@ import com.CodeEvalCrew.AutoScore.mappers.PermissionMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PermissionRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionListResponseDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionPermissionCategoryResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionCategoryResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PermissionResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission;
 import com.CodeEvalCrew.AutoScore.models.Entity.Permission_Category;
@@ -219,16 +219,16 @@ public class PermissionService implements IPermissionService {
     }
 
     @Override
-    public List<PermissionPermissionCategoryResponseDTO> getAllPermissionByPermissionCategory() {
+    public List<PermissionCategoryResponseDTO> getAllPermissionByPermissionCategory() {
         try {
             List<Permission_Category> permissionCategories = permissionCategoryRepository.findAll()
                     .stream().filter(permissionCategory -> permissionCategory.isStatus()).collect(Collectors.toList());
             if (permissionCategories == null || permissionCategories.isEmpty()) {
                 return null;
             }
-            List<PermissionPermissionCategoryResponseDTO> permissionPermissionCategoryResponseDTOs = new ArrayList<>();
+            List<PermissionCategoryResponseDTO> permissionPermissionCategoryResponseDTOs = new ArrayList<>();
             for (Permission_Category permissionCategory : permissionCategories) {
-                PermissionPermissionCategoryResponseDTO permissionPermissionCategoryResponseDTO = new PermissionPermissionCategoryResponseDTO();
+                PermissionCategoryResponseDTO permissionPermissionCategoryResponseDTO = new PermissionCategoryResponseDTO();
                 Optional<List<Permission>> permissions = permissionRepository.findAllByPermissionCategory(permissionCategory);
                 if (permissions.isPresent() && !permissions.get().isEmpty()) {
                     permissionPermissionCategoryResponseDTO.setPermissionCategoryName(permissionCategory.getPermissionCategoryName());
@@ -254,7 +254,7 @@ public class PermissionService implements IPermissionService {
                 }
             }
             return permissionPermissionCategoryResponseDTOs
-                    .stream().sorted(Comparator.comparing(PermissionPermissionCategoryResponseDTO::getPermissionCategoryName))
+                    .stream().sorted(Comparator.comparing(PermissionCategoryResponseDTO::getPermissionCategoryName))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new Exception("Error while getting all permissions");
