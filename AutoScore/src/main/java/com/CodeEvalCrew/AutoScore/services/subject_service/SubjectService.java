@@ -94,4 +94,19 @@ public class SubjectService implements ISubjectService{
     private <T> T checkEntityExistence(Optional<T> entity, String entityName, Long entityId) throws NotFoundException {
         return entity.orElseThrow(() -> new NotFoundException(entityName + " id: " + entityId + " not found"));
     }
+
+    @Override
+    public SubjectView updateInfoSubject(Long subjectId, CreateSubjectRequest request)  throws Exception, NotFoundException {
+        SubjectView result;
+        try {
+                Subject subject = checkEntityExistence(subjectRepository.findById(subjectId),"Subject", subjectId);
+                subject.setSubjectName(request.getSubjectName());
+                subjectRepository.save(subject);
+
+                result = SubjectMapper.INSTANCE.subjectToView(subject);
+                return result;
+        } catch (Exception | NotFoundException e) {
+            throw e;
+        }
+    }
 }
