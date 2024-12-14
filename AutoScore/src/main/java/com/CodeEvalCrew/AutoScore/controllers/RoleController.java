@@ -38,6 +38,20 @@ public class RoleController {
     }
 
     @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
+    @GetMapping("/byRole")
+    public ResponseEntity<List<RoleResponseDTO>> getAllRolesByRole() {
+        try {
+            List<RoleResponseDTO> roles = roleService.getAllRolesByRole();
+            if (roles == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(roles);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @GetMapping("/{roleId}")
     public ResponseEntity<RoleResponseDTO> getRoleById(@PathVariable Long roleId) {
         try {

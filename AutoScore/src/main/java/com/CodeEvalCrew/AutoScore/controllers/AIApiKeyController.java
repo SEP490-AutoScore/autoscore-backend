@@ -72,10 +72,9 @@ public class AIApiKeyController {
     @PutMapping("/{aiApiKeyId}")
     public ResponseEntity<Void> updateAIApiKey(
             @PathVariable Long aiApiKeyId,
-            @RequestParam String aiApiKey,
             @RequestParam boolean shared)  {
         try {
-            aiApiKeyService.updateAI_Api_Key(aiApiKeyId, aiApiKey, shared);
+            aiApiKeyService.updateAI_Api_Key(aiApiKeyId, shared);
             return ResponseEntity.noContent().build();
         } catch (ResponseStatusException ex) {
             throw ex;

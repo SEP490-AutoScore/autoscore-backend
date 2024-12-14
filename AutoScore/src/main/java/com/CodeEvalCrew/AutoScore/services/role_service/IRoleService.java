@@ -13,4 +13,5 @@ public interface IRoleService {
     OperationStatus createRole(RoleRequestDTO roleRequestDTO);
     OperationStatus updateRole(RoleRequestDTO roleRequestDTO);
     OperationStatus deleteRole(Long roleId);
+    List<RoleResponseDTO> getAllRolesByRole();
 }

@@ -11,6 +11,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.OrganizationRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OrganizationResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.repositories.account_organization_repository.AccountOrganizationRepository;
@@ -18,6 +19,7 @@ import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepos
 import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationSubjectRepository;
 import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentRepository;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 import jakarta.transaction.Transactional;
 
@@ -29,15 +31,17 @@ public class OrganizationService implements IOrganizationService {
     private final IOrganizationSubjectRepository organizationSubjectRepository;
     private final AccountOrganizationRepository accountOrganizationRepository;
     private final StudentRepository studentRepository;
+    private final Util util;
 
     public OrganizationService(IOrganizationRepository organizationRepository, IEmployeeRepository employeeRepository,
             IOrganizationSubjectRepository organizationSubjectRepository, AccountOrganizationRepository accountOrganizationRepository,
-            StudentRepository studentRepository) {
+            StudentRepository studentRepository, Util util) {
         this.organizationRepository = organizationRepository;
         this.employeeRepository = employeeRepository;
         this.organizationSubjectRepository = organizationSubjectRepository;
         this.accountOrganizationRepository = accountOrganizationRepository;
         this.studentRepository = studentRepository;
+        this.util = util;
     }
 
     @Override
@@ -53,6 +57,43 @@ public class OrganizationService implements IOrganizationService {
                 organizationResponseDTO.setType(organization.getType().toString());
                 organizationResponseDTO.setStatus(organization.isStatus());
                 organizationResponseDTO.setParentId(organization.getParentId());
+                organizationResponseDTOs.add(organizationResponseDTO);
+            }
+
+            return organizationResponseDTOs;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<OrganizationResponseDTO> getAllOrganizationByRole() {
+        try {
+            Account account = util.getAuthenticatedAccount();
+            List<OrganizationResponseDTO> organizationResponseDTOs = new ArrayList<>();
+            List<Organization> organizations = organizationRepository.findAll();
+
+            for (Organization organization : organizations) {
+                if (organization.getType() != Organization_Enum.CAMPUS
+                        && organization.getType() != Organization_Enum.UNIVERSITY) {
+                    continue;
+                }
+
+                OrganizationResponseDTO organizationResponseDTO = new OrganizationResponseDTO();
+                organizationResponseDTO.setOrganizationId(organization.getOrganizationId());
+                organizationResponseDTO.setName(organization.getName());
+
+                String roleCode = account.getRole().getRoleCode();
+                boolean status = false;
+
+                if ("ADMIN".equals(roleCode)) {
+                    status = true;
+                } else if (("EXAMINER".equals(roleCode) || "HEAD_OF_DEPARTMENT".equals(roleCode))
+                        && organization.getType() != Organization_Enum.UNIVERSITY) {
+                    status = true;
+                }
+
+                organizationResponseDTO.setStatus(status);
                 organizationResponseDTOs.add(organizationResponseDTO);
             }
 

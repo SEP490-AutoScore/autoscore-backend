@@ -157,17 +157,6 @@ public class ScoreController {
     }
 
     @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
-    @GetMapping("/analyze-log-one-pass")
-    public ResponseEntity<?> analyzeScoresPartialPassLogRunPostman(@RequestParam Long examPaperId) {
-        try {
-            Map<String, Integer> partialPassCounts = scoreService.analyzeScoresPartialPassLogRunPostman(examPaperId);
-            return ResponseEntity.ok(partialPassCounts);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
-        }
-    }
-
-    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("/analyze-log-all-pass")
     public ResponseEntity<?> analyzeScoresFullyPassLogRunPostman(@RequestParam Long examPaperId) {
         try {
@@ -179,15 +168,42 @@ public class ScoreController {
     }
 
     @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
-    @GetMapping("/analyze-log-each-test")
-    public ResponseEntity<?> analyzeScoresTestCasePassLogRunPostman(@RequestParam Long examPaperId) {
+    @GetMapping("/analyze-log-one-pass")
+    public ResponseEntity<?> analyzeScoresPartialPassLogRunPostman(@RequestParam Long examPaperId) {
         try {
-            Map<String, Map<String, Integer>> testCasePassCounts = scoreService
-                    .analyzeScoresTestCasePassLogRunPostman(examPaperId);
-            return ResponseEntity.ok(testCasePassCounts);
+            Map<String, Integer> partialPassCounts = scoreService.analyzeScoresPartialPassLogRunPostman(examPaperId);
+            return ResponseEntity.ok(partialPassCounts);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/analyze-log-fail-all")
+    public ResponseEntity<?> analyzeScoresFailedAllTests(@RequestParam Long examPaperId) {
+        try {
+            Map<String, Integer> functionFailCounts = scoreService.analyzeScoresFailedAllTests(examPaperId);
+            return ResponseEntity.ok(functionFailCounts);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/get-total-run-and-average-response-time")
+    public ResponseEntity<?> getTotalRunAndAverageResponseTime(@RequestParam Long examPaperId) {
+        try {
+            // Call the service method to get the total run duration and average response
+            // time
+            Map<String, Map<String, Double>> totalAndAverageResponseTimes = scoreService
+                    .getTotalRunAndAverageResponseTime(examPaperId);
+            return ResponseEntity.ok(totalAndAverageResponseTimes);
+        } catch (Exception e) {
+            // Handle the exception and return a 500 error with the message
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+   
 
 }

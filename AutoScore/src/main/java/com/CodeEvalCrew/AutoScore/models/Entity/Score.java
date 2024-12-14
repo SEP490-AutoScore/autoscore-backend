@@ -45,7 +45,6 @@ public class Score {
     @Column(columnDefinition = "LONGTEXT")
     private String logRunPostman;
 
-    //Relationship
     //n-1 exam paper
     @ManyToOne
     @JoinColumn(name = "examPaperId", nullable = false)
@@ -55,10 +54,6 @@ public class Score {
     @ManyToOne
     @JoinColumn(name = "studentId", nullable = false)
     private Student student;
-
-    // @ManyToOne
-    // @JoinColumn(name = "organizationId", nullable = false)
-    // private Organization organization;
 
     //1-n score detail
     @OneToMany(mappedBy = "score", cascade = CascadeType.ALL, orphanRemoval = true)

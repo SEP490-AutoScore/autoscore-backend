@@ -6,8 +6,9 @@ import lombok.Data;
 public class AccountRequestDTO {
     private Long accountId;
     private Long employeeId;
-    private String email;
     private String fullName;
+    private String email;
+    private String password;
     private Long roleId;
     private Long positionId;
     private Long departmentId;

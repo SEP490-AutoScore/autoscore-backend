@@ -11,5 +11,5 @@ import lombok.Setter;
 @Setter
 public class StudentScoreDTO {
     private String studentCode;
-    private int totalScore;
+    private Float totalScore;
 }

@@ -14,4 +14,6 @@ public interface ISubjectService {
 
     SubjectView addSubjectintoOrganization(Long organizationId, Long subjectId) throws Exception, NotFoundException;
 
+    SubjectView updateInfoSubject(Long subjectId, CreateSubjectRequest request) throws Exception, NotFoundException;
+
 }

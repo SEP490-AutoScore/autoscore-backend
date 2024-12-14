@@ -222,4 +222,17 @@ public class ExamPaperController {
         }
     }
 
+
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PutMapping("/exam-paper/{examPaperId}")
+    public ResponseEntity<?> usedExamPaperInExam(@PathVariable Long examPaperId) {
+        try {
+            examPaperService.updateIsused(examPaperId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

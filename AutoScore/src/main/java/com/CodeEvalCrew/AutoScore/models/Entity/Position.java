@@ -25,6 +25,7 @@ public class Position {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long positionId;
     private String name;
+    private String positionCode;
     private String description;
     private LocalDateTime lastUpdated;
     private boolean status;

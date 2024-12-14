@@ -14,7 +14,7 @@ public interface IAIApiKeyService {
 
      void createAIApiKey(CreateAIApiKeyDTO dto);
 
-    void updateAI_Api_Key(Long aiApiKeyId, String aiApiKey, boolean shared);
+    void updateAI_Api_Key(Long aiApiKeyId, boolean shared);
     
      boolean deleteAIApiKey(Long aiApiKeyId);
 
