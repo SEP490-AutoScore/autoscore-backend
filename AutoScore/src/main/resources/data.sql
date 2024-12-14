@@ -138,24 +138,30 @@ VALUES
 (true, 2, 15), (true, 2, 16), (true, 2, 19), (true, 2, 20), (true, 2, 21), (true, 2, 22), (true, 2, 26), (true, 2, 27), (true, 2, 28), (true, 2, 29),
 (true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40),
 (true, 2, 41), (true, 2, 42), (true, 2, 43), (true, 2, 44), (true, 2, 45), (true, 2, 46), (true, 2, 47), (true, 2, 48), (true, 2, 49), (true, 2, 50),
+
 (true, 2, 51),(true, 2, 52),(true, 2, 53),(true, 2, 54),(true, 2, 55),(true, 2, 56),(true, 2, 57),(true, 2, 58),(true, 2, 59), (true, 2, 60),
 (true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64),
+
 -- Head of Department
 (false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
 (false, 3, 15), (false, 3, 16), (false, 3, 19), (false, 3, 20), (false, 3, 21), (false, 3, 22), (false, 3, 27), (false, 3, 28),(false, 3, 29), (false, 3, 30),
 (false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
 (true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
 (true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 46), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
+
 (true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(true, 3, 58),(false, 3, 59), (true, 3, 60),
 (true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64),
+
 -- Lecturer
 (false, 4, 2), (false, 4, 3), (false, 4, 10), (false, 4, 11), (false, 4, 17), (false, 4, 18), (false, 4, 23), (false, 4, 24), (false, 4, 25), (false, 4, 26),
 (false, 4, 15), (false, 4, 16), (false, 4, 19), (false, 4, 20), (false, 4, 21), (false, 4, 22), (false, 4, 27), (false, 4, 28),(false, 4, 29), (false, 4, 30),
 (false, 4, 31), (false, 4, 32), (false, 4, 33), (false, 4, 34), (false, 4, 35), (false, 4, 36), (false, 4, 37), (false, 4, 38), (false, 4, 39),
 (true, 4, 1), (true, 4, 4), (true, 4, 5), (true, 4, 6), (true, 4, 7), (true, 4, 8), (true, 4, 9), (true, 4, 12), (true, 4, 13), (true, 4, 14), (true, 4, 40),
 (true, 4, 41), (true, 4, 42), (true, 4, 43), (true, 4, 44), (true, 4, 45), (true, 4, 46), (true, 4, 47), (true, 4, 48), (true, 4, 49), (true, 4, 50),
+
 (true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(true, 4, 58),(false, 4, 59),(true, 4, 60),
 (true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64);
+
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
@@ -441,7 +447,7 @@ The structure should follow the pattern:
 ', 2,'GENERATE_GHERKIN_FORMAT'),
 ('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
-('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.** Use the following structure as a guideline: 
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.** Do not generate any Gherkin scenarios that match or are similar to the following examples. Use the following structure as a guideline: 
 '
 ,2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
@@ -452,11 +458,11 @@ The structure should follow the pattern:
 2. The `info` section includes `_postman_id`, `name`, `schema`, `_exporter_id`.  
 3. The `item` section includes:  
    - `name`, which should closely reflect the Gherkin scenario name,  
-   - `request.url` which must start with `http://localhost:8080/`,  
+   - `request.url` which must start with `http://localhost:8080/...`,  
    - `event.listen` with the value `test`,  
    - `event.script.exec` with the value `pm.test`.  
 
-Do not explain the JSON structure, just provide the raw JSON. Use `http://localhost:8080/` as the base URL for all requests.  
+Do not explain the JSON structure, just provide the raw JSON.  
 ', 2,'GENERATE_POSTMAN_COLLECTION'),
 
 ('This is the database structure and sample data. Save it to your memory, do not reply.
@@ -536,6 +542,13 @@ VALUES
 'You are not allowed to connect directly to a database from ASP.NET Core Web API, every database connection must be used with Repository and Data Access Objects');
 
 INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '1', '1');
+<<<<<<< HEAD
+-- INSERT INTO `autoscore`.`important_exam_paper` (`status`, `exam_paper_id`, `important_exam_paper_id`, `important_id`) VALUES ('1', '1', '2', '2');
+
+--log
+INSERT INTO `log` VALUES (1,1,'Account [6] [Import database successfully] at [2024-12-10T23:11:56.789852300], Account [6] [Import file postman successfully] at [2024-12-10T23:12:01.822421], Account [6] [Import file postman successfully] at [2024-12-10T23:12:09.567323900], Account [6] [Update function tree successfully] at [2024-12-10T23:12:15.104123700], Account [6] [Import file postman successfully] at [2024-12-10T23:22:35.888355], Account [6] [Update function tree successfully] at [2024-12-10T23:22:43.238810800], Account [6] [Update function tree successfully] at [2024-12-10T23:22:55.905177900], Account [6] [Export file postman collection successfully] at [2024-12-10T23:24:32.451882600], Account [6] [Import file postman successfully] at [2024-12-10T23:25:36.391387400], Account [6] [Update function tree successfully] at [2024-12-10T23:25:42.654142100], Account [6] [Confirm all before grading successfully] at [2024-12-10T23:25:42.802534400], Account [6] [Import source code student successfully] at [2024-12-10T23:26:06.153789500], Account [6] [Import list student successfully] at [2024-12-10T23:26:04.664320400], Account [6] [Import file postman successfully] at [2024-12-10T23:51:32.345704800], Account [6] [Import file postman successfully] at [2024-12-10T23:53:42.280225100], Account [6] [Import file postman successfully] at [2024-12-10T23:54:12.388179800], Account [6] [Import file postman successfully] at [2024-12-10T23:54:47.648023800], Account [6] [Import file postman successfully] at [2024-12-10T23:55:56.097105600], Account [6] [Update function tree successfully] at [2024-12-10T23:56:01.767786500], Account [6] [Confirm all before grading successfully] at [2024-12-10T23:56:01.864255600], Account [6] [Import file postman successfully] at [2024-12-11T00:01:22.206974600], Account [6] [Update function tree successfully] at [2024-12-11T00:01:27.591985], Account [6] [Confirm all before grading successfully] at [2024-12-11T00:01:27.716983100], Account [6] [Import file postman successfully] at [2024-12-11T00:14:31.006665600], Account [6] [Update function tree successfully] at [2024-12-11T00:14:35.890770300], Account [6] [Confirm all before grading successfully] at [2024-12-11T00:14:35.996834300], Account [6] [Import file postman successfully] at [2024-12-11T00:17:24.660252900], Account [6] [Update function tree successfully] at [2024-12-11T00:17:29.446983300], Account [6] [Import file postman successfully] at [2024-12-11T00:24:10.145004600], Account [6] [Update function tree successfully] at [2024-12-11T00:24:29.453799500], Account [6] [Update function tree successfully] at [2024-12-11T00:26:08.666913200], Account [6] [Confirm all before grading successfully] at [2024-12-11T00:26:08.825104700], Account [6] [Import source code student successfully] at [2024-12-11T00:46:52.476736100], Account [6] [Import list student successfully] at [2024-12-11T00:46:51.378701], Account [6] [Import source code student successfully] at [2024-12-11T00:47:43.838854700], Account [6] [Import list student successfully] at [2024-12-11T00:47:42.795742100], Account [6] [Import file postman successfully] at [2024-12-11T00:58:27.130222600], Account [6] [Calculate score for all postman function successfully] at [2024-12-11T00:58:31.364076100], Account [6] [Update function tree successfully] at [2024-12-11T00:58:32.636913100], Account [6] [Confirm all before grading successfully] at [2024-12-11T00:58:32.767543100], Account [6] [Import file postman successfully] at [2024-12-11T01:05:48.753454], Account [6] [Calculate score for all postman function successfully] at [2024-12-11T01:05:54.131342900], Account [6] [Update function tree successfully] at [2024-12-11T01:05:55.210458700], Account [6] [Update function tree successfully] at [2024-12-11T01:06:14.643687800], Account [6] [Import file postman successfully] at [2024-12-11T01:06:41.146252600], Account [6] [Calculate score for all postman function successfully] at [2024-12-11T01:06:44.734973600], Account [6] [Update function tree successfully] at [2024-12-11T01:06:45.733347100], Account [6] [Confirm all before grading successfully] at [2024-12-11T01:06:45.872593600], Account [6] [Export file postman collection successfully] at [2024-12-11T01:09:23.272963500]');
+=======
+>>>>>>> 8f46292c53b0f596b02ed4ded968808cdc0c8f99
 
 
 

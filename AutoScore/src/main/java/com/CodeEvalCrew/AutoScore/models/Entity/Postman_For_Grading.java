@@ -27,21 +27,14 @@ public class Postman_For_Grading {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postmanForGradingId;
-
     private String postmanFunctionName;
-
     private Float scoreOfFunction;
-
     private Float scorePercentage;
-
     private Long totalPmTest;
-
     private boolean status;
-
     private Long orderPriority;
-
     private Long postmanForGradingParentId;
-
+    
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     @Basic(fetch = FetchType.EAGER)
