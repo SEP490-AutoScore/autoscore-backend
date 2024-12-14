@@ -621,28 +621,31 @@ public class ScoreService implements IScoreService {
 
         return studentTotalAndAverageResponseTimes;
     }
-// Helper method to extract total run duration from the log
-private Double extractTotalRunDurationFromLog(String log) {
 
-    Pattern totalDurationPattern = Pattern.compile("total run duration: ([0-9.]+)s");
-    Matcher matcher = totalDurationPattern.matcher(log);
-    if (matcher.find()) {
-        return Double.parseDouble(matcher.group(1)); // Return duration in seconds
+    // Helper method to extract total run duration from the log
+    private Double extractTotalRunDurationFromLog(String log) {
+
+        Pattern totalDurationPattern = Pattern.compile("total run duration: ([0-9.]+)s");
+        Matcher matcher = totalDurationPattern.matcher(log);
+        if (matcher.find()) {
+            return Double.parseDouble(matcher.group(1)); // Return duration in seconds
+        }
+        return 0.0; // Default if not found
     }
-    return 0.0; // Default if not found
-}
 
-// Helper method to extract average response time from the log
-private Double extractAverageResponseTimeFromLog(String log) {
+    // Helper method to extract average response time from the log
+    private Double extractAverageResponseTimeFromLog(String log) {
 
-    Pattern averageResponsePattern = Pattern.compile("average response time: ([0-9]+)ms");
-    Matcher matcher = averageResponsePattern.matcher(log);
-    if (matcher.find()) {
-        return Double.parseDouble(matcher.group(1)) / 1000.0; // Convert ms to seconds
+        Pattern averageResponsePattern = Pattern.compile("average response time: ([0-9]+)ms");
+        Matcher matcher = averageResponsePattern.matcher(log);
+        if (matcher.find()) {
+            return Double.parseDouble(matcher.group(1)) / 1000.0; // Convert ms to seconds
+        }
+        return 0.0; // Default if not found
     }
-    return 0.0; // Default if not found
-}
 
     
-
+    
+    
+    
 }

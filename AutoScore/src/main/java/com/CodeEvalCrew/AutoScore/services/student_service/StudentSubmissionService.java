@@ -2,13 +2,10 @@ package com.CodeEvalCrew.AutoScore.services.student_service;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -23,53 +20,49 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
-import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Source;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
-import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.repositories.student_repository.StudentRepository;
 import com.CodeEvalCrew.AutoScore.services.file_service.FileExtractionService;
 import com.CodeEvalCrew.AutoScore.services.source_service.SourceDetailService;
 import com.CodeEvalCrew.AutoScore.services.source_service.SourceService;
 import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorService;
-import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
 public class StudentSubmissionService {
 
-    @Autowired
-    private LogRepository logRepository;
+    // @Autowired
+    // private LogRepository logRepository;
 
-    private void saveLog(Long examPaperId, String actionDetail) {
+    // private void saveLog(Long examPaperId, String actionDetail) {
 
-        Optional<Exam_Paper> optionalExamPaper = examPaperRepository.findById(examPaperId);
-        if (optionalExamPaper.isEmpty()) {
-            throw new IllegalArgumentException("Exam Paper with ID " + examPaperId + " does not exist.");
-        }
+    //     Optional<Exam_Paper> optionalExamPaper = examPaperRepository.findById(examPaperId);
+    //     if (optionalExamPaper.isEmpty()) {
+    //         throw new IllegalArgumentException("Exam Paper with ID " + examPaperId + " does not exist.");
+    //     }
 
-        Exam_Paper examPaper = optionalExamPaper.get();
-        Log log = examPaper.getLog();
+    //     Exam_Paper examPaper = optionalExamPaper.get();
+    //     Log log = examPaper.getLog();
 
-        if (log == null) {
-            log = new Log();
-            log.setExamPaper(examPaper);
-            log.setAllData(actionDetail);
-        } else {
+    //     if (log == null) {
+    //         log = new Log();
+    //         log.setExamPaper(examPaper);
+    //         log.setAllData(actionDetail);
+    //     } else {
 
-            String updatedData = log.getAllData() == null ? "" : log.getAllData() + ", ";
-            log.setAllData(updatedData + actionDetail);
-        }
+    //         String updatedData = log.getAllData() == null ? "" : log.getAllData() + ", ";
+    //         log.setAllData(updatedData + actionDetail);
+    //     }
 
-        logRepository.save(log);
-    }
+    //     logRepository.save(log);
+    // }
 
     private static final Logger logger = LoggerFactory.getLogger(StudentSubmissionService.class);
 
@@ -86,7 +79,7 @@ public class StudentSubmissionService {
     private final StudentErrorService studentErrorService;
     private final IExamPaperRepository examPaperRepository;
     private final FileProcessingProgressService progressService;
-    private static final int MAX_THREADS = 4;
+    private static final int MAX_THREADS = 1;
 
     AtomicInteger totalTasks = new AtomicInteger(0);
     AtomicInteger completedTasks = new AtomicInteger(0);
@@ -108,10 +101,10 @@ public class StudentSubmissionService {
     // Phương thức chính để xử lý file submission
     public List<String> processFileSubmission(MultipartFile file, Long examId) throws IOException {
 
-        Long authenticatedUserId = Util.getAuthenticatedAccountId();
-        LocalDateTime time = Util.getCurrentDateTime();
-        List<Exam_Paper> foundExamPapers = new ArrayList<>();
-        Set<Long> loggedExamPaperIds = new HashSet<>();
+        // Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        // LocalDateTime time = Util.getCurrentDateTime();
+        // List<Exam_Paper> foundExamPapers = new ArrayList<>();
+        // Set<Long> loggedExamPaperIds = new HashSet<>();
 
         List<String> unmatchedStudents = Collections.synchronizedList(new ArrayList<>());
         List<String> errors = Collections.synchronizedList(new ArrayList<>()); // Danh sách lưu lỗi
@@ -155,8 +148,8 @@ public class StudentSubmissionService {
                     continue;
                 }
 
-                Exam_Paper foundExamPaper = examPaper.get();
-                foundExamPapers.add(foundExamPaper);
+                // Exam_Paper foundExamPaper = examPaper.get();
+                // foundExamPapers.add(foundExamPaper);
 
                 Source source = sourceService.saveMainSource(examFolder.getAbsolutePath(), examPaper.get());
 
@@ -205,14 +198,14 @@ public class StudentSubmissionService {
 
         unmatchedStudents.addAll(errors);
 
-        for (Exam_Paper examPaper : foundExamPapers) {
-            if (!loggedExamPaperIds.contains(examPaper.getExamPaperId())) {
-                saveLog(
-                        examPaper.getExamPaperId(),
-                        "Account [" + authenticatedUserId + "] [Import list student successfully] at [" + time + "]");
-                loggedExamPaperIds.add(examPaper.getExamPaperId());
-            }
-        }
+        // for (Exam_Paper examPaper : foundExamPapers) {
+        //     if (!loggedExamPaperIds.contains(examPaper.getExamPaperId())) {
+        //         saveLog(
+        //                 examPaper.getExamPaperId(),
+        //                 "Account [" + authenticatedUserId + "] [Import list student successfully] at [" + time + "]");
+        //         loggedExamPaperIds.add(examPaper.getExamPaperId());
+        //     }
+        // }
 
         return unmatchedStudents;
     }

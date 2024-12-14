@@ -36,8 +36,8 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateD
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetbyIdDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Prompt;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Purpose_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
@@ -231,7 +231,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
             // Lấy thông tin từ Exam_Paper
             Exam_Paper examPaper = examPaperRepository.findById(examPaperId).orElseThrow(
-                    () -> new RuntimeException("Exam Paper không tồn tại với ID: " + examPaperId));
+                    () -> new RuntimeException("Exam Paper not existed ID: " + examPaperId));
 
             String examCode = (examPaper.getExam() != null) ? examPaper.getExam().getExamCode() : "Unknown";
 

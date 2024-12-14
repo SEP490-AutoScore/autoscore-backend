@@ -49,6 +49,8 @@ public interface IScoreService {
           Map<String, Integer> analyzeScoresFailedAllTests(Long examPaperId);
 
            Map<String, Map<String, Double>> getTotalRunAndAverageResponseTime(Long examPaperId);
+
+           
           
 
      

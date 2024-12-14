@@ -37,6 +37,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.NewmanResult;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
+import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important;
@@ -47,6 +48,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
+import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
 import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
@@ -85,6 +87,8 @@ public class ExamPaperService implements IExamPaperService {
     private LogRepository logRepository;
     @Autowired
     private PathUtil pathUtil;
+    @Autowired
+    private IExamDatabaseRepository examDatabaseRepository;
 
     public ExamPaperService(IExamPaperRepository examPaperRepository,
             IExamRepository examRepository,
@@ -365,7 +369,7 @@ public class ExamPaperService implements IExamPaperService {
             }
         }
     }
-    
+
     @Override
     public void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception {
 
@@ -447,20 +451,20 @@ public class ExamPaperService implements IExamPaperService {
                         JSONArray pathArray = urlObject.getJSONArray("path");
                         String actualPath = "/" + String.join("/",
                                 pathArray.toList().stream().map(Object::toString).toArray(String[]::new));
-                    
-                          List<Exam_Question> matchingQuestions = examQuestions.stream()
-                    .filter(question -> question.getHttpMethod().equals(httpMethod)
-                            && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
-                    .collect(Collectors.toList());
-                    
-                      // If only one question matches, perform assignment
-            if (matchingQuestions.size() == 1) {
-                postmanFunction.setExamQuestion(matchingQuestions.get(0));
-                postmanForGradingRepository.save(postmanFunction);
-            } else if (matchingQuestions.size() > 1) {
-              
-            }
-                                         
+
+                        List<Exam_Question> matchingQuestions = examQuestions.stream()
+                                .filter(question -> question.getHttpMethod().equals(httpMethod)
+                                        && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
+                                .collect(Collectors.toList());
+
+                        // If only one question matches, perform assignment
+                        if (matchingQuestions.size() == 1) {
+                            postmanFunction.setExamQuestion(matchingQuestions.get(0));
+                            postmanForGradingRepository.save(postmanFunction);
+                        } else if (matchingQuestions.size() > 1) {
+
+                        }
+
                     }
                 }
             }
@@ -758,30 +762,30 @@ public class ExamPaperService implements IExamPaperService {
     private void validateItemRequests(String fileContent) throws Exception {
         JSONObject collectionJson = new JSONObject(fileContent);
         JSONArray items = collectionJson.getJSONArray("item");
-    
+
         for (int i = 0; i < items.length(); i++) {
             JSONObject item = items.getJSONObject(i);
             if (item.has("request")) {
                 JSONObject request = item.getJSONObject("request");
                 if (request.has("url")) {
                     JSONObject url = request.getJSONObject("url");
-    
-                  // Check protocol
+
+                    // Check protocol
                     if (!url.has("protocol") || !"http".equalsIgnoreCase(url.getString("protocol"))) {
                         throw new Exception("Invalid protocol for item: " + item.getString("name"));
                     }
-                //     if (!url.has("protocol") || 
-                //     (!"http".equalsIgnoreCase(url.getString("protocol")) && 
-                //      !"https".equalsIgnoreCase(url.getString("protocol")))) {
-                //     throw new Exception("Invalid protocol for item: " + item.getString("name"));
-                // }
-    
-                  // Check host
+                    // if (!url.has("protocol") ||
+                    // (!"http".equalsIgnoreCase(url.getString("protocol")) &&
+                    // !"https".equalsIgnoreCase(url.getString("protocol")))) {
+                    // throw new Exception("Invalid protocol for item: " + item.getString("name"));
+                    // }
+
+                    // Check host
                     if (!url.has("host") || !url.getJSONArray("host").toList().contains("localhost")) {
                         throw new Exception("Invalid host for item: " + item.getString("name"));
                     }
-    
-               // Check port
+
+                    // Check port
                     if (!url.has("port") || url.getString("port").isEmpty()) {
                         throw new Exception("Port is missing for item: " + item.getString("name"));
                     }
@@ -808,20 +812,29 @@ public class ExamPaperService implements IExamPaperService {
             throw new IllegalArgumentException("Exam Paper with the provided ID does not exist.", e);
         }
 
+        // Check Exam_Database and databaseScript
+        Exam_Database examDatabase = examDatabaseRepository.findByExamPaper_ExamPaperId(examPaperId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Exam Database not found for the provided Exam Paper ID."));
+
+        if (examDatabase.getDatabaseScript() == null || examDatabase.getDatabaseScript().isEmpty()) {
+            throw new IllegalArgumentException("Exam Database Script cannot be null or empty.");
+        }
+
+        // Check fileCollectionPostman
         if (examPaper.getFileCollectionPostman() == null || examPaper.getFileCollectionPostman().length == 0) {
             throw new IllegalArgumentException("fileCollectionPostman is empty for this Exam Paper.");
         }
 
-         // Convert byte[] to String
-    String fileContent = new String(examPaper.getFileCollectionPostman(), StandardCharsets.UTF_8);
+        // Convert byte[] to String
+        String fileContent = new String(examPaper.getFileCollectionPostman(), StandardCharsets.UTF_8);
 
-    // Call the validateItemRequests function to check the file
-    try {
-        validateItemRequests(fileContent);
-    } catch (Exception e) {
-        throw new IllegalArgumentException("Validation failed for fileCollectionPostman: " + e.getMessage(), e);
-    }
-
+        // Call the validateItemRequests function to check the file
+        try {
+            validateItemRequests(fileContent);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Validation failed for fileCollectionPostman: " + e.getMessage(), e);
+        }
 
         try {
 
@@ -854,9 +867,8 @@ public class ExamPaperService implements IExamPaperService {
                 }
                 if (gradingItem.getScoreOfFunction() == null || gradingItem.getScoreOfFunction() <= 0) {
                     throw new IllegalArgumentException(String.format(
-                        "Grading item '%s' has invalid scoreOfFunction: must be greater than 0.",
-                        gradingItem.getPostmanFunctionName()
-                    ));
+                            "Grading item '%s' has invalid scoreOfFunction: must be greater than 0.",
+                            gradingItem.getPostmanFunctionName()));
                 }
             }
 
