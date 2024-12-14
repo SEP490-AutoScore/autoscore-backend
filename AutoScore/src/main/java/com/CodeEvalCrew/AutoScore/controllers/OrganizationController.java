@@ -33,6 +33,12 @@ public class OrganizationController {
     }
 
     @PreAuthorize("hasAnyAuthority('VIEW_ORGANIZATION', 'ALL_ACCESS')")
+    @GetMapping("/byRole")
+    public List<OrganizationResponseDTO> getAllOrganizationByRole() {
+        return organizationService.getAllOrganizationByRole();
+    }
+
+    @PreAuthorize("hasAnyAuthority('VIEW_ORGANIZATION', 'ALL_ACCESS')")
     @GetMapping("/{organizationId}")
     public OrganizationResponseDTO getOrganization(@PathVariable Long organizationId) {
         return organizationService.getOrganization(organizationId);

@@ -8,8 +8,9 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PositionResponseDTO;
 
 public interface IPositionService {
     List<PositionResponseDTO> getAllPosition();
-    public PositionResponseDTO getPositionById(Long positionId);
-    public OperationStatus createPosition(PositionRequestDTO positionRequestDTO);
-    public OperationStatus updatePosition(PositionRequestDTO positionRequestDTO);
-    public OperationStatus deletePosition(Long positionId);
+    PositionResponseDTO getPositionById(Long positionId);
+    OperationStatus createPosition(PositionRequestDTO positionRequestDTO);
+    OperationStatus updatePosition(PositionRequestDTO positionRequestDTO);
+    OperationStatus deletePosition(Long positionId);
+    List<PositionResponseDTO> getAllPositionByRole();
 }

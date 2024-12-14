@@ -39,11 +39,11 @@ public class Account {
     @Email(message = "Email should be valid")
     @Column(unique = true)
     private String email;
+    private String password;
     @Lob
-    private String avatar;
+    private byte[] avatar;
 
     @NotNull
-    @Size(min = 1, max = 20)
     private boolean status;
 
     private LocalDateTime createdAt;
