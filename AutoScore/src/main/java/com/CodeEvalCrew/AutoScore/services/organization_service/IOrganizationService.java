@@ -8,8 +8,9 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OrganizationResponseDTO
 
 public interface IOrganizationService {
     List<OrganizationResponseDTO> getAllOrganization();
-    public OrganizationResponseDTO getOrganization(Long organizationId);
-    public OperationStatus createOrganization(OrganizationRequestDTO organizationRequestDTO);
-    public OperationStatus updateOrganization(OrganizationRequestDTO organizationRequestDTO);
-    public OperationStatus deleteOrganization(Long organizationId);
+    OrganizationResponseDTO getOrganization(Long organizationId);
+    OperationStatus createOrganization(OrganizationRequestDTO organizationRequestDTO);
+    OperationStatus updateOrganization(OrganizationRequestDTO organizationRequestDTO);
+    OperationStatus deleteOrganization(Long organizationId);
+    List<OrganizationResponseDTO> getAllOrganizationByRole();
 }

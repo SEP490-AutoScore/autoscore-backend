@@ -11,20 +11,24 @@ import org.springframework.stereotype.Service;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PositionRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PositionResponseDTO;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.models.Entity.Position;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.position_repository.IPositionRepository;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
 public class PositionService implements IPositionService {
 
     private final IPositionRepository positionRepository;
     private final IEmployeeRepository employeeRepository;
+    private final Util util;
 
-    public PositionService(IPositionRepository positionRepository, IEmployeeRepository employeeRepository) {
+    public PositionService(IPositionRepository positionRepository, IEmployeeRepository employeeRepository, Util util) {
         this.positionRepository = positionRepository;
         this.employeeRepository = employeeRepository;
+        this.util = util;
     }
 
     @Override
@@ -43,6 +47,40 @@ public class PositionService implements IPositionService {
                 positionResponseDTO.setLastUpdated(position.getLastUpdated());
                 positionResponseDTOs.add(positionResponseDTO);
             }
+            return positionResponseDTOs;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<PositionResponseDTO> getAllPositionByRole() {
+        try {
+            Account account = util.getAuthenticatedAccount();
+            List<Position> positions = positionRepository.findAll();
+            List<PositionResponseDTO> positionResponseDTOs = new ArrayList<>();
+
+            String roleCode = account.getRole().getRoleCode();
+
+            for (Position position : positions) {
+                PositionResponseDTO positionResponseDTO = new PositionResponseDTO();
+                boolean status = false;
+
+                if ("ADMIN".equals(roleCode)) {
+                    status = true;
+                } else if ("EXAMINER".equals(roleCode) && !"ADMIN".equals(position.getPositionCode())) {
+                    status = true;
+                } else if ("HEAD_OF_DEPARTMENT".equals(roleCode)
+                        && (!"ADMIN".equals(position.getPositionCode()) || !"EXAMINER".equals(position.getPositionCode()))) {
+                    status = true;
+                }
+
+                positionResponseDTO.setStatus(status);
+                positionResponseDTO.setPositionId(position.getPositionId());
+                positionResponseDTO.setName(position.getName());
+                positionResponseDTOs.add(positionResponseDTO);
+            }
+
             return positionResponseDTOs;
         } catch (Exception e) {
             return null;
