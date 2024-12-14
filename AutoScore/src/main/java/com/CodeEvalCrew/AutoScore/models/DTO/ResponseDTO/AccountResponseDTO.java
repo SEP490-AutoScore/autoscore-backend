@@ -13,7 +13,7 @@ public class AccountResponseDTO {
     private String email;
     private String role;
     private String employeeCode;
-    private String avatar;
+    private byte[] avatar;
     private String status;
     private String position;
     private String campus;
@@ -23,4 +23,7 @@ public class AccountResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+    private Long roleId;
+    private Long campusId;
+    private Long positionId;
 }

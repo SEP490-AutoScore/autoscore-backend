@@ -11,7 +11,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,11 +42,6 @@ public class Organization {
     //1-n emp
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Employee> employees;
-
-    //1-n suborg
-    @OneToMany
-    @JoinColumn(name = "subjectOrgId", nullable = true)
-    private Set<Organization_Subject> organizationSubjects;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
     private Set<Account_Organization> accountOrganizations;

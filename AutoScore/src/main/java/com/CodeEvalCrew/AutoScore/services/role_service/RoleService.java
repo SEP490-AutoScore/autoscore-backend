@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.exceptions.Exception;
@@ -36,10 +37,12 @@ public class RoleService implements IRoleService {
     private final IPermissionRepository permissionRepository;
     private final IRolePermissionRepository rolePermissionRepository;
     private final Util util;
+    @Autowired
+    private Util utils;
 
     public RoleService(IRoleRepository roleRepository, IEmployeeRepository employeeRepository,
-             RolePermissionService rolePermissionService, IAccountRepository accountRepository,
-             IPermissionRepository permissionRepository, IRolePermissionRepository rolePermissionRepository) {
+            RolePermissionService rolePermissionService, IAccountRepository accountRepository,
+            IPermissionRepository permissionRepository, IRolePermissionRepository rolePermissionRepository) {
         this.roleRepository = roleRepository;
         this.rolePermissionService = rolePermissionService;
         this.accountRepository = accountRepository;
@@ -79,6 +82,40 @@ public class RoleService implements IRoleService {
             return roleResponseDTOs;
         } catch (Exception e) {
             throw new Exception("Error while getting all roles");
+        }
+    }
+
+    @Override
+    public List<RoleResponseDTO> getAllRolesByRole() throws Exception {
+        try {
+            Account account = utils.getAuthenticatedAccount();
+            List<Role> roles = roleRepository.findAll();
+            List<RoleResponseDTO> roleResponseDTOs = new ArrayList<>();
+
+            String roleCode = account.getRole().getRoleCode();
+
+            for (Role role : roles) {
+                RoleResponseDTO roleResponse = new RoleResponseDTO();
+                boolean status = false;
+
+                if ("ADMIN".equals(roleCode)) {
+                    status = true;
+                } else if ("EXAMINER".equals(roleCode) && !"ADMIN".equals(role.getRoleCode())) {
+                    status = true;
+                } else if ("HEAD_OF_DEPARTMENT".equals(roleCode)
+                        && (!"ADMIN".equals(role.getRoleCode()) || !"EXAMINER".equals(role.getRoleCode()))) {
+                    status = true;
+                }
+
+                roleResponse.setStatus(status);
+                roleResponse.setRoleId(role.getRoleId());
+                roleResponse.setRoleName(role.getRoleName());
+                roleResponseDTOs.add(roleResponse);
+            }
+
+            return roleResponseDTOs;
+        } catch (Exception e) {
+            return null;
         }
     }
 

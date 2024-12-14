@@ -3,17 +3,24 @@ package com.CodeEvalCrew.AutoScore.utils;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
-import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.services.account_service.UserDetailsImpl;
 
+@Component
 public class Util {
     private final IEmployeeRepository employeeRepository;
+    @Autowired
+    private IAccountRepository accountRepository;
 
     public Util(IEmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
@@ -27,6 +34,18 @@ public class Util {
             return userDetails.getAccountId();
         }
         return null;
+    }
+
+    public Account getAuthenticatedAccount() {
+        try {
+            Long accountId = getAuthenticatedAccountId();
+            if (accountId != null) {
+                return accountRepository.findById(accountId).get();
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // Get the current date and time

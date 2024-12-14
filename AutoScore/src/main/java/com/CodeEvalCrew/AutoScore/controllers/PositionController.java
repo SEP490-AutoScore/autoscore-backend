@@ -41,6 +41,20 @@ public class PositionController {
     }
 
     @PreAuthorize("hasAnyAuthority('VIEW_POSITION', 'ALL_ACCESS')")
+    @GetMapping("/byRole")
+    public ResponseEntity<List<PositionResponseDTO>> getAllPositionByRole() {
+        try {
+            List<PositionResponseDTO> positions = positionService.getAllPositionByRole();
+            if (positions.isEmpty()) {
+                return ResponseEntity.status(404).build();
+            }
+            return ResponseEntity.ok(positions);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('VIEW_POSITION', 'ALL_ACCESS')")
     @GetMapping("/{positionId}")
     public ResponseEntity<PositionResponseDTO> getPositionById(@PathVariable Long positionId) {
         try {

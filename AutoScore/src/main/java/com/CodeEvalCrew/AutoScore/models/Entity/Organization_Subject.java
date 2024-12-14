@@ -22,14 +22,12 @@ public class Organization_Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long organizationSubjectId;
-
     private boolean status;
     //rlsp
     //n-1sub
     @ManyToOne
     @JoinColumn(name = "subjectId", nullable = false)
     private Subject subject;
-
     //n-1org
     @ManyToOne
     @JoinColumn(name = "organizationId", nullable = false)
