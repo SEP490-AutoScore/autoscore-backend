@@ -16,6 +16,7 @@ public class SignInWithGoogleResponseDTO {
     @Email
     private String email;
     private String name;
+    private String id;
     private String role;
     private String position;
     private String campus;
