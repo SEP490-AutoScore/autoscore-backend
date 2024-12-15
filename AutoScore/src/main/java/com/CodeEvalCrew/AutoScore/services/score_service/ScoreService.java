@@ -645,8 +645,34 @@ public class ScoreService implements IScoreService {
         return 0.0; // Default if not found
     }
 
-    
-    
-    
-    
+    @Override
+    public List<Map<String, String>> getCodePlagiarismDetailsByExamPaperId(Long examPaperId) {
+        // Fetch the `Exam_Paper` entity by ID
+        Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
+                .orElseThrow(() -> new RuntimeException("Exam paper not found"));
+
+        // Get all associated Scores
+        Set<Score> scores = examPaper.getScores();
+        if (scores == null || scores.isEmpty()) {
+            throw new RuntimeException("No scores available for the given exam paper");
+        }
+
+        List<Map<String, String>> plagiarismDetails = new ArrayList<>();
+
+        // Loop through each score and its code plagiarisms
+        for (Score score : scores) {
+            Set<Code_Plagiarism> codePlagiarisms = score.getCodePlagiarisms();
+            if (codePlagiarisms != null) {
+                for (Code_Plagiarism codePlagiarism : codePlagiarisms) {
+                    Map<String, String> plagiarismDetail = new HashMap<>();
+                    plagiarismDetail.put("studentCodePlagiarism", codePlagiarism.getStudentCodePlagiarism());
+                    plagiarismDetail.put("plagiarismPercentage", codePlagiarism.getPlagiarismPercentage());
+                    plagiarismDetails.add(plagiarismDetail);
+                }
+            }
+        }
+
+        return plagiarismDetails;
+    }
+
 }
