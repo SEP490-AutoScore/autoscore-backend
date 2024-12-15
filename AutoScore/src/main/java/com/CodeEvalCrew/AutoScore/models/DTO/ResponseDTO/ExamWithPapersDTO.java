@@ -1,6 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +13,4 @@ public class ExamWithPapersDTO {
     private String examCode;
     private String examPaperCode;
     private Long examPaperId;
-
 }
