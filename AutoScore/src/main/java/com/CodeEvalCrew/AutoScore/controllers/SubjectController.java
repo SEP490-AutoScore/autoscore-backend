@@ -82,6 +82,21 @@ public class SubjectController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @GetMapping("{subjectId}")
+    public ResponseEntity<?> getSubjectBySubjectId(@PathVariable Long subjectId) {
+        SubjectView result;
+        try {
+            result = subjectService.getSubjectBySubjectId(subjectId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
     
     
 }

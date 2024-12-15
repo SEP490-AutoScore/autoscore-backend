@@ -20,6 +20,7 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Semester.SemesterView;
 import com.CodeEvalCrew.AutoScore.services.semesterService.ISemesterService;
 
 
+
 @RestController
 @RequestMapping("api/semester")
 public class SemesterController {
@@ -40,6 +41,20 @@ public class SemesterController {
         }
     }
 
+    @GetMapping("{semesterId}")
+    public ResponseEntity<?> getSemesterById(@PathVariable Long semesterId) {
+        SemesterView result;
+        try {
+            result = semesterService.getSemesterById(semesterId);
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+
     @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createNewSemester(@RequestBody CreateSemesterRequest request) {
@@ -54,6 +69,7 @@ public class SemesterController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
     @PutMapping("{semesterId}")
     public ResponseEntity<?> updateSemesterInfo(@RequestBody CreateSemesterRequest request, @PathVariable Long semesterId) {
         SemesterView result;
