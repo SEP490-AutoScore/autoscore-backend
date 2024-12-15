@@ -91,7 +91,6 @@ VALUES
 -- Exam paper
 ('IMPORT_POSTMAN', 44, 'Import postman', 7, 1, 'Allows importing file collection postman'),
 ('EXPORT_POSTMAN', 45, 'Export postman', 7, 1, 'Allows exporting file collection postman'),
-('CONFIRM_BEFORE_GRADING', 46, 'Confirm before grading', 7, 1, 'Allows confirming before grading'),
 
 -- Score Management
 ('VIEW_SCORE', 8, 'View score', 8, 1, 'Allows viewing scores'),
@@ -167,7 +166,8 @@ VALUES
 (7, 'vtrvuongdt694@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (8, 'vtrvuongdt758@gmail.com', 4, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (4, 'minhtpvse160611@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(5, 'thanhtuyen66202@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true);
+(5, 'thanhtuyen66202@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(9, 'cunprokt9@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true);
 
 INSERT INTO `organization`
 (`organization_id`, `name`, `type`, `parent_id`, `status`)
@@ -231,7 +231,8 @@ VALUES
 (7, 'Võ Trọng Vương Head of Department', 'AD0007', 7, 1, 2, true),
 (8, 'Võ Trọng Vương Lecturer', 'AD0008', 8, 3, 2, true),
 (4, 'Thiều Phan Văn Minh', 'AD0004', 4, 4, 1, true),
-(5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 2, true);
+(5, 'Võ Thanh Tuyền', 'AD0005', 5, 2, 2, true),
+(9, 'Anh Di', 'AD0008', 9, 2, 2, true);
 
 INSERT INTO `subject` 
 (`subject_name`, `subject_code`, `status`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) 
