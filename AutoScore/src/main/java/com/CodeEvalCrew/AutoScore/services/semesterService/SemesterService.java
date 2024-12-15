@@ -88,4 +88,14 @@ public class SemesterService implements ISemesterService {
         }
     }
 
+    @Override
+    public SemesterView getSemesterById(Long semesterId) throws Exception {
+        try {
+            Semester semester = checkEntityExistence(semesterRepository.findById(semesterId), "Semester", semesterId);
+            return SemesterMapper.INSTANCE.semesterToView(semester);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
 }
