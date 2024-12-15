@@ -150,7 +150,8 @@ public class ExamService implements IExamService {
                     curOrg = org;
                 }
             }
-            List<Organization_Subject> orgSubs = subjectOrganOrgenizationRepository.findByOrganization_OrganizationId(curOrg.getOrganizationId());
+            List<Organization_Subject> orgSubs = subjectOrganOrgenizationRepository
+                    .findByOrganization_OrganizationId(curOrg.getOrganizationId());
             List<Subject> subs = new ArrayList<>();
             for (Organization_Subject orgSub : orgSubs) {
                 subs.add(orgSub.getSubject());
@@ -187,14 +188,17 @@ public class ExamService implements IExamService {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
             // Check subject
-            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
+            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject",
+                    entity.getSubjectId());
             // Check account
-            Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()), "Account", Util.getAuthenticatedAccountId());
-            //Check semester
-            Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()), "Semester", entity.getSemesterId());
+            Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()),
+                    "Account", Util.getAuthenticatedAccountId());
+            // Check semester
+            Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()), "Semester",
+                    entity.getSemesterId());
 
-            //validation exam
-            //mapping exam
+            // validation exam
+            // mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
             exam.setSubject(subject);
             exam.setCreatedAt(LocalDateTime.now());
@@ -203,10 +207,10 @@ public class ExamService implements IExamService {
             exam.setCreatedBy(account.getAccountId());
             exam.setSemester(semester);
 
-            //create new exam
+            // create new exam
             exam = examRepository.save(exam);
 
-            //mapping exam
+            // mapping exam
             result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException ex) {
             throw ex;
@@ -222,14 +226,16 @@ public class ExamService implements IExamService {
     public ExamViewResponseDTO updateExam(ExamCreateRequestDTO entity, Long id) throws Exception, NotFoundException {
         ExamViewResponseDTO result = new ExamViewResponseDTO();
         try {
-            //check exist exam
+            // check exist exam
             Exam exam = checkEntityExistence(examRepository.findById(id), "Exam", id);
             // Check subject
-            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
-            //Check semester
-            Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()), "Semester", entity.getSemesterId());
+            Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject",
+                    entity.getSubjectId());
+            // Check semester
+            Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()), "Semester",
+                    entity.getSemesterId());
 
-            //update exam 
+            // update exam
             exam.setExamCode(entity.getExamCode());
             exam.setExamAt(entity.getExamAt());
             exam.setGradingAt(entity.getGradingAt());
@@ -237,7 +243,7 @@ public class ExamService implements IExamService {
             exam.setSubject(subject);
             exam.setSemester(semester);
 
-            //save exam
+            // save exam
             examRepository.save(exam);
 
             // mapping exam to return
@@ -255,7 +261,7 @@ public class ExamService implements IExamService {
         return entity.orElseThrow(() -> new NotFoundException(entityName + " id: " + entityId + " not found"));
     }
 
-// <editor-fold desc="get exam func helper">
+    // <editor-fold desc="get exam func helper">
     private Specification<Exam> createSpecificationForGet(ExamViewRequestDTO request) {
         Specification<Exam> spec = Specification.where(null);
 
@@ -297,7 +303,8 @@ public class ExamService implements IExamService {
     }
 
     @Override
-    public void mergeDataIntoWord(String templatePath, String outputPath, Map<DataFieldName, String> data) throws Exception {
+    public void mergeDataIntoWord(String templatePath, String outputPath, Map<DataFieldName, String> data)
+            throws Exception {
         try {
             File file = new File(templatePath);
             // Load the Word template
@@ -363,7 +370,7 @@ public class ExamService implements IExamService {
             // Create a paragraph for the question content and score
             XWPFParagraph questionParagraph = document.createParagraph();
             XWPFRun questionRun = questionParagraph.createRun();
-            questionRun.setBold(true);  // Highlight the question
+            questionRun.setBold(true); // Highlight the question
             questionRun.setText("Question: " + question.getQuestionContent());
 
             // Create numbered list for the barems
@@ -407,12 +414,16 @@ public class ExamService implements IExamService {
         try {
             List<ExamQuestionExport> questions = new ArrayList<>(getListExamQuestionExport(examPaperId));
 
-            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper", examPaperId);
+            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
+                    examPaperId);
 
-            // Exam exam = checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()), "Exam", examPaper.getExam().getExamId());
-            Specification<Exam_Database> spec = ExamDatabaseSpecification.hasForeignKey(examPaperId, "exam_paper", "examPaperId");
+            // Exam exam =
+            // checkEntityExistence(examRepository.findById(examPaper.getExam().getExamId()),
+            // "Exam", examPaper.getExam().getExamId());
+            Specification<Exam_Database> spec = ExamDatabaseSpecification.hasForeignKey(examPaperId, "exam_paper",
+                    "examPaperId");
 
-            //get error
+            // get error
             Exam_Database examDatabase = examDatabaseRepository.findByExamPaperExamPaperId(examPaperId);
 
             // result.setExamCode(exam.getExamCode());
@@ -456,7 +467,8 @@ public class ExamService implements IExamService {
                         imageParagraph.setAlignment(ParagraphAlignment.CENTER); // Center align the paragraph
                         XWPFRun imageRun = imageParagraph.createRun();
 
-                        try (ByteArrayInputStream imageInputStream = new ByteArrayInputStream(exportExam.getDatabaseImage())) {
+                        try (ByteArrayInputStream imageInputStream = new ByteArrayInputStream(
+                                exportExam.getDatabaseImage())) {
                             imageRun.addPicture(
                                     imageInputStream,
                                     XWPFDocument.PICTURE_TYPE_PNG, // Correct image type
@@ -511,19 +523,50 @@ public class ExamService implements IExamService {
 
     @Override
     public List<ExamWithPapersDTO> getExamWithUsedPapers() {
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+
+        // Get user role information
+        Account userAccount = accountRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new RuntimeException("User account not found."));
+        String roleCode = userAccount.getRole().getRoleCode();
+
+        // If role is "EXAMINER"
+        if ("EXAMINER".equals(roleCode)) {
+            String userCampus = checkCampusForAccount(authenticatedUserId);
+            if (userCampus == null) {
+                throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+            }
+
+            return examPaperRepository.findByIsUsedTrueOrderByCreatedAtDesc()
+                    .stream()
+                    .filter(examPaper -> {
+                        // Kiểm tra createdBy của Exam_Paper
+                        Long createdBy = examPaper.getCreatedBy();
+                        String creatorCampus = checkCampusForAccount(createdBy);
+                        return userCampus.equals(creatorCampus);
+                    })
+                    .map(examPaper -> new ExamWithPapersDTO(
+                            examPaper.getExam().getExamCode(),
+                            examPaper.getExamPaperCode(),
+                            examPaper.getExamPaperId()))
+                    .collect(Collectors.toList());
+        }
+
+        // If the role is different from "EXAMINER"
         return examPaperRepository.findByIsUsedTrueOrderByCreatedAtDesc()
                 .stream()
+                .filter(examPaper -> examPaper.getCreatedBy().equals(authenticatedUserId))
                 .map(examPaper -> new ExamWithPapersDTO(
-                examPaper.getExam().getExamCode(),
-                examPaper.getExamPaperCode(),
-                examPaper.getExamPaperId()
-        ))
+                        examPaper.getExam().getExamCode(),
+                        examPaper.getExamPaperCode(),
+                        examPaper.getExamPaperId()))
                 .collect(Collectors.toList());
     }
 
     private String checkCampusForAccount(Long accountId) {
 
-        List<Account_Organization> accountOrganizations = accountOrganizationRepository.findByAccount_AccountId(accountId);
+        List<Account_Organization> accountOrganizations = accountOrganizationRepository
+                .findByAccount_AccountId(accountId);
 
         for (Account_Organization accountOrg : accountOrganizations) {
             Organization organization = accountOrg.getOrganization();
@@ -537,103 +580,175 @@ public class ExamService implements IExamService {
 
     @Override
     public long countExamsByTypeAndCampus() {
-
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        String userCampus = checkCampusForAccount(authenticatedUserId);
+        // Get user role information
+        Account userAccount = accountRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new RuntimeException("User account not found."));
+        String roleCode = userAccount.getRole().getRoleCode();
 
-        if (userCampus == null) {
-            throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+        if ("EXAMINER".equals(roleCode)) {
+            // Logic for role "EXAMINER"
+            String userCampus = checkCampusForAccount(authenticatedUserId);
+
+            if (userCampus == null) {
+                throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+            }
+
+            // Get a list of exams with type EXAM
+            List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+
+            // Filter by campus and count
+            return exams.stream()
+                    .filter(exam -> userCampus.equals(checkCampusForAccount(exam.getCreatedBy())))
+                    .count();
+        } else {
+            // Logic for other roles
+            // Get the list of exams with type ASSIGNMENT
+            List<Exam> exams = examRepository.findByCreatedBy(authenticatedUserId);
+
+            return exams.size();
         }
-
-        List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
-
-        long count = exams.stream()
-                .filter(exam -> checkCampusForAccount(exam.getCreatedBy()).equals(userCampus))
-                .count();
-
-        return count;
     }
 
     @Override
     public long countExamsByTypeAndGradingAt() {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        String userCampus = checkCampusForAccount(authenticatedUserId);
+        // Get user role information
+        Account userAccount = accountRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new RuntimeException("User account not found."));
+        String roleCode = userAccount.getRole().getRoleCode();
 
-        if (userCampus == null) {
-            throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+        if ("EXAMINER".equals(roleCode)) {
+            // Logic for role "EXAMINER"
+            String userCampus = checkCampusForAccount(authenticatedUserId);
+
+            if (userCampus == null) {
+                throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+            }
+
+            // Get a list of exams with type EXAM
+            List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+
+            // Filter by gradingAt and campus
+            return exams.stream()
+                    .filter(exam -> exam.getGradingAt().isAfter(LocalDateTime.now())
+                            && userCampus.equals(checkCampusForAccount(exam.getCreatedBy())))
+                    .count();
+        } else {
+            // Logic for other roles
+            // Get the list of exams with createdBy as authenticatedUserId
+            List<Exam> exams = examRepository.findByCreatedBy(authenticatedUserId);
+
+            // Filter by gradingAt
+            return exams.stream()
+                    .filter(exam -> exam.getGradingAt().isAfter(LocalDateTime.now()))
+                    .count();
         }
-
-        List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
-
-        long count = exams.stream()
-                .filter(exam -> exam.getGradingAt().isAfter(LocalDateTime.now())
-                && checkCampusForAccount(exam.getCreatedBy()).equals(userCampus))
-                .count();
-
-        return count;
     }
 
     @Override
     public long countExamsByGradingAtPassed() {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        String userCampus = checkCampusForAccount(authenticatedUserId);
+        // Get user role information
+        Account userAccount = accountRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new RuntimeException("User account not found."));
+        String roleCode = userAccount.getRole().getRoleCode();
 
-        if (userCampus == null) {
-            throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+        if ("EXAMINER".equals(roleCode)) {
+            // Logic for role "EXAMINER"
+            String userCampus = checkCampusForAccount(authenticatedUserId);
+
+            if (userCampus == null) {
+                throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+            }
+
+            // Get a list of exams with type EXAM
+            List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+
+            // Filter by gradeAt passed and campus
+            return exams.stream()
+                    .filter(exam -> exam.getGradingAt().isBefore(LocalDateTime.now())
+                            && userCampus.equals(checkCampusForAccount(exam.getCreatedBy())))
+                    .count();
+        } else {
+            // Logic for other roles
+            // Get the list of exams with createdBy as authenticatedUserId
+            List<Exam> exams = examRepository.findByCreatedBy(authenticatedUserId);
+
+            // Filter by gradeAt passed
+            return exams.stream()
+                    .filter(exam -> exam.getGradingAt().isBefore(LocalDateTime.now()))
+                    .count();
         }
-
-        List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
-
-        long count = exams.stream()
-                .filter(exam -> exam.getGradingAt().isBefore(LocalDateTime.now())
-                && checkCampusForAccount(exam.getCreatedBy()).equals(userCampus))
-                .count();
-
-        return count;
     }
 
     @Override
     public Map<String, Long> countExamsByGradingAtPassedAndSemester(int year) {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        // Kiểm tra campus của authenticatedUserId
-        String userCampus = checkCampusForAccount(authenticatedUserId);
+        // Get user role information
+        Account userAccount = accountRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new RuntimeException("User account not found."));
+        String roleCode = userAccount.getRole().getRoleCode();
 
-        if (userCampus == null) {
-            throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
-        }
-
-        // Lấy tất cả các Exam có type là EXAM
-        List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
-
-        // Tạo map để lưu số lượng exam cho từng kỳ
+        // Create a map to store the number of exams for each period
         Map<String, Long> examCounts = new HashMap<>();
         examCounts.put("Spring", 0L);
         examCounts.put("Summer", 0L);
         examCounts.put("Fall", 0L);
 
-        // Lọc các Exam có gradingAt đã vượt qua thời gian hiện tại
-        for (Exam exam : exams) {
-            if (exam.getGradingAt().isBefore(LocalDateTime.now()) // gradingAt đã vượt qua thời gian hiện tại
-                    && checkCampusForAccount(exam.getCreatedBy()).equals(userCampus) // Kiểm tra campus của createdBy
-                    && exam.getGradingAt().getYear() == year) { // Kiểm tra năm của gradingAt
+        if ("EXAMINER".equals(roleCode)) {
+            // Logic for role "EXAMINER"
+            String userCampus = checkCampusForAccount(authenticatedUserId);
 
-                // Lọc theo kỳ (Spring: tháng 1-4, Summer: tháng 5-8, Fall: tháng 9-12)
-                int month = exam.getGradingAt().getMonthValue();
-                if (month >= 1 && month <= 4) {
-                    examCounts.put("Spring", examCounts.get("Spring") + 1);
-                } else if (month >= 5 && month <= 8) {
-                    examCounts.put("Summer", examCounts.get("Summer") + 1);
-                } else if (month >= 9 && month <= 12) {
-                    examCounts.put("Fall", examCounts.get("Fall") + 1);
+            if (userCampus == null) {
+                throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
+            }
+
+            // Get a list of exams with type EXAM
+            List<Exam> exams = examRepository.findByType(Exam_Type_Enum.EXAM);
+
+            // Filter and calculate the number of exams by period
+            for (Exam exam : exams) {
+                if (exam.getGradingAt().isBefore(LocalDateTime.now()) // gradingAt passed
+                        && userCampus.equals(checkCampusForAccount(exam.getCreatedBy())) // Check campus
+                        && exam.getGradingAt().getYear() == year) { // Check year
+
+                    // Sort by period
+                    updateSemesterCounts(examCounts, exam.getGradingAt().getMonthValue());
+                }
+            }
+        } else {
+            // Logic for other roles
+            // Get the list of exams with createdBy as authenticatedUserId
+            List<Exam> exams = examRepository.findByCreatedBy(authenticatedUserId);
+
+            // Filter and calculate the number of exams by period
+            for (Exam exam : exams) {
+                if (exam.getGradingAt().isBefore(LocalDateTime.now())// gradingAt passed
+                        && exam.getGradingAt().getYear() == year) {// Check year
+
+                    // Sort by period
+                    updateSemesterCounts(examCounts, exam.getGradingAt().getMonthValue());
                 }
             }
         }
 
         return examCounts;
+    }
+
+    // Helper function to classify exams by period
+    private void updateSemesterCounts(Map<String, Long> examCounts, int month) {
+        if (month >= 1 && month <= 4) {
+            examCounts.put("Spring", examCounts.get("Spring") + 1);
+        } else if (month >= 5 && month <= 8) {
+            examCounts.put("Summer", examCounts.get("Summer") + 1);
+        } else if (month >= 9 && month <= 12) {
+            examCounts.put("Fall", examCounts.get("Fall") + 1);
+        }
     }
 
 }

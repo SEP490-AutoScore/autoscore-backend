@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +35,10 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
     @Value("${jwt.refresh-token.expiration}")
     public long getJwtRefreshExpiration;
 
-    @Autowired
     public SignInWithGoogleService(IAccountRepository accountRepository,
-                                   IOAuthRefreshTokenRepository refreshTokenRepository,
-                                   JwtTokenProvider jwtTokenProvider,
-                                   IEmployeeRepository employeeRepository) {
+            IOAuthRefreshTokenRepository refreshTokenRepository,
+            JwtTokenProvider jwtTokenProvider,
+            IEmployeeRepository employeeRepository) {
         this.accountRepository = accountRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -75,7 +73,7 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         );
         response.setJwtToken(jwtToken);
 
-        Timestamp acessExpire = new Timestamp(Instant.now().plusMillis(getJwtAccessExpiration).toEpochMilli());
+        Timestamp accessExpire = new Timestamp(Instant.now().plusMillis(getJwtAccessExpiration).toEpochMilli());
         Timestamp refreshExpire = new Timestamp(Instant.now().plusMillis(getJwtRefreshExpiration).toEpochMilli());
 
         // Tạo refresh token ngẫu nhiên
@@ -96,11 +94,11 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         String employeeName = employee.getFullName();
         // Lấy position
         String position = employee.getPosition().getName();
-        
+
         response.setName(employeeName);
         response.setCampus(campus);
         response.setPosition(position);
-        response.setExp(acessExpire.getTime());
+        response.setExp(accessExpire.getTime());
 
         return response;
     }
@@ -109,4 +107,3 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         return UUID.randomUUID().toString();
     }
 }
-

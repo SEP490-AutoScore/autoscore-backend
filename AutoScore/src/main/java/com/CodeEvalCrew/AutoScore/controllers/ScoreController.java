@@ -204,6 +204,18 @@ public class ScoreController {
         }
     }
 
-   
+    @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
+    @GetMapping("/get-code-plagiarism-details")
+    public ResponseEntity<?> getCodePlagiarismDetails(@RequestParam Long examPaperId) {
+        try {
+
+            List<Map<String, String>> plagiarismDetails = scoreService
+                    .getCodePlagiarismDetailsByExamPaperId(examPaperId);
+            return ResponseEntity.ok(plagiarismDetails);
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
 
 }
