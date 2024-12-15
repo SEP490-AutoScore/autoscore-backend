@@ -28,7 +28,6 @@ public class Score_Detail {
     private Float scoreAchieve;
     private Long noPmtestAchieve;
 
-    //Relationship
     //n-1 score
     @ManyToOne
     @JoinColumn(name = "scoreId", nullable = false)

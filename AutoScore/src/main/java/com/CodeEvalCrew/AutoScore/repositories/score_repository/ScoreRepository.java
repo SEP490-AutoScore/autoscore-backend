@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.StudentScoreDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Score;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 
@@ -29,8 +28,11 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     @Query("SELECT COUNT(s) FROM Score s WHERE s.examPaper.examPaperId = :examPaperId AND s.totalScore > :totalScore")
     int countByExamPaperIdAndTotalScoreGreaterThan(@Param("examPaperId") Long examPaperId, @Param("totalScore") int totalScore);
     
+    List<Score> findAllByExamPaper_ExamPaperId(Long examPaperId);
+    // @Query("SELECT s.student.studentCode, s.totalScore FROM Score s WHERE s.examPaper.examPaperId = :examPaperId")
+    // List<StudentScoreDTO> findStudentScoresByExamPaperId(@Param("examPaperId") Long examPaperId);
 
-    @Query("SELECT s.student.studentCode, s.totalScore FROM Score s WHERE s.examPaper.examPaperId = :examPaperId")
-    List<StudentScoreDTO> findStudentScoresByExamPaperId(@Param("examPaperId") Long examPaperId);
+      // Find all score details by examPaperId
+
 
 }

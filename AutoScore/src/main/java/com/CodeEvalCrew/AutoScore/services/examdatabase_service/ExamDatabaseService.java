@@ -35,6 +35,8 @@ public class ExamDatabaseService implements IExamDatabaseService {
     private IExamPaperRepository examPaperRepository;
     @Autowired
     private LogRepository logRepository;
+    @Autowired
+    private PathUtil pathUtil;
 
     private void saveLog(Long examPaperId, String actionDetail) {
 
@@ -67,7 +69,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
         LocalDateTime time = Util.getCurrentDateTime();
 
         try {
-            Class.forName(PathUtil.DATABASE_DRIVER);
+            Class.forName(pathUtil.getDatabaseDriver());
         } catch (ClassNotFoundException e) {
             throw new Exception("SQL Server driver not found: " + e.getMessage());
         }
@@ -88,7 +90,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
             throw new Exception("Database name not found in .sql file");
         }
 
-        try (Connection conn = DriverManager.getConnection(PathUtil.DATABASE_URL)) {
+        try (Connection conn = DriverManager.getConnection(pathUtil.getDatabaseUrl())) {
             conn.setAutoCommit(false);
             Statement stmt = conn.createStatement();
 
@@ -180,7 +182,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
         LocalDateTime time = Util.getCurrentDateTime();
 
         try {
-            Class.forName(PathUtil.DATABASE_DRIVER);
+            Class.forName(pathUtil.getDatabaseDriver());
         } catch (ClassNotFoundException e) {
             throw new Exception("SQL Server driver not found: " + e.getMessage());
         }
@@ -209,7 +211,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
             examDatabaseRepository.save(existingDatabase);
         }
 
-        try (Connection conn = DriverManager.getConnection(PathUtil.DATABASE_URL)) {
+        try (Connection conn = DriverManager.getConnection(pathUtil.getDatabaseUrl())) {
             conn.setAutoCommit(false);
             Statement stmt = conn.createStatement();
 

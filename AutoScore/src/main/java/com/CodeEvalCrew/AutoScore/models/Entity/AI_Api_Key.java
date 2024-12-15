@@ -36,19 +36,13 @@ public class AI_Api_Key {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long aiApiKeyId;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     private AIName_Enum aiName;
-
     private String aiApiKey;
-
     private boolean status;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
-
     private boolean shared;
 
     @OneToMany(mappedBy = "aiApiKey", cascade = CascadeType.ALL, orphanRemoval = true)
