@@ -284,7 +284,7 @@ VALUES
 ('123456', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true,1, `Instruction`),
 ('456789', 'COMPLETE', '2024-09-30 10:00:00', 1, null, null, null, null, 2,true,1, `Instruction`);
 
-INSERT INTO `Exam_Question`
+INSERT INTO `exam_question`
 (`question_content`, `exam_question_score`, `end_point`, `role_allow`, `http_method`, `description`, `payload_type`, `payload`, `validation`, `sucess_response`, `error_response`, `status`, `order_by`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
 ('Login', 2, '/api/login', 'Administrator, Doctor, Patient', 'POST', 'This function allows the user to access the system', 'JSON',
