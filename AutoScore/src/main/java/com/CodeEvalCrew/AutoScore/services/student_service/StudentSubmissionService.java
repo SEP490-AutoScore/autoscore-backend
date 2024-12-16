@@ -248,6 +248,12 @@ public class StudentSubmissionService {
             try {
                 File slnFileFolder = fileExtractionService.processExtractedFolder(studentFolder, source, studentOpt.get());
                 if (slnFileFolder != null) {
+                    if (slnFileFolder.length() > 1) {
+                        String error = "More than one .sln file found in folder: " + studentFolder.getName();
+                        errors.add(error);
+                        studentErrorService.saveStudentError(source, studentOpt.get(), error);
+                        failedTasks.incrementAndGet();
+                    }
                     sourceDetailService.saveStudentSubmission(slnFileFolder, studentOpt.get(), source, examType);
                 } else {
                     String error = "No .sln file found in folder: " + studentFolder.getName();
