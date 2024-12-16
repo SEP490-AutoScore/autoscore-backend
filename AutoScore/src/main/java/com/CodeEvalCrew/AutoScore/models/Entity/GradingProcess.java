@@ -36,6 +36,7 @@ public class GradingProcess {
     private List<Long> studentIds;
     private Exam_Type_Enum examType;
     private Long organizationId;
+    private Long createBy;
     //n-1 exam
     @OneToOne
     @JoinColumn(name = "examPaperId", nullable = true)

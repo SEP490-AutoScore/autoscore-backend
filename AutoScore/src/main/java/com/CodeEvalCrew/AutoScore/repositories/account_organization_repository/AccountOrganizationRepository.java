@@ -17,4 +17,6 @@ public interface AccountOrganizationRepository extends JpaRepository<Account_Org
     boolean existsByOrganizationOrganizationId(Long organizationId);
 
     List<Account_Organization> findByAccount_AccountId(Long accountId);
+    List<Account_Organization> findByOrganizationOrganizationIdAndStatusTrue(Long organizationId);
+
 }

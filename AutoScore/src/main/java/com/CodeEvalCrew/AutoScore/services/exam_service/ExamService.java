@@ -44,11 +44,13 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamWithPapersDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Notification_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.Notification;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Organization_Subject;
 import com.CodeEvalCrew.AutoScore.models.Entity.Semester;
@@ -60,11 +62,13 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperReposit
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.repositories.notification_repository.NotificationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.semester_repository.SemesterRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.SubjectOrgenizationRepository;
 import com.CodeEvalCrew.AutoScore.specification.ExamDatabaseSpecification;
 import com.CodeEvalCrew.AutoScore.specification.ExamSpecification;
+import com.CodeEvalCrew.AutoScore.utils.SendNotificationUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
 import com.aspose.words.Document;
 import com.aspose.words.MailMerge;
@@ -92,6 +96,9 @@ public class ExamService implements IExamService {
     private final IExamQuestionRepository examQuestionRepository;
     @Autowired
     private final AccountOrganizationRepository accountOrganizationRepository;
+    @Autowired
+    private final NotificationRepository notificationRepository;
+    private final SendNotificationUtil notiUtil;
 
     public ExamService(IExamRepository examRepository,
             ISubjectRepository subjectRepository,
@@ -102,6 +109,8 @@ public class ExamService implements IExamService {
             SemesterRepository semesterRepository,
             IEmployeeRepository employeeRepository,
             SubjectOrgenizationRepository subjectOrganOrgenizationRepository,
+            NotificationRepository notificationRepository,
+            SendNotificationUtil notiUtil,
             AccountOrganizationRepository accountOrganizationRepository) {
         this.examRepository = examRepository;
         this.subjectRepository = subjectRepository;
@@ -112,6 +121,8 @@ public class ExamService implements IExamService {
         this.semesterRepository = semesterRepository;
         this.accountOrganizationRepository = accountOrganizationRepository;
         this.subjectOrganOrgenizationRepository = subjectOrganOrgenizationRepository;
+        this.notificationRepository = notificationRepository;
+        this.notiUtil = notiUtil;
     }
 
     @Override
@@ -192,8 +203,13 @@ public class ExamService implements IExamService {
             Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()), "Account", Util.getAuthenticatedAccountId());
             //Check semester
             Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()), "Semester", entity.getSemesterId());
-
-            //validation exam
+            Organization org = new Organization();
+            Set<Organization> orgs = Util.getOrganizations();
+            for (Organization organization : orgs) {
+                if (organization.getType().equals(Organization_Enum.CAMPUS)) {
+                    org = organization;
+                }
+            }
             //mapping exam
             Exam exam = ExamMapper.INSTANCE.requestToExam(entity);
             exam.setSubject(subject);
@@ -202,9 +218,12 @@ public class ExamService implements IExamService {
             exam.setType(Exam_Type_Enum.EXAM);
             exam.setCreatedBy(account.getAccountId());
             exam.setSemester(semester);
-
             //create new exam
             exam = examRepository.save(exam);
+            //Noti
+            Notification noti = new Notification(null, "New exam", "New exam has create in your campus", "/exams", Notification_Type_Enum.NOTIFICATION, null);
+            Notification newNoti = notificationRepository.save(noti);
+            notiUtil.sendNotiToAllAccountIncampus(newNoti, org);
 
             //mapping exam
             result = ExamMapper.INSTANCE.examToViewResponse(exam);
@@ -228,7 +247,6 @@ public class ExamService implements IExamService {
             Subject subject = checkEntityExistence(subjectRepository.findById(entity.getSubjectId()), "Subject", entity.getSubjectId());
             //Check semester
             Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()), "Semester", entity.getSemesterId());
-
             //update exam 
             exam.setExamCode(entity.getExamCode());
             exam.setExamAt(entity.getExamAt());
@@ -236,10 +254,8 @@ public class ExamService implements IExamService {
             exam.setPublishAt(entity.getPublishAt());
             exam.setSubject(subject);
             exam.setSemester(semester);
-
             //save exam
             examRepository.save(exam);
-
             // mapping exam to return
             result = ExamMapper.INSTANCE.examToViewResponse(exam);
         } catch (NotFoundException nfe) {
