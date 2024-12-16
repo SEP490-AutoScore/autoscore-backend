@@ -288,26 +288,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 return pairs;
         }
 
-        // @Override
-        // public List<GherkinScenarioDTO> getAllGherkinScenariosByExamPaperId(Long examPaperId) {
-
-        //         List<Gherkin_Scenario> scenarios = gherkinScenarioRepository
-        //                         .findByExamQuestion_ExamPaper_ExamPaperIdAndStatusTrue(examPaperId);
-
-        //         return scenarios.stream().map(scenario -> new GherkinScenarioDTO(
-        //                         scenario.getGherkinScenarioId(),
-        //                         scenario.getGherkinData(),
-        //                         scenario.isStatus(),
-        //                         scenario.getExamQuestion().getExamQuestionId(),
-        //                         scenario.getPostmanForGrading() != null
-        //                                         ? scenario.getPostmanForGrading().getPostmanForGradingId()
-        //                                         : null))
-        //                         .collect(Collectors.toList());
-        // }
-
         @Override
         public ResponseEntity<String> generateGherkinFormat(Long examQuestionId) {
-
                 Long authenticatedUserId = Util.getAuthenticatedAccountId();
                 LocalDateTime time = Util.getCurrentDateTime();
 
@@ -316,86 +298,92 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 Exam_Paper examPaper = examQuestion.getExamPaper();
 
                 if (gherkinScenarioRepository.existsByExamQuestion_ExamQuestionIdAndStatusTrue(examQuestionId)) {
-                        return ResponseEntity
-                                        .status(HttpStatus.CONFLICT)
+                        return ResponseEntity.status(HttpStatus.CONFLICT)
                                         .body("Unsuccessfully! Gherkin already exists for Exam Question ID: "
                                                         + examQuestionId);
                 }
 
-                Optional<Account_Selected_Key> optionalAccountSelectedKey = accountSelectedKeyRepository
-                                .findByAccount_AccountId(authenticatedUserId);
-                if (optionalAccountSelectedKey.isEmpty()) {
-                        return ResponseEntity
-                                        .status(HttpStatus.BAD_REQUEST)
-                                        .body("User has not selected an AI Key");
+                Account_Selected_Key accountSelectedKey = accountSelectedKeyRepository
+                                .findByAccount_AccountId(authenticatedUserId)
+                                .orElse(null);
+                if (accountSelectedKey == null || accountSelectedKey.getAiApiKey() == null) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("User has not selected a valid AI Key");
                 }
 
-                Account_Selected_Key accountSelectedKey = optionalAccountSelectedKey.get();
                 AI_Api_Key selectedAiApiKey = accountSelectedKey.getAiApiKey();
-                if (selectedAiApiKey == null) {
-                        return ResponseEntity
-                                        .status(HttpStatus.NOT_FOUND)
-                                        .body("AI API Key not exists");
+
+                Exam_Database examDatabase = examDatabaseRepository.findByExamQuestionId(examQuestionId)
+                                .orElse(null);
+                if (examDatabase == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body("Database not exists for Exam Question ID: " + examQuestionId);
                 }
 
-                Optional<Exam_Database> optionalExamDatabase = examDatabaseRepository
-                                .findByExamQuestionId(examQuestionId);
-                if (optionalExamDatabase.isEmpty()) {
-                        return ResponseEntity
-                                        .status(HttpStatus.NOT_FOUND)
-                                        .body("Database not exists");
-                }
-
-                Exam_Database examDatabase = optionalExamDatabase.get();
                 String databaseScript = examDatabase.getDatabaseScript();
-
-                StringBuilder responseBuilder = new StringBuilder();
 
                 List<AI_Prompt> orderedAIPrompts = aiPromptRepository
                                 .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT);
-
-                for (AI_Prompt aiprompt : orderedAIPrompts) {
-                        String question = aiprompt.getQuestionAskAiContent();
-                        if (aiprompt.getOrderPriority() == 1) {
-                                question += "\n" + databaseScript;
-                        } else if (aiprompt.getOrderPriority() == 2) {
-                                question += ""
-                                                + "\n - Question Content: " + examQuestion.getQuestionContent()
-                                                + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
-                                                + "\n - Description: " + examQuestion.getDescription()
-                                                + "\n - End point: " + examQuestion.getEndPoint()
-                                                + "\n - Http method: " + examQuestion.getHttpMethod()
-                                                + "\n - Payload type: " + examQuestion.getPayloadType()
-                                                + "\n - Validation: " + examQuestion.getValidation()
-                                                + "\n - Success response: " + examQuestion.getSucessResponse()
-                                                + "\n - Error response: " + examQuestion.getErrorResponse()
-                                                + "\n - Payload: " + examQuestion.getPayload();
-                        }
-
-                        String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8),
-                                        StandardCharsets.UTF_8);
-                        String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
-
-                        responseBuilder.append(response).append("\n");
-
-                        if (aiprompt.getOrderPriority() == 2) {
-                                List<String> gherkinDataList = extractGherkinData(response);
-                                saveGherkinData(gherkinDataList, examQuestion);
-
-                                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
-                                                + "] [Generate gherkin successfully] at [" + time + "]");
-                                return ResponseEntity
-                                                .status(HttpStatus.OK)
-                                                .body("Generate gherkin successfully!");
-                        }
-
+                if (orderedAIPrompts.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("No AI Prompts found for purpose: GENERATE_GHERKIN_FORMAT");
                 }
-                saveLog(examPaper.getExamPaperId(),
-                                "Account [" + authenticatedUserId + "] [Generate gherkin failure] at [" + time + "]");
 
-                return ResponseEntity
-                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Unknown error! Maybe AI did not respond");
+                StringBuilder fullResponseBuilder = new StringBuilder();
+
+                AI_Prompt firstPrompt = orderedAIPrompts.get(0);
+                String firstQuestion = firstPrompt.getQuestionAskAiContent() + "\n" + databaseScript;
+
+                String firstResponse = sendToAI(firstQuestion, selectedAiApiKey.getAiApiKey());
+                if (firstResponse == null || firstResponse.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body("Error: Failed to call AI API for orderPriority 1.");
+                }
+
+                fullResponseBuilder.append(firstResponse).append("\n");
+
+                if (orderedAIPrompts.size() > 1) {
+                        AI_Prompt secondPrompt = orderedAIPrompts.get(1);
+                        String secondQuestion = secondPrompt.getQuestionAskAiContent()
+                                        + "\n - Question Content: " + examQuestion.getQuestionContent()
+                                        + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
+                                        + "\n - Description: " + examQuestion.getDescription()
+                                        + "\n - End point: " + examQuestion.getEndPoint()
+                                        + "\n - Http method: " + examQuestion.getHttpMethod()
+                                        + "\n - Payload type: " + examQuestion.getPayloadType()
+                                        + "\n - Validation: " + examQuestion.getValidation()
+                                        + "\n - Success response: " + examQuestion.getSucessResponse()
+                                        + "\n - Error response: " + examQuestion.getErrorResponse()
+                                        + "\n - Payload: " + examQuestion.getPayload();
+
+                        String promptInUTF8 = new String(secondQuestion.getBytes(StandardCharsets.UTF_8),
+                                        StandardCharsets.UTF_8);
+                        String secondResponse = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
+
+                        if (secondResponse == null || secondResponse.isEmpty()) {
+                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                .body("Error: Failed to call AI API for orderPriority 2.");
+                        }
+
+                        fullResponseBuilder.append(secondResponse).append("\n");
+
+                        List<String> gherkinDataList = extractGherkinData(secondResponse);
+                        if (gherkinDataList == null || gherkinDataList.isEmpty()) {
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("Error: No Gherkin data extracted from AI response.");
+                        }
+
+                        saveGherkinData(gherkinDataList, examQuestion);
+
+                        saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                        + "] [Generate gherkin successfully] at [" + time + "]");
+                        return ResponseEntity.status(HttpStatus.OK).body("Generate gherkin successfully!");
+                }
+
+                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                + "] [Generate gherkin failure] at [" + time + "]");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Unknown error! Maybe AI did not respond.");
         }
 
         public List<String> getGherkinDatasByExamQuestionId(Long examQuestionId) {
@@ -408,7 +396,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository
                                 .findByExamQuestion_ExamQuestionIdAndStatusTrue(examQuestionId);
 
-                // Trả về danh sách gherkinData
                 return gherkinScenarios.stream()
                                 .map(Gherkin_Scenario::getGherkinData)
                                 .collect(Collectors.toList());
@@ -423,53 +410,38 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                                 .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
                 Exam_Paper examPaper = examQuestion.getExamPaper();
 
-                Optional<Account_Selected_Key> optionalAccountSelectedKey = accountSelectedKeyRepository
-                                .findByAccount_AccountId(authenticatedUserId);
-                if (optionalAccountSelectedKey.isEmpty()) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User has not selected an AI Key");
+                Account_Selected_Key accountSelectedKey = accountSelectedKeyRepository
+                                .findByAccount_AccountId(authenticatedUserId)
+                                .orElse(null);
+                if (accountSelectedKey == null || accountSelectedKey.getAiApiKey() == null) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("User has not selected a valid AI Key");
                 }
 
-                Account_Selected_Key accountSelectedKey = optionalAccountSelectedKey.get();
                 AI_Api_Key selectedAiApiKey = accountSelectedKey.getAiApiKey();
-                if (selectedAiApiKey == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("AI API Key does not exist");
-                }
 
                 List<Gherkin_Scenario> gherkinScenarios = gherkinScenarioRepository.findAllById(gherkinIds);
-
                 if (gherkinScenarios.isEmpty()) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                         .body("No Gherkin data found for the provided Gherkin IDs");
                 }
 
-                // Long examQuestionId =
-                // gherkinScenarios.get(0).getExamQuestion().getExamQuestionId();
                 boolean allBelongToSameQuestion = gherkinScenarios.stream()
                                 .allMatch(gherkin -> gherkin.getExamQuestion().getExamQuestionId()
                                                 .equals(examQuestionId));
-
                 if (!allBelongToSameQuestion) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                         .body("All Gherkin IDs must belong to the same Exam Question");
                 }
 
-                Optional<Exam_Database> optionalExamDatabase = examDatabaseRepository
-                                .findByExamQuestionId(examQuestionId);
-                if (optionalExamDatabase.isEmpty()) {
+                Exam_Database examDatabase = examDatabaseRepository.findByExamQuestionId(examQuestionId)
+                                .orElse(null);
+                if (examDatabase == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                         .body("Database does not exist for Exam Question ID: " + examQuestionId);
                 }
 
-                Exam_Database examDatabase = optionalExamDatabase.get();
                 String databaseScript = examDatabase.getDatabaseScript();
-
-                Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(examQuestionId);
-                if (optionalExamQuestion.isEmpty()) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                        .body("Exam Question does not exist for ID: " + examQuestionId);
-                }
-
-                // Exam_Question examQuestion = optionalExamQuestion.get();
 
                 String formattedGherkinData = gherkinScenarios.stream()
                                 .map(Gherkin_Scenario::getGherkinData)
@@ -478,40 +450,61 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
                 List<AI_Prompt> orderedAIPrompts = aiPromptRepository
                                 .findByPurposeOrderByOrderPriority(Purpose_Enum.GENERATE_GHERKIN_FORMAT_MORE);
-
-                for (AI_Prompt aiprompt : orderedAIPrompts) {
-                        String question = aiprompt.getQuestionAskAiContent();
-
-                        if (aiprompt.getOrderPriority() == 1) {
-                                question += "\n" + databaseScript;
-                        } else if (aiprompt.getOrderPriority() == 2) {
-                                question += "\n" + formattedGherkinData
-                                                + "\n - Question Content: " + examQuestion.getQuestionContent()
-                                                + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
-                                                + "\n - Description: " + examQuestion.getDescription()
-                                                + "\n - End point: " + examQuestion.getEndPoint()
-                                                + "\n - Http method: " + examQuestion.getHttpMethod()
-                                                + "\n - Payload type: " + examQuestion.getPayloadType()
-                                                + "\n - Validation: " + examQuestion.getValidation()
-                                                + "\n - Success response: " + examQuestion.getSucessResponse()
-                                                + "\n - Error response: " + examQuestion.getErrorResponse()
-                                                + "\n - Payload: " + examQuestion.getPayload();
-                        }
-
-                        String promptInUTF8 = new String(question.getBytes(StandardCharsets.UTF_8),
-                                        StandardCharsets.UTF_8);
-                        String response = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
-
-                        if (aiprompt.getOrderPriority() == 2) {
-
-                                List<String> gherkinDataList = extractGherkinData(response);
-                                saveGherkinData(gherkinDataList, examQuestion);
-
-                                saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
-                                                + "] [Generate gherkin more successfully] at [" + time + "]");
-                                return ResponseEntity.status(HttpStatus.OK).body("Generate gherkin more successfully!");
-                        }
+                if (orderedAIPrompts.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No AI Prompts found.");
                 }
+
+                StringBuilder fullResponseBuilder = new StringBuilder();
+
+                AI_Prompt firstPrompt = orderedAIPrompts.get(0);
+                String firstQuestion = firstPrompt.getQuestionAskAiContent() + "\n" + databaseScript;
+
+                String firstResponse = sendToAI(firstQuestion, selectedAiApiKey.getAiApiKey());
+                if (firstResponse == null || firstResponse.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body("Error: Failed to call AI API for orderPriority 1.");
+                }
+
+                fullResponseBuilder.append(firstResponse).append("\n");
+
+                if (orderedAIPrompts.size() > 1) {
+                        AI_Prompt secondPrompt = orderedAIPrompts.get(1);
+                        String secondQuestion = secondPrompt.getQuestionAskAiContent()
+                                        + "\n" + formattedGherkinData
+                                        + "\n - Question Content: " + examQuestion.getQuestionContent()
+                                        + "\n - Allowed Roles: " + examQuestion.getRoleAllow()
+                                        + "\n - Description: " + examQuestion.getDescription()
+                                        + "\n - End point: " + examQuestion.getEndPoint()
+                                        + "\n - Http method: " + examQuestion.getHttpMethod()
+                                        + "\n - Payload type: " + examQuestion.getPayloadType()
+                                        + "\n - Validation: " + examQuestion.getValidation()
+                                        + "\n - Success response: " + examQuestion.getSucessResponse()
+                                        + "\n - Error response: " + examQuestion.getErrorResponse()
+                                        + "\n - Payload: " + examQuestion.getPayload();
+
+                        String promptInUTF8 = new String(secondQuestion.getBytes(StandardCharsets.UTF_8),
+                                        StandardCharsets.UTF_8);
+                        String secondResponse = sendToAI(promptInUTF8, selectedAiApiKey.getAiApiKey());
+                        if (secondResponse == null || secondResponse.isEmpty()) {
+                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                .body("Error: Failed to call AI API for orderPriority 2.");
+                        }
+
+                        fullResponseBuilder.append(secondResponse).append("\n");
+
+                        List<String> gherkinDataList = extractGherkinData(secondResponse);
+                        if (gherkinDataList == null || gherkinDataList.isEmpty()) {
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("Error: No Gherkin data extracted from AI response.");
+                        }
+
+                        saveGherkinData(gherkinDataList, examQuestion);
+
+                        saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
+                                        + "] [Generate gherkin more successfully] at [" + time + "]");
+                        return ResponseEntity.status(HttpStatus.OK).body("Generate gherkin more successfully!");
+                }
+
                 saveLog(examPaper.getExamPaperId(), "Account [" + authenticatedUserId
                                 + "] [Generate gherkin more failure] at [" + time + "]");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -524,16 +517,12 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 Matcher matcher = pattern.matcher(response);
 
                 while (matcher.find()) {
-                        // Lấy dữ liệu giữa dấu {{ }}
                         String gherkinData = matcher.group(1).trim();
-
-                        // Thay thế dấu ** và xuống dòng \n để chuẩn hóa cho MySQL
-                        gherkinData = gherkinData.replace("**", "  ") // Bỏ dấu ** để dễ đọc
-                                        .replace("\\n", "\n") // Chuyển ký tự \\n thành dòng mới
+                        gherkinData = gherkinData.replace("**", "  ")
+                                        .replace("\\n", "\n")
                                         .replace("\"", "")
                                         .replace("\\", "");
 
-                        // Loại bỏ \n đầu và cuối chuỗi nếu có
                         gherkinData = gherkinData.replaceAll("^\\n+|\\n+$", "").trim();
 
                         gherkinDataList.add(gherkinData);
@@ -542,15 +531,12 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         }
 
         private void saveGherkinData(List<String> gherkinDataList, Exam_Question examQuestion) {
-                // long priority = 1;
+
                 for (String data : gherkinDataList) {
                         Gherkin_Scenario scenario = new Gherkin_Scenario();
                         scenario.setGherkinData(data);
-                        // scenario.setOrderPriority(priority++);
                         scenario.setExamQuestion(examQuestion);
                         scenario.setStatus(true);
-                        // scenario.setIsUpdateCreate(true);
-
                         gherkinScenarioRepository.save(scenario);
                 }
         }
@@ -641,7 +627,6 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
                 Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                                 .orElseThrow(() -> new NoSuchElementException("Exam Paper not exists"));
-             
 
                 for (Long gherkinScenarioId : gherkinScenarioIds) {
                         Optional<Gherkin_Scenario> optionalGherkinScenario = gherkinScenarioRepository

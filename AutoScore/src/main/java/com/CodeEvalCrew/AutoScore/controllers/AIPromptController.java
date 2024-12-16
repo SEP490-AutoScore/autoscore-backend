@@ -32,7 +32,7 @@ public class AIPromptController {
     public String updateQuestionAskAiContent(
             @PathVariable Long aiPromptId,
             @RequestBody String newQuestionAskAiContent) {
-                aiPromptService.updateQuestionAskAiContent(aiPromptId, newQuestionAskAiContent);
+        aiPromptService.updateQuestionAskAiContent(aiPromptId, newQuestionAskAiContent);
         return "Update success";
     }
 

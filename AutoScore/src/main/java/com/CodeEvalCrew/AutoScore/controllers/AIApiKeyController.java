@@ -66,13 +66,12 @@ public class AIApiKeyController {
             return new ResponseEntity<>("Failed to create API Key", HttpStatus.BAD_REQUEST);
         }
     }
-    
 
     @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
     @PutMapping("/{aiApiKeyId}")
     public ResponseEntity<Void> updateAIApiKey(
             @PathVariable Long aiApiKeyId,
-            @RequestParam boolean shared)  {
+            @RequestParam boolean shared) {
         try {
             aiApiKeyService.updateAI_Api_Key(aiApiKeyId, shared);
             return ResponseEntity.noContent().build();
@@ -87,7 +86,6 @@ public class AIApiKeyController {
     @DeleteMapping("/{aiApiKeyId}")
     public ResponseEntity<String> deleteAIApiKey(@PathVariable Long aiApiKeyId) {
         boolean isDeleted = aiApiKeyService.deleteAIApiKey(aiApiKeyId);
-
         if (isDeleted) {
             return ResponseEntity.ok("Delete successful");
         } else {
@@ -98,7 +96,6 @@ public class AIApiKeyController {
     @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
     @GetMapping("/ai-names")
     public List<AIName_Enum> getAllAINames() {
-        // Call the service to get the enum values
         return aiApiKeyService.getAllAINameEnums();
     }
 

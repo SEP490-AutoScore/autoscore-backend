@@ -96,13 +96,9 @@ public class AIApiKeyService implements IAIApiKeyService {
 
         return apiKeys.stream()
                 .map(apiKey -> {
-
-                    // Check if the API key belongs to the authenticated user
-                    String fullName = "Unknown"; // Default value
-
+                    String fullName = "Unknown";
                     if (apiKey.getAccount() != null && apiKey.getAccount().getAccountId().equals(authenticatedUserId)) {
-                        fullName = "Owned By You"; // Replace with "owned by you" if it belongs to the authenticated
-                                                   // user
+                        fullName = "Owned By You";
                     } else {
                         fullName = Optional.ofNullable(apiKey.getAccount())
                                 .map(account -> Optional
@@ -111,7 +107,6 @@ public class AIApiKeyService implements IAIApiKeyService {
                                         .orElse("Unknown"))
                                 .orElse("Unknown");
                     }
-
                     return new AIApiKeyDTO(
                             apiKey.getAiApiKeyId(),
                             apiKey.getAiName(),
@@ -137,19 +132,16 @@ public class AIApiKeyService implements IAIApiKeyService {
         Account authenticatedUserAccount = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Authenticated account not found"));
 
-        // Check if the user has already selected a key
         Optional<Account_Selected_Key> existingSelectedKey = accountSelectedKeyRepository
                 .findByAccountAccountId(authenticatedUserId)
                 .stream()
                 .findFirst();
 
         if (existingSelectedKey.isPresent()) {
-            // Update the existing key
             Account_Selected_Key selectedKey = existingSelectedKey.get();
             selectedKey.setAiApiKey(selectedApiKey);
             accountSelectedKeyRepository.save(selectedKey);
         } else {
-            // Create a new key selection
             Account_Selected_Key newSelectedKey = new Account_Selected_Key();
             newSelectedKey.setAccount(authenticatedUserAccount);
             newSelectedKey.setAiApiKey(selectedApiKey);
@@ -183,7 +175,6 @@ public class AIApiKeyService implements IAIApiKeyService {
 
     @Override
     public void updateAI_Api_Key(Long aiApiKeyId, boolean shared) {
-        // Search for AI API Key
         Optional<AI_Api_Key> existingApiKeyOpt = aiApiKeyRepository.findById(aiApiKeyId);
 
         if (existingApiKeyOpt.isEmpty()) {
@@ -191,34 +182,30 @@ public class AIApiKeyService implements IAIApiKeyService {
         }
 
         AI_Api_Key existingApiKey = existingApiKeyOpt.get();
-        // Check API Key ownership
+
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         if (!existingApiKey.getAccount().getAccountId().equals(authenticatedUserId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this key");
         }
 
-        // Update the "shared" status of AI API Key
         existingApiKey.setShared(shared);
         existingApiKey.setUpdatedAt(LocalDateTime.now());
 
         aiApiKeyRepository.save(existingApiKey);
 
-        // If shared = false, set all selectedAiApiKeyId = null
         if (!shared) {
             Set<Account_Selected_Key> accountSelectedKeys = existingApiKey.getAccountSelectedKeys();
 
             for (Account_Selected_Key selectedKey : accountSelectedKeys) {
-                selectedKey.setAiApiKey(null); // Set aiApiKey = null
+                selectedKey.setAiApiKey(null);
             }
         }
-
     }
 
     @Override
     public boolean deleteAIApiKey(Long aiApiKeyId) {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        // Get AI API Key and check deletion permission
         AI_Api_Key apiKey = aiApiKeyRepository.findById(aiApiKeyId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "AI API Key not found"));
 
@@ -226,19 +213,15 @@ public class AIApiKeyService implements IAIApiKeyService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "You do not have permission to delete this AI API Key");
         }
-        // Update status of AI API Key
 
         apiKey.setStatus(false);
         apiKey.setUpdatedAt(LocalDateTime.now());
         aiApiKeyRepository.save(apiKey);
 
         Set<Account_Selected_Key> accountSelectedKeys = apiKey.getAccountSelectedKeys();
-
         for (Account_Selected_Key selectedKey : accountSelectedKeys) {
-            // Set selectedAiApiKeyId = null
             selectedKey.setAiApiKey(null);
         }
-
         return true;
     }
 
@@ -284,8 +267,6 @@ public class AIApiKeyService implements IAIApiKeyService {
 
     @Override
     public List<AIName_Enum> getAllAINameEnums() {
-        // Return the enum values as a list
         return Arrays.asList(AIName_Enum.values());
     }
-
 }
