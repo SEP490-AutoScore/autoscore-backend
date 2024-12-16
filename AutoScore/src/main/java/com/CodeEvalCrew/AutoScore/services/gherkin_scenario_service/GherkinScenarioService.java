@@ -27,13 +27,15 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GherkinScenarioResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanDTO;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Prompt;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.GradingStatusEnum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Purpose_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
+import com.CodeEvalCrew.AutoScore.models.Entity.GradingProcess;
 import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
@@ -42,6 +44,7 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperReposit
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
+import com.CodeEvalCrew.AutoScore.repositories.grading_process_repository.GradingProcessRepository;
 import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
 import com.CodeEvalCrew.AutoScore.utils.Util;
@@ -69,6 +72,8 @@ public class GherkinScenarioService implements IGherkinScenarioService {
         private LogRepository logRepository;
         @Autowired
         private IExamPaperRepository examPaperRepository;
+        @Autowired
+        private GradingProcessRepository gradingProcessRepository;
 
         private void saveLog(Long examPaperId, String actionDetail) {
 
@@ -91,6 +96,25 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 }
 
                 logRepository.save(log);
+        }
+
+        private void checkGradingProcessStatus(Long examPaperId) throws IllegalStateException {
+                Optional<GradingProcess> gradingProcessOpt = gradingProcessRepository
+                                .findByExamPaper_ExamPaperId(examPaperId);
+
+                if (gradingProcessOpt.isPresent()) {
+                        GradingProcess gradingProcess = gradingProcessOpt.get();
+                        GradingStatusEnum status = gradingProcess.getStatus();
+
+                        if (status == GradingStatusEnum.PENDING ||
+                                        status == GradingStatusEnum.IMPORTANT ||
+                                        status == GradingStatusEnum.GRADING ||
+                                        status == GradingStatusEnum.PLAGIARISM) {
+                                throw new IllegalStateException(
+                                                String.format("Grading processing, not allowed",
+                                                                examPaperId, status));
+                        }
+                }
         }
 
         @Override
@@ -296,6 +320,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
                                 .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
                 Exam_Paper examPaper = examQuestion.getExamPaper();
+                checkGradingProcessStatus(examPaper.getExamPaperId());
 
                 if (gherkinScenarioRepository.existsByExamQuestion_ExamQuestionIdAndStatusTrue(examQuestionId)) {
                         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -409,7 +434,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
                                 .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
                 Exam_Paper examPaper = examQuestion.getExamPaper();
-
+                checkGradingProcessStatus(examPaper.getExamPaperId());
                 Account_Selected_Key accountSelectedKey = accountSelectedKeyRepository
                                 .findByAccount_AccountId(authenticatedUserId)
                                 .orElse(null);
@@ -593,7 +618,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 Exam_Question examQuestion = gherkinScenario.getExamQuestion();
 
                 Exam_Paper examPaper = examQuestion.getExamPaper();
-
+                checkGradingProcessStatus(examPaper.getExamPaperId());
                 if (examPaper == null) {
                         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                                         "Exam Paper not found for the Gherkin Scenario");
@@ -621,7 +646,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
 
         @Override
         public String deleteGherkinScenario(List<Long> gherkinScenarioIds, Long examPaperId) {
-
+                checkGradingProcessStatus(examPaperId);
                 Long authenticatedUserId = Util.getAuthenticatedAccountId();
                 LocalDateTime time = Util.getCurrentDateTime();
 
@@ -661,7 +686,7 @@ public class GherkinScenarioService implements IGherkinScenarioService {
                 Exam_Question examQuestion = examQuestionRepository.findById(dto.getExamQuestionId())
                                 .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
                 Exam_Paper examPaper = examQuestion.getExamPaper();
-
+                checkGradingProcessStatus(examPaper.getExamPaperId());
                 Optional<Exam_Question> optionalExamQuestion = examQuestionRepository.findById(dto.getExamQuestionId());
 
                 if (optionalExamQuestion.isEmpty()) {
