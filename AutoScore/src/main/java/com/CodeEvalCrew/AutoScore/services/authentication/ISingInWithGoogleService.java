@@ -4,4 +4,5 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.SignInWithGoogleRespons
 
 public interface  ISingInWithGoogleService {
     SignInWithGoogleResponseDTO authenticateWithGoogle(String email);
+    SignInWithGoogleResponseDTO authenticateWithEmail(String email, String password);
 }

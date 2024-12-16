@@ -271,15 +271,19 @@ public class AccountService implements IAccountService {
             Account account = accountRepository.findById(accountId).orElseThrow();
             Employee employee = employeeRepository.findByAccount_AccountId(accountId);
             employee.setFullName(accountRequestDTO.getName());
-            account.setEmail(accountRequestDTO.getEmail());
             account.setUpdatedBy(accountId);
-            account.setPassword(accountRequestDTO.getPassword());
             if (accountRequestDTO.getAvatar() != null) {
                 byte[] avatarBytes = Base64.getDecoder().decode(accountRequestDTO.getAvatar().split(",")[1]);
                 account.setAvatar(avatarBytes);
             }
+            if (accountRequestDTO.getOldPassword() != null) {
+                if (accountRequestDTO.getNewPassword().equals(accountRequestDTO.getConfirmPassword())) {
+                    account.setPassword(accountRequestDTO.getNewPassword());
+                }
+            }
             accountRepository.save(account);
             employeeRepository.save(employee);
+
             return OperationStatus.SUCCESS;
         } catch (Exception e) {
             return OperationStatus.ERROR;
@@ -299,8 +303,7 @@ public class AccountService implements IAccountService {
                 && accountRequestDTO.getCampusId() != null;
         boolean hasRequiredFieldsForUpdate
                 = accountRequestDTO.getName() != null && !accountRequestDTO.getName().trim().isEmpty()
-                && accountRequestDTO.getEmail() != null && !accountRequestDTO.getEmail().trim().isEmpty()
-                && accountRequestDTO.getPassword() != null && !accountRequestDTO.getPassword().trim().isEmpty();
+                && accountRequestDTO.getEmail() != null && !accountRequestDTO.getEmail().trim().isEmpty();
         switch (type) {
             case "create" -> {
                 return hasRequiredFields;
