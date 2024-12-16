@@ -30,6 +30,7 @@ import com.CodeEvalCrew.AutoScore.mappers.ImportantMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperToExamRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamPaper.ExamPaperViewRequest;
+import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Semester.SemesterView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperFilePostmanResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamPaperView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ImportantView;
@@ -128,7 +129,6 @@ public class ExamPaperService implements IExamPaperService {
     @Override
     public ExamPaperView getById(Long id) throws NotFoundException {
         try {
-
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(id), "Exam Paper", id);
 
             ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
@@ -140,6 +140,13 @@ public class ExamPaperService implements IExamPaperService {
                 ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
                 set.add(view);
             }
+
+            if (examPaper.getExam() != null) {
+                Exam exam = examPaper.getExam();
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                examPaperView.setSemester(semesterView);
+            }
+
             examPaperView.setImportants(set);
 
             return examPaperView;
@@ -156,13 +163,12 @@ public class ExamPaperService implements IExamPaperService {
         List<ExamPaperView> result = new ArrayList<>();
         try {
             // check exam
-            checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
-
+            Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
             // crete spec
             Specification<Exam_Paper> spec = ExamPaperSpecification.hasForeignKey(request.getExamId(), "exam",
                     "examId");
             spec.and(ExamPaperSpecification.hasTrueStatus());
-
+            //check exam
             List<Exam_Paper> listEntities = examPaperRepository.findAll(spec);
 
             if (listEntities.isEmpty()) {
@@ -180,6 +186,8 @@ public class ExamPaperService implements IExamPaperService {
                     set.add(view);
                 }
                 examPaperView.setImportants(set);
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                examPaperView.setSemester(semesterView);
 
                 result.add(examPaperView);
             }
@@ -222,7 +230,6 @@ public class ExamPaperService implements IExamPaperService {
                 ImportantView view = ImportantMapper.INSTANCE.formImportantToView(important);
                 set.add(view);
             }
-
             // update side in4
             examPaper.setExam(exam);
             examPaper.setImportants(importants);
@@ -236,6 +243,10 @@ public class ExamPaperService implements IExamPaperService {
             examPaperRepository.save(examPaper);
 
             ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            if (examPaper.getExam() != null) {
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                examPaperView.setSemester(semesterView);
+            }
             examPaperView.setImportants(set);
 
             return examPaperView;
@@ -286,6 +297,10 @@ public class ExamPaperService implements IExamPaperService {
             examPaperRepository.save(examPaper);
 
             ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
+            if (examPaper.getExam() != null) {
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                examPaperView.setSemester(semesterView);
+            }
             examPaperView.setImportants(set);
 
             return examPaperView;
@@ -383,7 +398,6 @@ public class ExamPaperService implements IExamPaperService {
             // List<PostmanFunctionInfo> functionInfoList =
             // getPostmanFunctionInfoByExamPaperId(examPaperId);
             // List<String> allNewmanFunctionNames = new ArrayList<>();
-
             for (MultipartFile file : files) {
 
                 byte[] fileData = file.getBytes();
@@ -413,7 +427,6 @@ public class ExamPaperService implements IExamPaperService {
                 // .filter(name -> !allNewmanFunctionNames.contains(name))
                 // .collect(Collectors.toList());
                 // setStatusFalseForFunctionsNotInNewman(functionNamesNotInNewman);
-
                 updateExamQuestionInPostman(fileContent.getBytes(StandardCharsets.UTF_8), examPaperId);
 
                 examPaper.setFileCollectionPostman(null);
@@ -473,7 +486,6 @@ public class ExamPaperService implements IExamPaperService {
     // e);
     // }
     // }
-
     public void updateExamQuestionInPostman(byte[] fileContent, Long examPaperId) throws Exception {
         try {
             String jsonContent = new String(fileContent, StandardCharsets.UTF_8);
@@ -498,7 +510,6 @@ public class ExamPaperService implements IExamPaperService {
                         String httpMethod = request.getString("method").toUpperCase();
 
                         // String rawUrl = request.getJSONObject("url").getString("raw");
-
                         // Chỉ lấy phần path từ raw URL
                         // String pathFromRawUrl = extractPathFromRawUrl(rawUrl);
                         // Lấy path từ request.url.path
@@ -509,7 +520,7 @@ public class ExamPaperService implements IExamPaperService {
 
                         List<Exam_Question> matchingQuestions = examQuestions.stream()
                                 .filter(question -> question.getHttpMethod().equals(httpMethod)
-                                        && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
+                                && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
                                 .collect(Collectors.toList());
 
                         if (matchingQuestions.size() == 1) {
@@ -556,7 +567,6 @@ public class ExamPaperService implements IExamPaperService {
     // postmanForGrading.getTotalPmTest()))
     // .collect(Collectors.toList());
     // }
-
     private void updateFileCollectionPostmanForGrading(byte[] fileData, Long examPaperId) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -653,7 +663,6 @@ public class ExamPaperService implements IExamPaperService {
             createNewPostmanForGrading(functionName, newTotalPmTest, examPaperId);
 
             // }
-
         }
 
         return result;
@@ -674,7 +683,6 @@ public class ExamPaperService implements IExamPaperService {
     // postmanForGradingRepository.saveAll(postmenToUpdate);
     // }
     // }
-
     private void createNewPostmanForGrading(String functionName, Long totalPmTest, Long examPaperId)
             throws NotFoundException {
 
@@ -701,7 +709,6 @@ public class ExamPaperService implements IExamPaperService {
     // System.out.println("Updated " + functionName + " in database to " +
     // newTotalPmTest);
     // }
-
     private NewmanResult parseNewmanOutput(String newmanOutput) {
         NewmanResult result = new NewmanResult();
         List<String> functionNames = new ArrayList<>();
@@ -774,7 +781,6 @@ public class ExamPaperService implements IExamPaperService {
     // });
     // return result;
     // }
-
     @Override
     public byte[] exportPostmanCollection(Long examPaperId) throws Exception {
 
@@ -1049,7 +1055,7 @@ public class ExamPaperService implements IExamPaperService {
                 if (examQuestion != null) {
                     examQuestionScores.put(examQuestion.getExamQuestionId(),
                             examQuestionScores.getOrDefault(examQuestion.getExamQuestionId(), 0f)
-                                    + gradingItem.getScoreOfFunction());
+                            + gradingItem.getScoreOfFunction());
                 }
             }
 
