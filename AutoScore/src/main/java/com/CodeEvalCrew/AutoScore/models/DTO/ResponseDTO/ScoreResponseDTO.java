@@ -16,7 +16,7 @@ public class ScoreResponseDTO {
     private String examPaperCode;
     private String studentCode;
     private String studentEmail;
-
+    private String logRunPostman;
     private LocalDateTime gradedAt;
 
     private String levelOfPlagiarism;
