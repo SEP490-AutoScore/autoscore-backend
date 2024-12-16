@@ -75,7 +75,8 @@ public class GherkinScenarioController {
 
     @PreAuthorize("hasAnyAuthority('DELETE_GHERKIN_SCENARIO', 'ALL_ACCESS')")
     @DeleteMapping("/gherkinScenarioIds")
-    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds, @RequestParam Long examPaperId) {
+    public ResponseEntity<String> deleteGherkinScenarios(@RequestParam List<Long> gherkinScenarioIds,
+            @RequestParam Long examPaperId) {
         try {
 
             String result = gherkinScenarioService.deleteGherkinScenario(gherkinScenarioIds, examPaperId);

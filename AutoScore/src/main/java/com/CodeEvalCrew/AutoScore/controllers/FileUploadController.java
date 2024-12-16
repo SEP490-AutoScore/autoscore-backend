@@ -63,14 +63,5 @@ public class FileUploadController {
         }
     }
 
-    @GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamProgress() {
-        // Tăng timeout lên 10 phút (600_000 ms)
-        SseEmitter emitter = new SseEmitter(600_000L);
-        progressService.registerEmitter(emitter,
-                studentSubmissionService.getTotalTasks(),
-                studentSubmissionService.getCompletedTasks(),
-                studentSubmissionService.getFailedTasks());
-        return emitter;
-    }
+
 }

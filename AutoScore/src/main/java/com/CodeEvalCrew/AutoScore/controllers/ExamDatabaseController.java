@@ -46,7 +46,6 @@ public class ExamDatabaseController {
         }
     }
 
-
     @PreAuthorize("hasAnyAuthority('UPDATE_EXAM_DATABASE', 'ALL_ACCESS')")
     @PutMapping(value = "/update", consumes = { "multipart/form-data" })
     @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {

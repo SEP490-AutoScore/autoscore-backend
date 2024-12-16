@@ -26,10 +26,6 @@ public interface IExamPaperService {
 
     void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception;
 
-    // List<Long> getExamQuestionIdsByExamPaperId(Long examPaperId) throws NotFoundException;
-
-    // List<GherkinScenarioInfoDTO> getGherkinScenariosByExamPaperId(Long examPaperId) throws NotFoundException;
-
     byte[] exportPostmanCollection(Long examPaperId) throws Exception;
 
     List<ExamPaperView> getAllExamNotUsed() throws NotFoundException, Exception;
