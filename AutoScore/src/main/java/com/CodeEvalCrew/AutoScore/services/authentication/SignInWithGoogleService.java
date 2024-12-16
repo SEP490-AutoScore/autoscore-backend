@@ -49,7 +49,26 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
     public SignInWithGoogleResponseDTO authenticateWithGoogle(String email) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Account not found for email: " + email));
+        return authenticate(account);
+    }
 
+    private String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public SignInWithGoogleResponseDTO authenticateWithEmail(String email, String password) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Account not found for email: " + email));
+
+        if (!account.getPassword().equals(password)) {
+            throw new IllegalStateException("Invalid password for email: " + email);
+        }
+
+        return authenticate(account);
+    }
+
+    private SignInWithGoogleResponseDTO authenticate(Account account){
         SignInWithGoogleResponseDTO response = AccountMapper.INSTANCE.accountToSignInWithGoogleResponseDTO(account);
 
         // Lấy Role duy nhất của Account
@@ -72,6 +91,7 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
                 permissions
         );
         response.setJwtToken(jwtToken);
+        response.setAvatar(account.getAvatar());
 
         Timestamp accessExpire = new Timestamp(Instant.now().plusMillis(getJwtAccessExpiration).toEpochMilli());
         Timestamp refreshExpire = new Timestamp(Instant.now().plusMillis(getJwtRefreshExpiration).toEpochMilli());
@@ -101,9 +121,5 @@ public class SignInWithGoogleService implements ISingInWithGoogleService {
         response.setExp(accessExpire.getTime());
 
         return response;
-    }
-
-    private String generateRefreshToken() {
-        return UUID.randomUUID().toString();
     }
 }
