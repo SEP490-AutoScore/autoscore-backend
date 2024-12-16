@@ -170,8 +170,8 @@ VALUES
 (2, 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (3, 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (6, 'vtrvuongdt510@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(7, 'vtrvuongdt694@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(8, 'vtrvuongdt758@gmail.com', 4, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(7, 'votrongvuong999@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(8, 'votrongvuong3647@gmail.com', 4, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (4, 'minhtpvse160611@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (5, 'thanhtuyen66202@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (9, 'cunprokt9@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true);
