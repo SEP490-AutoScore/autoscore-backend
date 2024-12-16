@@ -26,11 +26,17 @@ public class StudentErrorService implements IStudentErrorService {
 
     @Override
     public void saveStudentError(Source source, Student student, String errorContent) {
-        Student_Error studentError = new Student_Error();
-        studentError.setSource(source);
-        studentError.setStudent(student);
-        studentError.setErrorContent(errorContent);
-        studentErrorRepository.save(studentError);
+        Student_Error studentError = studentErrorRepository.findBySourceAndStudent(source, student).orElse(null);
+        if (studentError != null) {
+            studentError.setErrorContent(errorContent);
+            studentErrorRepository.save(studentError);
+            return;
+        }
+        Student_Error studentErrorNew = new Student_Error();
+        studentErrorNew.setSource(source);
+        studentErrorNew.setStudent(student);
+        studentErrorNew.setErrorContent(errorContent);
+        studentErrorRepository.save(studentErrorNew);
     }
 
     @Override

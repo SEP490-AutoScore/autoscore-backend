@@ -5,13 +5,16 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.CodeEvalCrew.AutoScore.services.student_service.FileProcessingProgressService;
 import com.CodeEvalCrew.AutoScore.services.student_service.StudentSubmissionService;
@@ -60,14 +63,5 @@ public class FileUploadController {
         }
     }
 
-    // @GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    // public SseEmitter streamProgress() {
-    //     // Tăng timeout lên 10 phút (600_000 ms)
-    //     SseEmitter emitter = new SseEmitter(600_000L);
-    //     progressService.registerEmitter(emitter,
-    //             studentSubmissionService.getTotalTasks(),
-    //             studentSubmissionService.getCompletedTasks(),
-    //             studentSubmissionService.getFailedTasks());
-    //     return emitter;
-    // }
+
 }
