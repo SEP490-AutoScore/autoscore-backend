@@ -34,7 +34,7 @@ public class Postman_For_Grading {
     private boolean status;
     private Long orderPriority;
     private Long postmanForGradingParentId;
-    
+
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     @Basic(fetch = FetchType.EAGER)

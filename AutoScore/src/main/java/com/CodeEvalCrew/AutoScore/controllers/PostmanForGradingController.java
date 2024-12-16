@@ -105,6 +105,7 @@ public class PostmanForGradingController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAnyAuthority('CALCULATE_SCORE', 'ALL_ACCESS')")
     @PostMapping("/calculate")
     public ResponseEntity<String> calculateScores(@RequestParam Long examPaperId) {
         try {
@@ -113,6 +114,13 @@ public class PostmanForGradingController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('FIX_AUTH_POSTMAN', 'ALL_ACCESS')")
+    @PutMapping("/fix-auth-postman")
+    public ResponseEntity<String> updateAllPostmanCollections(@RequestParam Long examPaperId) {
+        String result = postmanForGradingService.updateAllPostmanCollections(examPaperId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

@@ -21,6 +21,7 @@ import com.CodeEvalCrew.AutoScore.mappers.GradingProcessMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Grading.GradingRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Grading.GradingRequestForExam;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.GradingProcessView;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.GradingStatusEnum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
@@ -124,6 +125,8 @@ public class GradingService implements IGradingService {
             }
         }
 
+        Long acc = Util.getAuthenticatedAccountId();
+
         Optional<Source> optSource = sourceRepository.findByExamPaper_ExamPaperId(request.getExamPaperId());
         if (!optSource.isPresent()) {
             throw new NoSuchElementException("source not found");
@@ -141,7 +144,7 @@ public class GradingService implements IGradingService {
         GradingProcess process;
         if (optionalProcess.isEmpty()) {
             process = new GradingProcess(
-                    null, GradingStatusEnum.PENDING, LocalDateTime.now(), LocalDateTime.now(), students, Exam_Type_Enum.valueOf(request.getExamType()), request.getOrganizationId(), examPaper
+                    null, GradingStatusEnum.PENDING, LocalDateTime.now(), LocalDateTime.now(), students, Exam_Type_Enum.valueOf(request.getExamType()), request.getOrganizationId(), acc, examPaper
             );
         } else {
             process = optionalProcess.get();
@@ -150,6 +153,8 @@ public class GradingService implements IGradingService {
         }
 
         gradingProcessRepository.save(process);
+        examPaper.setStatus(Exam_Status_Enum.GRADING);
+        examPaperRepository.save(examPaper);
 
         List<GradingStatusEnum> statuses = Arrays.asList(
                 GradingStatusEnum.IMPORTANT,

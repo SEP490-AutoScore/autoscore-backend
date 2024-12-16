@@ -30,21 +30,17 @@ public class LogController {
     @PostMapping("/export")
     public ResponseEntity<Resource> exportLog(@RequestParam Long examPaperId) {
         try {
-            // Gọi service để tạo file log
             String fileName = logService.exportLogToFile(examPaperId);
     
-            // Đảm bảo file tồn tại
             Path filePath = Paths.get(fileName).toAbsolutePath();
             Resource resource = new UrlResource(filePath.toUri());
             if (!resource.exists() || !resource.isReadable()) {
                 throw new IOException("File not found or unreadable: " + fileName);
             }
     
-            // Thiết lập header Content-Disposition
             String contentDisposition = "attachment; filename=\"" + fileName + "\"";
             System.out.println("Content-Disposition header: " + contentDisposition);
     
-            // Trả về response
             return ResponseEntity.ok()
                     .contentType(MediaType.TEXT_PLAIN)
                     .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)

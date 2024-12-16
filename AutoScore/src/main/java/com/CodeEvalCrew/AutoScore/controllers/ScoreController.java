@@ -215,13 +215,10 @@ public class ScoreController {
     @GetMapping("/get-total-run-and-average-response-time")
     public ResponseEntity<?> getTotalRunAndAverageResponseTime(@RequestParam Long examPaperId) {
         try {
-            // Call the service method to get the total run duration and average response
-            // time
             Map<String, Map<String, Double>> totalAndAverageResponseTimes = scoreService
                     .getTotalRunAndAverageResponseTime(examPaperId);
             return ResponseEntity.ok(totalAndAverageResponseTimes);
         } catch (Exception e) {
-            // Handle the exception and return a 500 error with the message
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }

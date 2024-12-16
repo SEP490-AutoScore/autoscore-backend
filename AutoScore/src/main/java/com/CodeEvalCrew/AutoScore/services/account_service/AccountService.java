@@ -16,9 +16,12 @@ import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.AccountRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AccountResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Organization;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
+import com.CodeEvalCrew.AutoScore.repositories.account_organization_repository.AccountOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationRepository;
@@ -34,14 +37,17 @@ public class AccountService implements IAccountService {
     private final IRoleRepository roleRepository;
     private final IPositionRepository positionRepository;
     private final IOrganizationRepository organizationRepository;
+    private final AccountOrganizationRepository accountOrganizationRepository;
 
     public AccountService(IAccountRepository accountRepository, IEmployeeRepository employeeRepository,
-            IRoleRepository roleRepository, IPositionRepository positionRepository, IOrganizationRepository organizationRepository) {
+            IRoleRepository roleRepository, IPositionRepository positionRepository, IOrganizationRepository organizationRepository,
+            AccountOrganizationRepository accountOrganizationRepository) {
         this.accountRepository = accountRepository;
         this.employeeRepository = employeeRepository;
         this.roleRepository = roleRepository;
         this.positionRepository = positionRepository;
         this.organizationRepository = organizationRepository;
+        this.accountOrganizationRepository = accountOrganizationRepository;
     }
 
     @Override
@@ -223,11 +229,23 @@ public class AccountService implements IAccountService {
                 account.setUpdatedBy(Util.getAuthenticatedAccountId());
                 accountRepository.save(account);
 
+                Organization organization = organizationRepository.findById(accountRequestDTO.getCampusId()).get();
+                Organization_Enum type = organization.getType();
+
                 Employee employee = employeeRepository.findByAccount_AccountId(accountRequestDTO.getAccountId());
                 employee.setFullName(accountRequestDTO.getName());
                 employee.setPosition(positionRepository.findById(accountRequestDTO.getPositionId()).get());
-                employee.setOrganization(organizationRepository.findById(accountRequestDTO.getCampusId()).get());
+                employee.setOrganization(organization);
                 employeeRepository.save(employee);
+
+                List<Account_Organization> accountOrganization = accountOrganizationRepository.findByAccount_AccountId(accountRequestDTO.getAccountId());
+                for (Account_Organization accountOrganizationRoot : accountOrganization) {
+                    if (accountOrganizationRoot.getOrganization().getType() == type) {
+                        accountOrganizationRoot.setOrganization(organization);
+                        accountOrganizationRepository.save(accountOrganizationRoot);
+                    }
+                }
+
                 return OperationStatus.SUCCESS;
             }
         } catch (Exception e) {

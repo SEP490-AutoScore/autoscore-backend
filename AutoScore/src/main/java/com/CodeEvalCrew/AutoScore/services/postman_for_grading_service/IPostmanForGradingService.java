@@ -27,4 +27,6 @@ public interface IPostmanForGradingService {
 
       void calculateScores(Long examPaperId) throws Exception;
 
+      String updateAllPostmanCollections(Long examPaperId);
+
 }
