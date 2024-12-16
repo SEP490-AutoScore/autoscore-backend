@@ -11,13 +11,9 @@ import lombok.Setter;
 @Setter
 public class ExamViewRequestDTO{
     private String searchString;
-    
     private Long subjectId = null;
-
     private LocalDateTime examAt;
-
     private LocalDateTime gradingAt;
-
     private LocalDateTime publishAt;
 
     //paging

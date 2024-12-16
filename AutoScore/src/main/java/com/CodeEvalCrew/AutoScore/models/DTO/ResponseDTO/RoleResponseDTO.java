@@ -14,11 +14,10 @@ import lombok.Setter;
 public class RoleResponseDTO {
     private Long roleId;
     private String roleName;
+    private String roleCode;
+    private String description;
     private boolean status;
-    private LocalDateTime createdAt;
-    private String createdBy;
-    private LocalDateTime updatedAt;
-    private String updatedBy;
-    private LocalDateTime deletedAt;
-    private String deletedBy;
+    private LocalDateTime lastUpdatedAt;
+    private String lastUpdatedBy;
+    private int totalUser;
 }

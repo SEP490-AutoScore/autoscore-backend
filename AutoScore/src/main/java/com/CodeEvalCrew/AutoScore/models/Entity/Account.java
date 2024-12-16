@@ -10,8 +10,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -37,9 +39,11 @@ public class Account {
     @Email(message = "Email should be valid")
     @Column(unique = true)
     private String email;
+    private String password;
+    @Lob
+    private byte[] avatar;
 
     @NotNull
-    @Size(min = 1, max = 20)
     private boolean status;
 
     private LocalDateTime createdAt;
@@ -53,7 +57,7 @@ public class Account {
     private LocalDateTime deletedAt;
 
     private Long deletedBy;
-    
+
     // Relationships
     @ManyToOne
     @JoinColumn(name = "roleId", nullable = false)
@@ -63,6 +67,17 @@ public class Account {
     @ToString.Exclude
     private Set<OAuthRefreshToken> refreshTokens;
 
-    @OneToMany(mappedBy = "account", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private Set<Account_Organization> accountOrganizations;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<AI_Api_Key> aiApiKeys;
+
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Account_Selected_Key accountSelectedKey;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private Set<Accout_Notification> notification_Accounts;
 }

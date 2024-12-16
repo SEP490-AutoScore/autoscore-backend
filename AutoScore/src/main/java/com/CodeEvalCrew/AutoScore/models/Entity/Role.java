@@ -29,22 +29,16 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roleId;
-
+    private String roleCode;
+    private String description;
     private String roleName;
-
     private boolean status;
-
     @Past
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
     
     @OneToMany(mappedBy = "role")

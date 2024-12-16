@@ -14,6 +14,7 @@ import lombok.Setter;
 public class PermissionResponseDTO {
     private Long permissionId;
     private String permissionName;
+    private String description;
     private String action;
     private boolean status;
     private Permission_Category permissionCategory;

@@ -12,4 +12,6 @@ public interface ScoreDetailRepository extends JpaRepository<Score_Detail, Long>
     List<Score_Detail> findByScore_ScoreId(Long scoreId);
     List<Score_Detail> findByExamQuestion_ExamQuestionId(Long examQuestionId);
     // Score_Detail findByScoreAndPostmanFunctionName(Score score, String postmanFunctionName);
+
+    List<Score_Detail> findAllByScore_ExamPaper_ExamPaperId(Long examPaperId);
 }

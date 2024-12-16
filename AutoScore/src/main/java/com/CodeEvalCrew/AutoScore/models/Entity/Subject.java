@@ -25,29 +25,22 @@ public class Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long subjectId;
-
     private String subjectName;
-
     private String subjectCode;
-
     private boolean status;
-    
     private LocalDateTime createdAt;
-
     private Long createdBy;
-
     private LocalDateTime updatedAt;
-
     private Long updatedBy;
-
     private LocalDateTime deletedAt;
-
     private Long deletedBy;
-
     // 1-n exam
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
     private Set<Exam> exams;
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
     private Set<Important> importants;
+
+    @OneToMany(mappedBy = "subject", cascade= CascadeType.ALL)
+    private Set<Exam_Paper> examPapers;
 }

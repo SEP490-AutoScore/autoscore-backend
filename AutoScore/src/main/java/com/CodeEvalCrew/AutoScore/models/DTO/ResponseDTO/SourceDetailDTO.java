@@ -11,5 +11,5 @@ public class SourceDetailDTO {
     private Long sourceDetailId;
     private String studentSourceCodePath;
     private Long studentId;
-    private Long sourceId;
+    // private Long sourceId;
 }

@@ -2,6 +2,8 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 
 import java.time.LocalDateTime;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,10 +29,6 @@ public class Exam_Database {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examDatabaseId;
 
-    // @Lob
-    // @Column(columnDefinition = "LONGBLOB")
-    // private byte[] databaseFile;
-
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String databaseScript;
@@ -45,7 +43,7 @@ public class Exam_Database {
 
     private String databaseNote;
 
-    private Boolean status;
+    private Exam_Status_Enum status;
 
     private LocalDateTime createdAt;
 

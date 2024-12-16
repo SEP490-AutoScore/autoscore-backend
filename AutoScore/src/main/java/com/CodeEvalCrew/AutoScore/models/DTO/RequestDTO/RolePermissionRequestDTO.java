@@ -1,7 +1,5 @@
 package com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +7,6 @@ import lombok.Setter;
 @Setter
 public class RolePermissionRequestDTO {
     private Long roleId;
-    private List<Long> permissionIds;
+    private Long permissionId;
+    private boolean status;
 }

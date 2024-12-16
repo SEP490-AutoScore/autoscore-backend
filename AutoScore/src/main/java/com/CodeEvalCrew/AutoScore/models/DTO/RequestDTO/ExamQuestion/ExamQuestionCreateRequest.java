@@ -12,7 +12,7 @@ import lombok.Setter;
 public class ExamQuestionCreateRequest {
     private String questionContent;
     private Float examQuestionScore;
-    private String endPoint;
+    private String endPoint;   
     private String roleAllow;
     private String httpMethod;
     private String description;

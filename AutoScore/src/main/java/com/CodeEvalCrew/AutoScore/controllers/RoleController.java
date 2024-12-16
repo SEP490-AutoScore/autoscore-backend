@@ -23,7 +23,7 @@ public class RoleController {
     @Autowired
     private IRoleService roleService;
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @GetMapping
     public ResponseEntity<List<RoleResponseDTO>> getAllRoles() {
         try {
@@ -37,7 +37,21 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
+    @GetMapping("/byRole")
+    public ResponseEntity<List<RoleResponseDTO>> getAllRolesByRole() {
+        try {
+            List<RoleResponseDTO> roles = roleService.getAllRolesByRole();
+            if (roles == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(roles);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @GetMapping("/{roleId}")
     public ResponseEntity<RoleResponseDTO> getRoleById(@PathVariable Long roleId) {
         try {
@@ -51,7 +65,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @PostMapping("/getbyname/{roleName}")
     public ResponseEntity<RoleResponseDTO> getRoleByName(@PathVariable String roleName) {
         try {
@@ -65,7 +79,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('CREATE_ROLE')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLE', 'ALL_ACCESS')")
     @PostMapping("/create")
     public ResponseEntity<?> createRole(@RequestBody RoleRequestDTO roleRequestDTO) {
         try {
@@ -84,7 +98,7 @@ public class RoleController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('UPDATE_ROLE')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_ROLE', 'ALL_ACCESS')")
     @PostMapping("/update")
     public ResponseEntity<?> updateRole(@RequestBody RoleRequestDTO roleRequestDTO) {
         try {
@@ -103,21 +117,21 @@ public class RoleController {
         }
     }
 
-    // @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('DELETE_ROLE')")
-    // @DeleteMapping("/delete/{roleId}")
-    // public ResponseEntity<?> deleteRole(@PathVariable Long roleId) {
-    //     try {
-    //         OperationStatus status = roleService.deleteRole(roleId);
-    //         return switch (status) {
-    //             case SUCCESS -> ResponseEntity.ok("Role deleted successfully");
-    //             case FAILURE -> ResponseEntity.status(500).body("Can't delete Role");
-    //             case NOT_FOUND -> ResponseEntity.status(404).body("Role not found");
-    //             case CANNOT_DELETE -> ResponseEntity.status(400).body("Role is in use");
-    //             case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Role");
-    //             default -> ResponseEntity.status(500).body("Unexpected error occurred");
-    //         };
-    //     } catch (Exception e) {
-    //         return ResponseEntity.status(500).body("Unexpected error occurred");
-    //     }
-    // }
+    @PreAuthorize("hasAnyAuthority('DELETE_ROLE', 'ALL_ACCESS')")
+    @PostMapping("/delete/{roleId}")
+    public ResponseEntity<?> deleteRole(@PathVariable Long roleId) {
+        try {
+            OperationStatus status = roleService.deleteRole(roleId);
+            return switch (status) {
+                case SUCCESS -> ResponseEntity.ok("Role deleted successfully");
+                case FAILURE -> ResponseEntity.status(500).body("Can't delete Role");
+                case NOT_FOUND -> ResponseEntity.status(404).body("Role not found");
+                case CANNOT_DELETE -> ResponseEntity.status(400).body("Role is in use");
+                case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Role");
+                default -> ResponseEntity.status(500).body("Unexpected error occurred");
+            };
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Unexpected error occurred");
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO;
 import java.time.LocalDateTime;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.Semester.SemesterView;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,4 +22,6 @@ public class ExamViewResponseDTO {
     private LocalDateTime publishAt;
     private SemesterView semester;
     private SubjectView subject;
+    private Exam_Type_Enum type;
+    private boolean status;
 }

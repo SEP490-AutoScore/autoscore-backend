@@ -14,6 +14,7 @@ import com.CodeEvalCrew.AutoScore.mappers.ExamQuestionMapper;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionCreateRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.ExamQuestion.ExamQuestionViewRequest;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamQuestionView;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
@@ -37,12 +38,11 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView getById(Long id) throws NotFoundException {
-        ExamQuestionView result;
         try {
 
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam Question", id);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nfe) {
             throw nfe;
         } catch (Exception e) {
@@ -56,7 +56,7 @@ public class ExamQuestionService implements IExamQuestionService {
         List<ExamQuestionView> result = new ArrayList<>();
         try {
 
-            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
+            checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
             Specification<Exam_Question> spec = ExamQuestionSpecification.hasForeignKey(request.getExamPaperId(), "examPaper", "examPaperId");
             spec.and(ExamQuestionSpecification.hasTrueStatus());
@@ -82,7 +82,6 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView createNewExamQuestion(ExamQuestionCreateRequest request) throws NotFoundException {
-        ExamQuestionView result;
         try {
             // check examPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
@@ -97,7 +96,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {
@@ -108,23 +107,31 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView updateExamQuestion(Long id, ExamQuestionCreateRequest request) throws NotFoundException {
-        ExamQuestionView result;
         try {
             //check examQuestion
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam question", id);
-
             // check examPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
             //update
-            examQuestion.setQuestionContent(request.getQuestionContent());
             examQuestion.setExamPaper(examPaper);
+            examQuestion.setQuestionContent(request.getQuestionContent());
+            examQuestion.setDescription(request.getDescription());
+            examQuestion.setExamQuestionScore(request.getExamQuestionScore());
+            examQuestion.setEndPoint(request.getEndPoint());
+            examQuestion.setHttpMethod(request.getHttpMethod());
+            examQuestion.setRoleAllow(request.getRoleAllow());
+            examQuestion.setPayloadType(request.getPayloadType());
+            examQuestion.setPayload(request.getPayload());
+            examQuestion.setValidation(request.getValidation());
+            examQuestion.setSucessResponse(request.getSucessResponse());
+            examQuestion.setErrorResponse(request.getErrorResponse());
             examQuestion.setUpdatedAt(Util.getCurrentDateTime());
             examQuestion.setUpdatedBy(Util.getAuthenticatedAccountId());
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {
@@ -135,19 +142,18 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView deleteExamQuestion(Long id) throws NotFoundException {
-        ExamQuestionView result;
         try {
             //check examQuestion
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam question", id);
 
             //update
-            examQuestion.setStatus(false);
+            examQuestion.setStatus(Exam_Status_Enum.UNACTIVE);
             examQuestion.setDeletedAt(Util.getCurrentDateTime());
             examQuestion.setDeletedBy(Util.getAuthenticatedAccountId());
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {

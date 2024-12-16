@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -29,13 +31,20 @@ public class Score {
     private Long scoreId;
 
     private Float totalScore;
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String reason;
 
     private LocalDateTime gradedAt;
 
-    private Boolean flag;
+    private String levelOfPlagiarism;
+    @Lob
+    private String plagiarismReason;
 
-    //Relationship
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String logRunPostman;
+
     //n-1 exam paper
     @ManyToOne
     @JoinColumn(name = "examPaperId", nullable = false)
@@ -46,11 +55,10 @@ public class Score {
     @JoinColumn(name = "studentId", nullable = false)
     private Student student;
 
-    // @ManyToOne
-    // @JoinColumn(name = "organizationId", nullable = false)
-    // private Organization organization;
-
     //1-n score detail
     @OneToMany(mappedBy = "score", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Score_Detail> scoreDetails;
+
+    @OneToMany(mappedBy = "score", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Code_Plagiarism> codePlagiarisms;
 }

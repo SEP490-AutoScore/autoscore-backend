@@ -1,8 +1,12 @@
 package com.CodeEvalCrew.AutoScore.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,10 +31,11 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+    @Value("${domain.frontend}")
+    private String frontendDomain;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
@@ -51,7 +56,7 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
                 // Cho phép các yêu cầu tới endpoint auth khác
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/students/**").permitAll()
+                .requestMatchers("/api/students/upload-progress", "/api/upload/progress").permitAll()
                 .anyRequest().authenticated() // Mọi request khác yêu cầu xác thực
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -84,6 +89,8 @@ public class SecurityConfig {
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
+        config.addExposedHeader(HttpHeaders.CONTENT_DISPOSITION);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
@@ -101,12 +108,16 @@ public class SecurityConfig {
                     // Lấy thuộc tính email từ OAuth2User
                     String email = oauthUser.getAttribute("email");
 
-                    if (email != null) {
-                        // Chuyển hướng tới endpoint signInGoogle với email
-                        response.sendRedirect("/api/auth/signingoogle?email=" + email);
+                    if (email != null ) {
+                    // Redirect đến trang login frontend với thông tin email và hình ảnh
+                    String redirectUrl = String.format(
+                        frontendDomain + "/?email=%s",
+                        email
+                    );
+                    response.sendRedirect(redirectUrl);
                     } else {
                         // Chuyển hướng tới trang login với lỗi
-                        response.sendRedirect("/login?error=true");
+                        response.sendRedirect(frontendDomain + "/");
                     }
                 } else {
                     super.onAuthenticationSuccess(request, response, authentication);

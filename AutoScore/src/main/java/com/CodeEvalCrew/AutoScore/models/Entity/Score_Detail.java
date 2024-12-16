@@ -28,7 +28,6 @@ public class Score_Detail {
     private Float scoreAchieve;
     private Long noPmtestAchieve;
 
-    //Relationship
     //n-1 score
     @ManyToOne
     @JoinColumn(name = "scoreId", nullable = false)
@@ -36,6 +35,6 @@ public class Score_Detail {
 
     //n-1 exam question
     @ManyToOne
-    @JoinColumn(name = "examQuestionId", nullable = false)
+    @JoinColumn(name = "examQuestionId", nullable = true)
     private Exam_Question examQuestion;
 }

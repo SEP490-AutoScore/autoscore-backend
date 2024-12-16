@@ -20,11 +20,11 @@ public interface RolePermissionMapper {
     RolePermissionMapper INSTANCE = Mappers.getMapper(RolePermissionMapper.class);
 
     // Ánh xạ Role_Permission -> RolePermissionResponseDTO
+    @Mapping(source = "role.roleId", target = "roleId")
     @Mapping(source = "role.roleName", target = "roleName")
+    @Mapping(source = "role.description", target = "description")
+    @Mapping(source = "role.roleCode", target = "roleCode")
     @Mapping(source = "role.status", target = "status")
-    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getCreatedBy()))", target = "createdBy")
-    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getUpdatedBy()))", target = "updatedBy")
-    @Mapping(expression= "java(util.getEmployeeFullName(rolePermission.getDeletedBy()))", target = "deletedBy")
     RolePermissionResponseDTO rolePermissionToRolePermissionResponseDTO(Role_Permission rolePermission, @Context Util util);
     
     // Ánh xạ List<Role_Permission> -> List<RolePermissionResponseDTO>

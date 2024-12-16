@@ -3,12 +3,15 @@ package com.CodeEvalCrew.AutoScore.models.Entity;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -34,11 +37,14 @@ public class Exam_Question {
     private String httpMethod;
     private String description;
     private String payloadType;
+    @Lob
     private String payload;
     private String validation;
+    @Lob
     private String sucessResponse;
+    @Lob
     private String errorResponse;
-    private boolean status;
+    private Exam_Status_Enum status;
     private Long orderBy;
     private LocalDateTime createdAt;
     private Long createdBy;
