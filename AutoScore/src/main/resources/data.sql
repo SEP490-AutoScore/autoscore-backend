@@ -24,6 +24,7 @@ VALUES
 ('CONVERT_ROLE', 62, 'Convert role', 1, 1, 'Allows converting role'),
 ('CONVERT_POSITION', 63, 'Convert position', 1, 1, 'Allows converting position'),
 ('CONVERT_CAMPUS', 64, 'Convert campus', 1, 1, 'Allows converting campus'),
+('CHANGE_PASSWORD', 68, 'Change password', 1, 1, 'Allows changing password'),
 
 -- Role Management
 ('VIEW_ROLE', 2, 'View role', 2, 1, 'Allows viewing role details'),
@@ -133,16 +134,15 @@ VALUES
 (true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39), (true, 1, 40),
 (true, 1, 41), (true, 1, 42), (true, 1, 43), (true, 1, 44), (true, 1, 45), (true, 1, 47), (true, 1, 48), (true, 1, 49), (true, 1, 50),
 (true, 1, 51),(true, 1, 52),(true, 1, 53),(true, 1, 54),(true, 1, 55),(true, 1, 56),(true, 1, 57),(true, 1, 58),(true, 1, 59), (true, 1, 60),
-(true, 1, 61), (true, 1, 62), (true, 1, 63), (true, 1, 64), (true, 1, 65), (true, 1, 66), (true, 1, 67),
+(true, 1, 61), (true, 1, 62), (true, 1, 63), (true, 1, 64), (true, 1, 65), (true, 1, 66), (true, 1, 67), (true, 1, 68),
 -- Examiner
 (false, 2, 2), (false, 2, 3), (false, 2, 10), (false, 2, 11), (false, 2, 17), (false, 2, 18), (false, 2, 23), (false, 2, 24), (false, 2, 25), (false, 2, 39),
 (true, 2, 1), (true, 2, 4), (true, 2, 5), (true, 2, 6), (true, 2, 7), (true, 2, 8), (true, 2, 9), (true, 2, 12), (true, 2, 13), (true, 2, 14),
 (true, 2, 15), (true, 2, 16), (true, 2, 19), (true, 2, 20), (true, 2, 21), (true, 2, 22), (true, 2, 26), (true, 2, 27), (true, 2, 28), (true, 2, 29),
 (true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40),
 (true, 2, 41), (true, 2, 42), (true, 2, 43), (true, 2, 44), (true, 2, 45), (true, 2, 47), (true, 2, 48), (true, 2, 49), (true, 2, 50),
-
 (true, 2, 51),(true, 2, 52),(true, 2, 53),(true, 2, 54),(true, 2, 55),(true, 2, 56),(true, 2, 57),(true, 2, 58),(true, 2, 59), (true, 2, 60),
-(true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64), (true, 2, 65), (true, 2, 66), (true, 2, 67),
+(true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64), (true, 2, 65), (true, 2, 66), (true, 2, 67), (true, 2, 68),
 
 -- Head of Department
 (false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
@@ -150,9 +150,8 @@ VALUES
 (false, 3, 31), (false, 3, 32), (false, 3, 33), (false, 3, 34), (false, 3, 35), (false, 3, 36), (false, 3, 37), (false, 3, 38), (false, 3, 39),
 (true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
 (true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
-
 (true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(true, 3, 58),(false, 3, 59), (true, 3, 60),
-(true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64), (true, 3, 65), (true, 3, 66), (true, 3, 67),
+(true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64), (true, 3, 65), (true, 3, 66), (true, 3, 67), (true, 3, 68),
 
 -- Lecturer
 (false, 4, 2), (false, 4, 3), (false, 4, 10), (false, 4, 11), (false, 4, 17), (false, 4, 18), (false, 4, 23), (false, 4, 24), (false, 4, 25), (false, 4, 26),
@@ -160,9 +159,8 @@ VALUES
 (false, 4, 31), (false, 4, 32), (false, 4, 33), (false, 4, 34), (false, 4, 35), (false, 4, 36), (false, 4, 37), (false, 4, 38), (false, 4, 39),
 (true, 4, 1), (true, 4, 4), (true, 4, 5), (true, 4, 6), (true, 4, 7), (true, 4, 8), (true, 4, 9), (true, 4, 12), (true, 4, 13), (true, 4, 14), (true, 4, 40),
 (true, 4, 41), (true, 4, 42), (true, 4, 43), (true, 4, 44), (true, 4, 45), (true, 4, 47), (true, 4, 48), (true, 4, 49), (true, 4, 50),
-
 (true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(true, 4, 58),(false, 4, 59),(true, 4, 60),
-(true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64), (true, 4, 65), (true, 4, 66), (true, 4, 67);
+(true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64), (true, 4, 65), (true, 4, 66), (true, 4, 67), (true, 4, 68);
 
 
 INSERT INTO `account`
@@ -172,8 +170,8 @@ VALUES
 (2, 'truonghnse160585@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (3, 'vuongvtse160599@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (6, 'vtrvuongdt510@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(7, 'vtrvuongdt694@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true),
-(8, 'vtrvuongdt758@gmail.com', 4, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(7, 'votrongvuong999@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true),
+(8, 'votrongvuong3647@gmail.com', 4, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (4, 'minhtpvse160611@fpt.edu.vn', 1, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (5, 'thanhtuyen66202@gmail.com', 2, '2024-09-30 00:00:00', 1, null, null, null, null, true),
 (9, 'cunprokt9@gmail.com', 3, '2024-09-30 00:00:00', 1, null, null, null, null, true);

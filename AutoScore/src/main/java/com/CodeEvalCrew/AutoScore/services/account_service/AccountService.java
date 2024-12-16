@@ -1,27 +1,25 @@
 package com.CodeEvalCrew.AutoScore.services.account_service;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.springframework.context.support.BeanDefinitionDsl;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AccountResponseDTO;
-import com.CodeEvalCrew.AutoScore.models.Entity.Account;
-import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.AccountRequestDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AccountResponseDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
+import com.CodeEvalCrew.AutoScore.models.Entity.Account;
 import com.CodeEvalCrew.AutoScore.models.Entity.Employee;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Organization_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Role;
+import com.CodeEvalCrew.AutoScore.repositories.account_repository.IAccountRepository;
 import com.CodeEvalCrew.AutoScore.repositories.account_repository.IEmployeeRepository;
 import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.position_repository.IPositionRepository;
@@ -192,7 +190,7 @@ public class AccountService implements IAccountService {
                     return OperationStatus.FAILURE;
                 }
                 Employee employee = new Employee();
-                employee.setFullName(accountRequestDTO.getFullName());
+                employee.setFullName(accountRequestDTO.getName());
                 employee.setEmployeeCode(randomEmployeeCode(role.getRoleCode()));
                 employee.setAccount(savedAccount);
                 employee.setStatus(true);
@@ -226,7 +224,7 @@ public class AccountService implements IAccountService {
                 accountRepository.save(account);
 
                 Employee employee = employeeRepository.findByAccount_AccountId(accountRequestDTO.getAccountId());
-                employee.setFullName(accountRequestDTO.getFullName());
+                employee.setFullName(accountRequestDTO.getName());
                 employee.setPosition(positionRepository.findById(accountRequestDTO.getPositionId()).get());
                 employee.setOrganization(organizationRepository.findById(accountRequestDTO.getCampusId()).get());
                 employeeRepository.save(employee);
@@ -257,32 +255,37 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public OperationStatus updateProfile(AccountRequestDTO accountRequestDTO, MultipartFile file) {
+    public OperationStatus updateProfile(AccountRequestDTO accountRequestDTO) {
         try {
             if (validateInput(accountRequestDTO, "updateProfile")) {
                 return OperationStatus.FAILURE;
             }
             List<AccountResponseDTO> accounts = getAllAccount();
+            Long accountId = Util.getAuthenticatedAccountId();
             for (AccountResponseDTO account : accounts) {
-                if (!accountRequestDTO.getEmail().equals(account.getEmail())
-                        || Objects.equals(accountRequestDTO.getAccountId(), account.getAccountId())) {
-                } else {
+                if (accountRequestDTO.getEmail().equals(account.getEmail())
+                        && !Objects.equals(accountId, account.getAccountId())) {
                     return OperationStatus.ALREADY_EXISTS;
                 }
             }
-            Account account = accountRepository.findById(accountRequestDTO.getAccountId()).get();
-            Employee employee = employeeRepository.findByAccount_AccountId(accountRequestDTO.getAccountId());
-            employee.setFullName(accountRequestDTO.getFullName());
-            account.setEmail(accountRequestDTO.getEmail());
-            account.setUpdatedBy(Util.getAuthenticatedAccountId());
-            account.setPassword(accountRequestDTO.getPassword());
-            if (file != null) {
-                account.setAvatar(file.getBytes());
+            Account account = accountRepository.findById(accountId).orElseThrow();
+            Employee employee = employeeRepository.findByAccount_AccountId(accountId);
+            employee.setFullName(accountRequestDTO.getName());
+            account.setUpdatedBy(accountId);
+            if (accountRequestDTO.getAvatar() != null) {
+                byte[] avatarBytes = Base64.getDecoder().decode(accountRequestDTO.getAvatar().split(",")[1]);
+                account.setAvatar(avatarBytes);
+            }
+            if (accountRequestDTO.getOldPassword() != null) {
+                if (accountRequestDTO.getNewPassword().equals(accountRequestDTO.getConfirmPassword())) {
+                    account.setPassword(accountRequestDTO.getNewPassword());
+                }
             }
             accountRepository.save(account);
             employeeRepository.save(employee);
+
             return OperationStatus.SUCCESS;
-        } catch (Exception | IOException e) {
+        } catch (Exception e) {
             return OperationStatus.ERROR;
         }
     }
@@ -293,15 +296,14 @@ public class AccountService implements IAccountService {
         }
 
         boolean hasRequiredFields
-                = accountRequestDTO.getFullName() != null && !accountRequestDTO.getFullName().trim().isEmpty()
+                = accountRequestDTO.getName() != null && !accountRequestDTO.getName().trim().isEmpty()
                 && accountRequestDTO.getEmail() != null && !accountRequestDTO.getEmail().trim().isEmpty()
                 && accountRequestDTO.getRoleId() != null
                 && accountRequestDTO.getPositionId() != null
                 && accountRequestDTO.getCampusId() != null;
         boolean hasRequiredFieldsForUpdate
-                = accountRequestDTO.getFullName() != null && !accountRequestDTO.getFullName().trim().isEmpty()
-                && accountRequestDTO.getEmail() != null && !accountRequestDTO.getEmail().trim().isEmpty()
-                && accountRequestDTO.getPassword() != null && !accountRequestDTO.getPassword().trim().isEmpty();
+                = accountRequestDTO.getName() != null && !accountRequestDTO.getName().trim().isEmpty()
+                && accountRequestDTO.getEmail() != null && !accountRequestDTO.getEmail().trim().isEmpty();
         switch (type) {
             case "create" -> {
                 return hasRequiredFields;

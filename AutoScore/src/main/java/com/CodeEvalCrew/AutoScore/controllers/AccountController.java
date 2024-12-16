@@ -4,17 +4,17 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.AccountRequestDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AccountResponseDTO;
-import com.CodeEvalCrew.AutoScore.exceptions.Exception;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.OperationStatus;
 import com.CodeEvalCrew.AutoScore.services.account_service.IAccountService;
 
@@ -52,26 +52,22 @@ public class AccountController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('UPDATE_PROFILE', 'ALL_ACCESS')")
-    @PostMapping("profile/update")
-    public ResponseEntity<OperationStatus> updateProfile(@RequestBody AccountRequestDTO account,
-            @RequestBody MultipartFile file) {
-        try {
-            OperationStatus operationStatus = accountService.updateProfile(account, file);
-            return switch (operationStatus) {
-                case SUCCESS ->
-                    ResponseEntity.ok(operationStatus);
-                case ALREADY_EXISTS ->
-                    ResponseEntity.status(409).body(operationStatus);
-                case FAILURE ->
-                    ResponseEntity.status(400).body(operationStatus);
-                default ->
-                    ResponseEntity.status(500).body(operationStatus);
-            };
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
+@PreAuthorize("hasAnyAuthority('UPDATE_PROFILE', 'ALL_ACCESS')")
+@PostMapping("profile/update")
+public ResponseEntity<OperationStatus> updateProfile(@ModelAttribute AccountRequestDTO account) {
+    try {
+        OperationStatus operationStatus = accountService.updateProfile(account);
+        return switch (operationStatus) {
+            case SUCCESS -> ResponseEntity.ok(operationStatus);
+            case ALREADY_EXISTS -> ResponseEntity.status(409).body(operationStatus);
+            case FAILURE -> ResponseEntity.status(400).body(operationStatus);
+            default -> ResponseEntity.status(500).body(operationStatus);
+        };
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(OperationStatus.ERROR);
     }
+}
+
 
     @PreAuthorize("hasAnyAuthority('CREATE_ACCOUNT', 'ALL_ACCESS')")
     @PostMapping("create")

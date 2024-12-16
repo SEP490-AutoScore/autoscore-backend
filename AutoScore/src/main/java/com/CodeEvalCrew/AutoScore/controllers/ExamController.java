@@ -67,7 +67,7 @@ public class ExamController {
     @PostMapping("")
     public ResponseEntity<?> creatNewExam(@RequestBody ExamCreateRequestDTO entity) {
         try {
-            //call service for create new exam
+            // call service for create new exam
             ExamViewResponseDTO result = examService.createNewExam(entity);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException nfe) {
@@ -82,7 +82,7 @@ public class ExamController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateExam(@PathVariable Long id, @RequestBody ExamCreateRequestDTO request) {
         try {
-            //call service for update exam
+            // call service for update exam
             ExamViewResponseDTO result = examService.updateExam(request, id);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NotFoundException nfe) {
@@ -95,7 +95,7 @@ public class ExamController {
 
     @PreAuthorize("hasAnyAuthority('DASHBOARD', 'ALL_ACCESS')")
     @GetMapping("list-exam-exampaper")
-    public ResponseEntity<List<ExamWithPapersDTO>> getExamsWithUsedPapers() {
+    public ResponseEntity<List<ExamWithPapersDTO>> getExamsWithUsedPapers() throws NotFoundException {
         try {
             List<ExamWithPapersDTO> result = examService.getExamWithUsedPapers();
             return new ResponseEntity<>(result, HttpStatus.OK);
@@ -149,13 +149,13 @@ public class ExamController {
     @GetMapping("countByGradingAtPassedAndSemester")
     public ResponseEntity<Map<String, Long>> getExamCountByGradingAtPassedAndSemester(@RequestParam int year) {
         try {
-            // Lấy số lượng Exam đã vượt qua thời gian gradingAt và phân loại theo kỳ
+
             Map<String, Long> examCounts = examService.countExamsByGradingAtPassedAndSemester(year);
             return new ResponseEntity<>(examCounts, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Trả về lỗi nếu không có thông tin về campus
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Trả về lỗi khi có lỗi hệ thống
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

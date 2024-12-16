@@ -11,6 +11,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 
 @Repository
 public interface IExamRepository extends JpaRepository<Exam, Long>, JpaSpecificationExecutor<Exam> {
- List<Exam> findByType(Exam_Type_Enum type);
-}
+    List<Exam> findByType(Exam_Type_Enum type);
 
+    List<Exam> findByCreatedBy(Long createdBy);
+}
