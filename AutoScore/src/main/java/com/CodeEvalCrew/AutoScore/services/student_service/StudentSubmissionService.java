@@ -8,11 +8,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -81,9 +79,9 @@ public class StudentSubmissionService {
     private final FileProcessingProgressService progressService;
     private static final int MAX_THREADS = 1;
 
-    AtomicInteger totalTasks = new AtomicInteger(0);
-    AtomicInteger completedTasks = new AtomicInteger(0);
-    AtomicInteger failedTasks = new AtomicInteger(0); // Đếm số lượng tác vụ thất bại
+    // AtomicInteger totalTasks = new AtomicInteger(0);
+    // AtomicInteger completedTasks = new AtomicInteger(0);
+    // AtomicInteger failedTasks = new AtomicInteger(0); // Đếm số lượng tác vụ thất bại
 
     public StudentSubmissionService(FileExtractionService fileExtractionService,
             StudentRepository studentRepository, SourceService sourceService,
@@ -162,34 +160,34 @@ public class StudentSubmissionService {
                                                                                                      // trình tổng
             }
 
-            // Chờ tất cả các tác vụ hoàn thành
-            while (completedTasks.get() + failedTasks.get() < totalTasks.get()) {
-                try {
-                    Future<Void> future = completionService.poll(5, TimeUnit.SECONDS);
-                    if (future != null) {
-                        try {
-                            future.get(); // Lấy kết quả nếu không có lỗi
-                            completedTasks.incrementAndGet(); // Đánh dấu tác vụ thành công
-                        } catch (ExecutionException | InterruptedException e) {
-                            errors.add("Task execution error: " + e.getMessage());
-                            failedTasks.incrementAndGet(); // Đánh dấu tác vụ thất bại
-                        }
-                    } else {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    errors.add("Interrupted while waiting for task completion");
-                    break; // Thoát vòng lặp nếu bị ngắt
-                }
-            }
+            // // Chờ tất cả các tác vụ hoàn thành
+            // while (completedTasks.get() + failedTasks.get() < totalTasks.get()) {
+            //     try {
+            //         Future<Void> future = completionService.poll(5, TimeUnit.SECONDS);
+            //         if (future != null) {
+            //             try {
+            //                 future.get(); // Lấy kết quả nếu không có lỗi
+            //                 completedTasks.incrementAndGet(); // Đánh dấu tác vụ thành công
+            //             } catch (ExecutionException | InterruptedException e) {
+            //                 errors.add("Task execution error: " + e.getMessage());
+            //                 failedTasks.incrementAndGet(); // Đánh dấu tác vụ thất bại
+            //             }
+            //         } else {
+            //             Thread.currentThread().interrupt();
+            //             break;
+            //         }
+            //     } catch (InterruptedException e) {
+            //         Thread.currentThread().interrupt();
+            //         errors.add("Interrupted while waiting for task completion");
+            //         break; // Thoát vòng lặp nếu bị ngắt
+            //     }
+            // }
 
             executorService.shutdown();
             executorService.awaitTermination(5, TimeUnit.SECONDS);
-            if (completedTasks.get() + failedTasks.get() >= totalTasks.get()) {
-                progressService.sendProgress(100);
-            }
+            // if (completedTasks.get() + failedTasks.get() >= totalTasks.get()) {
+            //     progressService.sendProgress(100);
+            // }
         } catch (IOException | InterruptedException e) {
             errors.add("Critical error: " + e.getMessage());
         } finally {
@@ -215,16 +213,16 @@ public class StudentSubmissionService {
 
         File[] studentFolders = examFolder.listFiles(File::isDirectory);
         if (studentFolders == null || studentFolders.length == 0) {
-            totalTasks.incrementAndGet();
+            // totalTasks.incrementAndGet();
             errors.add("No subfolders found inside " + examFolder.getName());
-            completedTasks.incrementAndGet();
-            progressService.sendProgress((completedTasks.get() * 100) / totalTasks.get());
+            // completedTasks.incrementAndGet();
+            // progressService.sendProgress((completedTasks.get() * 100) / totalTasks.get());
             return;
         }
 
         for (File studentFolder : studentFolders) {
             logger.info("Processing student folder: {}", studentFolder.getAbsolutePath());
-            totalTasks.incrementAndGet();
+            // totalTasks.incrementAndGet();
             completionService.submit(() -> {
                 try {
                     new SubmissionTask(studentFolder, source,
@@ -233,14 +231,14 @@ public class StudentSubmissionService {
                 } catch (Exception e) {
                     errors.add("Error processing folder " + studentFolder.getName() + ": " + e.getMessage());
                     logger.error("Error processing folder: " + studentFolder.getName(), e);
-                    failedTasks.incrementAndGet();
+                    // failedTasks.incrementAndGet();
                 } finally {
                     synchronized (this) {
-                        int totalProgress = completedTasks.get() + failedTasks.get();
-                        if (totalProgress < totalTasks.get()) {
-                            int progress = (totalProgress * 100) / totalTasks.get();
-                            progressService.sendProgress(progress);
-                        }
+                        // int totalProgress = completedTasks.get() + failedTasks.get();
+                        // if (totalProgress < totalTasks.get()) {
+                        //     int progress = (totalProgress * 100) / totalTasks.get();
+                        //     progressService.sendProgress(progress);
+                        // }
                     }
                 }
                 return null;
@@ -273,7 +271,7 @@ public class StudentSubmissionService {
             String studentCode = extractStudentCode(studentFolder.getName());
             if (studentCode.isEmpty()) {
                 unmatchedStudents.add(studentFolder.getName());
-                failedTasks.incrementAndGet(); // Đánh dấu thất bại
+                // failedTasks.incrementAndGet(); // Đánh dấu thất bại
                 return null;
             }
 
@@ -281,7 +279,7 @@ public class StudentSubmissionService {
             if (!studentOpt.isPresent()) {
                 studentErrorService.saveStudentError(source, null,
                         "Student not found with student code: " + studentCode);
-                failedTasks.incrementAndGet(); // Đánh dấu thất bại
+                // failedTasks.incrementAndGet(); // Đánh dấu thất bại
                 return null;
             }
 
@@ -295,13 +293,13 @@ public class StudentSubmissionService {
                     String error = "No .sln file found for student folder: " + studentFolder.getName();
                     errors.add(error);
                     studentErrorService.saveStudentError(source, studentOpt.get(), error);
-                    failedTasks.incrementAndGet();
+                    // failedTasks.incrementAndGet();
                 }
             } catch (IOException e) {
                 String error = "Extraction error for folder " + studentFolder.getName() + ": " + e.getMessage();
                 errors.add(error);
                 studentErrorService.saveStudentError(source, studentOpt.get(), error);
-                failedTasks.incrementAndGet();
+                // failedTasks.incrementAndGet();
             }
             return null;
         }
@@ -316,15 +314,15 @@ public class StudentSubmissionService {
         return "";
     }
 
-    public AtomicInteger getTotalTasks() {
-        return totalTasks;
-    }
+    // public AtomicInteger getTotalTasks() {
+    //     return totalTasks;
+    // }
 
-    public AtomicInteger getCompletedTasks() {
-        return completedTasks;
-    }
+    // public AtomicInteger getCompletedTasks() {
+    //     return completedTasks;
+    // }
 
-    public AtomicInteger getFailedTasks() {
-        return failedTasks;
-    }
+    // public AtomicInteger getFailedTasks() {
+    //     return failedTasks;
+    // }
 }
