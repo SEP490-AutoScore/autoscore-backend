@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,8 +39,7 @@ import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorSer
 @Service
 public class StudentSubmissionService {
 
-    private static final Logger logger = LoggerFactory.getLogger(StudentSubmissionService.class);
-
+    // private static final Logger logger = LoggerFactory.getLogger(StudentSubmissionService.class);
     @Value("${upload.folder}")
     private String uploadDir;
 
@@ -87,8 +86,6 @@ public class StudentSubmissionService {
             File rootDirectory = new File(rootFolder);
 
             if (!rootDirectory.exists() || !rootDirectory.isDirectory()) {
-                logger.error("Root directory does not exist or is not a directory: {}",
-                        rootDirectory.getAbsolutePath());
                 progressService.sendProgress(100); // Hoàn tất vì không thể xử lý
                 return unmatchedStudents;
             }
@@ -97,7 +94,6 @@ public class StudentSubmissionService {
             File[] examFolders = rootDirectory.listFiles(File::isDirectory);
 
             if (examFolders == null || examFolders.length == 0) {
-                logger.error("No subfolders found inside root directory: {}", rootDirectory.getAbsolutePath());
                 progressService.sendProgress(100); // Hoàn tất vì không có gì để xử lý
                 return unmatchedStudents;
             }
@@ -183,7 +179,7 @@ public class StudentSubmissionService {
         }
 
         for (File studentFolder : studentFolders) {
-            logger.info("Processing student folder: {}", studentFolder.getAbsolutePath());
+            // logger.info("Processing student folder: {}", studentFolder.getAbsolutePath());
             totalTasks.incrementAndGet();
             completionService.submit(() -> {
                 try {
@@ -196,10 +192,8 @@ public class StudentSubmissionService {
                 } finally {
                     synchronized (this) {
                         int totalProgress = completedTasks.get() + failedTasks.get();
-                        if (totalProgress <= totalTasks.get()) {
-                            int progress = (totalProgress * 100) / totalTasks.get();
-                            progressService.sendProgress(progress);
-                        }
+                        int progress = Math.min(100, (totalProgress * 100) / totalTasks.get());
+                        progressService.sendProgress(progress);
                     }
                 }
                 return null;
@@ -277,18 +271,6 @@ public class StudentSubmissionService {
                 return matcher.group().toLowerCase();
             }
             return "";
-        }
-
-        public AtomicInteger getTotalTasks() {
-            return totalTasks;
-        }
-
-        public AtomicInteger getCompletedTasks() {
-            return completedTasks;
-        }
-
-        public AtomicInteger getFailedTasks() {
-            return failedTasks;
         }
     }
 }
