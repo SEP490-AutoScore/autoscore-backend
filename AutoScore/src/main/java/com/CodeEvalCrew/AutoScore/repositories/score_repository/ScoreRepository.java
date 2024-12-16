@@ -21,4 +21,18 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     @Query("SELECT DISTINCT s.examPaper.examPaperId FROM Score s")
     List<Long> findDistinctExamPaperIds();
 
+    int countByExamPaperExamPaperId(Long examPaperId);
+
+    int countByExamPaperExamPaperIdAndTotalScore(Long examPaperId, int totalScore);
+
+    @Query("SELECT COUNT(s) FROM Score s WHERE s.examPaper.examPaperId = :examPaperId AND s.totalScore > :totalScore")
+    int countByExamPaperIdAndTotalScoreGreaterThan(@Param("examPaperId") Long examPaperId, @Param("totalScore") int totalScore);
+    
+    List<Score> findAllByExamPaper_ExamPaperId(Long examPaperId);
+    // @Query("SELECT s.student.studentCode, s.totalScore FROM Score s WHERE s.examPaper.examPaperId = :examPaperId")
+    // List<StudentScoreDTO> findStudentScoresByExamPaperId(@Param("examPaperId") Long examPaperId);
+
+      // Find all score details by examPaperId
+
+
 }

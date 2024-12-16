@@ -14,4 +14,6 @@ public interface StudentRepository extends JpaRepository<Student, Long>,JpaSpeci
     Optional<Student> findByStudentCode(String studentCode);
     Optional<Student> findByStudentCodeAndExamExamId(String studentCode, Long examId);
     Optional<List<Student>> findAllByExamExamIdAndOrganizationName(Long examId, String organizationName);
+    Optional<List<Student>> findAllByExamExamId(Long examId);
+    boolean existsByOrganizationOrganizationId(Long organizationId);
 }

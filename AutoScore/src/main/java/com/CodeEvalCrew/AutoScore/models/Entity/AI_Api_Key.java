@@ -36,20 +36,13 @@ public class AI_Api_Key {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long aiApiKeyId;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     private AIName_Enum aiName;
-
-    // @NotNull
     private String aiApiKey;
-
     private boolean status;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
-
     private boolean shared;
 
     @OneToMany(mappedBy = "aiApiKey", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -58,6 +51,7 @@ public class AI_Api_Key {
 
     @ManyToOne
     @JoinColumn(name = "accountId", nullable = false)
+    @ToString.Exclude
     private Account account;
 
 }

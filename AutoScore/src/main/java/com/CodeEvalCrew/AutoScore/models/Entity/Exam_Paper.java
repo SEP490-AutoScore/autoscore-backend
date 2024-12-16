@@ -19,6 +19,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,31 +51,27 @@ public class Exam_Paper {
     private Long deletedBy;
     @Lob
     @Column(columnDefinition = "LONGBLOB")
-    @Basic(fetch = FetchType.EAGER) // Buộc tải ngay lập tức
+    @Basic(fetch = FetchType.EAGER)
     private byte[] fileCollectionPostman;
     private Boolean isComfirmFile = false;
 
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String logRunPostman;
-    
+
     private Boolean isUsed = false;
 
-    //Relationship
-    //1-n score
-    @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "examPaper", cascade = CascadeType.ALL)
     private Set<Score> scores;
 
-    //n-1 exam
     @ManyToOne
     @JoinColumn(name = "examId", nullable = true)
     private Exam exam;
 
-    //1-n examquestion
-    @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "examPaper", cascade = CascadeType.ALL)
     private Set<Exam_Question> examQuestions;
 
-    @OneToMany(mappedBy = "examPaper", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "examPaper", cascade = CascadeType.ALL)
     private Set<Important_Exam_Paper> importants;
 
     @OneToMany(mappedBy = "examPaper", cascade = CascadeType.ALL)
@@ -83,5 +80,8 @@ public class Exam_Paper {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subjectId", referencedColumnName = "subjectId", nullable = false)
     private Subject subject;
+
+    @OneToOne(mappedBy = "examPaper", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Log log;
 
 }

@@ -31,18 +31,13 @@ public class Employee {
     //Relationship
     //n-1 org
     @ManyToOne
-    @JoinColumn(name = "organizationId", nullable = false)
+    @JoinColumn(name = "organizationId", nullable = true)
     private Organization organization;
-
+    
     //n-1 posi
     @ManyToOne
     @JoinColumn(name = "positionId", nullable = false)
     private Position position;
-
-    //1-1 prompt
-    @OneToOne
-    @JoinColumn(name = "aiPromptId", nullable = true)
-    private AI_Prompt aiPrompt;
 
     //1-1 acc
     @OneToOne

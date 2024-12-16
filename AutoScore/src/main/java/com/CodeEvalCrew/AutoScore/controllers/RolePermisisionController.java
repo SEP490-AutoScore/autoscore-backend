@@ -23,7 +23,7 @@ public class RolePermisisionController {
         this.rolePermissionService = rolePermissionService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('VIEW_ROLE')")
+    @PreAuthorize("hasAnyAuthority('VIEW_ROLE', 'ALL_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<RolePermissionResponseDTO> getRolePermissionById(@PathVariable Long id) {
         RolePermissionResponseDTO rolePermissionResponseDTO = rolePermissionService.getRolePermissionById(id);
@@ -33,22 +33,7 @@ public class RolePermisisionController {
         return ResponseEntity.ok(rolePermissionResponseDTO);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('CREATE_ROLE')")
-    @PostMapping("/create")
-    public ResponseEntity<?> createRolePermission(@RequestBody RolePermissionRequestDTO rolePermissionRequestDTO) {
-        OperationStatus operationStatus = rolePermissionService.createRolePermission(rolePermissionRequestDTO);
-        return switch (operationStatus) {
-            case SUCCESS -> ResponseEntity.ok("Role Permission created successfully");
-            case INVALID_INPUT -> ResponseEntity.badRequest().body("Invalid input data");
-            case ALREADY_EXISTS -> ResponseEntity.status(409).body("Role Permission already exists");
-            case FAILURE -> ResponseEntity.status(500).body("Can't create Role Permission");
-            case NOT_FOUND -> ResponseEntity.status(404).body("Role Permission not found");
-            case ERROR -> ResponseEntity.status(500).body("An error occurred while creating Role Permission");
-            default -> ResponseEntity.status(500).body("Unexpected error occurred");
-        };
-    }
-
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('UPDATE_ROLE')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_ROLE', 'ALL_ACCESS')")
     @PostMapping("/update")
     public ResponseEntity<?> updateRolePermission(@RequestBody RolePermissionRequestDTO rolePermissionRequestDTO) {
         OperationStatus operationStatus = rolePermissionService.updateRolePermission(rolePermissionRequestDTO);
@@ -62,18 +47,4 @@ public class RolePermisisionController {
             default -> ResponseEntity.status(500).body("Unexpected error occurred");
         };
     }
-
-    // @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') and hasAuthority('DELETE_ROLE')")
-    // @DeleteMapping("/delete/{id}")
-    // public ResponseEntity<?> deleteRolePermission(@PathVariable Long id) {
-    //     OperationStatus operationStatus = rolePermissionService.deleteRolePermission(id);
-    //     return switch (operationStatus) {
-    //         case SUCCESS -> ResponseEntity.ok("Role Permission deleted successfully");
-    //         case FAILURE -> ResponseEntity.status(500).body("Can't delete Role Permission");
-    //         case CANNOT_DELETE -> ResponseEntity.status(409).body("Role Permission is in use");
-    //         case NOT_FOUND -> ResponseEntity.status(404).body("Role Permission not found");
-    //         case ERROR -> ResponseEntity.status(500).body("An error occurred while deleting Role Permission");
-    //         default -> ResponseEntity.status(500).body("Unexpected error occurred");
-    //     };
-    // }
 }

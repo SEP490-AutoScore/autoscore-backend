@@ -4,5 +4,6 @@ public enum Exam_Status_Enum {
     DRAFT,
     ACTIVE,
     COMPLETE,
-    UNACTIVE
+    UNACTIVE,
+    GRADING
 }

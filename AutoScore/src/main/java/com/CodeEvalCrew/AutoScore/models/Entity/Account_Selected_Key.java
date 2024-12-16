@@ -32,6 +32,6 @@ public class Account_Selected_Key {
     private Account account;
 
     @ManyToOne 
-    @JoinColumn(name = "selectedAiApiKeyId", nullable = false)
+    @JoinColumn(name = "selectedAiApiKeyId", nullable = true)
     private AI_Api_Key aiApiKey;
 }

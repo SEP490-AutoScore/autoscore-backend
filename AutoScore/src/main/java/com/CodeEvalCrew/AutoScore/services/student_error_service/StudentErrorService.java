@@ -11,6 +11,8 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Student;
 import com.CodeEvalCrew.AutoScore.models.Entity.Student_Error;
 import com.CodeEvalCrew.AutoScore.repositories.student_error_repository.StudentErrorRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class StudentErrorService implements IStudentErrorService {
 
@@ -42,5 +44,10 @@ public class StudentErrorService implements IStudentErrorService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Transactional
+    public void deleteStudentErrorBySourceId(Long sourceId) {
+        studentErrorRepository.deleteAllBySourceSourceId(sourceId);
     }
 }

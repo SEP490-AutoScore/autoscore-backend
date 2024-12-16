@@ -9,4 +9,6 @@ public class OrganizationResponseDTO {
     private Long organizationId;
     private String name;
     private String type;
+    private boolean status;
+    private Long parentId;
 }

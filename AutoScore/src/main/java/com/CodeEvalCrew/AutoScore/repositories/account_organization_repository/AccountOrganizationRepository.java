@@ -14,4 +14,9 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Account_Organization;
 public interface AccountOrganizationRepository extends JpaRepository<Account_Organization, Long> {
     Optional<Account_Organization> findByAccountAccountIdAndStatusTrue(Long accountId);
     List<Account_Organization> findByOrganizationOrganizationIdInAndStatusTrue(Set<Long> organizationIds);
+    boolean existsByOrganizationOrganizationId(Long organizationId);
+
+    List<Account_Organization> findByAccount_AccountId(Long accountId);
+    List<Account_Organization> findByOrganizationOrganizationIdAndStatusTrue(Long organizationId);
+
 }

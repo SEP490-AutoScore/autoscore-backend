@@ -2,32 +2,29 @@ package com.CodeEvalCrew.AutoScore.services.postman_for_grading_service;
 
 import java.util.List;
 
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingCreateDTO;
+import org.springframework.http.ResponseEntity;
+
 import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.RequestDTO.PostmanForGradingUpdateGetDTO;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingDTO;
-import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetDTO;
+import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetbyIdDTO;
 
 public interface IPostmanForGradingService {
       List<PostmanForGradingDTO> getPostmanForGradingByExamPaperId(Long examPaperId);
 
-      // void updatePostmanForGradingList(List<PostmanForGradingDTO> postmanForGradingDTOs);
+      ResponseEntity<?> generatePostmanCollection(Long gherkinScenarioId);
 
-      String generatePostmanCollection(Long gherkinScenarioId);
+      ResponseEntity<?> generatePostmanCollectionMore(Long postmanForGradingId);
 
-      String generatePostmanCollectionMore(Long gherkinScenarioId);
-
-      // Hàm merge các file Postman collection của cùng 1 examPaperId
       String mergePostmanCollections(Long examPaperId);
 
       String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs);
 
-      String deletePostmanForGrading(Long postmanForGradingId);
+      String deletePostmanForGrading(List<Long> postmanForGradingIds, Long examPaperId);
 
-      PostmanForGradingGetDTO getPostmanForGradingById(Long postmanForGradingId);
+      ResponseEntity<PostmanForGradingGetbyIdDTO> getPostmanForGradingById(Long id);
 
-      // PostmanForGradingGetDTO updatePostmanForGrading(Long postmanForGradingId, PostmanForGradingUpdateGetDTO updateDTO);
-      
-      PostmanForGradingGetDTO createPostmanForGrading(PostmanForGradingCreateDTO createDTO);
-     
+      String updateExamQuestionId(Long postmanForGradingId, Long examQuestionId);
+
+      void calculateScores(Long examPaperId) throws Exception;
+
 }

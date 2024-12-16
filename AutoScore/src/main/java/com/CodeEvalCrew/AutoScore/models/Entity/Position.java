@@ -1,5 +1,6 @@
 package com.CodeEvalCrew.AutoScore.models.Entity;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
@@ -23,9 +24,10 @@ public class Position {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long positionId;
-
     private String name;
-
+    private String positionCode;
+    private String description;
+    private LocalDateTime lastUpdated;
     private boolean status;
 
     //realationship

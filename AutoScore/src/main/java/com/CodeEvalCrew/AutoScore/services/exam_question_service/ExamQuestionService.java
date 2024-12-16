@@ -107,23 +107,31 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView updateExamQuestion(Long id, ExamQuestionCreateRequest request) throws NotFoundException {
-        ExamQuestionView result;
         try {
             //check examQuestion
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam question", id);
-
             // check examPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
             //update
-            examQuestion.setQuestionContent(request.getQuestionContent());
             examQuestion.setExamPaper(examPaper);
+            examQuestion.setQuestionContent(request.getQuestionContent());
+            examQuestion.setDescription(request.getDescription());
+            examQuestion.setExamQuestionScore(request.getExamQuestionScore());
+            examQuestion.setEndPoint(request.getEndPoint());
+            examQuestion.setHttpMethod(request.getHttpMethod());
+            examQuestion.setRoleAllow(request.getRoleAllow());
+            examQuestion.setPayloadType(request.getPayloadType());
+            examQuestion.setPayload(request.getPayload());
+            examQuestion.setValidation(request.getValidation());
+            examQuestion.setSucessResponse(request.getSucessResponse());
+            examQuestion.setErrorResponse(request.getErrorResponse());
             examQuestion.setUpdatedAt(Util.getCurrentDateTime());
             examQuestion.setUpdatedBy(Util.getAuthenticatedAccountId());
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {
@@ -134,7 +142,6 @@ public class ExamQuestionService implements IExamQuestionService {
 
     @Override
     public ExamQuestionView deleteExamQuestion(Long id) throws NotFoundException {
-        ExamQuestionView result;
         try {
             //check examQuestion
             Exam_Question examQuestion = checkEntityExistence(examQuestionRepository.findById(id), "Exam question", id);
@@ -146,7 +153,7 @@ public class ExamQuestionService implements IExamQuestionService {
 
             examQuestionRepository.save(examQuestion);
 
-            return result = ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
+            return ExamQuestionMapper.INSTANCE.examQuestionToView(examQuestion);
         } catch (NotFoundException nse) {
             throw nse;
         } catch (Exception e) {
