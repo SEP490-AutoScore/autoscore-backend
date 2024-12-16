@@ -256,26 +256,30 @@ public class DocumentService implements IDocumentService {
     }
 
     private void addInstruction(XWPFDocument document, String value) {
-// Locate {important} placeholder
         for (XWPFParagraph paragraph : document.getParagraphs()) {
             for (XWPFRun run : paragraph.getRuns()) {
-                String text = run.getText(0);
+                String text = run.getText(0); // Lấy nội dung hiện tại
                 if (text != null && text.contains("{instructions}")) {
+                    // Thay thế {instructions} bằng nội dung mới
+                    String updatedText = text.replace("{instructions}", "");
                     XWPFParagraph valueParagraph = document.createParagraph();
-                    valueParagraph.setIndentationLeft(720); // Thụt vào 720 (đơn vị là twips, tương đương 0.5 inch)
-                    XWPFRun valueRun = valueParagraph.createRun();
-                    // Thêm giá trị với cách xuống dòng nếu có nhiều dòng
+                    valueParagraph.setIndentationLeft(720);
+                    run.setText(updatedText, 0); // Xóa placeholder
+                    
+                    // Thêm nội dung mới với các dòng xuống dòng
                     String[] lines = value.split("\n");
                     for (int i = 0; i < lines.length; i++) {
-                        valueRun.setText(lines[i]);
-                        if (i < lines.length - 1) {
-                            valueRun.addBreak();
+                        if (i > 0) {
+                            run.addBreak(); // Thêm xuống dòng giữa các dòng
                         }
+                        run.setText(lines[i], i == 0 ? 0 : run.getTextPosition());
                     }
+                    return; // Thoát khi đã xử lý xong
                 }
             }
         }
     }
+    
 
     private String addDatabaseImage(XWPFDocument document, ExamExport exportExam) throws IOException {
         String message = "Image added successfully.";
