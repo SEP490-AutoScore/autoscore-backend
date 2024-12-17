@@ -9,6 +9,7 @@ VALUES
 (true, 6, 'Department Management'),
 (true, 7, 'Exam Management'),
 (true, 8, 'Score Management'),
+(true, 10, 'Semester Management'),
 (true, 9, 'Other');
 
 INSERT INTO `permission`
@@ -90,14 +91,29 @@ VALUES
 ('SELECT_OTHER_KEY', 49, 'Select other api key', 9, 1, 'Allows selecting other api key'),
 ('CREATE_API_KEY', 50, 'Create api key', 9, 1, 'Allows creating api key'),
 ('DELETE_API_KEY', 51, 'Delete api key', 9, 1, 'Allows deleting api key'),
-('UPDATE_API_KEY', 71, 'Update api key', 9, 1, 'Allows updating api key'),
+('UPDATE_API_KEY', 82, 'Update api key', 9, 1, 'Allows updating api key'),
 
 -- Exam paper
 ('IMPORT_POSTMAN', 44, 'Import postman', 7, 1, 'Allows importing file collection postman'),
 ('EXPORT_POSTMAN', 45, 'Export postman', 7, 1, 'Allows exporting file collection postman'),
+--expp
+('VIEW_EXAM_PAPER', 71, 'View exam paper', 7, 1, 'Allows view paper'),
 ('CREATE_EXAM_PAPER', 65, 'Create exam paper', 7, 1, 'Allows create exam paper'),
-('GRADING_EXAM', 66, 'Start grading', 7, 1, 'Allows start grading exam'),
+('UPDATE_EXAM_PAPER', 73, 'Update exam paper', 7, 1, 'Allows update exam paper'),
+('DELETE_EXAM_PAPER', 74, 'Delete exam paper', 7, 1, 'Allows delete exam paper'),
+
 ('CREATE_QUESTION', 67, 'Create question', 7, 1, 'Allows create new question'),
+('UPDATE_QUESTION', 75, 'Update question', 7, 1, 'Allows Update question'),
+('DELETE_QUESTION', 76, 'Delete question', 7, 1, 'Allows Delete question'),
+('VIEW_QUESTION', 72, 'View question', 7, 1, 'Allows view question'),
+--grading
+('GRADING_EXAM', 66, 'Start grading', 7, 1, 'Allows start grading exam'),
+
+-- Semester Management
+('VIEW_SEMESTER', 78, 'View semester', 10, 1, 'Allows viewing subject details'),
+('CREATE_SEMESTER', 79, 'Create semester', 10, 1, 'Allows creating new semester'),
+('UPDATE_SEMESTER', 80, 'Update semester', 10, 1, 'Allows updating semester information'),
+('DELETE_SEMESTER', 81, 'Delete semester', 10, 1, 'Allows deleting semester'),
 
 -- Score Management
 ('VIEW_SCORE', 8, 'View score', 8, 1, 'Allows viewing scores'),
@@ -115,8 +131,12 @@ VALUES
 ('VIEW_PROMPT_AI', 57, 'View prompt AI', 7, 1, 'Allows viewing prompt ai'),
 ('EDIT_PROMPT_AI', 58, 'Edit prompt AI', 7, 1, 'Allows editing prompt ai'),
 
+--Important
+('VIEW_IMPORTANT', 77, 'View Important', 7, 1, 'Allows to view importants'),
+
 --Log
 ('EXPORT_LOG', 59, 'Export log', 7, 1, 'Allows exporting log data');
+
 
 
 INSERT INTO `role`
@@ -137,7 +157,10 @@ VALUES
 (true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39), (true, 1, 40),
 (true, 1, 41), (true, 1, 42), (true, 1, 43), (true, 1, 44), (true, 1, 45), (true, 1, 47), (true, 1, 48), (true, 1, 49), (true, 1, 50),
 (true, 1, 51),(true, 1, 52),(true, 1, 53),(true, 1, 54),(true, 1, 55),(true, 1, 56),(true, 1, 57),(true, 1, 58),(true, 1, 59), (true, 1, 60),
-(true, 1, 61), (true, 1, 62), (true, 1, 63), (true, 1, 64), (true, 1, 65), (true, 1, 66), (true, 1, 67), (true, 1, 68),(true, 1, 69),(true, 1, 70),(true, 1, 71),
+(true, 1, 61), (true, 1, 62), (true, 1, 63), (true, 1, 64), (true, 1, 65), (true, 1, 66), (true, 1, 67), (true, 1, 68),(true, 1, 69),(true, 1, 70),
+(true, 1, 71), (true, 1, 72), (true, 1, 73), (true, 1, 74), (true, 1, 75), (true, 1, 76), (true, 1, 77), (true, 1, 78), (true, 1, 79), (true, 1, 80),
+(true, 1, 81),(true, 1, 82),
+
 -- Examiner
 (false, 2, 2), (false, 2, 3), (false, 2, 10), (false, 2, 11), (false, 2, 17), (false, 2, 18), (false, 2, 23), (false, 2, 24), (false, 2, 25), (false, 2, 39),
 (true, 2, 1), (true, 2, 4), (true, 2, 5), (true, 2, 6), (true, 2, 7), (true, 2, 8), (true, 2, 9), (true, 2, 12), (true, 2, 13), (true, 2, 14),
@@ -145,7 +168,8 @@ VALUES
 (true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40),
 (true, 2, 41), (true, 2, 42), (true, 2, 43), (true, 2, 44), (true, 2, 45), (true, 2, 47), (true, 2, 48), (true, 2, 49), (true, 2, 50),
 (true, 2, 51),(true, 2, 52),(true, 2, 53),(true, 2, 54),(true, 2, 55),(true, 2, 56),(true, 2, 57),(false, 2, 58),(true, 2, 59), (true, 2, 60),
-(true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64), (true, 2, 65), (true, 2, 66), (true, 2, 67), (true, 2, 68),(true, 2, 69),(true, 2, 70),(true, 2, 71),
+(true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64), (true, 2, 65), (true, 2, 66), (true, 2, 67), (true, 2, 68),(true, 2, 69),(true, 2, 70),
+(true, 2, 71), (true, 2, 72), (true, 2, 73), (true, 2, 74), (true, 2, 75), (true, 2, 76), (true, 1, 77),(true, 1, 82),
 
 -- Head of Department
 (false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
@@ -154,7 +178,8 @@ VALUES
 (true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
 (true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
 (true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(false, 3, 58),(false, 3, 59), (true, 3, 60),
-(true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64), (true, 3, 65), (true, 3, 66), (true, 3, 67), (true, 3, 68),(true, 3, 69),(true, 3, 70),(true, 3, 71),
+(true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64), (true, 3, 65), (true, 3, 66), (true, 3, 67), (true, 3, 68),(true, 3, 69),(true, 3, 70),
+(true, 3, 71), (true, 3, 72), (true, 3, 73), (true, 3, 74), (true, 3, 75), (true, 3, 76),(true, 1, 77),(true, 1, 82),
 
 -- Lecturer
 (false, 4, 2), (false, 4, 3), (false, 4, 10), (false, 4, 11), (false, 4, 17), (false, 4, 18), (false, 4, 23), (false, 4, 24), (false, 4, 25), (false, 4, 26),
@@ -163,8 +188,8 @@ VALUES
 (true, 4, 1), (true, 4, 4), (true, 4, 5), (true, 4, 6), (true, 4, 7), (true, 4, 8), (true, 4, 9), (true, 4, 12), (true, 4, 13), (true, 4, 14), (true, 4, 40),
 (true, 4, 41), (true, 4, 42), (true, 4, 43), (true, 4, 44), (true, 4, 45), (true, 4, 47), (true, 4, 48), (true, 4, 49), (true, 4, 50),
 (true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(false, 4, 58),(false, 4, 59),(true, 4, 60),
-(true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64), (true, 4, 65), (true, 4, 66), (true, 4, 67), (true, 4, 68), (true, 4, 69), (true, 4, 70), (true, 4, 71);
-
+(true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64), (true, 4, 65), (true, 4, 66), (true, 4, 67), (true, 4, 68), (true, 4, 69), (true, 4, 70),
+(true, 4, 71), (true, 4, 72), (true, 4, 73), (true, 4, 74), (true, 4, 75), (true, 4, 76),(true, 1, 77), (true, 1, 82);
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)

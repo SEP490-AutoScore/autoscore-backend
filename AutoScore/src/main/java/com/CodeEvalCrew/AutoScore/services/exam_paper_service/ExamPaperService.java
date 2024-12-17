@@ -217,10 +217,10 @@ public class ExamPaperService implements IExamPaperService {
 
             Subject subject = checkEntityExistence(subjectRepository.findById(request.getSubjectId()), "Subject",
                     request.getSubjectId());
-
             // set to add
             Set<Important_Exam_Paper> importants = new HashSet<>();
-
+            boolean existExamCode = examPaperRepository.existsByExamPaperCode(request.getExamPaperCode());
+            if(existExamCode) throw new NotFoundException("ExamCode existed");
             // mapping
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
 

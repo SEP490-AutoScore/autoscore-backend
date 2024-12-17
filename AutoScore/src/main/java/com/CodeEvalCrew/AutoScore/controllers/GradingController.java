@@ -26,7 +26,7 @@ public class GradingController {
     @Autowired
     private IGradingService gradingService;
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('GRADING_EXAM','ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> startGradingProcess(@RequestBody GradingRequest request) {
         try {
@@ -39,7 +39,7 @@ public class GradingController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('GRADING_EXAM','ALL_ACCESS')")
     @PostMapping("exam")
     public ResponseEntity<?> startGradingProcessForExamPaper(@RequestBody GradingRequestForExam request) {
         try {
@@ -52,7 +52,7 @@ public class GradingController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('GRADING_EXAM','ALL_ACCESS')")
     @GetMapping("/ws/progress")
     public ResponseEntity<?> loadingProcess(@RequestParam Long examPaperId) {
         GradingProcessView result;

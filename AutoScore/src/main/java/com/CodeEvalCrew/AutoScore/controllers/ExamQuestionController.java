@@ -33,7 +33,7 @@ public class ExamQuestionController {
         this.examQuestionService = examQuestionService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_QUESTION','ALL_ACCESS')")
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         ExamQuestionView result;
@@ -49,7 +49,7 @@ public class ExamQuestionController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_QUESTION','ALL_ACCESS')")
     @PostMapping("list")
     public ResponseEntity<?> getListExamQuestion(@RequestBody ExamQuestionViewRequest request) {
         List<ExamQuestionView> result;
@@ -67,7 +67,7 @@ public class ExamQuestionController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CREATE_QUESTION','ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createExamQeustion(@RequestBody ExamQuestionCreateRequest request) {
         ExamQuestionView result;
@@ -83,7 +83,7 @@ public class ExamQuestionController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_QUESTION','ALL_ACCESS')")
     @PutMapping("{id}")
     public ResponseEntity<?> updateExamQuestion(@PathVariable Long id, @RequestBody ExamQuestionCreateRequest request) {
         ExamQuestionView result;
@@ -97,7 +97,7 @@ public class ExamQuestionController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DELETE_QUESTION','ALL_ACCESS')")
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteExamQuestion(Long id) {
         ExamQuestionView result;
