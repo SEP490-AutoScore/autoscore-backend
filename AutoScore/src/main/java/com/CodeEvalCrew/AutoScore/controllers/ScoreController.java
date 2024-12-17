@@ -50,19 +50,14 @@ public class ScoreController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('EXPORT_SCORE', 'ALL_ACCESS')")
     @GetMapping("/txtLog/{examPaperId}")
-    public ResponseEntity<Resource> downloadTxtFiles(@PathVariable Long examPaperId){
-        scoreService.exportTxtFiles(examPaperId);
-        Path filePath = Paths.get("exampapercode.zip");
-        // File file = filePath.toFile();
-        // if (!file.exists()) {
-        //     throw new FileNotFoundException("File not found at: " + filePath.toString());
-        // }
-        Resource resource = new FileSystemResource(filePath.toFile());
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=studentcode.zip")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
+    public void downloadTxtFiles(HttpServletResponse response, @PathVariable Long examPaperId){
+        try {
+            scoreService.exportTxtFiles(response, examPaperId);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
     }
 
     @PreAuthorize("hasAnyAuthority('EXPORT_SCORE', 'ALL_ACCESS')")
