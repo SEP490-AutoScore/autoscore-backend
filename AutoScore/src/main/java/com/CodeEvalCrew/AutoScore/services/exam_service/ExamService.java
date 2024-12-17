@@ -146,14 +146,14 @@ public class ExamService implements IExamService {
     public List<ExamViewResponseDTO> GetExam(ExamViewRequestDTO request) throws Exception {
         List<ExamViewResponseDTO> result = new ArrayList<>();
         try {
-            Specification<Exam> spec = createSpecificationForGet(request);
-            List<Exam> listExams = examRepository.findAll(spec);
-
+            //get account
             Long curAccountID = Util.getAuthenticatedAccountId();
             Account curAccount = accountRepository.findById(curAccountID).get();
             if (curAccount == null) {
                 throw new NoSuchElementException("Account not fould");
             }
+            String roleCode = curAccount.getRole().getRoleCode();
+            //chceck org
             Organization curOrg = new Organization();
             Set<Organization> orgs = Util.getOrganizations();
             for (Organization org : orgs) {
@@ -161,6 +161,10 @@ public class ExamService implements IExamService {
                     curOrg = org;
                 }
             }
+            //getexam
+            Specification<Exam> spec = createSpecificationForGet(request, roleCode, curAccountID);
+
+            List<Exam> listExams = examRepository.findAll(spec);
             List<Organization_Subject> orgSubs = subjectOrganOrgenizationRepository
                     .findByOrganization_OrganizationId(curOrg.getOrganizationId());
             List<Subject> subs = new ArrayList<>();
@@ -203,6 +207,10 @@ public class ExamService implements IExamService {
                     entity.getSubjectId());
             // Check account
             Account account = checkEntityExistence(accountRepository.findById(Util.getAuthenticatedAccountId()), "Account", Util.getAuthenticatedAccountId());
+            boolean isExaminer = false;
+            if (account.getRole().getRoleCode().equals("ADMIN") || account.getRole().getRoleCode().equals("EXAMINER")) {
+                isExaminer = true;
+            }
             //Check semester
             Semester semester = checkEntityExistence(semesterRepository.findById(entity.getSemesterId()), "Semester", entity.getSemesterId());
             Organization org = new Organization();
@@ -217,7 +225,11 @@ public class ExamService implements IExamService {
             exam.setSubject(subject);
             exam.setCreatedAt(LocalDateTime.now());
             exam.setStatus(true);
-            exam.setType(Exam_Type_Enum.EXAM);
+            if (isExaminer) {
+                exam.setType(Exam_Type_Enum.EXAM);
+            } else {
+                exam.setType(Exam_Type_Enum.ASSIGNMENT);
+            }
             exam.setCreatedBy(account.getAccountId());
             exam.setSemester(semester);
             //create new exam
@@ -274,7 +286,7 @@ public class ExamService implements IExamService {
     }
 
     // <editor-fold desc="get exam func helper">
-    private Specification<Exam> createSpecificationForGet(ExamViewRequestDTO request) {
+    private Specification<Exam> createSpecificationForGet(ExamViewRequestDTO request, String roleCode, Long id) {
         Specification<Exam> spec = Specification.where(null);
 
         if (!request.getSearchString().isBlank()) {
@@ -282,8 +294,22 @@ public class ExamService implements IExamService {
                     .or(ExamSpecification.hasSemester(request.getSearchString()));
         }
 
-        if (request.getSubjectId() != null) {
-            spec.and(ExamSpecification.hasSubjectId(request.getSubjectId()));
+        if (request.getSubjectId() != null && request.getSubjectId() != 0) {
+            spec = spec.and(ExamSpecification.hasSubjectId(request.getSubjectId()));
+        }
+
+        // Modify spec based on roleCode
+        switch (roleCode) {
+            case "EXAMINER" -> {
+                spec = spec.and(ExamSpecification.hasExamType(Exam_Type_Enum.EXAM));
+            }
+            case "HEAD_OF_DEPARTMENT" -> {
+                spec = spec.and(ExamSpecification.hasExamType(Exam_Type_Enum.ASSIGNMENT));
+            }
+            case "LECTURER" -> {
+                spec = spec.and(ExamSpecification.hasExamType(Exam_Type_Enum.ASSIGNMENT))
+                        .and(ExamSpecification.hasCreatedBy(id));
+            }
         }
 
         return spec;
@@ -558,9 +584,9 @@ public class ExamService implements IExamService {
                         return userCampus.equals(creatorCampus);
                     })
                     .map(examPaper -> new ExamWithPapersDTO(
-                            examPaper.getExam().getExamCode(),
-                            examPaper.getExamPaperCode(),
-                            examPaper.getExamPaperId()))
+                    examPaper.getExam().getExamCode(),
+                    examPaper.getExamPaperCode(),
+                    examPaper.getExamPaperId()))
                     .collect(Collectors.toList());
         }
 
@@ -569,9 +595,9 @@ public class ExamService implements IExamService {
                 .stream()
                 .filter(examPaper -> examPaper.getCreatedBy().equals(authenticatedUserId))
                 .map(examPaper -> new ExamWithPapersDTO(
-                        examPaper.getExam().getExamCode(),
-                        examPaper.getExamPaperCode(),
-                        examPaper.getExamPaperId()))
+                examPaper.getExam().getExamCode(),
+                examPaper.getExamPaperCode(),
+                examPaper.getExamPaperId()))
                 .collect(Collectors.toList());
     }
 
@@ -646,7 +672,7 @@ public class ExamService implements IExamService {
             // Filter by gradingAt and campus
             return exams.stream()
                     .filter(exam -> exam.getGradingAt().isAfter(LocalDateTime.now())
-                            && userCampus.equals(checkCampusForAccount(exam.getCreatedBy())))
+                    && userCampus.equals(checkCampusForAccount(exam.getCreatedBy())))
                     .count();
         } else {
             // Logic for other roles
@@ -683,7 +709,7 @@ public class ExamService implements IExamService {
             // Filter by gradeAt passed and campus
             return exams.stream()
                     .filter(exam -> exam.getGradingAt().isBefore(LocalDateTime.now())
-                            && userCampus.equals(checkCampusForAccount(exam.getCreatedBy())))
+                    && userCampus.equals(checkCampusForAccount(exam.getCreatedBy())))
                     .count();
         } else {
             // Logic for other roles

@@ -113,6 +113,10 @@ public class ExamQuestionService implements IExamQuestionService {
             // check examPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()), "Exam Paper", request.getExamPaperId());
 
+            if(examPaper.getStatus().equals(Exam_Status_Enum.GRADING) || examPaper.getStatus().equals(Exam_Status_Enum.COMPLETE)){
+                throw new NotFoundException("Canot update complete or grading exam");
+            }
+
             //update
             examQuestion.setExamPaper(examPaper);
             examQuestion.setQuestionContent(request.getQuestionContent());

@@ -235,4 +235,16 @@ public class ExamPaperController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PutMapping("/exam-paper/complete/{examPaperId}")
+    public ResponseEntity<?> completeExamPaper(@PathVariable Long examPaperId) {
+        try {
+            examPaperService.completeExamPaper(examPaperId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -3,6 +3,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 
 public class ExamSpecification {
@@ -57,5 +58,23 @@ public class ExamSpecification {
             return criteriaBuilder.equal(root.join("subject").get("subjectId"), id);
         };
     }
+
+    public static Specification<Exam> hasCreatedBy(Long createdBy) {
+        return (root, query, criteriaBuilder) -> {
+            if (createdBy == null) {
+                return criteriaBuilder.conjunction(); // No filtering if null
+            }
+            return criteriaBuilder.equal(root.get("createdBy"), createdBy);
+        };
+    }
+
+    public static Specification<Exam> hasExamType(Exam_Type_Enum type) {
+    return (root, query, criteriaBuilder) -> {
+        if (type == null) {
+            return criteriaBuilder.conjunction(); // No filtering if null
+        }
+        return criteriaBuilder.equal(root.get("type"), type.toString());
+    };
+}
 
 }
