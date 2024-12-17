@@ -196,7 +196,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('CONFIRM_BEFORE_GRADING', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_POSTMAN', 'ALL_ACCESS')")
     @PutMapping("/confirmFilePostman/{examPaperId}")
     public ResponseEntity<?> confirmFilePostman(@PathVariable Long examPaperId) {
         try {
