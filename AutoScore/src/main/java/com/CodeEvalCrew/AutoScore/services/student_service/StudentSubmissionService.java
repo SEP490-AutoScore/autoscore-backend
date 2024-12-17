@@ -53,7 +53,7 @@ public class StudentSubmissionService {
     private final StudentErrorService studentErrorService;
     private final IExamPaperRepository examPaperRepository;
     private final FileProcessingProgressService progressService;
-    private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
+    private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors() * 2;
 
     AtomicInteger totalTasks = new AtomicInteger(0);
     AtomicInteger completedTasks = new AtomicInteger(0);
