@@ -27,7 +27,7 @@ public class SemesterController {
     @Autowired
     private ISemesterService semesterService;
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SEMESTER','ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<?> getAllSemester() {
         List<SemesterView> result;
@@ -41,6 +41,7 @@ public class SemesterController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_SEMESTER','ALL_ACCESS')")
     @GetMapping("{semesterId}")
     public ResponseEntity<?> getSemesterById(@PathVariable Long semesterId) {
         SemesterView result;
@@ -55,7 +56,7 @@ public class SemesterController {
     }
     
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+     @PreAuthorize("hasAnyAuthority('CREATE_SEMESTER','ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createNewSemester(@RequestBody CreateSemesterRequest request) {
         SemesterView result;
@@ -69,7 +70,7 @@ public class SemesterController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_SEMESTER','ALL_ACCESS')")
     @PutMapping("{semesterId}")
     public ResponseEntity<?> updateSemesterInfo(@RequestBody CreateSemesterRequest request, @PathVariable Long semesterId) {
         SemesterView result;

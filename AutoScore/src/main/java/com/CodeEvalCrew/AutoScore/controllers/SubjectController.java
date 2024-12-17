@@ -28,7 +28,7 @@ public class SubjectController {
     @Autowired
     private ISubjectService subjectService;
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SUBJECT', 'ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<?> getSubject() {
         List<SubjectView> result;
@@ -42,7 +42,7 @@ public class SubjectController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CREATE_SUBJECT', 'ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createNewSubject(@RequestBody CreateSubjectRequest request) {
         SubjectView result;
@@ -56,7 +56,7 @@ public class SubjectController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_SUBJECT', 'ALL_ACCESS')")
     @PutMapping("org")
     public ResponseEntity<?> addSubjectIntoOrganiztion(@RequestParam Long organizationId, @RequestParam Long subjectId) {
         SubjectView result;
@@ -70,6 +70,7 @@ public class SubjectController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('UPDATE_SUBJECT', 'ALL_ACCESS')")
     @PutMapping("{subjectId}")
     public ResponseEntity<?> updateInfoSubject(@RequestBody CreateSubjectRequest request,@PathVariable Long subjectId) {
         SubjectView result;
@@ -83,7 +84,7 @@ public class SubjectController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_SUBJECT', 'ALL_ACCESS')")
     @GetMapping("{subjectId}")
     public ResponseEntity<?> getSubjectBySubjectId(@PathVariable Long subjectId) {
         SubjectView result;
@@ -96,7 +97,4 @@ public class SubjectController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
-    
-    
 }
