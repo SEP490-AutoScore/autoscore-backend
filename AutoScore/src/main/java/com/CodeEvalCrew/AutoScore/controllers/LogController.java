@@ -46,7 +46,7 @@ public class LogController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
                     .body(resource);
         } catch (IOException e) {
-            e.printStackTrace(); // Log lỗi nếu xảy ra
+            e.printStackTrace(); 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
