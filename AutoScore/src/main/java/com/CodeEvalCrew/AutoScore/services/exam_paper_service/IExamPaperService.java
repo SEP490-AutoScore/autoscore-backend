@@ -40,4 +40,6 @@ public interface IExamPaperService {
 
     void updateIsused(Long examPaperId) throws NotFoundException, Exception;
 
+    void completeExamPaper(Long examPaperId) throws NotFoundException, Exception;
+
 }

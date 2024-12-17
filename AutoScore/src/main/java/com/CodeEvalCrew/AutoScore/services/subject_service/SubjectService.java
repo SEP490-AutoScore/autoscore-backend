@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import com.CodeEvalCrew.AutoScore.models.Entity.Subject;
 import com.CodeEvalCrew.AutoScore.repositories.organization_repository.IOrganizationRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.ISubjectRepository;
 import com.CodeEvalCrew.AutoScore.repositories.subject_repository.SubjectOrgenizationRepository;
+import com.CodeEvalCrew.AutoScore.utils.Util;
 
 @Service
 public class SubjectService implements ISubjectService{
@@ -34,13 +36,27 @@ public class SubjectService implements ISubjectService{
         List<SubjectView> result = new ArrayList<>();
         try {
             List<Subject> subjects = subjectRepository.findAll();
+            Organization org = new Organization();
+            Set<Organization> orgs = Util.getOrganizations();
+            for (Organization organization : orgs) {
+                if(organization.getType().equals(Organization_Enum.CAMPUS)) org = organization;
+            }
             
             if (subjects.isEmpty()) {
                 throw new NoSuchElementException("No subject has found");
             }
 
             for (Subject subject : subjects) {
-                result.add(new SubjectView(subject.getSubjectId(), subject.getSubjectCode(), subject.getSubjectName()));
+                boolean flag = false;
+                Set<Organization_Subject> orgSubs = subject.getOrganizationSubjects();
+                for (Organization_Subject orgSub : orgSubs) {
+                    if(orgSub.getOrganization().getOrganizationId().equals(org.getOrganizationId())){
+                        flag = true;
+                    }
+                }
+                if(flag){
+                    result.add(new SubjectView(subject.getSubjectId(), subject.getSubjectCode(), subject.getSubjectName()));
+                }
             }
 
             return result;
