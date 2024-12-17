@@ -1,8 +1,7 @@
 package com.CodeEvalCrew.AutoScore.services.student_service;
 
 import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -10,54 +9,30 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Service
 public class FileProcessingProgressService {
 
-    private final CopyOnWriteArrayList<SseEmitter> emitters = new CopyOnWriteArrayList<>();
-    private int lastProgress = -1; // Trạng thái tiến trình cuối cùng
+    private final ConcurrentHashMap<String, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private int lastSentProgress = -1;
 
-    public void registerEmitter(SseEmitter emitter, AtomicInteger totalTasks, AtomicInteger completedTasks, AtomicInteger failedTasks) {
-        emitters.add(emitter);
-
-        // Xóa emitter khỏi danh sách khi hoàn thành hoặc timeout
-        emitter.onCompletion(() -> {
-            if (emitters.contains(emitter)) {
-                emitters.remove(emitter);
-            }
-        });
-        emitter.onTimeout(() -> {
-            if (emitters.contains(emitter)) {
-                emitters.remove(emitter);
-            }
-        });
-        emitter.onError((e) -> {
-            if (emitters.contains(emitter)) {
-                emitters.remove(emitter);
-            }
-        });
-
-        // Gửi heartbeat định kỳ để giữ kết nối mở
-        new Thread(() -> {
-            while (emitters.contains(emitter)) {
-                try {
-                    Thread.sleep(1_000L); // Gửi heartbeat mỗi 5 giây
-                    emitter.send(SseEmitter.event().data("keep-alive"));
-                } catch (IOException | InterruptedException e) {
-                    emitters.remove(emitter);
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        }).start();
+    // Đăng ký một emitter mới
+    public void registerEmitter(String clientId, SseEmitter emitter) {
+        emitters.put(clientId, emitter);
+        emitter.onCompletion(() -> emitters.remove(clientId));
+        emitter.onTimeout(() -> emitters.remove(clientId));
+        emitter.onError(e -> emitters.remove(clientId));
     }
 
     public void sendProgress(int progress) {
-        if (progress != lastProgress) { // Chỉ gửi khi tiến trình thay đổi
-            lastProgress = progress;
-            for (SseEmitter emitter : emitters) {
+        if (progress != lastSentProgress) { // Gửi nếu tiến trình thay đổi
+            lastSentProgress = progress;
+            emitters.forEach((clientId, emitter) -> {
                 try {
-                    emitter.send(SseEmitter.event().data(progress));
-                } catch (IllegalStateException | IOException e) {
-                    emitters.remove(emitter);
+                    emitter.send(SseEmitter.event()
+                            .name("progress")
+                            .data(progress)
+                            .reconnectTime(3000));
+                } catch (IOException e) {
+                    emitters.remove(clientId);
                 }
-            }
+            });
         }
     }
 }

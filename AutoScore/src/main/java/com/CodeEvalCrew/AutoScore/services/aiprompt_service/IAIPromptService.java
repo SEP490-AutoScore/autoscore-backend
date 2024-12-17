@@ -6,5 +6,6 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.AIPromptDTO;
 
 public interface IAIPromptService {
     List<AIPromptDTO> getAllAIPrompt();
-     void updateQuestionAskAiContent(Long aiPromptId, String newQuestionAskAiContent);
+
+    void updateQuestionAskAiContent(Long aiPromptId, String newQuestionAskAiContent);
 }

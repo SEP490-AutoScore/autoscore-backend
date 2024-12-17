@@ -82,6 +82,8 @@ VALUES
 ('MERGE_POSTMAN', 41, 'Merge postman', 7, 1, 'Allows merging postman script to main file collection postman'),
 ('DELETE_POSTMAN', 42, 'Delete postman', 7, 1, 'Allows deleting postman script'),
 ('UPDATE_QUESTION_POSTMAN', 43, 'Update question of postman', 7, 1, 'Allows updating question of postman script'),
+('CALCULATE_SCORE', 69, 'Calculate score postman function', 7, 1, 'Allows calculating score for all postman function'),
+('FIX_AUTH_POSTMAN', 70, 'Fix auth postman', 7, 1, 'Allows fixing authorization of all postman function'),
 
 -- AI-key
 ('VIEW_API_KEY', 48, 'View api key', 9, 1, 'Allows viewing api key'),
@@ -134,7 +136,7 @@ VALUES
 (true, 1, 31), (true, 1, 32), (true, 1, 33), (true, 1, 34), (true, 1, 35), (true, 1, 36), (true, 1, 37), (true, 1, 38), (true, 1, 39), (true, 1, 40),
 (true, 1, 41), (true, 1, 42), (true, 1, 43), (true, 1, 44), (true, 1, 45), (true, 1, 47), (true, 1, 48), (true, 1, 49), (true, 1, 50),
 (true, 1, 51),(true, 1, 52),(true, 1, 53),(true, 1, 54),(true, 1, 55),(true, 1, 56),(true, 1, 57),(true, 1, 58),(true, 1, 59), (true, 1, 60),
-(true, 1, 61), (true, 1, 62), (true, 1, 63), (true, 1, 64), (true, 1, 65), (true, 1, 66), (true, 1, 67), (true, 1, 68),
+(true, 1, 61), (true, 1, 62), (true, 1, 63), (true, 1, 64), (true, 1, 65), (true, 1, 66), (true, 1, 67), (true, 1, 68),(true, 1, 69),(true, 1, 70),
 -- Examiner
 (false, 2, 2), (false, 2, 3), (false, 2, 10), (false, 2, 11), (false, 2, 17), (false, 2, 18), (false, 2, 23), (false, 2, 24), (false, 2, 25), (false, 2, 39),
 (true, 2, 1), (true, 2, 4), (true, 2, 5), (true, 2, 6), (true, 2, 7), (true, 2, 8), (true, 2, 9), (true, 2, 12), (true, 2, 13), (true, 2, 14),
@@ -142,7 +144,7 @@ VALUES
 (true, 2, 30), (true, 2, 31), (true, 2, 32), (true, 2, 33), (true, 2, 34), (true, 2, 35), (true, 2, 36), (true, 2, 37), (true, 2, 38), (true, 2, 39), (true, 2, 40),
 (true, 2, 41), (true, 2, 42), (true, 2, 43), (true, 2, 44), (true, 2, 45), (true, 2, 47), (true, 2, 48), (true, 2, 49), (true, 2, 50),
 (true, 2, 51),(true, 2, 52),(true, 2, 53),(true, 2, 54),(true, 2, 55),(true, 2, 56),(true, 2, 57),(true, 2, 58),(true, 2, 59), (true, 2, 60),
-(true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64), (true, 2, 65), (true, 2, 66), (true, 2, 67), (true, 2, 68),
+(true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64), (true, 2, 65), (true, 2, 66), (true, 2, 67), (true, 2, 68),(true, 2, 69),(true, 2, 70),
 
 -- Head of Department
 (false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
@@ -151,7 +153,7 @@ VALUES
 (true, 3, 1), (true, 3, 4), (true, 3, 5), (true, 3, 6), (true, 3, 7), (true, 3, 8), (true, 3, 9), (true, 3, 12), (true, 3, 13), (true, 3, 14), (true, 3, 40),
 (true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
 (true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(true, 3, 58),(false, 3, 59), (true, 3, 60),
-(true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64), (true, 3, 65), (true, 3, 66), (true, 3, 67), (true, 3, 68),
+(true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64), (true, 3, 65), (true, 3, 66), (true, 3, 67), (true, 3, 68),(true, 3, 69),(true, 3, 70),
 
 -- Lecturer
 (false, 4, 2), (false, 4, 3), (false, 4, 10), (false, 4, 11), (false, 4, 17), (false, 4, 18), (false, 4, 23), (false, 4, 24), (false, 4, 25), (false, 4, 26),
@@ -160,7 +162,7 @@ VALUES
 (true, 4, 1), (true, 4, 4), (true, 4, 5), (true, 4, 6), (true, 4, 7), (true, 4, 8), (true, 4, 9), (true, 4, 12), (true, 4, 13), (true, 4, 14), (true, 4, 40),
 (true, 4, 41), (true, 4, 42), (true, 4, 43), (true, 4, 44), (true, 4, 45), (true, 4, 47), (true, 4, 48), (true, 4, 49), (true, 4, 50),
 (true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(true, 4, 58),(false, 4, 59),(true, 4, 60),
-(true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64), (true, 4, 65), (true, 4, 66), (true, 4, 67), (true, 4, 68);
+(true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64), (true, 4, 65), (true, 4, 66), (true, 4, 67), (true, 4, 68), (true, 4, 69), (true, 4, 70);
 
 
 INSERT INTO `account`
@@ -287,7 +289,7 @@ VALUES
 INSERT INTO `exam_question`
 (`question_content`, `exam_question_score`, `end_point`, `role_allow`, `http_method`, `description`, `payload_type`, `payload`, `validation`, `sucess_response`, `error_response`, `status`, `order_by`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `exam_paper_id`)
 VALUES
-('Login', 2, '/api/login', 'Administrator, Doctor, Patient', 'POST', 'This function allows the user to access the system', 'JSON',
+('Login', 2, '/api/login', 'Admin, Doctor, Patient', 'POST', 'This function allows the user to access the system', 'JSON',
 '{
   "email": "user@example.com",
   "password": "securepassword123"
@@ -304,7 +306,7 @@ Response Body (JSON):
  		} 
  }', 'Response Code: 401 Unauthorized (for incorrect email/password)
 Response Body (JSON): {"error": "Invalid email or password"}', true, 1, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
-('Create (Add a person and the viruses they are infected with)', 2, '/api/person', 'Administrator, Doctor, Patient', 'POST', 'Retrieves details of a person, including any viruses they are infected with.', 'JSON',
+('Create (Add a person and the viruses they are infected with)', 2, '/api/person', 'Admin, Doctor, Patient', 'POST', 'Retrieves details of a person, including any viruses they are infected with.', 'JSON',
 '{ 
   	"personID": 1,
   	"fullName": "John Doe",
@@ -329,7 +331,7 @@ Response Body (JSON): {"error": "Invalid email or password"}', true, 1, '2023-10
 }',
  'Response Code: 500 (for incorrect phone/viruses)
 Response Body (JSON): {"error": "Invalid viruses or phone"}', true, 2, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
-('Read (Retrieve person details and associated viruses)', 2, '/api/person/{id}', 'Administrator, Doctor, Patient', 'GET', 'Retrieves details of a person, including any viruses they are infected with.', 'URL Parameters',
+('Read (Retrieve person details and associated viruses)', 2, '/api/person/{id}', 'Admin, Doctor, Patient', 'GET', 'Retrieves details of a person, including any viruses they are infected with.', 'URL Parameters',
 'id (ID of the person to retrieve)
 ',
 '',
@@ -351,7 +353,7 @@ Response Body (JSON): {"error": "Invalid viruses or phone"}', true, 2, '2023-10-
  	] 
 }',
  '', true, 3, '2023-10-01 10:00:00', 3, NULL, NULL, NULL, NULL, 1),
-('Retrieve all persons and their viruses', 2, '/api/persons', 'Administrator, Doctor, Patient', 'GET', 'Retrieve all persons and their viruses', NULL, NULL, NULL,
+('Retrieve all persons and their viruses', 2, '/api/persons', 'Admin, Doctor, Patient', 'GET', 'Retrieve all persons and their viruses', NULL, NULL, NULL,
 '[ 
  	{ 
       	"personId": 1, 
@@ -429,13 +431,12 @@ INSERT INTO `ai_prompt`
 VALUES
 ('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_GHERKIN_FORMAT'),
-('Generate Gherkin format scenarios for the given API based on the database structure and sample data provided earlier. Ensure the scenarios reflect real-world interactions, grounded in the fields and data existing in the database. Avoid using IDs or data that do not exist in the database.
+('Generate Gherkin format scenarios for the given API based on the database structure and sample data provided earlier. Ensure the scenarios reflect real-world interactions, grounded in the fields and data existing in the database. Avoid using IDs or data that do not exist in the database. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.
 
 **Important Instructions:**
 - Only use real values and references from the database. For example, do not refer to a person with ID 123 if no such record exists.
 - Avoid generic descriptions like "valid person ID" or "successful response" unless explicitly derived from the database schema or example data.
 - Use specific field names and example values when describing request parameters or expected results.
-- **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.**
 - Each complete scenario must be fully enclosed in double curly braces {{ }}.
 
 The structure should follow the pattern:
@@ -455,14 +456,18 @@ The structure should follow the pattern:
 
 ('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_POSTMAN_COLLECTION'),
-('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. Ensure that:  
-1. The `event.script.exec` section in `item` contains valid Postman test scripts (using `pm.test`).  
-2. The `info` section includes `_postman_id`, `name`, `schema`, `_exporter_id`.  
-3. The `item` section includes:  
+('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. Ensure that: 
+- The `event.script.exec` section in `item` contains valid Postman test scripts (using `pm.test`).  
+- The `info` section includes `_postman_id`, `name`, `schema`, `_exporter_id`.  
+- The `item` section includes:  
    - `name`, which should closely reflect the Gherkin scenario name,  
    - `request.url` which must start with `http://localhost:8080/...`,  
    - `event.listen` with the value `test`,  
    - `event.script.exec` with the value `pm.test`.  
+- If the request is for a login function:
+Save the token from the response into an environment variable named jwt-{Role Name}.
+- If the request is not for a login function:
+Retrieve the token from the environment variable named jwt-{Role Name} and include it in the Authorization header of the request.
 
 Do not explain the JSON structure, just provide the raw JSON.  
 ', 2,'GENERATE_POSTMAN_COLLECTION'),

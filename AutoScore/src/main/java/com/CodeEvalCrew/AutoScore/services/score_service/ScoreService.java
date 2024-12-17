@@ -53,7 +53,6 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ScoreService implements IScoreService {
     @Autowired
     private final IAccountRepository accountRepository;
-
     private final ScoreRepository scoreRepository;
     private final ScoreDetailRepository scoreDetailRepository;
     private final CodePlagiarismRepository codePlagiarismRepository;
@@ -232,7 +231,6 @@ public class ScoreService implements IScoreService {
     public List<ScoreDetailsResponseDTO> getScoreDetailsByScoreId(Long scoreId) {
         try {
             List<Score_Detail> scoreDetails = scoreDetailRepository.findByScore_ScoreId(scoreId);
-
             if (scoreDetails != null) {
                 return scoreDetailMapper.scoreDetailEntitiesToDTOs(scoreDetails);
             }
@@ -248,7 +246,6 @@ public class ScoreService implements IScoreService {
         try {
             List<Code_Plagiarism> entities = codePlagiarismRepository.findByScoreScoreId(scoreId);
             return codePlagiarismMapper.toCodePlagiarismResponseDTOList(entities);
-            // return codePlagiarismRepository.findByScoreScoreId(scoreId);
         } catch (Exception e) {
             throw new RuntimeException("Error retrieving plagiarism data for scoreId " + scoreId, e);
         }
@@ -256,28 +253,23 @@ public class ScoreService implements IScoreService {
 
     @Override
     public int getTotalStudentsByExamPaperId(Long examPaperId) {
-        // Use repository to count the number of students with examPaperId
         return scoreRepository.countByExamPaperExamPaperId(examPaperId);
     }
 
     @Override
     public int getTotalStudentsWithZeroScore(Long examPaperId) {
-        // Use the repository to count the number of students with totalScore = 0
         return scoreRepository.countByExamPaperExamPaperIdAndTotalScore(examPaperId, 0);
     }
 
     @Override
     public int getTotalStudentsWithScoreGreaterThanZero(Long examPaperId) {
-        // Use repository to count the number of students with totalScore > 0
         return scoreRepository.countByExamPaperIdAndTotalScoreGreaterThan(examPaperId, 0);
     }
 
     @Override
     public List<StudentScoreDTO> getStudentScoresByExamPaperId(Long examPaperId) {
-        // Retrieve all scores for the given examPaperId
         List<Score> allScores = scoreRepository.findAllByExamPaper_ExamPaperId(examPaperId);
 
-        // Filter the scores based on some conditions if necessary
         return allScores.stream()
                 .map(score -> new StudentScoreDTO(
                         score.getStudent().getStudentCode(),
@@ -286,7 +278,7 @@ public class ScoreService implements IScoreService {
     }
 
     private String checkCampusForAccount(Long accountId) {
-        // Function to check the account's campus
+
         List<Account_Organization> accountOrganizations = accountOrganizationRepository
                 .findByAccount_AccountId(accountId);
 
@@ -304,31 +296,26 @@ public class ScoreService implements IScoreService {
     public Map<Float, Long> getTotalScoreOccurrences() {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        // Get user role information
         Account userAccount = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new RuntimeException("User account not found."));
         String roleCode = userAccount.getRole().getRoleCode();
 
-        // Get all points
         List<Score> scores = scoreRepository.findAll();
 
         if ("EXAMINER".equals(roleCode)) {
-            // Logic for role "EXAMINER"
+
             String userCampus = checkCampusForAccount(authenticatedUserId);
 
             if (userCampus == null) {
                 throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
             }
 
-            // Filter and group by totalScore for EXAM papers by campus
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
                             && score.getExamPaper().getExam().getType().toString().equals("EXAM")
                             && score.getStudent().getOrganization().getName().equals(userCampus))
                     .collect(Collectors.groupingBy(Score::getTotalScore, Collectors.counting()));
         } else {
-            // Logic for other roles
-            // Filter and group by totalScore for ASSIGNMENT items
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
                             && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
@@ -341,27 +328,21 @@ public class ScoreService implements IScoreService {
     public ScoreCategoryDTO getScoreCategories() {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        // Get user role information
         Account userAccount = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new RuntimeException("User account not found."));
         String roleCode = userAccount.getRole().getRoleCode();
 
-        // Get all points
         List<Score> scores = scoreRepository.findAll();
 
         if ("EXAMINER".equals(roleCode)) {
-            // Logic for role "EXAMINER"
             String userCampus = checkCampusForAccount(authenticatedUserId);
 
-            // Categorize scores for EXAM exams by campus
             return categorizeScores(scores.stream()
                     .filter(score -> score.getStudent().isStatus()
                             && score.getExamPaper().getExam().getType().toString().equals("EXAM")
                             && score.getStudent().getOrganization().getName().equals(userCampus))
                     .toList());
         } else {
-            // Logic for other roles
-            // Classify scores for ASSIGNMENT articles
             return categorizeScores(scores.stream()
                     .filter(score -> score.getStudent().isStatus()
                             && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
@@ -399,49 +380,44 @@ public class ScoreService implements IScoreService {
     public List<TopStudentDTO> getTopStudents() {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
 
-        // Get user role information
         Account userAccount = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new RuntimeException("User account not found."));
         String roleCode = userAccount.getRole().getRoleCode();
 
-        // Query scores of all students
         List<Score> scores = scoreRepository.findAll();
 
         if ("EXAMINER".equals(roleCode)) {
-            // Logic for role "EXAMINER"
+
             String userCampus = checkCampusForAccount(authenticatedUserId);
 
             if (userCampus == null) {
                 throw new IllegalArgumentException("Authenticated user does not belong to any CAMPUS.");
             }
 
-            // Filter and sort by student scores for EXAM
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
                             && score.getExamPaper().getExam().getType().toString().equals("EXAM")
                             && score.getStudent().getOrganization().getName().equals(userCampus))
-                    .sorted((s1, s2) -> Float.compare(s2.getTotalScore(), s1.getTotalScore())) // Sort by highest score
-                    .limit(20) // Get the 20 students with the highest scores
+                    .sorted((s1, s2) -> Float.compare(s2.getTotalScore(), s1.getTotalScore()))
+                    .limit(20)
                     .map(score -> new TopStudentDTO(
                             score.getStudent().getStudentCode(),
                             score.getStudent().getStudentEmail(),
                             score.getTotalScore(),
-                            score.getExamPaper().getExam().getExamCode())) // Access Exam through Exam_Paper
+                            score.getExamPaper().getExam().getExamCode()))
                     .collect(Collectors.toList());
         } else {
-            // Logic for other roles
-            // Filter and sort by student scores for ASSIGNMENT
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
                             && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
                             && score.getExamPaper().getCreatedBy().equals(authenticatedUserId))
-                    .sorted((s1, s2) -> Float.compare(s2.getTotalScore(), s1.getTotalScore())) // Sort by highest score
-                    .limit(20)// Get the 20 students with the highest scores
+                    .sorted((s1, s2) -> Float.compare(s2.getTotalScore(), s1.getTotalScore()))
+                    .limit(20)
                     .map(score -> new TopStudentDTO(
                             score.getStudent().getStudentCode(),
                             score.getStudent().getStudentEmail(),
                             score.getTotalScore(),
-                            score.getExamPaper().getExam().getExamCode())) // Access Exam through Exam_Paper
+                            score.getExamPaper().getExam().getExamCode()))
                     .collect(Collectors.toList());
         }
     }
@@ -450,125 +426,78 @@ public class ScoreService implements IScoreService {
     public List<Map<String, Object>> analyzeLog() {
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         if (authenticatedUserId == null) {
-            // Handle the case where the authenticated user ID is not found
             throw new IllegalStateException("Authenticated user ID is null.");
         }
 
-        // Get user role information
         Account userAccount = accountRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new RuntimeException("User account not found."));
         String roleCode = userAccount.getRole().getRoleCode();
 
         String userCampus = checkCampusForAccount(authenticatedUserId);
         if (userCampus == null) {
-            // Handle the case where campus is not found
             throw new IllegalStateException("User campus is null.");
         }
 
-        // Get all the scores
         List<Score> scores = scoreRepository.findAll();
 
-        // If role is EXAMINER, filter according to EXAM conditions
-        if ("EXAMINER".equals(roleCode)) {
-            // Filter scores by EXAM and campus
-            List<String> logDataList = scores.stream()
-                    .filter(score -> score.getStudent() != null &&
-                            score.getStudent().isStatus() &&
-                            score.getExamPaper().getExam().getType().toString().equals("EXAM") &&
-                            score.getStudent().getOrganization().getName().equals(userCampus))
-                    .map(score -> {
-                        String logRunPostman = score.getLogRunPostman();
-                        return logRunPostman != null ? logRunPostman : "";
-                    })
-                    .collect(Collectors.toList());
+        List<Score> filteredScores = scores.stream()
+                .filter(score -> {
+                    if ("EXAMINER".equals(roleCode)) {
+                        return score.getStudent() != null &&
+                                score.getStudent().isStatus() &&
+                                score.getExamPaper().getExam().getType().toString().equals("EXAM") &&
+                                score.getStudent().getOrganization().getName().equals(userCampus);
+                    } else {
+                        return score.getStudent() != null &&
+                                score.getStudent().isStatus() &&
+                                score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT") &&
+                                score.getExamPaper().getCreatedBy().equals(authenticatedUserId);
+                    }
+                })
+                .collect(Collectors.toList());
 
-            // Create a Set containing unique functions
-            Set<String> uniqueFunctionsSet = new HashSet<>();
-            for (Score score : scores) {
-                Long examPaperId = score.getExamPaper().getExamPaperId();
-                String logData = score.getLogRunPostman();
+        List<String> logDataList = filteredScores.stream()
+                .map(score -> {
+                    String logRunPostman = score.getLogRunPostman();
+                    return logRunPostman != null ? logRunPostman : "";
+                })
+                .collect(Collectors.toList());
 
-                // Regular expression to find functions after '→'
-                Pattern pattern = Pattern.compile("→\\s*(.+)");
-                Matcher matcher = pattern.matcher(logData);
+        Set<String> uniqueFunctionsSet = new HashSet<>();
+        for (Score score : filteredScores) {
+            Long examPaperId = score.getExamPaper().getExamPaperId();
+            String logData = score.getLogRunPostman();
 
-                while (matcher.find()) {
-                    String functionName = matcher.group(1).trim();
-                    String uniqueKey = examPaperId + ":" + functionName;
-                    uniqueFunctionsSet.add(uniqueKey);
-                }
+            Pattern pattern = Pattern.compile("→\\s*(.+)");
+            Matcher matcher = pattern.matcher(logData);
+
+            while (matcher.find()) {
+                String functionName = matcher.group(1).trim();
+                String uniqueKey = examPaperId + ":" + functionName;
+                uniqueFunctionsSet.add(uniqueKey);
             }
-
-            // Create a Map containing the function name and number of occurrences
-            Map<String, Integer> functionCountMap = new HashMap<>();
-            for (String uniqueKey : uniqueFunctionsSet) {
-                String functionName = uniqueKey.split(":")[1];
-                functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
-            }
-
-            // Convert Map to List
-            List<Map<String, Object>> formattedData = new ArrayList<>();
-            for (Map.Entry<String, Integer> entry : functionCountMap.entrySet()) {
-                Map<String, Object> entryMap = new HashMap<>();
-                entryMap.put("function", entry.getKey());
-                entryMap.put("occurrences", entry.getValue());
-                formattedData.add(entryMap);
-            }
-
-            return formattedData;
-
-        } else {
-            // Logic for roles other than EXAMINER (filter by ASSIGNMENT and createdBy)
-            List<String> logDataList = scores.stream()
-                    .filter(score -> score.getStudent() != null &&
-                            score.getStudent().isStatus() &&
-                            score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT") &&
-                            score.getExamPaper().getCreatedBy().equals(authenticatedUserId)) // Lọc theo createdBy
-                    .map(score -> {
-                        String logRunPostman = score.getLogRunPostman();
-                        return logRunPostman != null ? logRunPostman : "";
-                    })
-                    .collect(Collectors.toList());
-
-            // Create a Set containing unique functions
-            Set<String> uniqueFunctionsSet = new HashSet<>();
-            for (Score score : scores) {
-                Long examPaperId = score.getExamPaper().getExamPaperId();
-                String logData = score.getLogRunPostman();
-
-                Pattern pattern = Pattern.compile("→\\s*(.+)");
-                Matcher matcher = pattern.matcher(logData);
-
-                while (matcher.find()) {
-                    String functionName = matcher.group(1).trim();
-                    String uniqueKey = examPaperId + ":" + functionName;
-                    uniqueFunctionsSet.add(uniqueKey);
-                }
-            }
-
-            // Create a Map containing the function name and number of occurrences
-            Map<String, Integer> functionCountMap = new HashMap<>();
-            for (String uniqueKey : uniqueFunctionsSet) {
-                String functionName = uniqueKey.split(":")[1];
-                functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
-            }
-
-            // Convert Map to List
-            List<Map<String, Object>> formattedData = new ArrayList<>();
-            for (Map.Entry<String, Integer> entry : functionCountMap.entrySet()) {
-                Map<String, Object> entryMap = new HashMap<>();
-                entryMap.put("function", entry.getKey());
-                entryMap.put("occurrences", entry.getValue());
-                formattedData.add(entryMap);
-            }
-
-            return formattedData;
         }
+
+        Map<String, Integer> functionCountMap = new HashMap<>();
+        for (String uniqueKey : uniqueFunctionsSet) {
+            String functionName = uniqueKey.split(":")[1];
+            functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
+        }
+
+        List<Map<String, Object>> formattedData = functionCountMap.entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> entryMap = new HashMap<>();
+                    entryMap.put("function", entry.getKey());
+                    entryMap.put("occurrences", entry.getValue());
+                    return entryMap;
+                })
+                .collect(Collectors.toList());
+
+        return formattedData;
     }
 
     @Override
     public Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId) {
-        // Fetch all Score_Detail entities for the given examPaperId
         List<Score_Detail> scoreDetails = scoreDetailRepository.findAllByScore_ExamPaper_ExamPaperId(examPaperId);
 
         if (scoreDetails == null || scoreDetails.isEmpty()) {
@@ -577,11 +506,8 @@ public class ScoreService implements IScoreService {
 
         Map<String, Integer> functionPassCounts = new HashMap<>();
 
-        // Iterate over each Score_Detail and count the fully passed functions
         for (Score_Detail detail : scoreDetails) {
-            // Check if the function is fully passed (noPmtestAchieve == totalPmtest)
             if (detail.getNoPmtestAchieve().equals(detail.getTotalPmtest())) {
-                // Increment the count for the fully passed function
                 functionPassCounts.put(detail.getPostmanFunctionName(),
                         functionPassCounts.getOrDefault(detail.getPostmanFunctionName(), 0) + 1);
             }
@@ -592,7 +518,6 @@ public class ScoreService implements IScoreService {
 
     @Override
     public Map<String, Integer> analyzeScoresFailedAllTests(Long examPaperId) {
-        // Fetch all Score_Detail entities for the given examPaperId
         List<Score_Detail> scoreDetails = scoreDetailRepository.findAllByScore_ExamPaper_ExamPaperId(examPaperId);
 
         if (scoreDetails == null || scoreDetails.isEmpty()) {
@@ -601,12 +526,8 @@ public class ScoreService implements IScoreService {
 
         Map<String, Integer> functionFailCounts = new HashMap<>();
 
-        // Iterate over each Score_Detail and count the functions with no successful
-        // tests
         for (Score_Detail detail : scoreDetails) {
-            // Check if noPmtestAchieve == 0 (function failed all tests)
             if (detail.getNoPmtestAchieve() != null && detail.getNoPmtestAchieve() == 0) {
-                // Increment the count for the failed function
                 functionFailCounts.put(detail.getPostmanFunctionName(),
                         functionFailCounts.getOrDefault(detail.getPostmanFunctionName(), 0) + 1);
             }
@@ -617,11 +538,9 @@ public class ScoreService implements IScoreService {
 
     @Override
     public Map<String, Integer> analyzeScoresPartialPassLogRunPostman(Long examPaperId) {
-        // Fetch the `Exam_Paper` entity by ID
         Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                 .orElseThrow(() -> new RuntimeException("Exam paper not found"));
 
-        // Get all associated Scores
         Set<Score> scores = examPaper.getScores();
         if (scores == null || scores.isEmpty()) {
             throw new RuntimeException("No scores available for the given exam paper");
@@ -629,17 +548,13 @@ public class ScoreService implements IScoreService {
 
         Map<String, Integer> partialPassCounts = new HashMap<>();
 
-        // Process each Score's logRunPostman
         for (Score score : scores) {
             String log = score.getLogRunPostman();
             if (log == null || log.isEmpty()) {
-                continue; // Skip if no log is available
+                continue;
             }
-
-            // Analyze the log for partially passed functions
             Set<String> partiallyPassedFunctions = extractPartiallyPassedFunctions(log);
 
-            // Increment the count for each partially passed function
             for (String function : partiallyPassedFunctions) {
                 partialPassCounts.put(function, partialPassCounts.getOrDefault(function, 0) + 1);
             }
@@ -651,14 +566,12 @@ public class ScoreService implements IScoreService {
     private Set<String> extractPartiallyPassedFunctions(String log) {
         Set<String> partiallyPassedFunctions = new HashSet<>();
 
-        // Extract function names and their associated log entries
         Pattern functionPattern = Pattern.compile("→\\s*(.+)$", Pattern.MULTILINE);
         Matcher functionMatcher = functionPattern.matcher(log);
 
         while (functionMatcher.find()) {
             String functionName = functionMatcher.group(1).trim();
 
-            // Locate log entries related to the function
             String functionLog = extractLogForFunction(log, functionName);
 
             // Check if the function has at least one test case passed ("√")
@@ -689,11 +602,9 @@ public class ScoreService implements IScoreService {
 
     @Override
     public Map<String, Map<String, Double>> getTotalRunAndAverageResponseTime(Long examPaperId) {
-        // Fetch the `Exam_Paper` entity by ID
         Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                 .orElseThrow(() -> new RuntimeException("Exam paper not found"));
 
-        // Get all associated Scores
         Set<Score> scores = examPaper.getScores();
         if (scores == null || scores.isEmpty()) {
             throw new RuntimeException("No scores available for the given exam paper");
@@ -701,11 +612,10 @@ public class ScoreService implements IScoreService {
 
         Map<String, Map<String, Double>> studentTotalAndAverageResponseTimes = new HashMap<>();
 
-        // Process each Score's logRunPostman
         for (Score score : scores) {
             String log = score.getLogRunPostman();
             if (log == null || log.isEmpty()) {
-                continue; // Skip if no log is available
+                continue;
             }
 
             // Extract total run duration and average response time from the log
@@ -730,9 +640,9 @@ public class ScoreService implements IScoreService {
         Pattern totalDurationPattern = Pattern.compile("total run duration: ([0-9.]+)s");
         Matcher matcher = totalDurationPattern.matcher(log);
         if (matcher.find()) {
-            return Double.parseDouble(matcher.group(1)); // Return duration in seconds
+            return Double.parseDouble(matcher.group(1));
         }
-        return 0.0; // Default if not found
+        return 0.0;
     }
 
     // Helper method to extract average response time from the log
@@ -741,18 +651,16 @@ public class ScoreService implements IScoreService {
         Pattern averageResponsePattern = Pattern.compile("average response time: ([0-9]+)ms");
         Matcher matcher = averageResponsePattern.matcher(log);
         if (matcher.find()) {
-            return Double.parseDouble(matcher.group(1)) / 1000.0; // Convert ms to seconds
+            return Double.parseDouble(matcher.group(1)) / 1000.0;
         }
-        return 0.0; // Default if not found
+        return 0.0;
     }
 
     @Override
     public List<Map<String, String>> getCodePlagiarismDetailsByExamPaperId(Long examPaperId) {
-        // Fetch the `Exam_Paper` entity by ID
         Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                 .orElseThrow(() -> new RuntimeException("Exam paper not found"));
 
-        // Get all associated Scores
         Set<Score> scores = examPaper.getScores();
         if (scores == null || scores.isEmpty()) {
             throw new RuntimeException("No scores available for the given exam paper");
@@ -775,5 +683,4 @@ public class ScoreService implements IScoreService {
 
         return plagiarismDetails;
     }
-
 }
