@@ -476,13 +476,19 @@ The structure should follow the pattern:
 ', 2,'GENERATE_GHERKIN_FORMAT'),
 ('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_GHERKIN_FORMAT_MORE'),
-('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.** Do not generate any Gherkin scenarios that match or are similar to the following examples. Use the following structure as a guideline: 
+('Generate Gherkin format scenarios for the given feature or API. Ensure that each complete scenario is fully enclosed in double curly braces {{ }}, regardless of whether optional steps are included. If multiple roles are involved, create separate scenarios for each role to explicitly represent their unique context and actions. **For scenarios related to Success Responses, prepend "Successfully" to the Scenario name.** Use the following structure as a guideline: 
 '
 ,2,'GENERATE_GHERKIN_FORMAT_MORE'),
 
 ('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_POSTMAN_COLLECTION'),
-('Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. Ensure that: 
+('**Please make sure
+- If the request is for a login function:
+Save the token from the response into an environment variable named jwt-{Role Name}.
+- For Non-Login Requests:
+Retrieve the token from the environment variable named jwt-{Role Name} and include it in the Authorization header of the request.
+
+Write JSON Postman collection for 1 item in Gherkin format below, with no explanation. Provide only the JSON structure. Ensure that: 
 - The `event.script.exec` section in `item` contains valid Postman test scripts (using `pm.test`).  
 - The `info` section includes `_postman_id`, `name`, `schema`, `_exporter_id`.  
 - The `item` section includes:  
@@ -490,17 +496,21 @@ The structure should follow the pattern:
    - `request.url` which must start with `http://localhost:8080/...`,  
    - `event.listen` with the value `test`,  
    - `event.script.exec` with the value `pm.test`.  
-- If the request is for a login function:
-Save the token from the response into an environment variable named jwt-{Role Name}.
-- If the request is not for a login function:
-Retrieve the token from the environment variable named jwt-{Role Name} and include it in the Authorization header of the request.
 
 Do not explain the JSON structure, just provide the raw JSON.  
 ', 2,'GENERATE_POSTMAN_COLLECTION'),
 
 ('This is the database structure and sample data. Save it to your memory, do not reply.
 ', 1,'GENERATE_POSTMAN_COLLECTION_MORE'),
-('Given the JSON Postman collection below, please add multiple pm.test scripts within the same test case. Ensure that each test script is inside the same `event.script.exec` block, but each script checks a different condition or assertion. In the provided Postman JSON, within the `event.script.exec` section, please create multiple `pm.test` scripts under the same test case. Each `pm.test` should check a separate condition without creating additional test cases.', 2,'GENERATE_POSTMAN_COLLECTION_MORE');
+('
+**Please make sure
+- If the request is for a login function:
+Save the token from the response into an environment variable named jwt-{Role Name}.
+- For Non-Login Requests:
+Retrieve the token from the environment variable jwt-{Role Name} and include it in the Authorization header item.request.header
+Given the JSON Postman collection below, please add multiple pm.test scripts within the same test case. Ensure that each test script is inside the same `event.script.exec` block, but each script checks a different condition or assertion. In the provided Postman JSON, within the `event.script.exec` section, please create multiple `pm.test` scripts under the same test case. Each `pm.test` should check a separate condition without creating additional test cases.
+
+', 2,'GENERATE_POSTMAN_COLLECTION_MORE');
 
 
 -- INSERT INTO `autoscore`.`exam_barem` 
