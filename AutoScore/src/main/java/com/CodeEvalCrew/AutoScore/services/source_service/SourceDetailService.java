@@ -56,7 +56,7 @@ public class SourceDetailService {
     }
 
     @Transactional
-    public void saveStudentSubmission(File studentFolder, Student student, Source source, String examType) {
+    public Source_Detail saveStudentSubmission(File studentFolder, Student student, Source source, String examType) {
         try {
             // Lưu thông tin chi tiết về mã nguồn
             Source_Detail sourceDetail = new Source_Detail();
@@ -64,13 +64,12 @@ public class SourceDetailService {
             sourceDetail.setStudent(student);
             sourceDetail.setSource(source);
             sourceDetail.setType(Exam_Type_Enum.valueOf(examType));
-            sourceDetailRepository.save(sourceDetail);
-
-            logger.info("Successfully saved submission for student: {}", student.getStudentCode());
-
+            Source_Detail savedSourceDetail = sourceDetailRepository.save(sourceDetail);
+            return savedSourceDetail;
         } catch (DataAccessException e) {
             logger.error("Save student submission error!");
         }
+        return null;
     }
 
     @Transactional
