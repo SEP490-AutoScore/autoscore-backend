@@ -1,6 +1,14 @@
 package com.CodeEvalCrew.AutoScore.services.score_service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +18,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -19,6 +29,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import com.CodeEvalCrew.AutoScore.mappers.CodePlagiarismMapper;
@@ -51,6 +62,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class ScoreService implements IScoreService {
+
     @Autowired
     private final IAccountRepository accountRepository;
     private final ScoreRepository scoreRepository;
@@ -91,6 +103,107 @@ public class ScoreService implements IScoreService {
             return null;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public void exportTxtFiles(HttpServletResponse response, Long examPaperId) {
+        String baseFolder = "TxtLogScore/";
+        String exportFolder = baseFolder + "exampapercode_" + examPaperId + "/";
+        String zipFilePath = exportFolder + ".zip";
+        try {
+            File parentFolder = new File(baseFolder);
+            if (!parentFolder.exists()) {
+                parentFolder.mkdirs();
+            }
+            File exportFolderFile = new File(exportFolder);
+            if (exportFolderFile.exists()) {
+                deleteFolderRecursively(exportFolderFile);
+            }
+            exportFolderFile.mkdirs();
+
+            List<ScoreResponseDTO> scores = getScoresByExamPaperId(examPaperId);
+            if (scores == null || scores.isEmpty()) {
+                throw new IllegalArgumentException("No scores available to export.");
+            }
+
+            String examPaperCode = scores.get(0).getExamPaperCode();
+            String examPaperFolder = baseFolder + examPaperCode + "/";
+            File examFolder = new File(examPaperFolder);
+            if (!examFolder.exists()) {
+                examFolder.mkdirs();
+            }
+
+            for (ScoreResponseDTO score : scores) {
+                if ((score.getLogRunPostman() == null || score.getLogRunPostman().isEmpty())
+                        && (score.getReason() == null || score.getReason().isEmpty())) {
+                    continue;
+                }
+                String studentFolderPath = examPaperFolder + "studentcode_" + score.getStudentCode() + "/";
+                File studentFolder = new File(studentFolderPath);
+                studentFolder.mkdirs();
+
+                if (score.getLogRunPostman() != null && !score.getLogRunPostman().isEmpty()) {
+                    File logFile = new File(studentFolderPath + "log_run_postman.txt");
+                    try (FileWriter logWriter = new FileWriter(logFile)) {
+                        logWriter.write(score.getLogRunPostman());
+                    }
+                }
+
+                if (score.getReason() != null && !score.getReason().isEmpty()) {
+                    File reasonFile = new File(studentFolderPath + "reason.txt");
+                    try (FileWriter reasonWriter = new FileWriter(reasonFile)) {
+                        reasonWriter.write("Reason: " + score.getReason());
+                    }
+                }
+            }
+
+            zipFolder(Paths.get(examPaperFolder), Paths.get(zipFilePath));
+
+            deleteFolderRecursively(examFolder);
+            try (InputStream is = new FileInputStream(zipFilePath); OutputStream os = response.getOutputStream()) {
+                response.setContentType("application/zip");
+                response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + examPaperCode + ".zip");
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = is.read(buffer)) > 0) {
+                    os.write(buffer, 0, length);
+                }
+            }
+            deleteFolderRecursively(new File(exportFolder));
+            Files.deleteIfExists(Paths.get(zipFilePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteFolderRecursively(File folder) {
+        if (folder.exists()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteFolderRecursively(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+            folder.delete();
+        }
+    }
+
+    public void zipFolder(Path sourceFolderPath, Path zipPath) throws IOException {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+            Files.walk(sourceFolderPath).filter(path -> !Files.isDirectory(path)).forEach(path -> {
+                ZipEntry zipEntry = new ZipEntry(sourceFolderPath.relativize(path).toString());
+                try {
+                    zipOutputStream.putNextEntry(zipEntry);
+                    Files.copy(path, zipOutputStream);
+                    zipOutputStream.closeEntry();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 
@@ -272,8 +385,8 @@ public class ScoreService implements IScoreService {
 
         return allScores.stream()
                 .map(score -> new StudentScoreDTO(
-                        score.getStudent().getStudentCode(),
-                        score.getTotalScore()))
+                score.getStudent().getStudentCode(),
+                score.getTotalScore()))
                 .collect(Collectors.toList());
     }
 
@@ -312,14 +425,14 @@ public class ScoreService implements IScoreService {
 
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
-                            && score.getExamPaper().getExam().getType().toString().equals("EXAM")
-                            && score.getStudent().getOrganization().getName().equals(userCampus))
+                    && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                    && score.getStudent().getOrganization().getName().equals(userCampus))
                     .collect(Collectors.groupingBy(Score::getTotalScore, Collectors.counting()));
         } else {
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
-                            && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
-                            && score.getExamPaper().getCreatedBy().equals(authenticatedUserId))
+                    && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
+                    && score.getExamPaper().getCreatedBy().equals(authenticatedUserId))
                     .collect(Collectors.groupingBy(Score::getTotalScore, Collectors.counting()));
         }
     }
@@ -339,14 +452,14 @@ public class ScoreService implements IScoreService {
 
             return categorizeScores(scores.stream()
                     .filter(score -> score.getStudent().isStatus()
-                            && score.getExamPaper().getExam().getType().toString().equals("EXAM")
-                            && score.getStudent().getOrganization().getName().equals(userCampus))
+                    && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                    && score.getStudent().getOrganization().getName().equals(userCampus))
                     .toList());
         } else {
             return categorizeScores(scores.stream()
                     .filter(score -> score.getStudent().isStatus()
-                            && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
-                            && score.getExamPaper().getCreatedBy().equals(authenticatedUserId))
+                    && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
+                    && score.getExamPaper().getCreatedBy().equals(authenticatedUserId))
                     .toList());
         }
     }
@@ -396,28 +509,28 @@ public class ScoreService implements IScoreService {
 
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
-                            && score.getExamPaper().getExam().getType().toString().equals("EXAM")
-                            && score.getStudent().getOrganization().getName().equals(userCampus))
+                    && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                    && score.getStudent().getOrganization().getName().equals(userCampus))
                     .sorted((s1, s2) -> Float.compare(s2.getTotalScore(), s1.getTotalScore()))
                     .limit(20)
                     .map(score -> new TopStudentDTO(
-                            score.getStudent().getStudentCode(),
-                            score.getStudent().getStudentEmail(),
-                            score.getTotalScore(),
-                            score.getExamPaper().getExam().getExamCode()))
+                    score.getStudent().getStudentCode(),
+                    score.getStudent().getStudentEmail(),
+                    score.getTotalScore(),
+                    score.getExamPaper().getExam().getExamCode()))
                     .collect(Collectors.toList());
         } else {
             return scores.stream()
                     .filter(score -> score.getStudent().isStatus()
-                            && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
-                            && score.getExamPaper().getCreatedBy().equals(authenticatedUserId))
+                    && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
+                    && score.getExamPaper().getCreatedBy().equals(authenticatedUserId))
                     .sorted((s1, s2) -> Float.compare(s2.getTotalScore(), s1.getTotalScore()))
                     .limit(20)
                     .map(score -> new TopStudentDTO(
-                            score.getStudent().getStudentCode(),
-                            score.getStudent().getStudentEmail(),
-                            score.getTotalScore(),
-                            score.getExamPaper().getExam().getExamCode()))
+                    score.getStudent().getStudentCode(),
+                    score.getStudent().getStudentEmail(),
+                    score.getTotalScore(),
+                    score.getExamPaper().getExam().getExamCode()))
                     .collect(Collectors.toList());
         }
     }
@@ -439,19 +552,18 @@ public class ScoreService implements IScoreService {
         }
 
         List<Score> scores = scoreRepository.findAll();
-
         List<Score> filteredScores = scores.stream()
                 .filter(score -> {
                     if ("EXAMINER".equals(roleCode)) {
-                        return score.getStudent() != null &&
-                                score.getStudent().isStatus() &&
-                                score.getExamPaper().getExam().getType().toString().equals("EXAM") &&
-                                score.getStudent().getOrganization().getName().equals(userCampus);
+                        return score.getStudent() != null
+                                && score.getStudent().isStatus()
+                                && score.getExamPaper().getExam().getType().toString().equals("EXAM")
+                                && score.getStudent().getOrganization().getName().equals(userCampus);
                     } else {
-                        return score.getStudent() != null &&
-                                score.getStudent().isStatus() &&
-                                score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT") &&
-                                score.getExamPaper().getCreatedBy().equals(authenticatedUserId);
+                        return score.getStudent() != null
+                                && score.getStudent().isStatus()
+                                && score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT")
+                                && score.getExamPaper().getCreatedBy().equals(authenticatedUserId);
                     }
                 })
                 .collect(Collectors.toList());
