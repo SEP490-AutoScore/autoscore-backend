@@ -691,7 +691,9 @@ public class ExamPaperService implements IExamPaperService {
     public List<ExamPaperView> getAllExamNotUsed() throws NotFoundException, Exception {
         List<ExamPaperView> result = new ArrayList<>();
         try {
-            Specification<Exam_Paper> spec = ExamPaperSpecification.isUsedFalse();
+            Long curAccountId = Util.getAuthenticatedAccountId();
+
+            Specification<Exam_Paper> spec = ExamPaperSpecification.isUsedFalse().and(ExamPaperSpecification.hasCreatedBy(curAccountId));
 
             List<Exam_Paper> listExamPaper = examPaperRepository.findAll(spec);
 
