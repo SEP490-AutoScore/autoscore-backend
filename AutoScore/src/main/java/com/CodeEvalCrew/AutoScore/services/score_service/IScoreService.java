@@ -16,40 +16,42 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface IScoreService {
 
-  List<ScoreResponseDTO> getScoresByExamPaperId(Long examPaperId);
+    List<ScoreResponseDTO> getScoresByExamPaperId(Long examPaperId);
 
-  void exportScoresToExcel(HttpServletResponse response, Long examPaperId) throws IOException;
+    void exportTxtFiles(HttpServletResponse response, Long examPaperId);
 
-  List<ScoreOverViewResponseDTO> getScoreOverView();
+    void exportScoresToExcel(HttpServletResponse response, Long examPaperId) throws IOException;
 
-  List<ScoreDetailsResponseDTO> getScoreDetailsByScoreId(Long scoreId);
+    List<ScoreOverViewResponseDTO> getScoreOverView();
 
-  List<CodePlagiarismResponseDTO> getCodePlagiarismByScoreId(Long scoreId);
+    List<ScoreDetailsResponseDTO> getScoreDetailsByScoreId(Long scoreId);
 
-  int getTotalStudentsByExamPaperId(Long examPaperId);
+    List<CodePlagiarismResponseDTO> getCodePlagiarismByScoreId(Long scoreId);
 
-  int getTotalStudentsWithZeroScore(Long examPaperId);
+    int getTotalStudentsByExamPaperId(Long examPaperId);
 
-  int getTotalStudentsWithScoreGreaterThanZero(Long examPaperId);
+    int getTotalStudentsWithZeroScore(Long examPaperId);
 
-  List<StudentScoreDTO> getStudentScoresByExamPaperId(Long examPaperId);
+    int getTotalStudentsWithScoreGreaterThanZero(Long examPaperId);
 
-  List<TopStudentDTO> getTopStudents();
+    List<StudentScoreDTO> getStudentScoresByExamPaperId(Long examPaperId);
 
-  Map<Float, Long> getTotalScoreOccurrences();
+    List<TopStudentDTO> getTopStudents();
 
-  ScoreCategoryDTO getScoreCategories();
+    Map<Float, Long> getTotalScoreOccurrences();
 
-  List<Map<String, Object>> analyzeLog();
+    ScoreCategoryDTO getScoreCategories();
 
-  Map<String, Integer> analyzeScoresPartialPassLogRunPostman(Long examPaperId);
+    List<Map<String, Object>> analyzeLog();
 
-  Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId);
+    Map<String, Integer> analyzeScoresPartialPassLogRunPostman(Long examPaperId);
 
-  Map<String, Integer> analyzeScoresFailedAllTests(Long examPaperId);
+    Map<String, Integer> analyzeScoresFullyPassLogRunPostman(Long examPaperId);
 
-  Map<String, Map<String, Double>> getTotalRunAndAverageResponseTime(Long examPaperId);
+    Map<String, Integer> analyzeScoresFailedAllTests(Long examPaperId);
 
-  List<Map<String, String>> getCodePlagiarismDetailsByExamPaperId(Long examPaperId);
+    Map<String, Map<String, Double>> getTotalRunAndAverageResponseTime(Long examPaperId);
+
+    List<Map<String, String>> getCodePlagiarismDetailsByExamPaperId(Long examPaperId);
 
 }
