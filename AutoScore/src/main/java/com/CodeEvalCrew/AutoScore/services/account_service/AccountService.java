@@ -195,6 +195,13 @@ public class AccountService implements IAccountService {
                 if (savedAccount == null) {
                     return OperationStatus.FAILURE;
                 }
+
+                Account_Organization accountOrganization = new Account_Organization();
+                accountOrganization.setAccount(savedAccount);
+                accountOrganization.setOrganization(organizationRepository.findById(accountRequestDTO.getCampusId()).get());
+                accountOrganization.setStatus(true);
+                accountOrganizationRepository.save(accountOrganization);
+
                 Employee employee = new Employee();
                 employee.setFullName(accountRequestDTO.getName());
                 employee.setEmployeeCode(randomEmployeeCode(role.getRoleCode()));
