@@ -17,11 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ExamDatabaseDTO;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.GradingStatusEnum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
+import com.CodeEvalCrew.AutoScore.models.Entity.GradingProcess;
 import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.repositories.grading_process_repository.GradingProcessRepository;
 import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.utils.PathUtil;
 import com.CodeEvalCrew.AutoScore.utils.Util;
@@ -37,6 +40,8 @@ public class ExamDatabaseService implements IExamDatabaseService {
     private LogRepository logRepository;
     @Autowired
     private PathUtil pathUtil;
+    @Autowired
+    private GradingProcessRepository gradingProcessRepository;
 
     private void saveLog(Long examPaperId, String actionDetail) {
 
@@ -61,10 +66,29 @@ public class ExamDatabaseService implements IExamDatabaseService {
         logRepository.save(log);
     }
 
+    private void checkGradingProcessStatus(Long examPaperId) throws IllegalStateException {
+        Optional<GradingProcess> gradingProcessOpt = gradingProcessRepository
+                .findByExamPaper_ExamPaperId(examPaperId);
+
+        if (gradingProcessOpt.isPresent()) {
+            GradingProcess gradingProcess = gradingProcessOpt.get();
+            GradingStatusEnum status = gradingProcess.getStatus();
+
+            if (status == GradingStatusEnum.PENDING ||
+                    status == GradingStatusEnum.IMPORTANT ||
+                    status == GradingStatusEnum.GRADING ||
+                    status == GradingStatusEnum.PLAGIARISM) {
+                throw new IllegalStateException(
+                        String.format("Grading processing, not allowed",
+                                examPaperId, status));
+            }
+        }
+    }
+
     @Override
     public String importSqlFile(MultipartFile file, MultipartFile imageFile, Long examPaperId, String databaseNote,
             String databaseDescription) throws Exception {
-
+        checkGradingProcessStatus(examPaperId);
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
 
@@ -177,7 +201,7 @@ public class ExamDatabaseService implements IExamDatabaseService {
     @Override
     public String updateSqlFile(MultipartFile sqlFile, MultipartFile imageFile, Long examPaperId, String databaseNote,
             String databaseDescription) throws Exception {
-
+        checkGradingProcessStatus(examPaperId);
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
 

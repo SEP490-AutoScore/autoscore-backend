@@ -37,10 +37,12 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.ImportantView;
 import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.NewmanResult;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Status_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Exam_Type_Enum;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.GradingStatusEnum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
+import com.CodeEvalCrew.AutoScore.models.Entity.GradingProcess;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important;
 import com.CodeEvalCrew.AutoScore.models.Entity.Important_Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Log;
@@ -50,6 +52,7 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperReposit
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
+import com.CodeEvalCrew.AutoScore.repositories.grading_process_repository.GradingProcessRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantExamPaperRepository;
 import com.CodeEvalCrew.AutoScore.repositories.important_repository.ImportantRepository;
 import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
@@ -90,6 +93,8 @@ public class ExamPaperService implements IExamPaperService {
     private PathUtil pathUtil;
     @Autowired
     private IExamDatabaseRepository examDatabaseRepository;
+    @Autowired
+    private GradingProcessRepository gradingProcessRepository;
 
     public ExamPaperService(IExamPaperRepository examPaperRepository,
             IExamRepository examRepository,
@@ -143,7 +148,8 @@ public class ExamPaperService implements IExamPaperService {
 
             if (examPaper.getExam() != null) {
                 Exam exam = examPaper.getExam();
-                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(),
+                        exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
                 examPaperView.setSemester(semesterView);
             }
 
@@ -168,7 +174,7 @@ public class ExamPaperService implements IExamPaperService {
             Specification<Exam_Paper> spec = ExamPaperSpecification.hasForeignKey(request.getExamId(), "exam",
                     "examId");
             spec.and(ExamPaperSpecification.hasTrueStatus());
-            //check exam
+            // check exam
             List<Exam_Paper> listEntities = examPaperRepository.findAll(spec);
 
             if (listEntities.isEmpty()) {
@@ -186,7 +192,8 @@ public class ExamPaperService implements IExamPaperService {
                     set.add(view);
                 }
                 examPaperView.setImportants(set);
-                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(),
+                        exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
                 examPaperView.setSemester(semesterView);
 
                 result.add(examPaperView);
@@ -210,10 +217,10 @@ public class ExamPaperService implements IExamPaperService {
 
             Subject subject = checkEntityExistence(subjectRepository.findById(request.getSubjectId()), "Subject",
                     request.getSubjectId());
-
             // set to add
             Set<Important_Exam_Paper> importants = new HashSet<>();
-
+            boolean existExamCode = examPaperRepository.existsByExamPaperCode(request.getExamPaperCode());
+            if(existExamCode) throw new NotFoundException("ExamCode existed");
             // mapping
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
 
@@ -244,7 +251,8 @@ public class ExamPaperService implements IExamPaperService {
 
             ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
             if (examPaper.getExam() != null) {
-                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(),
+                        exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
                 examPaperView.setSemester(semesterView);
             }
             examPaperView.setImportants(set);
@@ -298,7 +306,8 @@ public class ExamPaperService implements IExamPaperService {
 
             ExamPaperView examPaperView = ExamPaperMapper.INSTANCE.examPAperToView(examPaper);
             if (examPaper.getExam() != null) {
-                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(), exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
+                SemesterView semesterView = new SemesterView(exam.getSemester().getSemesterId(),
+                        exam.getSemester().getSemesterCode(), exam.getSemester().getSemesterName());
                 examPaperView.setSemester(semesterView);
             }
             examPaperView.setImportants(set);
@@ -385,6 +394,24 @@ public class ExamPaperService implements IExamPaperService {
         }
     }
 
+    private void checkGradingProcessStatus(Long examPaperId) throws IllegalStateException {
+        Optional<GradingProcess> gradingProcessOpt = gradingProcessRepository.findByExamPaper_ExamPaperId(examPaperId);
+
+        if (gradingProcessOpt.isPresent()) {
+            GradingProcess gradingProcess = gradingProcessOpt.get();
+            GradingStatusEnum status = gradingProcess.getStatus();
+
+            if (status == GradingStatusEnum.PENDING ||
+                    status == GradingStatusEnum.IMPORTANT ||
+                    status == GradingStatusEnum.GRADING ||
+                    status == GradingStatusEnum.PLAGIARISM) {
+                throw new IllegalStateException(
+                        String.format("Grading processing, not allowed",
+                                examPaperId, status));
+            }
+        }
+    }
+
     @Override
     public void importPostmanCollections(Long examPaperId, List<MultipartFile> files) throws Exception {
 
@@ -395,9 +422,8 @@ public class ExamPaperService implements IExamPaperService {
             Exam_Paper examPaper = examPaperRepository.findById(examPaperId)
                     .orElseThrow(() -> new NotFoundException("Exam Paper not found for ID: " + examPaperId));
 
-            // List<PostmanFunctionInfo> functionInfoList =
-            // getPostmanFunctionInfoByExamPaperId(examPaperId);
-            // List<String> allNewmanFunctionNames = new ArrayList<>();
+            checkGradingProcessStatus(examPaperId);
+
             for (MultipartFile file : files) {
 
                 byte[] fileData = file.getBytes();
@@ -472,7 +498,7 @@ public class ExamPaperService implements IExamPaperService {
 
                         List<Exam_Question> matchingQuestions = examQuestions.stream()
                                 .filter(question -> question.getHttpMethod().equals(httpMethod)
-                                && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
+                                        && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
                                 .collect(Collectors.toList());
 
                         if (matchingQuestions.size() == 1) {
@@ -914,7 +940,7 @@ public class ExamPaperService implements IExamPaperService {
                 if (examQuestion != null) {
                     examQuestionScores.put(examQuestion.getExamQuestionId(),
                             examQuestionScores.getOrDefault(examQuestion.getExamQuestionId(), 0f)
-                            + gradingItem.getScoreOfFunction());
+                                    + gradingItem.getScoreOfFunction());
                 }
             }
 

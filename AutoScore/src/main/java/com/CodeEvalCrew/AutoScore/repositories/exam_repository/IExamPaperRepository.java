@@ -14,4 +14,5 @@ public interface IExamPaperRepository extends JpaRepository<Exam_Paper, Long>, J
     Optional<Exam_Paper> findByExamPaperCode(String examPaperCode);
     Optional<List<Exam_Paper>> findAllByExamExamId(Long examId);
     List<Exam_Paper> findByIsUsedTrueOrderByCreatedAtDesc();
+    boolean existsByExamPaperCode(String examPaperCode);
 }

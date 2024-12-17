@@ -38,11 +38,13 @@ import com.CodeEvalCrew.AutoScore.models.DTO.ResponseDTO.PostmanForGradingGetbyI
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Api_Key;
 import com.CodeEvalCrew.AutoScore.models.Entity.AI_Prompt;
 import com.CodeEvalCrew.AutoScore.models.Entity.Account_Selected_Key;
+import com.CodeEvalCrew.AutoScore.models.Entity.Enum.GradingStatusEnum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Enum.Purpose_Enum;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Database;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Paper;
 import com.CodeEvalCrew.AutoScore.models.Entity.Exam_Question;
 import com.CodeEvalCrew.AutoScore.models.Entity.Gherkin_Scenario;
+import com.CodeEvalCrew.AutoScore.models.Entity.GradingProcess;
 import com.CodeEvalCrew.AutoScore.models.Entity.Log;
 import com.CodeEvalCrew.AutoScore.models.Entity.Postman_For_Grading;
 import com.CodeEvalCrew.AutoScore.repositories.account_selected_key_repository.AccountSelectedKeyRepository;
@@ -51,6 +53,7 @@ import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamPaperReposit
 import com.CodeEvalCrew.AutoScore.repositories.exam_repository.IExamQuestionRepository;
 import com.CodeEvalCrew.AutoScore.repositories.examdatabase_repository.IExamDatabaseRepository;
 import com.CodeEvalCrew.AutoScore.repositories.gherkin_scenario_repository.GherkinScenarioRepository;
+import com.CodeEvalCrew.AutoScore.repositories.grading_process_repository.GradingProcessRepository;
 import com.CodeEvalCrew.AutoScore.repositories.log_repository.LogRepository;
 import com.CodeEvalCrew.AutoScore.repositories.postman_for_grading.PostmanForGradingRepository;
 import com.CodeEvalCrew.AutoScore.utils.PathUtil;
@@ -83,6 +86,8 @@ public class PostmanForGradingService implements IPostmanForGradingService {
     private LogRepository logRepository;
     @Autowired
     private PathUtil pathUtil;
+    @Autowired
+    private GradingProcessRepository gradingProcessRepository;
 
     private Long totalPmTest;
 
@@ -109,6 +114,24 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         logRepository.save(log);
     }
 
+    private void checkGradingProcessStatus(Long examPaperId) throws IllegalStateException {
+        Optional<GradingProcess> gradingProcessOpt = gradingProcessRepository.findByExamPaper_ExamPaperId(examPaperId);
+
+        if (gradingProcessOpt.isPresent()) {
+            GradingProcess gradingProcess = gradingProcessOpt.get();
+            GradingStatusEnum status = gradingProcess.getStatus();
+
+            if (status == GradingStatusEnum.PENDING ||
+                    status == GradingStatusEnum.IMPORTANT ||
+                    status == GradingStatusEnum.GRADING ||
+                    status == GradingStatusEnum.PLAGIARISM) {
+                throw new IllegalStateException(
+                        String.format("Grading processing, not allowed",
+                                examPaperId, status));
+            }
+        }
+    }
+
     private boolean isFirstElementValid(PostmanForGradingUpdateDTO firstElement) {
 
         return firstElement != null
@@ -119,7 +142,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
     @Override
     public String updatePostmanForGrading(Long examPaperId, List<PostmanForGradingUpdateDTO> updateDTOs) {
-
+        checkGradingProcessStatus(examPaperId);
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
 
@@ -215,6 +238,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
     @Override
     public String mergePostmanCollections(Long examPaperId) {
+        checkGradingProcessStatus(examPaperId);
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
 
@@ -288,6 +312,8 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
         Exam_Question examQuestion = gherkinScenario.getExamQuestion();
         Exam_Paper examPaper = examQuestion.getExamPaper();
+
+        checkGradingProcessStatus(examPaper.getExamPaperId());
 
         Optional<Postman_For_Grading> existingPostman = postmanForGradingRepository
                 .findByGherkinScenario_GherkinScenarioIdAndStatusTrue(gherkinScenarioId);
@@ -403,6 +429,8 @@ public class PostmanForGradingService implements IPostmanForGradingService {
         if (postmanForGrading == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Postman For Grading ID not found");
         }
+
+        checkGradingProcessStatus(postmanForGrading.getExamPaper().getExamPaperId());
 
         Exam_Database examDatabase = examDatabaseRepository
                 .findByExamPaper_ExamPaperId(postmanForGrading.getExamQuestion().getExamPaper().getExamPaperId())
@@ -776,7 +804,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
     @Override
     public String deletePostmanForGrading(List<Long> postmanForGradingIds, Long examPaperId) {
-
+        checkGradingProcessStatus(examPaperId);
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
         Exam_Paper examPaper2 = examPaperRepository.findById(examPaperId)
@@ -839,12 +867,14 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
     @Override
     public String updateExamQuestionId(Long postmanForGradingId, Long examQuestionId) {
-
-        Long authenticatedUserId = Util.getAuthenticatedAccountId();
-        LocalDateTime time = Util.getCurrentDateTime();
         Exam_Question examQuestion = examQuestionRepository.findById(examQuestionId)
                 .orElseThrow(() -> new NoSuchElementException("Exam Question not exists"));
         Exam_Paper examPaper = examQuestion.getExamPaper();
+        checkGradingProcessStatus(examPaper.getExamPaperId());
+
+        Long authenticatedUserId = Util.getAuthenticatedAccountId();
+        LocalDateTime time = Util.getCurrentDateTime();
+
         Optional<Postman_For_Grading> optionalPostmanForGrading = postmanForGradingRepository
                 .findById(postmanForGradingId);
         if (optionalPostmanForGrading.isEmpty()) {
@@ -865,7 +895,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
     @Override
     public void calculateScores(Long examPaperId) throws Exception {
-
+        checkGradingProcessStatus(examPaperId);
         Long authenticatedUserId = Util.getAuthenticatedAccountId();
         LocalDateTime time = Util.getCurrentDateTime();
 
@@ -993,6 +1023,7 @@ public class PostmanForGradingService implements IPostmanForGradingService {
 
     @Override
     public String updateAllPostmanCollections(Long examPaperId) {
+        checkGradingProcessStatus(examPaperId);
         List<Postman_For_Grading> postmanList = postmanForGradingRepository
                 .findByExamPaper_ExamPaperIdAndStatusTrueOrderByOrderPriorityAsc(examPaperId);
 

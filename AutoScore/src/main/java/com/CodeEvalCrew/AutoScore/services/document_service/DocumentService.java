@@ -50,6 +50,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @Service
 public class DocumentService implements IDocumentService {
 
@@ -76,9 +78,11 @@ public class DocumentService implements IDocumentService {
             throw new NotFoundException(ex.getMessage());
         }
 
-        // Define the path of the template and output file
-        String templatePath = "AutoScore\\src\\main\\resources\\Template.docx";
-        String outputPath = "C:\\Project\\SEP490\\output.docx";
+        // String templatePath = "AutoScore\\src\\main\\resources\\Template.docx";
+        // String outputPath = "C:\\Project\\SEP490\\output.docx";
+        Dotenv dotenv = Dotenv.configure().load();
+        String templatePath = dotenv.get("TEMPLATE_PATH");
+        String outputPath = dotenv.get("OUTPUT_PATH");
 
         Map<String, String> data = new HashMap<>();
 
@@ -265,7 +269,7 @@ public class DocumentService implements IDocumentService {
                     XWPFParagraph valueParagraph = document.createParagraph();
                     valueParagraph.setIndentationLeft(720);
                     run.setText(updatedText, 0); // Xóa placeholder
-                    
+
                     // Thêm nội dung mới với các dòng xuống dòng
                     String[] lines = value.split("\n");
                     for (int i = 0; i < lines.length; i++) {
@@ -279,7 +283,6 @@ public class DocumentService implements IDocumentService {
             }
         }
     }
-    
 
     private String addDatabaseImage(XWPFDocument document, ExamExport exportExam) throws IOException {
         String message = "Image added successfully.";

@@ -24,7 +24,7 @@ public class ImportantController {
     @Autowired
     private IImportantService importantService;
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_IMPORTANT','ALL_ACCESS')")
     @GetMapping("")
     public ResponseEntity<?> getImportantOfSubject(@RequestParam Long subjectId) {
         List<ImportantView> result;

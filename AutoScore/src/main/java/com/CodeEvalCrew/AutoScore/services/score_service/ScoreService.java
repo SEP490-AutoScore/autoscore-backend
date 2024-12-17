@@ -440,99 +440,60 @@ public class ScoreService implements IScoreService {
 
         List<Score> scores = scoreRepository.findAll();
 
-        if ("EXAMINER".equals(roleCode)) {
-            List<String> logDataList = scores.stream()
-                    .filter(score -> score.getStudent() != null &&
-                            score.getStudent().isStatus() &&
-                            score.getExamPaper().getExam().getType().toString().equals("EXAM") &&
-                            score.getStudent().getOrganization().getName().equals(userCampus))
-                    .map(score -> {
-                        String logRunPostman = score.getLogRunPostman();
-                        return logRunPostman != null ? logRunPostman : "";
-                    })
-                    .collect(Collectors.toList());
+        List<Score> filteredScores = scores.stream()
+                .filter(score -> {
+                    if ("EXAMINER".equals(roleCode)) {
+                        return score.getStudent() != null &&
+                                score.getStudent().isStatus() &&
+                                score.getExamPaper().getExam().getType().toString().equals("EXAM") &&
+                                score.getStudent().getOrganization().getName().equals(userCampus);
+                    } else {
+                        return score.getStudent() != null &&
+                                score.getStudent().isStatus() &&
+                                score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT") &&
+                                score.getExamPaper().getCreatedBy().equals(authenticatedUserId);
+                    }
+                })
+                .collect(Collectors.toList());
 
-            Set<String> uniqueFunctionsSet = new HashSet<>();
-            for (Score score : scores) {
-                Long examPaperId = score.getExamPaper().getExamPaperId();
-                String logData = score.getLogRunPostman();
+        List<String> logDataList = filteredScores.stream()
+                .map(score -> {
+                    String logRunPostman = score.getLogRunPostman();
+                    return logRunPostman != null ? logRunPostman : "";
+                })
+                .collect(Collectors.toList());
 
-                // Regular expression to find functions after '→'
-                Pattern pattern = Pattern.compile("→\\s*(.+)");
-                Matcher matcher = pattern.matcher(logData);
+        Set<String> uniqueFunctionsSet = new HashSet<>();
+        for (Score score : filteredScores) {
+            Long examPaperId = score.getExamPaper().getExamPaperId();
+            String logData = score.getLogRunPostman();
 
-                while (matcher.find()) {
-                    String functionName = matcher.group(1).trim();
-                    String uniqueKey = examPaperId + ":" + functionName;
-                    uniqueFunctionsSet.add(uniqueKey);
-                }
+            Pattern pattern = Pattern.compile("→\\s*(.+)");
+            Matcher matcher = pattern.matcher(logData);
+
+            while (matcher.find()) {
+                String functionName = matcher.group(1).trim();
+                String uniqueKey = examPaperId + ":" + functionName;
+                uniqueFunctionsSet.add(uniqueKey);
             }
-
-            // Create a Map containing the function name and number of occurrences
-            Map<String, Integer> functionCountMap = new HashMap<>();
-            for (String uniqueKey : uniqueFunctionsSet) {
-                String functionName = uniqueKey.split(":")[1];
-                functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
-            }
-
-            // Convert Map to List
-            List<Map<String, Object>> formattedData = new ArrayList<>();
-            for (Map.Entry<String, Integer> entry : functionCountMap.entrySet()) {
-                Map<String, Object> entryMap = new HashMap<>();
-                entryMap.put("function", entry.getKey());
-                entryMap.put("occurrences", entry.getValue());
-                formattedData.add(entryMap);
-            }
-
-            return formattedData;
-
-        } else {
-            // Logic for roles other than EXAMINER (filter by ASSIGNMENT and createdBy)
-            List<String> logDataList = scores.stream()
-                    .filter(score -> score.getStudent() != null &&
-                            score.getStudent().isStatus() &&
-                            score.getExamPaper().getExam().getType().toString().equals("ASSIGNMENT") &&
-                            score.getExamPaper().getCreatedBy().equals(authenticatedUserId)) // Lọc theo createdBy
-                    .map(score -> {
-                        String logRunPostman = score.getLogRunPostman();
-                        return logRunPostman != null ? logRunPostman : "";
-                    })
-                    .collect(Collectors.toList());
-
-            // Create a Set containing unique functions
-            Set<String> uniqueFunctionsSet = new HashSet<>();
-            for (Score score : scores) {
-                Long examPaperId = score.getExamPaper().getExamPaperId();
-                String logData = score.getLogRunPostman();
-
-                Pattern pattern = Pattern.compile("→\\s*(.+)");
-                Matcher matcher = pattern.matcher(logData);
-
-                while (matcher.find()) {
-                    String functionName = matcher.group(1).trim();
-                    String uniqueKey = examPaperId + ":" + functionName;
-                    uniqueFunctionsSet.add(uniqueKey);
-                }
-            }
-
-            // Create a Map containing the function name and number of occurrences
-            Map<String, Integer> functionCountMap = new HashMap<>();
-            for (String uniqueKey : uniqueFunctionsSet) {
-                String functionName = uniqueKey.split(":")[1];
-                functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
-            }
-
-            // Convert Map to List
-            List<Map<String, Object>> formattedData = new ArrayList<>();
-            for (Map.Entry<String, Integer> entry : functionCountMap.entrySet()) {
-                Map<String, Object> entryMap = new HashMap<>();
-                entryMap.put("function", entry.getKey());
-                entryMap.put("occurrences", entry.getValue());
-                formattedData.add(entryMap);
-            }
-
-            return formattedData;
         }
+
+        Map<String, Integer> functionCountMap = new HashMap<>();
+        for (String uniqueKey : uniqueFunctionsSet) {
+            String functionName = uniqueKey.split(":")[1];
+            functionCountMap.put(functionName, functionCountMap.getOrDefault(functionName, 0) + 1);
+        }
+
+        List<Map<String, Object>> formattedData = functionCountMap.entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> entryMap = new HashMap<>();
+                    entryMap.put("function", entry.getKey());
+                    entryMap.put("occurrences", entry.getValue());
+                    return entryMap;
+                })
+                .collect(Collectors.toList());
+
+        return formattedData;
     }
 
     @Override
