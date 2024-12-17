@@ -67,7 +67,7 @@ public class AIApiKeyController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('VIEW_API_KEY', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_API_KEY', 'ALL_ACCESS')")
     @PutMapping("/{aiApiKeyId}")
     public ResponseEntity<Void> updateAIApiKey(
             @PathVariable Long aiApiKeyId,

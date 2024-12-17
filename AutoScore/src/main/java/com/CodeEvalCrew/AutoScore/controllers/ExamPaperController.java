@@ -38,7 +38,7 @@ public class ExamPaperController {
         this.examPaperService = examPaperService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM_PAPER', 'ALL_ACCESS')")
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         ExamPaperView result;
@@ -54,7 +54,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CREATE_EXAM_PAPER','ALL_ACCESS')")
     @PostMapping("")
     public ResponseEntity<?> createNewExamPaper(@RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;
@@ -70,7 +70,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CREATE_EXAM_PAPER','ALL_ACCESS')")
     @PostMapping("/new")
     public ResponseEntity<?> createNewExamPaperNotUsed(@RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;
@@ -86,7 +86,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_EXAM_PAPER', 'ALL_ACCESS')")
     @PutMapping("{id}")
     public ResponseEntity<?> updateExamPaper(@PathVariable Long id, @RequestBody ExamPaperCreateRequest request) {
         ExamPaperView result;
@@ -102,7 +102,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DELETE_EXAM_PAPER', 'ALL_ACCESS')")
     @PostMapping("list")
     public ResponseEntity<?> getList(@RequestBody ExamPaperViewRequest request) {
         List<ExamPaperView> result;
@@ -120,7 +120,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('CREATE_EXAM_PAPER','ALL_ACCESS')")
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteExamPaper(@PathVariable Long id) {
         ExamPaperView result;
@@ -196,7 +196,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('CONFIRM_BEFORE_GRADING', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_POSTMAN', 'ALL_ACCESS')")
     @PutMapping("/confirmFilePostman/{examPaperId}")
     public ResponseEntity<?> confirmFilePostman(@PathVariable Long examPaperId) {
         try {

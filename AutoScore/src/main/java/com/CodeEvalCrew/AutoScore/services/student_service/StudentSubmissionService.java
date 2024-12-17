@@ -18,8 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,8 +37,7 @@ import com.CodeEvalCrew.AutoScore.services.student_error_service.StudentErrorSer
 @Service
 public class StudentSubmissionService {
 
-    private static final Logger logger = LoggerFactory.getLogger(StudentSubmissionService.class);
-
+    // private static final Logger logger = LoggerFactory.getLogger(StudentSubmissionService.class);
     @Value("${upload.folder}")
     private String uploadDir;
 
@@ -54,7 +51,7 @@ public class StudentSubmissionService {
     private final StudentErrorService studentErrorService;
     private final IExamPaperRepository examPaperRepository;
     private final FileProcessingProgressService progressService;
-    private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
+    private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors() * 2;
 
 
     AtomicInteger totalTasks = new AtomicInteger(0);
@@ -84,12 +81,10 @@ public class StudentSubmissionService {
 
         try {
             // Giải nén file
-            String rootFolder = fileExtractionService.extract7zWithApacheCommons(file, uploadDir);
+            String rootFolder = fileExtractionService.extract7zWithSelectiveDelete(file, uploadDir);
             File rootDirectory = new File(rootFolder);
 
             if (!rootDirectory.exists() || !rootDirectory.isDirectory()) {
-                logger.error("Root directory does not exist or is not a directory: {}",
-                        rootDirectory.getAbsolutePath());
                 progressService.sendProgress(100); // Hoàn tất vì không thể xử lý
                 return unmatchedStudents;
             }
@@ -98,7 +93,6 @@ public class StudentSubmissionService {
             File[] examFolders = rootDirectory.listFiles(File::isDirectory);
 
             if (examFolders == null || examFolders.length == 0) {
-                logger.error("No subfolders found inside root directory: {}", rootDirectory.getAbsolutePath());
                 progressService.sendProgress(100); // Hoàn tất vì không có gì để xử lý
                 return unmatchedStudents;
             }
@@ -157,7 +151,7 @@ public class StudentSubmissionService {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                errors.add("Interrupted while waiting for task completion: " + e.getMessage());
+                errors.add("Interrupted while waiting for task completion " + e.getMessage());
             }
             if (completedTasks.get() + failedTasks.get() >= totalTasks.get()) {
                 progressService.sendProgress(100);
@@ -184,7 +178,7 @@ public class StudentSubmissionService {
         }
 
         for (File studentFolder : studentFolders) {
-            logger.info("Processing student folder: {}", studentFolder.getAbsolutePath());
+            // logger.info("Processing student folder: {}", studentFolder.getAbsolutePath());
             totalTasks.incrementAndGet();
             completionService.submit(() -> {
                 try {
@@ -192,15 +186,13 @@ public class StudentSubmissionService {
                             errors, examPaper.getExam().getExamId()).call();
                     completedTasks.incrementAndGet();
                 } catch (Exception e) {
-                    errors.add("Error processing folder " + studentFolder.getName() + ": " + e.getMessage());
+                    errors.add("Error processing folder " + studentFolder.getName());
                     failedTasks.incrementAndGet();
                 } finally {
                     synchronized (this) {
                         int totalProgress = completedTasks.get() + failedTasks.get();
-                        if (totalProgress <= totalTasks.get()) {
-                            int progress = (totalProgress * 100) / totalTasks.get();
-                            progressService.sendProgress(progress);
-                        }
+                        int progress = Math.min(100, (totalProgress * 100) / totalTasks.get());
+                        progressService.sendProgress(progress);
                     }
                 }
                 return null;
@@ -232,14 +224,14 @@ public class StudentSubmissionService {
         public Void call() {
             String studentCode = extractStudentCode(studentFolder.getName());
             if (studentCode.isEmpty()) {
-                unmatchedStudents.add("No valid student code for folder: " + studentFolder.getName());
+                unmatchedStudents.add("No valid student code for folder " + studentFolder.getName());
                 failedTasks.incrementAndGet();
                 return null;
             }
 
             Optional<Student> studentOpt = studentRepository.findByStudentCodeAndExamExamId(studentCode, examId);
             if (!studentOpt.isPresent()) {
-                String error = "Student not found for code: " + studentCode + " in folder: " + studentFolder.getName();
+                String error = "Student not found for code " + studentCode + " in folder " + studentFolder.getName();
                 unmatchedStudents.add(error);
                 studentErrorService.saveStudentError(source, null, error);
                 failedTasks.incrementAndGet();
@@ -251,19 +243,19 @@ public class StudentSubmissionService {
                 if (slnFileFolder != null) {
                     Source_Detail savedSourceDetail = sourceDetailService.saveStudentSubmission(slnFileFolder, studentOpt.get(), source, examType);
                     if (savedSourceDetail == null) {
-                        String error = "Please check student submission for folder: " + studentFolder.getName();
+                        String error = "Please check student submission for folder " + studentFolder.getName();
                         errors.add(error);
                         studentErrorService.saveStudentError(source, studentOpt.get(), error);
                         failedTasks.incrementAndGet();
                     }
                 } else {
-                    String error = "No .sln file found in folder: " + studentFolder.getName();
+                    String error = "No .sln file found in folder " + studentFolder.getName();
                     errors.add(error);
                     studentErrorService.saveStudentError(source, studentOpt.get(), error);
                     failedTasks.incrementAndGet();
                 }
             } catch (IOException e) {
-                String error = "Extraction error for folder " + studentFolder.getName() + ": " + e.getMessage();
+                String error = "Extraction error for folder " + studentFolder.getName();
                 errors.add(error);
                 studentErrorService.saveStudentError(source, studentOpt.get(), error);
                 failedTasks.incrementAndGet();
@@ -278,18 +270,6 @@ public class StudentSubmissionService {
                 return matcher.group().toLowerCase();
             }
             return "";
-        }
-
-        public AtomicInteger getTotalTasks() {
-            return totalTasks;
-        }
-
-        public AtomicInteger getCompletedTasks() {
-            return completedTasks;
-        }
-
-        public AtomicInteger getFailedTasks() {
-            return failedTasks;
         }
     }
 }
