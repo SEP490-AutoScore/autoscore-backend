@@ -1,17 +1,11 @@
 package com.CodeEvalCrew.AutoScore.controllers;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,6 +80,9 @@ public class ScoreController {
     public ResponseEntity<List<ScoreDetailsResponseDTO>> getScoreDetailsByScoreId(@RequestParam Long scoreId) {
         try {
             List<ScoreDetailsResponseDTO> scoreDetailResponseDTOs = scoreService.getScoreDetailsByScoreId(scoreId);
+            if (scoreDetailResponseDTOs == null || scoreDetailResponseDTOs.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
             return ResponseEntity.ok(scoreDetailResponseDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
