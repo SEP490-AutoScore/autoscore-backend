@@ -11,12 +11,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ScoreResponseDTO {
 
+    private String scoreId;
+    
     private Float totalScore;
     private String reason;
     private String examPaperCode;
     private String studentCode;
     private String studentEmail;
-
+    private String logRunPostman;
     private LocalDateTime gradedAt;
 
     private String levelOfPlagiarism;

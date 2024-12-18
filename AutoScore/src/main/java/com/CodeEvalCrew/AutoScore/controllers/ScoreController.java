@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,6 +45,16 @@ public class ScoreController {
     }
 
     @PreAuthorize("hasAnyAuthority('EXPORT_SCORE', 'ALL_ACCESS')")
+    @GetMapping("/txtLog/{examPaperId}")
+    public void downloadTxtFiles(HttpServletResponse response, @PathVariable Long examPaperId){
+        try {
+            scoreService.exportTxtFiles(response, examPaperId);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('EXPORT_SCORE', 'ALL_ACCESS')")
     @GetMapping("/export")
     public void exportScoresToExcel(HttpServletResponse response, @RequestParam Long exampaperid) {
         try {
@@ -69,6 +80,9 @@ public class ScoreController {
     public ResponseEntity<List<ScoreDetailsResponseDTO>> getScoreDetailsByScoreId(@RequestParam Long scoreId) {
         try {
             List<ScoreDetailsResponseDTO> scoreDetailResponseDTOs = scoreService.getScoreDetailsByScoreId(scoreId);
+            if (scoreDetailResponseDTOs == null || scoreDetailResponseDTOs.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
             return ResponseEntity.ok(scoreDetailResponseDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

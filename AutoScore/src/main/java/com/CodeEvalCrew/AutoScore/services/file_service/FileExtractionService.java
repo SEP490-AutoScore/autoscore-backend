@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -47,7 +49,7 @@ public class FileExtractionService {
     private String sevenZPath;
 
     // Giải nén file 7z bằng Apache Commons Compress
-    public String extract7zWithApacheCommons(MultipartFile file, String uploadDir) throws IOException {
+    public String extract7zWithSelectiveDelete(MultipartFile file, String uploadDir) throws IOException {
         File tempFile = new File(uploadDir, file.getOriginalFilename());
         file.transferTo(tempFile);
 
@@ -57,27 +59,47 @@ public class FileExtractionService {
         if (campus != null) {
             uploadDirect = uploadDir + File.separator + campus;
         }
-        String rootFolder = null;
 
+        Set<String> examPaperCodes = new HashSet<>(); // Lưu các ExamPaperCode từ file nén
+        Set<String> parentFolders = new HashSet<>();
+
+        // Bước 1: Duyệt file nén và lấy các ExamPaperCode
         try (SevenZFile sevenZFile = new SevenZFile(tempFile)) {
             SevenZArchiveEntry entry;
-            File outputDir = null;
-
             while ((entry = sevenZFile.getNextEntry()) != null) {
-                String entryName = entry.getName();
-
-                // Xác định tên thư mục gốc nếu chưa được đặt
-                if (rootFolder == null) {
-                    rootFolder = entryName.split("/")[0]; // Lấy tên thư mục gốc đầu tiên từ file nén
-                    outputDir = new File(uploadDirect, rootFolder);
-                    if (!outputDir.exists()) {
-                        outputDir.mkdir(); // Tạo thư mục gốc nếu chưa tồn tại
+                if (entry.isDirectory()) {
+                    String[] parts = entry.getName().split("/");
+                    if (parts.length > 1) {
+                        parentFolders.add(parts[0].trim() + File.separator);
+                        examPaperCodes.add(parts[1].trim());
                     }
                 }
+            }
+        } catch (IOException e) {
+            throw new IOException("Error reading 7z file " + tempFile.getAbsolutePath());
+        }
 
-                // Tạo đường dẫn giải nén với outputDir là thư mục gốc
-                File outFile = new File(outputDir, entryName.substring(rootFolder.length()));
+        // Debug: In ra danh sách ExamPaperCode
+        System.out.println("ExamPaperCodes: " + examPaperCodes);
 
+        // Bước 2: Xóa các folder ExamPaperCode tương ứng trên hệ thống
+        for (String examCode : examPaperCodes) {
+            File existingFolder = new File(uploadDirect, examCode);
+            if (existingFolder.exists() && existingFolder.isDirectory()) {
+                deleteFolderContents(existingFolder); // Xóa nội dung folder
+                if (!existingFolder.delete()) {
+                    System.err.println("Failed to delete folder " + existingFolder.getAbsolutePath());
+                }
+            } else {
+                System.out.println("Folder does not exist " + existingFolder.getAbsolutePath());
+            }
+        }
+
+        // Bước 3: Giải nén file nén 7z vào hệ thống
+        try (SevenZFile sevenZFile = new SevenZFile(tempFile)) {
+            SevenZArchiveEntry entry;
+            while ((entry = sevenZFile.getNextEntry()) != null) {
+                File outFile = new File(uploadDirect, entry.getName());
                 if (entry.isDirectory()) {
                     Files.createDirectories(outFile.toPath());
                 } else {
@@ -92,16 +114,29 @@ public class FileExtractionService {
                 }
             }
         } catch (IOException e) {
-            throw new IOException("Error extracting 7z file: " + e.getMessage(), e);
+            throw new IOException("Error extracting 7z file " + tempFile.getAbsolutePath());
         } finally {
-            tempFile.delete(); // Xóa file tạm sau khi giải nén
+            tempFile.delete(); // Xóa file tạm
         }
 
-        if (rootFolder == null) {
-            throw new IOException("Invalid archive structure: no root folder found");
-        }
+        return uploadDirect + File.separator + String.join(File.separator, parentFolders);
+    }
 
-        return new File(uploadDirect, rootFolder).getAbsolutePath();
+    // Hàm xóa nội dung trong thư mục
+    private void deleteFolderContents(File folder) {
+        if (folder.exists() && folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteFolderContents(file);
+                    }
+                    if (!file.delete()) {
+                        System.err.println("Failed to delete file " + file.getAbsolutePath());
+                    }
+                }
+            }
+        }
     }
 
     // Giải nén đệ quy và tìm tệp .sln
@@ -124,7 +159,7 @@ public class FileExtractionService {
                 // Giải nén file nén đệ quy
                 extractArchive(file, folder, source, student);
                 if (!file.delete()) {
-                    logger.warn("Failed to delete archive: {}", file.getPath());
+                    logger.warn("Failed to delete archive ", file.getPath());
                 }
                 return processExtractedFolder(folder, source, student); // Tiếp tục xử lý thư mục sau khi giải nén
             }
@@ -180,8 +215,8 @@ public class FileExtractionService {
                 zipFile.extractAll(outputDir.getAbsolutePath());
             }
         } catch (ZipException e) {
-            studentErrorService.saveStudentError(source, student, "Failed to extract ZIP for student code: " + student.getStudentCode());
-            throw new IOException("Failed to extract ZIP file: " + archive.getAbsolutePath(), e);
+            studentErrorService.saveStudentError(source, student, "Failed to extract ZIP for student code " + student.getStudentCode());
+            throw new IOException("Failed to extract ZIP file " + archive.getName());
         }
     }
 
@@ -206,8 +241,8 @@ public class FileExtractionService {
             }
         } catch (ArchiveException e) {
             // Xử lý ngoại lệ
-            studentErrorService.saveStudentError(source, student, "Error extracting archive for student code: " + student.getStudentCode());
-            throw new IOException("Error extracting archive: " + e.getMessage(), e);
+            studentErrorService.saveStudentError(source, student, "Error extracting archive for student code " + student.getStudentCode());
+            throw new IOException("Error extracting archive " + archive.getName());
         }
     }
 
@@ -240,8 +275,8 @@ public class FileExtractionService {
                 }
             }
         } catch (IOException e) {
-            studentErrorService.saveStudentError(source, student, "Failed to extract 7z file for student code: " + student.getStudentCode());
-            throw new IOException("Failed to extract 7z file: " + e.getMessage(), e);
+            studentErrorService.saveStudentError(source, student, "Failed to extract 7z file for student code " + student.getStudentCode());
+            throw new IOException("Failed to extract 7z file " + archive.getName());
         }
     }
 

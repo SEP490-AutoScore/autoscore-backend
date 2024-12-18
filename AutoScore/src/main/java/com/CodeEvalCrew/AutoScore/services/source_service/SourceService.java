@@ -90,17 +90,6 @@ public class SourceService {
                 studentErrorService.deleteStudentErrorBySourceId(sourceId);
                 // Xóa bản ghi source
                 deleteSourceById(sourceId);
-
-                // Xóa file và thư mục liên quan
-                // Path folderPath = Paths.get(path);
-                // if (Files.exists(folderPath) && folderPath.toFile().isDirectory()) {
-                //     File[] files = folderPath.toFile().listFiles();
-                //     if (files != null) {
-                //         for (File file : files) {
-                //             deleteRecursively(file);
-                //         }
-                //     }
-                // }
             }
 
             // Tạo mới nguồn và lưu
@@ -115,9 +104,8 @@ public class SourceService {
 
             logger.info("Successfully saved MAIN SOURCE for path: {}", path);
             return savedSource;
-        } catch (DataAccessException
-        // | IOException
-        e) {
+        } catch (DataAccessException // | IOException
+                e) {
             logger.error("Error in saveMainSource: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to save main source", e); // Đảm bảo rollback khi có lỗi
         }

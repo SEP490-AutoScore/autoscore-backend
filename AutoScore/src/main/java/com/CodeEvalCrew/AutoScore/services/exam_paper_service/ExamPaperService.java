@@ -217,10 +217,12 @@ public class ExamPaperService implements IExamPaperService {
 
             Subject subject = checkEntityExistence(subjectRepository.findById(request.getSubjectId()), "Subject",
                     request.getSubjectId());
-
             // set to add
             Set<Important_Exam_Paper> importants = new HashSet<>();
-
+            boolean existExamCode = examPaperRepository.existsByExamPaperCode(request.getExamPaperCode());
+            if (existExamCode) {
+                throw new NotFoundException("ExamCode existed");
+            }
             // mapping
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
 
@@ -272,9 +274,14 @@ public class ExamPaperService implements IExamPaperService {
         try {
             // check ExamPaper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(id), "Exam Paper", id);
-
-            // check Exam
-            Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
+            if (examPaper.getStatus().equals(Exam_Status_Enum.GRADING) || examPaper.getStatus().equals(Exam_Status_Enum.COMPLETE)) {
+                throw new NotFoundException("Cannot update complete or grading exam paper");
+            }
+           // check Exam
+           Exam exam = null;
+           if(examPaper.getIsUsed()){
+               exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
+           }
 
             importantExamPaperRepository.deleteByExamPaper_ExamPaperId(id);
             Set<Important_Exam_Paper> importants = new HashSet<>();
@@ -401,10 +408,10 @@ public class ExamPaperService implements IExamPaperService {
             GradingProcess gradingProcess = gradingProcessOpt.get();
             GradingStatusEnum status = gradingProcess.getStatus();
 
-            if (status == GradingStatusEnum.PENDING ||
-                    status == GradingStatusEnum.IMPORTANT ||
-                    status == GradingStatusEnum.GRADING ||
-                    status == GradingStatusEnum.PLAGIARISM) {
+            if (status == GradingStatusEnum.PENDING
+                    || status == GradingStatusEnum.IMPORTANT
+                    || status == GradingStatusEnum.GRADING
+                    || status == GradingStatusEnum.PLAGIARISM) {
                 throw new IllegalStateException(
                         String.format("Grading processing, not allowed",
                                 examPaperId, status));
@@ -498,7 +505,7 @@ public class ExamPaperService implements IExamPaperService {
 
                         List<Exam_Question> matchingQuestions = examQuestions.stream()
                                 .filter(question -> question.getHttpMethod().equals(httpMethod)
-                                        && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
+                                && isPathMatchingWithDynamicSegments(question.getEndPoint(), actualPath))
                                 .collect(Collectors.toList());
 
                         if (matchingQuestions.size() == 1) {
@@ -691,7 +698,9 @@ public class ExamPaperService implements IExamPaperService {
     public List<ExamPaperView> getAllExamNotUsed() throws NotFoundException, Exception {
         List<ExamPaperView> result = new ArrayList<>();
         try {
-            Specification<Exam_Paper> spec = ExamPaperSpecification.isUsedFalse();
+            Long curAccountId = Util.getAuthenticatedAccountId();
+
+            Specification<Exam_Paper> spec = ExamPaperSpecification.isUsedFalse().and(ExamPaperSpecification.hasCreatedBy(curAccountId));
 
             List<Exam_Paper> listExamPaper = examPaperRepository.findAll(spec);
 
@@ -731,6 +740,10 @@ public class ExamPaperService implements IExamPaperService {
             Exam_Paper examPaper = ExamPaperMapper.INSTANCE.requestToExamPaper(request);
             Subject subject = checkEntityExistence(subjectRepository.findById(request.getSubjectId()), "Subject",
                     request.getSubjectId());
+            boolean existExamCode = examPaperRepository.existsByExamPaperCode(request.getExamPaperCode());
+            if (existExamCode) {
+                throw new NotFoundException("ExamCode existed");
+            }
 
             // check important to add to exam paper
             Set<ImportantView> set = new HashSet<>();
@@ -750,7 +763,7 @@ public class ExamPaperService implements IExamPaperService {
             examPaper.setExam(null);
             examPaper.setImportants(importants);
             examPaper.setSubject(subject);
-            examPaper.setStatus(Exam_Status_Enum.DRAFT);
+            examPaper.setStatus(Exam_Status_Enum.ACTIVE);
             examPaper.setIsUsed(false);
             examPaper.setDuration(request.getDuration());
             examPaper.setCreatedAt(Util.getCurrentDateTime());
@@ -940,7 +953,7 @@ public class ExamPaperService implements IExamPaperService {
                 if (examQuestion != null) {
                     examQuestionScores.put(examQuestion.getExamQuestionId(),
                             examQuestionScores.getOrDefault(examQuestion.getExamQuestionId(), 0f)
-                                    + gradingItem.getScoreOfFunction());
+                            + gradingItem.getScoreOfFunction());
                 }
             }
 
@@ -980,10 +993,13 @@ public class ExamPaperService implements IExamPaperService {
             // check exam paper
             Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(request.getExamPaperId()),
                     "Exam Paper", request.getExamPaperId());
+            if (!examPaper.getStatus().equals(Exam_Status_Enum.COMPLETE)) {
+                throw new NotFoundException("Cannot update uncomplete exam paper");
+            }
 
             if (exam.getType().equals(Exam_Type_Enum.EXAM)) {
                 examPaper.setExam(exam);
-                examPaper.setIsUsed(false);
+                examPaper.setIsUsed(true);
                 examPaperRepository.save(examPaper);
             } else {
                 throw new NotFoundException("exam type is not EXAM");
@@ -1008,6 +1024,19 @@ public class ExamPaperService implements IExamPaperService {
             } else {
                 throw new NotFoundException("exam type is not EXAM");
             }
+        } catch (NotFoundException | Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public void completeExamPaper(Long examPaperId) throws NotFoundException, Exception {
+        try {
+            // check exam paper
+            Exam_Paper examPaper = checkEntityExistence(examPaperRepository.findById(examPaperId), "Exam Paper",
+                    examPaperId);
+            examPaper.setStatus(Exam_Status_Enum.COMPLETE);
+            examPaperRepository.save(examPaper);
         } catch (NotFoundException | Exception e) {
             throw e;
         }

@@ -43,4 +43,7 @@ public class Subject {
 
     @OneToMany(mappedBy = "subject", cascade= CascadeType.ALL)
     private Set<Exam_Paper> examPapers;
+
+    @OneToMany(mappedBy = "subject", cascade= CascadeType.ALL)
+    private Set<Organization_Subject> organizationSubjects;
 }

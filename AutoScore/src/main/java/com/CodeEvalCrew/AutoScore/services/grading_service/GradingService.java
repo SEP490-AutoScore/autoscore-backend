@@ -133,6 +133,9 @@ public class GradingService implements IGradingService {
         }
 
         List<Source_Detail> sourceDetails = sourceDetailRepository.findBySource_SourceId(optSource.get().getSourceId());
+        if (sourceDetails == null) {
+            throw new NotFoundException("No source found");
+        }
         List<Long> students = new ArrayList<>();
 
         for (Source_Detail s : sourceDetails) {
