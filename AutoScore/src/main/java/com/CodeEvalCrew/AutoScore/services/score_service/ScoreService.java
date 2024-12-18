@@ -265,41 +265,37 @@ public class ScoreService implements IScoreService {
         }
 
         // --- Sheet 2---
-        Sheet plagiarismSheet = workbook.createSheet("PlagiarismSheet");
-        Row headerRow2 = plagiarismSheet.createRow(0);
+        // Sheet plagiarismSheet = workbook.createSheet("PlagiarismSheet");
+        // Row headerRow2 = plagiarismSheet.createRow(0);
 
-        Cell plagiarismReasonHeader2 = headerRow2.createCell(0);
-        plagiarismReasonHeader2.setCellValue("Plagiarism Reason");
-        plagiarismReasonHeader2.setCellStyle(boldStyle);
-        Cell codePlagiarismHeader = headerRow2.createCell(1);
-        codePlagiarismHeader.setCellValue("Code Plagiarism");
-        codePlagiarismHeader.setCellStyle(boldStyle);
+        // Cell plagiarismReasonHeader2 = headerRow2.createCell(0);
+        // plagiarismReasonHeader2.setCellValue("Plagiarism Reason");
+        // plagiarismReasonHeader2.setCellStyle(boldStyle);
+        // Cell codePlagiarismHeader = headerRow2.createCell(1);
+        // codePlagiarismHeader.setCellValue("Code Plagiarism");
+        // codePlagiarismHeader.setCellStyle(boldStyle);
 
-        int rowNum2 = 1;
-        for (ScoreResponseDTO scoreDTO : scores) {
-            if (scoreDTO.getLevelOfPlagiarism() == null || scoreDTO.getPlagiarismReason().equals("N/A")) {
-                continue;
-            }
-            Row row = plagiarismSheet.createRow(rowNum2++);
+        // int rowNum2 = 1;
+        // for (ScoreResponseDTO scoreDTO : scores) {
+        //     if (scoreDTO.getLevelOfPlagiarism() == null || scoreDTO.getPlagiarismReason().equals("N/A")) {
+        //         continue;
+        //     }
+        //     Row row = plagiarismSheet.createRow(rowNum2++);
 
-            Cell studentCodeCell2 = row.createCell(0);
-            studentCodeCell2.setCellValue(scoreDTO.getPlagiarismReason());
+        //     Cell studentCodeCell2 = row.createCell(0);
+        //     studentCodeCell2.setCellValue(scoreDTO.getPlagiarismReason());
 
-            Cell plagiarismReasonCell2 = row.createCell(1);
-            plagiarismReasonCell2.setCellValue(scoreDTO.getPlagiarismReason());
+        //     Cell plagiarismReasonCell2 = row.createCell(1);
+        //     plagiarismReasonCell2.setCellValue(scoreDTO.getPlagiarismReason());
+        // }
 
-            // Cell codePlagiarismCell = row.createCell(2);
-            // codePlagiarismCell.setCellValue(scoreDTO.getCodePlagiarism());
-            // row.setHeight((short) (plagiarismSheet.getDefaultRowHeightInPoints() *
-            // calculateRowHeight(scoreDTO)));
-        }
         // Autosize columns for better readability
         for (int i = 0; i < 4; i++) {
             sheet.autoSizeColumn(i);
         }
-        for (int i = 0; i < 2; i++) {
-            plagiarismSheet.autoSizeColumn(i);
-        }
+        // for (int i = 0; i < 2; i++) {
+        //     plagiarismSheet.autoSizeColumn(i);
+        // }
         // Write the output to response output stream
         workbook.write(response.getOutputStream());
         workbook.close();
@@ -344,13 +340,13 @@ public class ScoreService implements IScoreService {
     public List<ScoreDetailsResponseDTO> getScoreDetailsByScoreId(Long scoreId) {
         try {
             List<Score_Detail> scoreDetails = scoreDetailRepository.findByScore_ScoreId(scoreId);
-            if (scoreDetails != null) {
+            if (scoreDetails != null && !scoreDetails.isEmpty()) {
                 return scoreDetailMapper.scoreDetailEntitiesToDTOs(scoreDetails);
             }
-            return null;
+            return new ArrayList<>();
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return new ArrayList<>();
         }
     }
 

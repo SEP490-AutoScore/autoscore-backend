@@ -169,7 +169,7 @@ VALUES
 (true, 2, 41), (true, 2, 42), (true, 2, 43), (true, 2, 44), (true, 2, 45), (true, 2, 47), (true, 2, 48), (true, 2, 49), (true, 2, 50),
 (true, 2, 51),(true, 2, 52),(true, 2, 53),(true, 2, 54),(true, 2, 55),(true, 2, 56),(true, 2, 57),(false, 2, 58),(true, 2, 59), (true, 2, 60),
 (true, 2, 61), (true, 2, 62), (true, 2, 63), (true, 2, 64), (true, 2, 65), (true, 2, 66), (true, 2, 67), (true, 2, 68),(true, 2, 69),(true, 2, 70),
-(true, 2, 71), (true, 2, 72), (true, 2, 73), (true, 2, 74), (true, 2, 75), (true, 2, 76), (true, 1, 77),(true, 1, 82),
+(true, 2, 71), (true, 2, 72), (true, 2, 73), (true, 2, 74), (true, 2, 75), (true, 2, 76), (true, 2, 77),(true, 2, 82),
 
 -- Head of Department
 (false, 3, 2), (false, 3, 3), (false, 3, 10), (false, 3, 11), (false, 3, 17), (false, 3, 18), (false, 3, 23), (false, 3, 24), (false, 3, 25), (false, 3, 26),
@@ -179,7 +179,7 @@ VALUES
 (true, 3, 41), (true, 3, 42), (true, 3, 43), (true, 3, 44), (true, 3, 45), (true, 3, 47), (true, 3, 48), (true, 3, 49), (true, 3, 50),
 (true, 3, 51),(true, 3, 52),(true, 3, 53),(true, 3, 54),(true, 3, 55),(true, 3, 56),(true, 3, 57),(false, 3, 58),(false, 3, 59), (true, 3, 60),
 (true, 3, 61), (false, 3, 62), (false, 3, 63), (false, 3, 64), (true, 3, 65), (true, 3, 66), (true, 3, 67), (true, 3, 68),(true, 3, 69),(true, 3, 70),
-(true, 3, 71), (true, 3, 72), (true, 3, 73), (true, 3, 74), (true, 3, 75), (true, 3, 76),(true, 1, 77),(true, 1, 82),
+(true, 3, 71), (true, 3, 72), (true, 3, 73), (true, 3, 74), (true, 3, 75), (true, 3, 76),(true, 3, 77),(true, 3, 82),
 
 -- Lecturer
 (false, 4, 2), (false, 4, 3), (false, 4, 10), (false, 4, 11), (false, 4, 17), (false, 4, 18), (false, 4, 23), (false, 4, 24), (false, 4, 25), (false, 4, 26),
@@ -189,7 +189,7 @@ VALUES
 (true, 4, 41), (true, 4, 42), (true, 4, 43), (true, 4, 44), (true, 4, 45), (true, 4, 47), (true, 4, 48), (true, 4, 49), (true, 4, 50),
 (true, 4, 51),(true, 4, 52),(true, 4, 53),(true, 4, 54),(true, 4, 55),(true, 4, 56),(true, 4, 57),(false, 4, 58),(false, 4, 59),(true, 4, 60),
 (true, 4, 61), (false, 4, 62), (false, 4, 63), (false, 4, 64), (true, 4, 65), (true, 4, 66), (true, 4, 67), (true, 4, 68), (true, 4, 69), (true, 4, 70),
-(true, 4, 71), (true, 4, 72), (true, 4, 73), (true, 4, 74), (true, 4, 75), (true, 4, 76),(true, 1, 77), (true, 1, 82);
+(true, 4, 71), (true, 4, 72), (true, 4, 73), (true, 4, 74), (true, 4, 75), (true, 4, 76),(true, 4, 77), (true, 4, 82);
 
 INSERT INTO `account`
 (`account_id`, `email`, `role_id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `status`)
