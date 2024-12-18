@@ -102,7 +102,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('DELETE_EXAM_PAPER', 'ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('VIEW_EXAM_PAPER', 'ALL_ACCESS')")
     @PostMapping("list")
     public ResponseEntity<?> getList(@RequestBody ExamPaperViewRequest request) {
         List<ExamPaperView> result;
@@ -120,7 +120,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('CREATE_EXAM_PAPER','ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('DELETE_EXAM_PAPER','ALL_ACCESS')")
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteExamPaper(@PathVariable Long id) {
         ExamPaperView result;
@@ -167,7 +167,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_EXAM_PAPER', 'ALL_ACCESS')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllExamPaper() {
         List<ExamPaperView> result;
@@ -209,7 +209,7 @@ public class ExamPaperController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ALL_ACCESS')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_EXAM_PAPER', 'ALL_ACCESS')")
     @PutMapping("/exam-paper")
     public ResponseEntity<?> updateExamPaperToAnExam(@RequestBody ExamPaperToExamRequest examPaperId) {
         try {
@@ -236,6 +236,7 @@ public class ExamPaperController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('CREATE_EXAM_PAPER', 'ALL_ACCESS')")
     @PutMapping("/exam-paper/complete/{examPaperId}")
     public ResponseEntity<?> completeExamPaper(@PathVariable Long examPaperId) {
         try {

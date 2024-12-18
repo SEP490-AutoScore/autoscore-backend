@@ -277,8 +277,11 @@ public class ExamPaperService implements IExamPaperService {
             if (examPaper.getStatus().equals(Exam_Status_Enum.GRADING) || examPaper.getStatus().equals(Exam_Status_Enum.COMPLETE)) {
                 throw new NotFoundException("Cannot update complete or grading exam paper");
             }
-            // check Exam
-            Exam exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
+           // check Exam
+           Exam exam = null;
+           if(examPaper.getIsUsed()){
+               exam = checkEntityExistence(examRepository.findById(request.getExamId()), "Exam", request.getExamId());
+           }
 
             importantExamPaperRepository.deleteByExamPaper_ExamPaperId(id);
             Set<Important_Exam_Paper> importants = new HashSet<>();
