@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ScoreResponseDTO {
 
+    private String scoreId;
+    
     private Float totalScore;
     private String reason;
     private String examPaperCode;
