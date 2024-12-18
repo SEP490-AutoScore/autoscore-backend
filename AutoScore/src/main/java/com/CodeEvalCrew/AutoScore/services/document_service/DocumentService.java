@@ -790,44 +790,46 @@ public class DocumentService implements IDocumentService {
     }
 
     public static Exam_Question parseExamQuestion(String input) {
-        // Khởi tạo đối tượng Exam_Question mới
+        // Initialize Exam_Question object
         Exam_Question examQuestion = new Exam_Question();
-
-        // Cấu trúc Regex để tìm các phần trong câu hỏi
-        String questionContentPattern = "Question: (.*?)\\n"; // Tìm nội dung câu hỏi
-        String endPointPattern = "Endpoint: (.*?)\\n"; // Tìm endpoint
-        String httpMethodPattern = "HTTP Method: (.*?)\\n"; // Tìm phương thức HTTP
-        String roleAllowPattern = "Role Allowed: (.*?)\\n"; // Tìm vai trò được phép
-        String descriptionPattern = "Function: (.*?)\\n"; // Tìm mô tả chức năng
-        String payloadTypePattern = "Request Type: \\s*:\\s*(.*?)\\n"; // Tìm loại payload (Payload Type)
-        String requestBodyPattern = "Request Body\\s*\\{(.*?)\\}"; // Tìm request body
-        String validationsPattern = "Validations:\\s*(.*?)\\n(\\s*•.*?\\n)*"; // Tìm validation
-        String successResponsePattern = "Success Response:(.*?)Error Response:"; // Tìm phản hồi thành công
-        String errorResponsePattern = "Error Response:(.*?)$"; // Tìm phản hồi lỗi
-        String questionScorePattern = "Score: (\\d+\\.\\d+)"; // Tìm điểm câu hỏi (ví dụ: Score: 2.0)
-
-        // Sử dụng Pattern và Matcher để tìm kiếm các phần trong chuỗi
+    
+        // Define updated regex patterns for the new format
+        String questionContentPattern = "Question:\\s*(.*?)\\n"; // Match question content
+        String endPointPattern = "Endpoint:\\s*(.*?)\\s+Score:"; // Match endpoint
+        String questionScorePattern = "Score:\\s*(\\d+(\\.\\d+)?)"; // Match Score (e.g., Score: 2.0)
+        String httpMethodPattern = "HTTP Method:\\s*(.*?)\\n"; // Match HTTP Method
+        String roleAllowPattern = "Role Allowed:\\s*(.*?)\\n"; // Match Role Allowed
+        String descriptionPattern = "Function:\\s*(.*?)\\n"; // Match function description
+        String payloadTypePattern = "Request Type:\\s*(.*?)\\n"; // Match Request Type
+        String requestBodyPattern = "Request Body:\\s*\\{(.*?)\\}\\n"; // Match JSON inside Request Body
+        String validationsPattern = "Validations:\\s*(.*?)\\nSuccess Response:"; // Match Validations
+        String successResponsePattern = "Success Response:\\s*(.*?)\\nError Response:"; // Match Success Response
+        String errorResponsePattern = "Error Response:\\s*(.*?)$"; // Match Error Response
+    
+        // Extract and set values using the getPatternMatch method
         examQuestion.setQuestionContent(getPatternMatch(input, questionContentPattern));
         examQuestion.setEndPoint(getPatternMatch(input, endPointPattern));
         examQuestion.setHttpMethod(getPatternMatch(input, httpMethodPattern));
         examQuestion.setRoleAllow(getPatternMatch(input, roleAllowPattern));
         examQuestion.setDescription(getPatternMatch(input, descriptionPattern));
-        examQuestion.setPayloadType(getPatternMatch(input, payloadTypePattern)); // Gán Payload Type
+        examQuestion.setPayloadType(getPatternMatch(input, payloadTypePattern));
         examQuestion.setPayload(getPatternMatch(input, requestBodyPattern));
-        examQuestion.setValidation(getPatternMatch(input, validationsPattern)); // Gán Validation
+        examQuestion.setValidation(getPatternMatch(input, validationsPattern));
         examQuestion.setSucessResponse(getPatternMatch(input, successResponsePattern));
         examQuestion.setErrorResponse(getPatternMatch(input, errorResponsePattern));
-
-        // Lấy điểm câu hỏi từ cuối cùng của nội dung câu hỏi
+    
+        // Extract and set the score
         String scoreString = getPatternMatch(input, questionScorePattern);
         if (!scoreString.isEmpty()) {
-            examQuestion.setExamQuestionScore(Float.valueOf(scoreString)); // Gán điểm cho câu hỏi
+            examQuestion.setExamQuestionScore(Float.valueOf(scoreString)); // Set extracted score
         } else {
-            examQuestion.setExamQuestionScore(2.0f); // Điểm mặc định nếu không tìm thấy
+            examQuestion.setExamQuestionScore(1.0f); // Default score if not found
         }
-
+    
         return examQuestion;
     }
+    
+    
 
     // Hàm phụ trợ để tìm kiếm và lấy giá trị của mẫu regex
     private static String getPatternMatch(String input, String pattern) {
