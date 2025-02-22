@@ -56,6 +56,13 @@ AutoScore is an AI-powered tool designed for automatic grading of subjects using
 
 ---
 
+## FLow
+![Exam](Image/Exam.png)
+![Gherkin](Image/Gherkin.png)
+![Grading](Image/Grading.png)
+
+---
+
 ## 📌 Entity Relationship Diagram (ERD)
 ![ERD](Image/Screenshot%202025-02-22%20141357.png)
 
