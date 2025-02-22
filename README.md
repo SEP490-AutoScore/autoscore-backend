@@ -1,113 +1,69 @@
 # AutoScore
 
-### Automatic grading tool for subjects using structured API at FPT University
+### 🚀 Automatic Grading Tool for Structured API-based Subjects at FPT University
 
 ---
 
-## Project Information
+## 📌 Project Information
 
-- **Project Name**: AutoScore  
-- **Topic**: Automatic grading tool for subjects using structured API at FPT University.
-- **Team Name**: CodeEval Crew
+- **Project Name:** AutoScore  
+- **Topic:** Automatic grading tool for subjects using structured API at FPT University.  
+- **Team Name:** CodeEval Crew  
 
 ---
 
-## Team Members
+## 👥 Team Members
 
 - **SE160607** - Võ Thanh Tuyền  
 - **SE160611** - Thiều Phan Văn Minh  
 - **SE160599** - Võ Trọng Vương  
-- **SE160585** - Hà Nhật Trường
+- **SE160585** - Hà Nhật Trường  
 
 ---
 
-## Supervisor
+## 🎓 Supervisor
 
 - **Nguyễn Văn Chiến**
 
 ---
 
-## Overview
+## 📖 Overview
 
-AutoScore is designed to streamline the grading process for programming assignments in courses that involve API development. This tool integrates a **Java Spring Boot** backend with a **Flutter** frontend to provide a seamless, scalable, and user-friendly grading solution.
-
----
-
-## Features
-
-- **Java Spring Boot Backend**: Efficiently handles API requests, grading logic, and database interactions.  
-- **Flutter Frontend**: Provides a clean, responsive UI for both instructors and students.  
-- **Customizable Grading Criteria**: Teachers can define grading rules based on performance and code quality.  
-- **API Integration**: Supports RESTful APIs for automated grading and data retrieval.
+AutoScore is an AI-powered tool designed for automatic grading of subjects using structured APIs at FPT University. It employs AI to generate test cases, streamlining the grading process with high speed, accuracy, transparency, and cost-effectiveness. The system is integrated with multiple services to enhance efficiency and reliability.
 
 ---
 
-## Installation
+## 🛠️ Technology Stack
 
-### Backend (Java Spring Boot)
-
-1. Clone the backend repository:
-    ```bash
-    git clone https://github.com/SEP490-AutoScore/autoscore-backend.git
-    ```
-
-2. Navigate to the backend directory and build the project:
-    ```bash
-    cd AutoScore-backend
-    ./mvnw clean install
-    ```
-
-3. Configure the database and API settings in `application.properties`.
-
-4. Run the Spring Boot server:
-    ```bash
-    ./mvnw spring-boot:run
-    ```
-
-### Frontend (Flutter)
-
-1. Clone the frontend repository:
-    ```bash
-    git clone https://github.com/SEP490-AutoScore/autoscore-frontend.git
-    ```
-
-2. Navigate to the frontend directory:
-    ```bash
-    cd AutoScore-frontend
-    ```
-
-3. Install Flutter dependencies:
-    ```bash
-    flutter pub get
-    ```
-
-4. Run the Flutter app:
-    ```bash
-    flutter run
-    ```
+- **Backend:** Java, Spring Boot, JWT, OAuth2  
+- **Database:** MySQL, SQL Server  
+- **Third-Party Services:** GeminiAI, Aspose, Docker, Postman  
+- **Deployment:** Azure  
+- **Other Tools:** Gherkin Format, 7z, GitHub  
 
 ---
 
-## Usage
+## 🔥 Key Features
 
-- **For Instructors**:  
-    - Access the web-based interface via the Flutter frontend.  
-    - Configure grading rules and review student submissions through the integrated dashboard.
-  
-- **For Students**:  
-    - Submit your project via the mobile or web app and receive feedback and grades immediately after submission.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- 🔐 Authentication & Authorization  
+- 👤 Account Management  
+- 🎭 Role & Permission Management  
+- 🏢 Organization & Position Management  
+- 📄 Exam & Exam Paper Management  
+- 📥 Import Source Code & Student Data  
+- 📚 Subject & Semester Management  
+- 📊 Score Management & Grading Process  
 
 ---
 
-## Acknowledgements
+## 📌 Entity Relationship Diagram (ERD)
+![ERD]()
 
-- Special thanks to **Nguyễn Văn Chiến**, our project supervisor, for his guidance and support.
+---
+
+## 🙏 Acknowledgements
+
+Special thanks to **Nguyễn Văn Chiến**, our project supervisor, for his invaluable guidance and support.
 
 ---
 
